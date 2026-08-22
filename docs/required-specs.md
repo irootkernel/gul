@@ -7,7 +7,7 @@
 | Product | Gul (굴) |
 | Subtitle | Remote operator interface for local development runtimes |
 | Version | 0.1-grpc-interface-aligned |
-| Status | Active; E0-T4 documentation rebaseline completed, E0-T8 toolchain pinning in progress |
+| Status | Active; E0-T4 and E0-T8 completed, E0-T7 contract inventory and fixtures in progress |
 | Last updated | 2026-08-23 |
 | Target | macOS host; modern desktop, iPad, and iPhone browsers |
 
@@ -158,7 +158,7 @@ Every other requirement, including all authority, credential, path-containment, 
 | REQ-HOST-009 | Exactly one Gul core per user and data directory MUST own the runtime lock. Gul.app MUST attach to a verified healthy existing `gul serve`; a second headless invocation MUST exit without starting another core or Dolgorae server. | Desktop/headless contention and spoofed-owner tests pass. | E8-T3 |
 | REQ-HOST-010 | Headless packaging MUST include user `launchd` operation, graceful upgrade/restart, host sleep/wake recovery, owned-process and protected-log locations, and actionable port-collision behavior. | Login, upgrade, sleep/wake, collision, and log-permission drills pass. | E8-T3 |
 | REQ-HOST-003 | Gul APIs MUST use Protobuf-defined ConnectRPC services. | Generated Go and TypeScript clients compile without handwritten feature REST APIs. | E1-T3 |
-| REQ-HOST-005 | Gul MUST pin and report its toolchain and target Runtime Provider compatibility ranges. | The dependency ledger records reproducible version and protocol evidence. | E0-T8 |
+| REQ-HOST-005 | Gul MUST pin and report its toolchain and target Runtime Provider compatibility ranges. | `toolchain/versions.env` is the single bootstrap authority; `make toolchain-check` reports exact, range, missing, and incompatible host tools without installing or rewriting anything; clean-host and mismatch fixtures pass. | E0-T8 |
 | REQ-HOST-006 | Runtime diagnostics MUST fail closed or display a blocker for unsupported or unverifiable dependencies. | Missing, changed, and incompatible dependency fixtures never enable runtime mutations. | E9-T2 |
 | REQ-AUTH-001 | Gul MUST support exactly one local password-authenticated account. | No username, team, or second-account creation surface exists. | E8-T1 |
 | REQ-AUTH-002 | Password material MUST use an approved salted password hash and never be persisted or logged in plaintext. | Security tests and source review pass. | E8-T1 |

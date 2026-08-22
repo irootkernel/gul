@@ -26,13 +26,13 @@ Allowed executable Task states are `Planned`, `In Progress`, `In Review`, `Compl
 | Field | Value |
 |---|---|
 | Active Epic | E0 — Gul Rebaseline and Dependency Contract |
-| Active Task | E0-T8 — Resolve pre-implementation technology ADRs and pins |
+| Active Task | E0-T7 — Define the public gRPC contract inventory and fake-server fixtures |
 | Status | `In Progress` |
 | Started | 2026-08-23 |
-| Exit | Exact toolchain and platform pins, clean-host checks, standard commands, and accepted ADR-0017 are documented without app scaffolding. |
-| Next | E0-T7 — Define the public gRPC contract inventory and fake-server fixtures |
+| Exit | Gate B closes with reproducible generated clients, fake server, complete maps/fixtures, and zero production CLI fallback. |
+| Next | E0 closeout; E2-T0 remains externally blocked and E1-T1 becomes eligible after E0 closes. |
 
-Only this pointer and the E0-T8 detail identify active work.
+Only this pointer and the E0-T7 detail identify active work.
 
 ## 3. Epic summary
 
@@ -133,7 +133,7 @@ and mutation surface. The Section 9 gate must cover that boundary before review.
 
 #### E0-T7 — Define the Dolgorae public gRPC contract inventory and fake-server fixtures
 
-**Status:** `Planned`
+**Status:** `In Progress`
 
 After Gate A, pin the already identified versioned Protobuf services/RPCs and the final identifiers, enums, typed error/action details, Run configuration, Controller Interaction payload, byte limits, typed event form, exact aggregate-invalidation matrix, client policy, carrier schema, timeline/artifacts, capability set, mutation policies, and Run-stream contract. Generate clients, a fake local gRPC server, fixtures, operation/error/capability/enum/event-invalidation maps, projection-stamp convergence fixtures, replay-policy fixtures, and an independent exact-schema Machine CLI conformance fixture from the accepted descriptor without depending on private worker sockets, state, audit files, or guessed RPC names.
 
@@ -141,11 +141,11 @@ After Gate A, pin the already identified versioned Protobuf services/RPCs and th
 
 #### E0-T8 — Resolve pre-implementation technology ADRs and pins
 
-**Status:** `In Progress`
+**Status:** `Completed`
 
-Pin Go, Wails, Node, package manager, TypeScript, React, Protobuf/Buf, ConnectRPC, SQLite choice, Git bounds, and macOS targets. Accept ADR-0017; ADR-0018 may remain scheduled for E6.
+Pin Go, Wails, Node, Bun, TypeScript, React, Protobuf/Buf, ConnectRPC, modernc SQLite, Git bounds, and macOS targets in one machine-readable authority. Provide a read-only fail-closed checker and stable serial Make commands. Accept ADR-0017 with WAL, foreign keys, `synchronous=FULL`, a 5-second busy timeout, one writer, at most four read-only connections, immediate transactional delivery-sequence allocation, and checkpointed `VACUUM INTO` backup; ADR-0018 remains scheduled for E6.
 
-**Acceptance:** clean-host version checks and standard commands are documented. This Task is not gated by Dolgorae executable availability.
+**Acceptance:** clean-host exact/missing/mismatch fixtures pass; host drift is reported without installation or substitution; standard commands and the fail-closed pre-E0-T7 contract delegates are documented. This Task is not gated by Dolgorae executable availability and introduces no application scaffold.
 
 #### E0-T9 — Pin an accepted Dolgorae executable contract
 

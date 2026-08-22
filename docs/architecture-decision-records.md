@@ -36,7 +36,7 @@ An ADR records product architecture, not Current State. Requirement promotion re
 | ADR-0014 | Use unary commands and streamed Gul events | Accepted, modified | — |
 | ADR-0015 | Promote requirements only after task acceptance | Accepted | — |
 | ADR-0016 | Select a Gul background-process policy | Superseded | ADR-0026 |
-| ADR-0017 | Select SQLite driver and concurrency settings | Proposed | — |
+| ADR-0017 | Select SQLite driver and concurrency settings | Accepted | — |
 | ADR-0018 | Select SVG preview policy | Proposed | — |
 | ADR-0019 | Separate upstream cursors and Gul delivery sequences | Accepted, modified | — |
 | ADR-0020 | Use bounded host Git for read-only artifact review | Accepted | — |
@@ -127,6 +127,18 @@ The upstream boundary uses unary gRPC for commands and snapshots, one logical se
 **Status:** Accepted
 
 Required State and Current State remain separate. Design, schema, or dependency evidence alone does not promote a requirement. At most one Roadmap task may be `In Progress` or `In Review`; zero is valid between tasks and at release closure.
+
+### ADR-0017: Use modernc SQLite with bounded WAL concurrency
+
+**Status:** Accepted
+
+Gul pins `modernc.org/sqlite` `v1.57.0` so the headless core and macOS package use the same pure-Go database implementation without a CGO packaging branch. Every connection enables foreign keys, uses a 5-second busy timeout, and sets `synchronous=FULL`. The database uses WAL mode.
+
+Writes use one writer connection and short transactions; provider calls and filesystem operations never occur while a transaction is held. Read-only work uses a separate pool capped at four connections. A busy or cancelled transaction fails visibly and is not converted into a retry of a runtime mutation.
+
+Client delivery sequences are allocated by an `UPDATE ... RETURNING` counter inside the same `BEGIN IMMEDIATE` transaction that persists the delivery record. `MAX(sequence)+1`, process-local counters, and allocation outside the committing transaction are prohibited.
+
+A backup checkpoints WAL, writes `VACUUM INTO` to a new file on the destination filesystem, fsyncs the new file and its parent, and publishes it by atomic rename. It never copies a live database file directly. SQLite remains authority only for the Gul-owned state allowed by ADR-0025.
 
 ### ADR-0019: Separate upstream cursors and Gul delivery sequences
 
@@ -461,14 +473,6 @@ The replay store may contain bounded Controller instructions or handoff text tha
 `SubmitTurn` supports application replay only while the original normalized request remains available in the same process. Gul does not durably retain prompts or images for replay. After process restart it reconciles through `GetRun` and the provider timeline and preserves `OutcomeUnknown` if acceptance cannot be proved. `ResolveInteraction` response bytes are never retained or replayed. Tokenless mutations are reconciled through authoritative reads rather than transport retry. Replay expiry never fabricates success, failure, or permission to issue a semantically new allocation request.
 
 ## 6. Proposed decisions
-
-### ADR-0017: Select SQLite driver and concurrency settings
-
-**Status:** Proposed
-
-**Deadline:** E1-T4
-
-Choose between maintained pure-Go and CGO drivers using macOS packaging, cancellation, transaction correctness, backup, and race stability. Also decide WAL, busy timeout, connection limits, and event-sequence allocation. Runtime authority is not a factor because SQLite owns Gul state only.
 
 ### ADR-0018: Select SVG preview policy
 

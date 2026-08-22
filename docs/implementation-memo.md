@@ -15,7 +15,8 @@ This memo records current investigation and execution context. It does not overr
 
 | Area | State |
 |---|---|
-| Five Gul SOT documents | E0-T4 completed the consumer alignment, Gate A reproduction, lifecycle rewire, validation, and independent review; E0-T8 is active |
+| Five Gul SOT documents | E0-T4 completed the consumer alignment and Gate A reproduction; E0-T8 completed toolchain/ADR alignment; E0-T7 is active |
+| Toolchain and developer-command artifacts | E0-T8 accepted one pin manifest, read-only checks, serial Make facade, and testing guide; no installer or application scaffold |
 | Production source | None |
 | Wails host/frontend | Not implemented |
 | ConnectRPC schema/services | Not implemented |
@@ -25,7 +26,7 @@ This memo records current investigation and execution context. It does not overr
 | FileService/auth/PWA/Tailscale integration | Not implemented |
 | Current State promotions | None |
 
-The repository currently contains documentation only. No runtime behavior has completed review.
+The repository contains documentation and pre-implementation bootstrap validation only. No application source or runtime behavior has completed review.
 
 ## 3. Current accepted assumptions
 
@@ -110,8 +111,10 @@ Gate A's clean external source and checked-artifact digests are fixed below. The
 | Public transport | Accepted target: supervised local gRPC over private UDS | Pinned release/descriptor/lifecycle evidence; private, TCP, REST, and operator interfaces excluded | E0-T7/E2-T0 |
 | Gul adapter version | Unset | Versioned adapter contract | E2-T1 |
 | Last successful compatibility probe | None | Timestamp, environment, result, redacted evidence | E2-T1 |
-| Go/Wails/Node/React/Buf/ConnectRPC | Unset | Reproducible clean-host pins | E0-T8 |
-| SQLite driver/settings | Unset | Accepted ADR-0017 | E0-T8 |
+| Go/Wails/Node/Bun/TypeScript/React | Go `1.26.6`; Wails `3.0.0-beta.8` (`wails3`); Node `26.7.0`; Bun `1.3.14`; TypeScript `7.0.2`; React/DOM `19.2.7` | `toolchain/versions.env`; read-only exact/missing/mismatch checks and clean-host fixtures | E0-T8 |
+| Protobuf/Buf/ConnectRPC | Buf `1.66.1`; protoc `35.1`; protoc-gen-go/protobuf-go `1.36.12`; connect-go/protoc-gen-connect-go `1.20.0`; Connect-ES/Web `2.1.2`; Protobuf-ES/protoc-gen-es `2.14.0`; protoc-gen-connect-es `1.7.0` | Same manifest; generated dependency manifests must match before use | E0-T8 |
+| Host platform | macOS `>=14.0.0`, `arm64`; Git `>=2.39.0,<3.0.0` | Range checks; no installation or mutation | E0-T8 |
+| SQLite driver/settings | modernc.org/sqlite `1.57.0`; WAL; foreign keys; `synchronous=FULL`; 5-second busy timeout; one writer and at most four read-only connections; immediate transactional sequence allocation; checkpoint plus `VACUUM INTO` backup | Accepted ADR-0017 and future E1-T4 fault/race/backup tests | E0-T8 |
 
 ## 6. Open decisions
 
@@ -121,11 +124,10 @@ Gate A's clean external source and checked-artifact digests are fixed below. The
 | Gorae release scope | Deferred by ADR-0030 | Explicit SOT/ADR approval required to enter v0.1. | Deferred epic |
 | Local draft Direct Session behavior | Unspecified | Decide whether a presentation may exist before Run creation and define cleanup/idempotency. | E3-T3 |
 | SVG preview | ADR-0018 Proposed | Select source-only, rasterization, or isolated sanitization. | Active SVG preview |
-| SQLite driver/concurrency | ADR-0017 Proposed | Decide driver, WAL, limits, timeout, backup, and delivery sequence allocation. | E1-T4 |
 
 No unresolved item is silently decided by this memo. Source-only SVG remains the safe fallback, and explicit refresh remains the Release-tier behavior beneath the Recommended-tier watcher.
 
-Decisions closed in this round: ADR-0043 assigns socket lifecycle ownership while retaining supervised local gRPC and diagnostic-only CLI; ADR-0044 requires the typed-state evaluator and threadless first-write flow; ADR-0045 requires timeline and Artifact capabilities; ADR-0046 selects one shared headless/desktop core; ADR-0047 assigns exact-schema credential creation/storage to Gul and verification/binding to Dolgorae. Gate A clean publication and reproduction are complete; Gul consumer-map/replay/convergence fixtures and digest manifest remain Gate B work, while executable/version evidence is E2-T0 work.
+Decisions closed in this round: ADR-0017 selects modernc SQLite with bounded WAL concurrency, immediate transactional delivery-sequence allocation, and checkpointed `VACUUM INTO` backup. ADR-0043 assigns socket lifecycle ownership while retaining supervised local gRPC and diagnostic-only CLI; ADR-0044 requires the typed-state evaluator and threadless first-write flow; ADR-0045 requires timeline and Artifact capabilities; ADR-0046 selects one shared headless/desktop core; ADR-0047 assigns exact-schema credential creation/storage to Gul and verification/binding to Dolgorae. Gate A clean publication and reproduction are complete; Gul consumer-map/replay/convergence fixtures and digest manifest remain Gate B work, while executable/version evidence is E2-T0 work.
 
 ## 7. Risk register
 
@@ -208,7 +210,7 @@ Gate A is closed at clean upstream revision `85a8862f784cc57701751d81a9e03bf7c57
 
 ## 9. Verification ledger
 
-Rows dated before 2026-08-23 are historical. Current E0-T4 lifecycle decisions use only the 2026-08-23 rerun and fresh independent review.
+Rows dated before 2026-08-23 are historical. E0-T4 lifecycle evidence remains recorded; E0-T8 uses the 2026-08-23 command, fixture, SOT, and independent-review evidence below.
 
 | Check | Command/approach | Result |
 |---|---|---|
@@ -220,8 +222,12 @@ Rows dated before 2026-08-23 are historical. Current E0-T4 lifecycle decisions u
 | Requirement ownership coverage | Only E0-T4, the documentation Task, owns no requirement | Passed 2026-08-19 corrective rerun |
 | Release tier assignment | Four Recommended-tier IDs are named in Section 5 with a Release-tier fallback each; every other requirement is Release tier by default | Passed, post-review rerun |
 | Product invariants | Invariants number contiguously 1 through 46 | Passed 2026-08-19 corrective rerun |
-| ADR index/body | 49 index IDs and 49 body IDs/statuses match; only ADR-0017 and ADR-0018 remain `Proposed`; ADR-0034 is superseded by ADR-0047; ADR-0048 and ADR-0049 capture final projection-convergence and replay-material decisions | Passed 2026-08-19 corrective rerun |
-| Roadmap active Task | 36 executable Tasks plus retired E0-T9: 33 `Planned`, E0-T4 `Completed`, E0-T8 `In Progress`, E2-T0 `Blocked`; exactly one Active Task | Passed 2026-08-23 lifecycle transition |
+| ADR index/body | 49 index IDs and 49 body IDs/statuses match; only ADR-0018 remains `Proposed`; ADR-0017 is Accepted; ADR-0034 is superseded by ADR-0047 | Passed 2026-08-23 E0-T8 rerun |
+| Roadmap active Task | 36 executable Tasks plus retired E0-T9: 32 `Planned`, E0-T4/E0-T8 `Completed`, E0-T7 `In Progress`, E2-T0 `Blocked`; exactly one Active Task | Passed 2026-08-23 completion transition |
+| Bootstrap pins | One data-only manifest fixes all approved executable, dependency, Git, macOS, and architecture values; manifest validation rejects missing or malformed authority | Passed `make test` 2026-08-23 |
+| Clean-host and drift behavior | Exact clean-host fixture passes; mismatched and missing Wails fail precisely; the current host reports four real readiness differences without installation or substitution | Passed fixture; current-host check intentionally exits 1 with four blockers |
+| Standard commands | Serial `make test` passes and leaves the complete target digest unchanged; pre-E0-T7 `generate-contract` and `contract-check` fail closed with exit 2 | Passed 2026-08-23 |
+| Independent E0-T8 review | Full logic/maintainability/documentation/testing review plus logic/documentation lifecycle delta; complete coverage; CI pass; publication committed | Runs `r_01a02b4a-038b-74c8-950d-ab766eda7036` and `r_01a02b52-2423-79f2-9c3a-da129769792c`; zero findings |
 | ADR gates in the DAG | Only unresolved ADRs appear as predecessors; ADR-0034 is superseded and accepted ADR-0047 owns credential storage | Passed 2026-08-19 corrective rerun |
 | Roadmap status vocabulary and DAG | Every detailed Task has an allowed status and one acyclic predecessor row with known dependencies | Passed 2026-08-19 corrective rerun |
 | Concrete RPC/type map | All 28 semantic RPC rows resolve to the current Dolgorae service declaration and exact request/response type; local/Gul operations remain separate | Passed 2026-08-19 final-alignment rerun; final digest pin pending Gate B |
@@ -408,9 +414,15 @@ These cases are normative future acceptance owned by the Roadmap tasks named in 
 | 31 | Incoming Controller safe payloads enforce `min(provider limit, 8 MiB)` and outgoing protected responses enforce `min(provider limit, 64 KiB)`. |
 | 32 | The clean Dolgorae revision reproduces all pinned proto, descriptor, capability, credential, mutation, error/action, client-policy, and conformance digests before Gate B closes. |
 
-## 10. Standard command contract under consideration
+## 10. Standard command contract
 
-E0-T8 will define final commands. The repository should eventually provide non-rewriting commands for documentation links/IDs/status/terminology, Go tests, frontend tests, generated gRPC API drift, exact Machine CLI conformance, browser E2E, fake-server contract tests, and explicit pinned-runtime smoke tests. Real provider tests must be opt-in and must never reveal Controller capabilities, carrier/socket paths, or protected input.
+The root Makefile provides the non-rewriting serial facade `toolchain-check`, `generate-contract`, `contract-check`, `test-prepare`, `test-unit`, `test-int`, `test-e2e`, and `test`. `test` invokes the four test phases serially. Before E0-T7, contract generation and drift checks fail closed with the exact missing delegate instead of returning success or guessing an upstream contract. Later Tasks extend these stable targets for documentation links/IDs/status/terminology, Go and frontend tests, generated gRPC API drift, exact Machine CLI conformance, browser E2E, fake-server contract tests, and opt-in pinned-runtime smoke tests. Real provider tests must remain opt-in and must never reveal Controller capabilities, carrier/socket paths, or protected input.
+
+The current host check is honest evidence, not an installation workflow: it matches Go, Node, Bun, Buf, protoc, protoc-gen-connect-es, Git, macOS, and architecture, and reports missing Wails v3 plus three older generators. The clean-host fixture proves the exact supported matrix; mismatch and missing-command fixtures prove fail-closed diagnostics. E0-T8 does not install or silently substitute those tools.
+
+### E0-T8 completion record
+
+E0-T8 completed on 2026-08-23 after serial tests and independent review. It promotes REQ-HOST-005 for the bootstrap pin/reporting surface and accepts ADR-0017. The accepted artifacts are `toolchain/versions.env`, the root Make facade, `TESTING.md`, and the read-only scripts under `scripts/`. This promotion proves the bootstrap contract only: the current host still needs Wails v3 and three generator upgrades, no application dependency manifest exists, and no runtime behavior is claimed.
 
 ## 11. Superseded design note
 
@@ -418,8 +430,8 @@ The initial documentation assumed Gul would manage one Codex App Server, map Ses
 
 ## 12. Handoff
 
-The next agent must first read all five SOT documents and confirm E0-T8 is the only active Task. E0-T4 is completed and its Gate A and lifecycle decisions are authoritative. E0-T8 may add only toolchain/version manifests, read-only verification commands, standard command adapters, and the ADR-0017 decision; it must not scaffold the application or claim runtime implementation.
+The next agent must first read all five SOT documents and confirm E0-T7 is the only active Task. E0-T4's Gate A and E0-T8's toolchain/ADR decisions are authoritative. E0-T7 may add only the pinned public-contract manifest, generated clients, fake server, maps, fixtures, conformance harness, and their checked generation/drift delegates; it must not scaffold the Gul application or claim live-provider compatibility.
 
-The immediate work is E0-T8's exact toolchain and SQLite decision. ADR-0047 through ADR-0049 already close Gul's credential-storage, projection-convergence, and replay-material decisions. Gate A is closed; Gate B still blocks generated provider-contract work, and E2-T0 separately blocks production provider/live evidence.
+The immediate work is E0-T7's reproducible Gate B contract inventory and fixtures. ADR-0017 and ADR-0047 through ADR-0049 are already accepted. Gate A is closed; E2-T0 separately blocks production provider/live evidence.
 
 E0-T8 now pins the host toolchain and accepts ADR-0017. E0-T7 then freezes the public gRPC inventory from the accepted Protobuf artifacts and builds generated clients, descriptor-derived fake server, maps, fixtures, and the separate CLI comparison harness. E2-T0 remains blocked until Gate B and compatible executable/smoke evidence exist. No live-evidence claim enters E0 completion.

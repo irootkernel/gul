@@ -668,6 +668,8 @@ Prohibited authoritative tables/aggregates include Codex threads, Turns, workspa
 
 Database transactions cover Gul-owned presentation, auth, delivery, non-authoritative projection/timeline cache, projection-stamp and invalidation metadata, and mutation-attempt coordination only. Provider calls never occur while a SQLite transaction is held. `provider_operation_attempts` contains operation identity, normalized-request digest, replay availability, logical replay-material reference, role-tagged logical Controller references, and reconciliation state, not authoritative provider outcome, prompt, protected input, credential bytes, carrier path, socket path, or canonical request bytes.
 
+ADR-0017 pins modernc SQLite `1.57.0` with WAL, foreign keys, `synchronous=FULL`, and a 5-second busy timeout on every connection. One writer connection serializes short write transactions; a separate read-only pool is capped at four connections. Delivery sequence allocation uses `UPDATE ... RETURNING` inside the same `BEGIN IMMEDIATE` transaction as the journal insert. Backup checkpoints WAL, uses `VACUUM INTO` on the destination filesystem, fsyncs the new file and parent, and publishes by atomic rename; direct copying of the live database is prohibited.
+
 Crash-safe canonical request material for unresolved `StartRun` and `CreateWriteContinuation` attempts lives in a separate protected `ProviderReplayStore` below `~/Library/Application Support/Gul/provider-replay/`. Its parent is `0700`, files are exclusive `0600`, all path components are non-symlinked and current-user-owned, material is bounded and versioned, file and parent are fsynced, and files are deleted on terminal resolution or after the fixed 72-hour v0.1 maximum retention, configurable only downward. `PurgeExpired` runs at startup and at least every six hours. Expiry removes replay availability but does not convert an unresolved operation into success or failure. The store never accepts `SubmitTurn` prompts/images or `ResolveInteraction` response bytes, and it never stores an absolute credential path or capability; exact carrier resolution uses the role-tagged logical Controller references.
 
 `runtime_projection_cache` stores each aggregate's complete `ProjectionStamp`, freshness, and invalidation floor; `runtime_timeline_cache` stores its `captured_head_cursor`. These remain non-authoritative caches and are marked stale at startup before mutation enablement.
@@ -743,6 +745,14 @@ No test requires Gul to parse raw App Server events or own runtime state.
 
 The package identity is `Gul.app`, bundle identifier `xyz.rootkernel.gul`, and helper `gul` with production `gul serve`. Application Support, Logs, and Cache use the `Gul` directories defined in Required Specifications; Controller carriers live below Dolgorae's application-support carrier root and the socket runtime parent lives under Gul Cache. A user `launchd` agent may own the headless core at login. Gul.app attaches to that verified core or starts the same core in-process while holding the same lock. Graceful upgrade drains the core and supervised child, replaces binaries externally, re-verifies them, and reconstructs state. Dolgorae remains an external dependency and is not silently bundled.
 
+### 17.1 Bootstrap toolchain and command contract
+
+`toolchain/versions.env` is the single E0-T8 bootstrap authority. The supported host is macOS `>=14.0.0` on `arm64` with Git `>=2.39.0,<3.0.0`. Exact executable pins are Go `1.26.6`, Wails `3.0.0-beta.8` through `wails3`, Node `26.7.0`, Bun `1.3.14`, Buf `1.66.1`, protoc `35.1`, protoc-gen-go `1.36.12`, protoc-gen-connect-go `1.20.0`, protoc-gen-es `2.14.0`, and protoc-gen-connect-es `1.7.0`.
+
+Future dependency manifests must match TypeScript `7.0.2`, React/React DOM `19.2.7`, protobuf-go `1.36.12`, connect-go `1.20.0`, Connect-ES/Connect-Web `2.1.2`, Protobuf-ES `2.14.0`, and modernc SQLite `1.57.0`. The read-only `make toolchain-check` reports all mismatches; it never installs or substitutes a dependency. In particular, Wails v2 does not satisfy the Wails v3 beta pin.
+
+The serial command facade is `toolchain-check`, `generate-contract`, `contract-check`, `test-prepare`, `test-unit`, `test-int`, `test-e2e`, and `test`. Contract commands fail closed until E0-T7 supplies their checked delegates. No bootstrap command scaffolds the application or claims runtime behavior.
+
 ## 18. Artifact migration matrix
 
 | Former artifact | Disposition | Replacement/owner |
@@ -770,9 +780,9 @@ The package identity is `Gul.app`, bundle identifier `xyz.rootkernel.gul`, and h
 
 **Snapshot date:** 2026-08-23
 
-**Roadmap point:** E0-T8 `In Progress` — E0-T4 accepted the corrected local-gRPC SOT and closed Gate A at Dolgorae `85a8862f784cc57701751d81a9e03bf7c5722818`; exact toolchain and ADR-0017 decisions are active
+**Roadmap point:** E0-T7 `In Progress` — E0-T8 accepted the exact bootstrap pins, read-only command facade, and ADR-0017; Gate B contract generation is active
 
-**Maturity:** documentation rebaseline accepted; pre-implementation toolchain pinning active
+**Maturity:** documentation rebaseline and bootstrap toolchain accepted; provider-contract fixtures in progress
 
 ### 19.1 Implemented components
 
@@ -784,7 +794,7 @@ None. Local Dolgorae design artifacts are dependency-discovery evidence, not Gul
 
 ### 19.3 Existing artifacts
 
-The five SOT documents exist. They describe Required State and governance only.
+The five SOT documents plus the E0-T8 toolchain manifest, read-only shell checks, serial Make facade, and testing guide exist. They provide bootstrap and governance evidence only; no application source, dependency graph, generated client, or runtime behavior exists.
 
 ### 19.4 Current topology and data
 
