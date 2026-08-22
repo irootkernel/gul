@@ -7,7 +7,7 @@
 | Product | Gul (굴) |
 | Subtitle | Remote operator interface for local development runtimes |
 | Version | 0.1-grpc-interface-aligned |
-| Status | Active; E0-T4 and E0-T8 completed, E0-T7 contract inventory and fixtures in progress |
+| Status | Active; E0 rebaseline, toolchain authority, and Gate B contract fixtures completed |
 | Last updated | 2026-08-23 |
 | Target | macOS host; modern desktop, iPad, and iPhone browsers |
 
@@ -389,7 +389,13 @@ REQ-WRITER-004 retains its original ID and meaning and is deferred, not supersed
 
 ## 7. Current State ledger
 
-No Gul product behavior has completed implementation review. The Current State ledger is empty.
+No Gul product runtime behavior exists. The following pre-implementation authorities have completed review:
+
+| Requirement | Accepted Current State | Evidence |
+|---|---|---|
+| REQ-HOST-005 | Exact bootstrap toolchain and target compatibility authority with read-only host reporting | E0-T8; `toolchain/versions.env`; checker fixtures; serial `make test` |
+| REQ-RUNTIME-011 | Versioned public gRPC inventory, exact semantic-operation ownership, generated clients, descriptor-derived fake server, exhaustive maps, and separate Machine CLI fixture | E0-T7; dependency/generated locks; contract validator; fake-server tests |
+| REQ-RUNTIME-022 | Independently typed projection inputs, public enum/event inventory, convergence and fail-closed compatibility fixtures | E0-T7; conformance pin; capability/error/mutation/projection policy maps |
 
 ## 8. Explicit v0.1 non-goals and limitations
 

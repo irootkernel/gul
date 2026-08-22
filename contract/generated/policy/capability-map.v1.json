@@ -1,0 +1,249 @@
+{
+  "schema_version": 1,
+  "supported_methods": [
+    "ArtifactService.GetArtifact",
+    "ArtifactService.ReadArtifactChunk",
+    "ControllerService.VerifyController",
+    "InteractionService.GetControllerInteraction",
+    "InteractionService.ListPendingInteractions",
+    "InteractionService.ResolveInteraction",
+    "ObservationService.ListRunTimelineItems",
+    "ObservationService.WatchRunEvents",
+    "RunService.CloseRun",
+    "RunService.CreateWriteContinuation",
+    "RunService.DeleteRun",
+    "RunService.ForkRun",
+    "RunService.GetRun",
+    "RunService.InterruptTurn",
+    "RunService.ListRuns",
+    "RunService.PauseRun",
+    "RunService.ReconcileRun",
+    "RunService.RecoverRun",
+    "RunService.ResumeRun",
+    "RunService.SetDefaultEffort",
+    "RunService.StartRun",
+    "RunService.SubmitTurn",
+    "RunService.VerifyRun",
+    "RuntimeService.GetCapabilities",
+    "RuntimeService.GetProfile",
+    "RuntimeService.InspectWorkspace",
+    "RuntimeService.ListProfileDiagnostics",
+    "RuntimeService.ListProfiles",
+    "WriterService.AcquireWriter",
+    "WriterService.CancelWriterHandoff",
+    "WriterService.CommitWriterHandoff",
+    "WriterService.GetWorkspaceWriterStatus",
+    "WriterService.PrepareWriterHandoff",
+    "WriterService.ReleaseWriter"
+  ],
+  "stage_requirements": {
+    "MILESTONE-BH1": [
+      "ArtifactService.GetArtifact",
+      "ArtifactService.ReadArtifactChunk",
+      "ControllerService.VerifyController",
+      "InteractionService.GetControllerInteraction",
+      "InteractionService.ListPendingInteractions",
+      "InteractionService.ResolveInteraction",
+      "ObservationService.WatchRunEvents",
+      "RunService.CloseRun",
+      "RunService.GetRun",
+      "RunService.InterruptTurn",
+      "RunService.ListRuns",
+      "RunService.PauseRun",
+      "RunService.ReconcileRun",
+      "RunService.RecoverRun",
+      "RunService.ResumeRun",
+      "RunService.StartRun",
+      "RunService.SubmitTurn",
+      "RuntimeService.GetCapabilities",
+      "RuntimeService.GetProfile",
+      "RuntimeService.InspectWorkspace",
+      "RuntimeService.ListProfiles",
+      "WriterService.AcquireWriter",
+      "WriterService.GetWorkspaceWriterStatus",
+      "WriterService.ReleaseWriter"
+    ],
+    "MILESTONE-PA1": [
+      "ArtifactService.GetArtifact",
+      "ArtifactService.ReadArtifactChunk",
+      "ControllerService.VerifyController",
+      "InteractionService.GetControllerInteraction",
+      "InteractionService.ListPendingInteractions",
+      "InteractionService.ResolveInteraction",
+      "ObservationService.ListRunTimelineItems",
+      "ObservationService.WatchRunEvents",
+      "RunService.CloseRun",
+      "RunService.CreateWriteContinuation",
+      "RunService.DeleteRun",
+      "RunService.ForkRun",
+      "RunService.GetRun",
+      "RunService.InterruptTurn",
+      "RunService.ListRuns",
+      "RunService.PauseRun",
+      "RunService.ReconcileRun",
+      "RunService.RecoverRun",
+      "RunService.ResumeRun",
+      "RunService.SetDefaultEffort",
+      "RunService.StartRun",
+      "RunService.SubmitTurn",
+      "RunService.VerifyRun",
+      "RuntimeService.GetCapabilities",
+      "RuntimeService.GetProfile",
+      "RuntimeService.InspectWorkspace",
+      "RuntimeService.ListProfileDiagnostics",
+      "RuntimeService.ListProfiles",
+      "WriterService.AcquireWriter",
+      "WriterService.CancelWriterHandoff",
+      "WriterService.CommitWriterHandoff",
+      "WriterService.GetWorkspaceWriterStatus",
+      "WriterService.PrepareWriterHandoff",
+      "WriterService.ReleaseWriter"
+    ]
+  },
+  "gul_operation_requirements": [
+    {
+      "operation": "GetCapabilities",
+      "capability": "Method is handshake authority"
+    },
+    {
+      "operation": "InspectWorkspace",
+      "capability": "Supported method"
+    },
+    {
+      "operation": "ListProfiles",
+      "capability": "Supported method"
+    },
+    {
+      "operation": "GetProfile",
+      "capability": "Supported method"
+    },
+    {
+      "operation": "StartRun",
+      "capability": "persistent_runs, controller_binding"
+    },
+    {
+      "operation": "ListRuns",
+      "capability": "persistent_runs"
+    },
+    {
+      "operation": "GetRun",
+      "capability": "persistent_runs"
+    },
+    {
+      "operation": "RefreshRunSnapshot",
+      "capability": "persistent_runs"
+    },
+    {
+      "operation": "SubmitTurn",
+      "capability": "persistent_runs; write uses writer features"
+    },
+    {
+      "operation": "InterruptTurn",
+      "capability": "Supported method"
+    },
+    {
+      "operation": "PauseRun",
+      "capability": "Supported method"
+    },
+    {
+      "operation": "ResumeRun",
+      "capability": "Supported method"
+    },
+    {
+      "operation": "CloseRun",
+      "capability": "Supported method"
+    },
+    {
+      "operation": "DeleteRun",
+      "capability": "Supported method"
+    },
+    {
+      "operation": "CreateWriteContinuation",
+      "capability": "write_continuation"
+    },
+    {
+      "operation": "RecoverRun",
+      "capability": "Supported method"
+    },
+    {
+      "operation": "ReconcileRun",
+      "capability": "Supported method"
+    },
+    {
+      "operation": "WatchRunEvents",
+      "capability": "event_replay"
+    },
+    {
+      "operation": "ListRunTimelineItems",
+      "capability": "controller_timeline"
+    },
+    {
+      "operation": "ListPendingInteractions",
+      "capability": "Advertised Interaction support"
+    },
+    {
+      "operation": "GetControllerInteraction",
+      "capability": "Advertised Interaction support"
+    },
+    {
+      "operation": "ResolveInteraction",
+      "capability": "Advertised Interaction support and response limit"
+    },
+    {
+      "operation": "GetWorkspaceWriterStatus",
+      "capability": "reader_writer_access, durable_writer_authority"
+    },
+    {
+      "operation": "AcquireWriter",
+      "capability": "Writer features; transition supported"
+    },
+    {
+      "operation": "ReleaseWriter",
+      "capability": "Writer features"
+    },
+    {
+      "operation": "VerifyController",
+      "capability": "controller_binding"
+    },
+    {
+      "operation": "GetArtifact",
+      "capability": "artifact_retrieval"
+    },
+    {
+      "operation": "ReadArtifactChunk",
+      "capability": "artifact_retrieval"
+    },
+    {
+      "operation": "Credential Create",
+      "capability": "N/A"
+    },
+    {
+      "operation": "Credential Validate",
+      "capability": "N/A"
+    },
+    {
+      "operation": "Credential ResolveCarrierReference",
+      "capability": "N/A"
+    },
+    {
+      "operation": "Credential RemoveUnused",
+      "capability": "N/A"
+    },
+    {
+      "operation": "Credential CreateSamePrincipalSuccessor",
+      "capability": "N/A"
+    },
+    {
+      "operation": "AdoptController workflow",
+      "capability": "Controller plus local store"
+    },
+    {
+      "operation": "EvaluateActions",
+      "capability": "N/A"
+    },
+    {
+      "operation": "AllocateDeliveryEvent",
+      "capability": "N/A"
+    }
+  ]
+}

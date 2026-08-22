@@ -12,13 +12,18 @@ contract-check:
 test-prepare:
 	@./scripts/toolchain-check.sh --manifest-only
 	@bash -n scripts/*.sh
+	@bash -n contract/*.sh
+	@cd contract && go mod download
+	@cd contract && bun install --frozen-lockfile --ignore-scripts
 
 test-unit:
+	@cd contract && go test ./...
 	@./scripts/test-contract-command.sh
 
 test-int:
 	@./scripts/toolchain-check.sh --manifest-only
 	@./scripts/check-sot.sh
+	@./scripts/contract-command.sh check
 	@git diff --check
 
 test-e2e:

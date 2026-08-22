@@ -7,11 +7,11 @@ exists.
 | Command | Contract |
 |---|---|
 | `make toolchain-check` | Compare the host with `toolchain/versions.env`; report every missing or mismatched executable and exit nonzero. |
-| `make generate-contract` | Delegate to E0-T7's checked generator; fail closed while that executable is absent. |
-| `make contract-check` | Delegate to E0-T7's drift check; fail closed while that executable is absent. |
-| `make test-prepare` | Validate the pin manifest and shell syntax without changing the tree. |
-| `make test-unit` | Prove the pre-E0-T7 contract commands fail closed with actionable prerequisites. |
-| `make test-int` | Validate SOT Task/requirement/ADR integrity and reject whitespace errors in the task diff. |
+| `make generate-contract` | Reproduce the pinned descriptor and deterministically rewrite only checked contract outputs. |
+| `make contract-check` | Regenerate into a temporary directory; reject source/generated drift; compile and test Go/TypeScript clients, fake gRPC server, maps, and fixtures. |
+| `make test-prepare` | Validate pins and shell syntax, then materialize only locked Go/Bun contract dependencies with Bun lifecycle scripts disabled. |
+| `make test-unit` | Compile generated Go clients, run descriptor-derived fake gRPC success/error tests, and exercise facade usage/fail-closed branches. |
+| `make test-int` | Validate SOT integrity, then run contract drift/schema/policy fixtures and TypeScript clients through the public command facade before whitespace checks. |
 | `make test-e2e` | Run the complete checker fixture through its public command boundary. |
 | `make test` | Run `test-prepare`, `test-unit`, `test-int`, and `test-e2e` serially. |
 
@@ -19,8 +19,7 @@ The pinned Wails executable is `wails3` at exactly `v3.0.0-beta.8`. A `wails`
 v2 installation is not a substitute. The host check also requires macOS 14 or
 newer on arm64 and Git `>=2.39.0,<3.0.0`.
 
-The version manifest also pins application dependencies that do not exist in the
-repository yet. Their future `go.mod` and `package.json` declarations must match
-the manifest. E0-T7 must install the two contract delegates named by the command
-facade alongside its task-owned generated artifacts and fixtures. Later Tasks may
-extend the tests but must keep the serial facade and fail-closed prerequisites.
+The nested contract Go/Bun graphs match the version manifest and exist only to
+compile contract fixtures; they are not an application scaffold. Later Tasks may
+extend the tests but must keep the serial facade, deterministic generation, and
+fail-closed prerequisites.

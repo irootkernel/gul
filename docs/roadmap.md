@@ -25,20 +25,20 @@ Allowed executable Task states are `Planned`, `In Progress`, `In Review`, `Compl
 
 | Field | Value |
 |---|---|
-| Active Epic | E0 — Gul Rebaseline and Dependency Contract |
-| Active Task | E0-T7 — Define the public gRPC contract inventory and fake-server fixtures |
-| Status | `In Progress` |
-| Started | 2026-08-23 |
-| Exit | Gate B closes with reproducible generated clients, fake server, complete maps/fixtures, and zero production CLI fallback. |
-| Next | E0 closeout; E2-T0 remains externally blocked and E1-T1 becomes eligible after E0 closes. |
+| Active Epic | None |
+| Active Task | None |
+| Status | `None` |
+| Completed | E0 closed on 2026-08-23 |
+| Exit | Gate B closed with reproducible generated clients, fake server, complete maps/fixtures, and zero production CLI fallback. |
+| Next | E1-T1 is eligible but not activated; E2-T0 remains externally blocked. |
 
-Only this pointer and the E0-T7 detail identify active work.
+No Task currently occupies the Active Task slot.
 
 ## 3. Epic summary
 
 | Group | Epic | Status | Outcome |
 |---:|---|---|---|
-| 0 | E0 — Gul Rebaseline and Dependency Contract | `In Progress` | Accepted SOT and pinned Dolgorae dependency boundary. |
+| 0 | E0 — Gul Rebaseline and Dependency Contract | `Completed` | Accepted SOT and pinned Dolgorae dependency boundary. |
 | 1 | E1 — Core, Frontend, ConnectRPC, Persistence, and Desktop Shell | `Planned` | Headless core serving remote clients, plus a shell over the same core, with Gul-owned state only. |
 | 2 | E2 — Dolgorae Runtime Provider Vertical Slice | `Planned` | Supervise the RPC server and create, submit, observe, render, and interrupt one Direct Run. |
 | 3 | E3 — Workspace and Direct Session Presentation | `Planned` | Safe attachment, profiles, and presentation lifecycle. |
@@ -67,7 +67,7 @@ The dependency path is also governed by five named gates:
 | D — Writer and Continuation | Typed evaluator, valid existing-thread Acquire/Release, both continuation branches, same-principal credential, and exact-request ambiguous replay pass. | E4-T3/E4-T4/E5-T3 |
 | E — Interaction and Recovery | Safe summaries/full fetch, one-shot protected input, timeline/artifact, event recovery, gateway/Gul restart, and outcome reconciliation pass. | E4-T1/E4-T2/E4-T5/E5 |
 
-Gate A closed at Dolgorae revision `85a8862f784cc57701751d81a9e03bf7c5722818`. Its primary proto and checked descriptor are pinned by SHA-256, and the descriptor reproduces byte-for-byte with `protoc 35.1` plus the source-info input `google/protobuf/timestamp.proto` from Protobuf `v32.1` commit `7fcfd66022455635fa29af92987cdc0967efd4f3` (SHA-256 `14052c6042c1dd2d0b50245f2812eaab6eaf82db0b6e8ce483eae527f73b6ee8`). Buf 1.66.1 lint and all 96 checked JSON artifacts pass. Gate B remains Gul-owned E0-T7 work. The missing executable is an E2-T0 blocker and no longer blocks E0 completion.
+Gate A closed at Dolgorae revision `85a8862f784cc57701751d81a9e03bf7c5722818`. Its primary proto and checked descriptor are pinned by SHA-256, and the descriptor reproduces byte-for-byte with `protoc 35.1` plus the source-info input `google/protobuf/timestamp.proto` from Protobuf `v32.1` commit `7fcfd66022455635fa29af92987cdc0967efd4f3` (SHA-256 `14052c6042c1dd2d0b50245f2812eaab6eaf82db0b6e8ce483eae527f73b6ee8`). Gate B closed with dependency-lock SHA-256 `c4f91aa3e2add1093880684e5c96fdbb6239aef6a85261a0adf6b585e2db8863` and generated-lock SHA-256 `8a6a614a3a08c585f9a62f74095a0237d47feefba802e2dfa3ce13be5fbe0bf6`; exact regeneration, Buf lint, generated clients, fake-server success/error calls across all 34 RPCs, maps, fixtures, Go tests, and TypeScript checks pass. The missing executable remains an E2-T0 blocker and is not E0 runtime evidence.
 
 | Task | Required predecessors |
 |---|---|
@@ -112,7 +112,7 @@ Gate A closed at Dolgorae revision `85a8862f784cc57701751d81a9e03bf7c5722818`. I
 
 ### E0 — Gul Rebaseline and Dependency Contract
 
-**Status:** `In Progress`
+**Status:** `Completed`
 
 #### E0-T4 — Rebaseline the five Gul SOT documents
 
@@ -133,7 +133,7 @@ and mutation surface. The Section 9 gate must cover that boundary before review.
 
 #### E0-T7 — Define the Dolgorae public gRPC contract inventory and fake-server fixtures
 
-**Status:** `In Progress`
+**Status:** `Completed`
 
 After Gate A, pin the already identified versioned Protobuf services/RPCs and the final identifiers, enums, typed error/action details, Run configuration, Controller Interaction payload, byte limits, typed event form, exact aggregate-invalidation matrix, client policy, carrier schema, timeline/artifacts, capability set, mutation policies, and Run-stream contract. Generate clients, a fake local gRPC server, fixtures, operation/error/capability/enum/event-invalidation maps, projection-stamp convergence fixtures, replay-policy fixtures, and an independent exact-schema Machine CLI conformance fixture from the accepted descriptor without depending on private worker sockets, state, audit files, or guessed RPC names.
 

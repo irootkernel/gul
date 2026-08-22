@@ -1,0 +1,463 @@
+{
+  "schema_version": 1,
+  "event_invalidation": [
+    {
+      "variant": "RunStateChanged",
+      "update": "None",
+      "invalidation_and_refresh": "Invalidate Run; also invalidate Writer when lifecycle can affect authority. Fetch GetRun and conditionally GetWorkspaceWriterStatus.",
+      "local_effect": "Refresh profile only when a separate generation/capability signal requires it.",
+      "action_safety": "Disable affected Run actions until Run/Writer stamps converge."
+    },
+    {
+      "variant": "TurnStateChanged",
+      "update": "Turn status only",
+      "invalidation_and_refresh": "Invalidate Run and timeline. Fetch GetRun and page timeline to a compatible captured head.",
+      "local_effect": "Update transient Turn presentation from the event hint.",
+      "action_safety": "Never enables a mutation by itself."
+    },
+    {
+      "variant": "FinalResponseAvailable",
+      "update": "Final-response value",
+      "invalidation_and_refresh": "Invalidate Run and timeline. Fetch GetRun and page timeline.",
+      "local_effect": "Resolve inline data or verified artifact chunks.",
+      "action_safety": "No writer action; final state comes from refreshed aggregates."
+    },
+    {
+      "variant": "InteractionOpened",
+      "update": "Interaction identity and kind only",
+      "invalidation_and_refresh": "Invalidate Interaction and Run pending count. Fetch ListPendingInteractions, GetRun, and Controller detail only with a healthy binding.",
+      "local_effect": "Raise Interaction priority in the live-window scheduler.",
+      "action_safety": "Disable conflicting actions until summary/detail and Run stamps converge."
+    },
+    {
+      "variant": "InteractionResolved",
+      "update": "Interaction outcome only",
+      "invalidation_and_refresh": "Invalidate Interaction, Run pending count, and timeline. Fetch ListPendingInteractions, GetRun, and timeline.",
+      "local_effect": "Remove or update the browser card only after authoritative reads.",
+      "action_safety": "Disable response action until refreshed."
+    },
+    {
+      "variant": "WriterStateChanged",
+      "update": "Writer generation hint only",
+      "invalidation_and_refresh": "Invalidate Writer and Run. Fetch GetWorkspaceWriterStatus and GetRun.",
+      "local_effect": "None.",
+      "action_safety": "Disable all writer actions until both refresh and stamps converge."
+    },
+    {
+      "variant": "RecoveryRequired",
+      "update": "Recovery notification only",
+      "invalidation_and_refresh": "Invalidate Run and Writer. Fetch GetRun and GetWorkspaceWriterStatus.",
+      "local_effect": "Raise unresolved/recovery presentation priority.",
+      "action_safety": "Immediately block conflicting mutations."
+    },
+    {
+      "variant": "RuntimeErrorOccurred",
+      "update": "Diagnostic only",
+      "invalidation_and_refresh": "Invalidate Run when the event's Run revision advances beyond the cached stamp; fetch GetRun in that case.",
+      "local_effect": "Append bounded safe error presentation.",
+      "action_safety": "Never marks the Run failed or enables an action by itself."
+    },
+    {
+      "variant": "GenerationChanged",
+      "update": "Generation or epoch only",
+      "invalidation_and_refresh": "Invalidate Run, Writer, and Interaction. Fetch GetRun, GetWorkspaceWriterStatus, and ListPendingInteractions plus authorized detail as required.",
+      "local_effect": "Re-handshake and refresh Profile when server/profile generation may have changed.",
+      "action_safety": "Block affected mutations until every required aggregate refreshes."
+    },
+    {
+      "variant": "WorkspaceChanges",
+      "update": "Workspace-change observation",
+      "invalidation_and_refresh": "Invalidate timeline and page it to a compatible captured head.",
+      "local_effect": "Invalidate affected FileService/Git presentation paths and perform bounded local refresh.",
+      "action_safety": "No authority change."
+    },
+    {
+      "variant": "CommandStarted",
+      "update": "Command observation",
+      "invalidation_and_refresh": "Invalidate timeline and page it.",
+      "local_effect": "Update bounded operational presentation.",
+      "action_safety": "No authority change."
+    },
+    {
+      "variant": "CommandCompleted",
+      "update": "Command observation",
+      "invalidation_and_refresh": "Invalidate timeline and page it.",
+      "local_effect": "Complete bounded operational presentation.",
+      "action_safety": "No authority change."
+    },
+    {
+      "variant": "UsageReported",
+      "update": "Usage observation",
+      "invalidation_and_refresh": "Invalidate timeline and page it.",
+      "local_effect": "Update bounded usage presentation.",
+      "action_safety": "No authority change."
+    },
+    {
+      "variant": "DiagnosticReported",
+      "update": "Diagnostic observation",
+      "invalidation_and_refresh": "Invalidate timeline and page it.",
+      "local_effect": "Append bounded safe diagnostic presentation.",
+      "action_safety": "No authority change."
+    },
+    {
+      "variant": "ReasoningSuppressed",
+      "update": "Suppression metadata",
+      "invalidation_and_refresh": "Invalidate timeline and page it.",
+      "local_effect": "Record only bounded suppression metadata, never content.",
+      "action_safety": "No authority change."
+    },
+    {
+      "variant": "RunEventHeartbeat",
+      "update": "Connection health and advisory durable head only",
+      "invalidation_and_refresh": "No semantic aggregate update; fetch snapshots only on gap, rewind, or commit uncertainty.",
+      "local_effect": "Update connection health.",
+      "action_safety": "No action change."
+    },
+    {
+      "variant": "RunEventStreamEnd(RUN_TERMINAL)",
+      "update": "Subscription terminal marker only",
+      "invalidation_and_refresh": "Fetch final Run and required timeline/artifact state.",
+      "local_effect": "Close the subscription without endless reconnect.",
+      "action_safety": "Use refreshed final state only."
+    },
+    {
+      "variant": "RunEventStreamEnd(SERVER_SHUTDOWN)",
+      "update": "Provider connection interruption only",
+      "invalidation_and_refresh": "Reconnect, re-handshake, refresh snapshots, and resume from the committed cursor.",
+      "local_effect": "Mark provider unavailable/restarting.",
+      "action_safety": "Block mutations while unavailable."
+    },
+    {
+      "variant": "typed gRPC SLOW_CONSUMER",
+      "update": "No semantic update",
+      "invalidation_and_refresh": "Refresh the affected Run's required aggregates and resume from its committed cursor.",
+      "local_effect": "Terminate only that subscription.",
+      "action_safety": "No cross-Run or unary effect."
+    },
+    {
+      "variant": "other transport failure",
+      "update": "No semantic update",
+      "invalidation_and_refresh": "Apply bounded reconnect and snapshot policy.",
+      "local_effect": "Mark connection stale/disconnected only.",
+      "action_safety": "Block only actions requiring freshness."
+    }
+  ],
+  "convergence": [
+    {
+      "name": "equal-complete-stamps",
+      "run": 7,
+      "writer": 7,
+      "interaction": 7,
+      "floor": 7,
+      "enables": true
+    },
+    {
+      "name": "writer-behind-floor",
+      "run": 8,
+      "writer": 7,
+      "interaction": 8,
+      "floor": 8,
+      "enables": false
+    },
+    {
+      "name": "partial-event-disable-only",
+      "run": 9,
+      "writer": null,
+      "interaction": 9,
+      "floor": 9,
+      "enables": false
+    },
+    {
+      "name": "timeline-head-behind",
+      "run": 10,
+      "writer": 10,
+      "interaction": 10,
+      "floor": 10,
+      "timeline_head": 9,
+      "enables": false
+    }
+  ],
+  "replay_material": {
+    "StartRun": "protected_durable_exact_request",
+    "CreateWriteContinuation": "protected_durable_exact_request",
+    "SubmitTurn": "process_memory_only",
+    "ResolveInteraction": "never_persist_or_replay",
+    "policies": {
+      "RunService.StartRun": {
+        "rpc": "RunService.StartRun",
+        "cli": "run.start",
+        "idempotency": "required",
+        "identity": [
+          "canonical_workspace_identity",
+          "controller_id_generation",
+          "control_mode",
+          "accepted_profile_snapshot",
+          "purpose_kind_label",
+          "effective_model",
+          "current_default_effort",
+          "execution_lane",
+          "required_assurance",
+          "sorted_unique_required_capabilities",
+          "parent_reference",
+          "controller_instructions_byte_length_sha256"
+        ],
+        "same_key_replay": "return_original_run",
+        "lost_response": "repeat_exact_key",
+        "different_controller": "idempotency_conflict",
+        "different_normalized_request": "idempotency_conflict",
+        "retention": "workspace_lifetime_no_ttl_with_deleted_run_tombstone",
+        "deleted_run_replay": "run_not_found_with_original_run_id_never_allocate",
+        "secondary_reconciliation": "list_runs_by_unique_controller_id",
+        "automatic_retry": "forbidden"
+      },
+      "RunService.ForkRun": {
+        "rpc": "RunService.ForkRun",
+        "cli": "run.fork",
+        "idempotency": "required",
+        "identity": [
+          "source_run",
+          "controller_identity_generation",
+          "fork_mode",
+          "model",
+          "history_or_provenance_boundary"
+        ],
+        "same_key_replay": "return_original_run",
+        "lost_response": "repeat_exact_key",
+        "automatic_retry": "forbidden"
+      },
+      "RunService.SubmitTurn": {
+        "rpc": "RunService.SubmitTurn",
+        "cli": "run.submit",
+        "idempotency": "required",
+        "identity": [
+          "run",
+          "controller_identity_generation",
+          "message_bytes",
+          "ordered_image_metadata_digests",
+          "model_effort",
+          "write_intent_turn_options"
+        ],
+        "same_key_replay": "return_original_accepted_turn",
+        "lost_response": "get_run_then_repeat_exact_key_or_reconcile",
+        "automatic_retry": "forbidden"
+      },
+      "InteractionService.ResolveInteraction": {
+        "rpc": "InteractionService.ResolveInteraction",
+        "cli": "run.respond",
+        "idempotency": "required",
+        "identity": [
+          "run",
+          "interaction",
+          "controller_identity_generation",
+          "normalized_nonsecret_response_or_secret_first_success"
+        ],
+        "same_key_replay": "return_original_resolution_receipt",
+        "lost_response": "refetch summary and authorized interaction; resolved means complete; pending protected input requires explicit user re-entry; indeterminate state is interaction_outcome_unknown",
+        "protected_input_replay": "forbidden",
+        "protected_input_persistence": "forbidden",
+        "winning_secret_key_replay": "return_receipt_without_comparing_or_replaying_body",
+        "automatic_retry": "forbidden"
+      },
+      "RunService.CreateWriteContinuation": {
+        "rpc": "RunService.CreateWriteContinuation",
+        "cli": "run.create_write_continuation",
+        "idempotency": "required",
+        "identity": [
+          "source_run_turn",
+          "creation_reason",
+          "purpose",
+          "model_effort",
+          "assurance_capabilities",
+          "handoff_instruction_digests",
+          "ordered_artifact_refs",
+          "destination_controller_identity_generation"
+        ],
+        "same_key_replay": "return_original_destination_run",
+        "lost_response": "repeat_exact_key",
+        "automatic_retry": "forbidden"
+      },
+      "RunService.InterruptTurn": {
+        "rpc": "RunService.InterruptTurn",
+        "cli": "run.interrupt",
+        "idempotency": "tokenless",
+        "identity": [
+          "run",
+          "controller_identity_generation",
+          "expected_state_revision"
+        ],
+        "same_key_replay": "not_applicable",
+        "lost_response": "get_run_and_reconcile_if_outcome_unknown",
+        "automatic_retry": "forbidden"
+      },
+      "RunService.SetDefaultEffort": {
+        "rpc": "RunService.SetDefaultEffort",
+        "cli": "run.set_effort",
+        "idempotency": "tokenless",
+        "identity": [
+          "run",
+          "controller_identity_generation",
+          "effort",
+          "expected_state_revision"
+        ],
+        "same_key_replay": "not_applicable",
+        "lost_response": "get_run",
+        "automatic_retry": "forbidden"
+      },
+      "RunService.PauseRun": {
+        "rpc": "RunService.PauseRun",
+        "cli": "run.pause",
+        "idempotency": "tokenless",
+        "identity": [
+          "run",
+          "controller_identity_generation",
+          "interrupt",
+          "expected_state_revision"
+        ],
+        "same_key_replay": "not_applicable",
+        "lost_response": "get_run_and_reconcile_if_required",
+        "automatic_retry": "forbidden"
+      },
+      "RunService.ResumeRun": {
+        "rpc": "RunService.ResumeRun",
+        "cli": "run.resume",
+        "idempotency": "tokenless",
+        "identity": [
+          "run",
+          "controller_identity_generation",
+          "expected_state_revision"
+        ],
+        "same_key_replay": "not_applicable",
+        "lost_response": "get_run_and_reconcile_if_required",
+        "automatic_retry": "forbidden"
+      },
+      "RunService.CloseRun": {
+        "rpc": "RunService.CloseRun",
+        "cli": "run.close",
+        "idempotency": "tokenless",
+        "identity": [
+          "run",
+          "controller_identity_generation",
+          "interrupt",
+          "expected_state_revision"
+        ],
+        "same_key_replay": "not_applicable",
+        "lost_response": "get_run_and_reconcile_if_required",
+        "automatic_retry": "forbidden"
+      },
+      "RunService.DeleteRun": {
+        "rpc": "RunService.DeleteRun",
+        "cli": "run.delete",
+        "idempotency": "tokenless",
+        "identity": [
+          "run",
+          "controller_identity_generation",
+          "confirmation",
+          "expected_state_revision"
+        ],
+        "same_key_replay": "not_applicable",
+        "lost_response": "inspect_workspace_run_absence_and_prior_confirmation",
+        "automatic_retry": "forbidden"
+      },
+      "RunService.RecoverRun": {
+        "rpc": "RunService.RecoverRun",
+        "cli": "run.recover",
+        "idempotency": "tokenless",
+        "identity": [
+          "run",
+          "controller_identity_generation",
+          "expected_state_revision"
+        ],
+        "same_key_replay": "not_applicable",
+        "lost_response": "get_run_then_reconcile",
+        "automatic_retry": "forbidden"
+      },
+      "RunService.ReconcileRun": {
+        "rpc": "RunService.ReconcileRun",
+        "cli": "run.reconcile",
+        "idempotency": "tokenless",
+        "identity": [
+          "run",
+          "controller_identity_generation",
+          "expected_state_revision"
+        ],
+        "same_key_replay": "not_applicable",
+        "lost_response": "get_run_before_new_reconcile",
+        "automatic_retry": "forbidden"
+      },
+      "WriterService.AcquireWriter": {
+        "rpc": "WriterService.AcquireWriter",
+        "cli": "run.acquire_write",
+        "idempotency": "tokenless",
+        "identity": [
+          "run",
+          "controller_identity_generation",
+          "expected_state_revision"
+        ],
+        "same_key_replay": "not_applicable",
+        "lost_response": "get_workspace_writer_status_and_get_run",
+        "automatic_retry": "forbidden"
+      },
+      "WriterService.ReleaseWriter": {
+        "rpc": "WriterService.ReleaseWriter",
+        "cli": "run.release_write",
+        "idempotency": "tokenless",
+        "identity": [
+          "run",
+          "controller_identity_generation",
+          "expected_state_revision"
+        ],
+        "same_key_replay": "not_applicable",
+        "lost_response": "get_workspace_writer_status_and_get_run",
+        "automatic_retry": "forbidden"
+      },
+      "WriterService.PrepareWriterHandoff": {
+        "rpc": "WriterService.PrepareWriterHandoff",
+        "cli": "workspace.writer.handoff_prepare",
+        "idempotency": "tokenless",
+        "identity": [
+          "workspace",
+          "source_run",
+          "destination_run",
+          "controller_identity_generation",
+          "expected_writer_generation"
+        ],
+        "same_key_replay": "not_applicable",
+        "lost_response": "get_workspace_writer_status",
+        "automatic_retry": "forbidden"
+      },
+      "WriterService.CommitWriterHandoff": {
+        "rpc": "WriterService.CommitWriterHandoff",
+        "cli": "workspace.writer.handoff_commit",
+        "idempotency": "tokenless",
+        "identity": [
+          "workspace",
+          "handoff_id",
+          "controller_identity_generation",
+          "expected_writer_generation"
+        ],
+        "same_key_replay": "not_applicable",
+        "lost_response": "get_workspace_writer_status",
+        "automatic_retry": "forbidden"
+      },
+      "WriterService.CancelWriterHandoff": {
+        "rpc": "WriterService.CancelWriterHandoff",
+        "cli": "workspace.writer.handoff_cancel",
+        "idempotency": "tokenless",
+        "identity": [
+          "workspace",
+          "handoff_id",
+          "controller_identity_generation"
+        ],
+        "same_key_replay": "not_applicable",
+        "lost_response": "get_workspace_writer_status",
+        "automatic_retry": "forbidden"
+      }
+    }
+  },
+  "stream_end": {
+    "RUN_TERMINAL": "fetch final required snapshots and do not reconnect indefinitely",
+    "SERVER_SHUTDOWN": "refresh gateway state and reconnect from the last committed cursor",
+    "SLOW_CONSUMER": "RESOURCE_EXHAUSTED typed error; refresh affected Run and resume from the last committed cursor",
+    "TRANSPORT_FAILURE": "never interpret as Run failure"
+  }
+}

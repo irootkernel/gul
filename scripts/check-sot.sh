@@ -28,8 +28,8 @@ if [ "$task_count" -ne 37 ] || [ "$retired_count" -ne 1 ]; then
   printf 'ERROR roadmap expected 36 executable Tasks plus one retired Task; found %s total and %s retired\n' "$task_count" "$retired_count" >&2
   exit 1
 fi
-if [ "$active_count" -ne 1 ]; then
-  printf 'ERROR roadmap expected exactly one active Task; found %s\n' "$active_count" >&2
+if [ "$active_count" -gt 1 ]; then
+  printf 'ERROR roadmap expected at most one active Task; found %s\n' "$active_count" >&2
   exit 1
 fi
 

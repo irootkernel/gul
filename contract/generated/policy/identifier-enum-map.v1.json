@@ -1,0 +1,1528 @@
+{
+  "schema_version": 1,
+  "identifiers": [
+    {
+      "name": "dolgorae.public.v1.RequestContext",
+      "fields": [
+        {
+          "name": "protocol_version",
+          "number": 1,
+          "label": 1,
+          "type": 13,
+          "type_name": "",
+          "oneof_index": null,
+          "proto3_optional": false
+        },
+        {
+          "name": "client_request_id",
+          "number": 2,
+          "label": 1,
+          "type": 9,
+          "type_name": "",
+          "oneof_index": null,
+          "proto3_optional": false
+        },
+        {
+          "name": "client_instance_id",
+          "number": 3,
+          "label": 1,
+          "type": 9,
+          "type_name": "",
+          "oneof_index": null,
+          "proto3_optional": false
+        }
+      ],
+      "oneofs": []
+    },
+    {
+      "name": "dolgorae.public.v1.ResponseContext",
+      "fields": [
+        {
+          "name": "protocol_version",
+          "number": 1,
+          "label": 1,
+          "type": 13,
+          "type_name": "",
+          "oneof_index": null,
+          "proto3_optional": false
+        },
+        {
+          "name": "server_instance_id",
+          "number": 2,
+          "label": 1,
+          "type": 9,
+          "type_name": "",
+          "oneof_index": null,
+          "proto3_optional": false
+        },
+        {
+          "name": "operation_id",
+          "number": 3,
+          "label": 1,
+          "type": 9,
+          "type_name": "",
+          "oneof_index": 0,
+          "proto3_optional": true
+        }
+      ],
+      "oneofs": [
+        "_operation_id"
+      ]
+    },
+    {
+      "name": "dolgorae.public.v1.WorkspaceRef",
+      "fields": [
+        {
+          "name": "absolute_path",
+          "number": 1,
+          "label": 1,
+          "type": 9,
+          "type_name": "",
+          "oneof_index": null,
+          "proto3_optional": false
+        },
+        {
+          "name": "expected_workspace_id",
+          "number": 2,
+          "label": 1,
+          "type": 9,
+          "type_name": "",
+          "oneof_index": null,
+          "proto3_optional": false
+        }
+      ],
+      "oneofs": []
+    },
+    {
+      "name": "dolgorae.public.v1.RunRef",
+      "fields": [
+        {
+          "name": "workspace",
+          "number": 1,
+          "label": 1,
+          "type": 11,
+          "type_name": "dolgorae.public.v1.WorkspaceRef",
+          "oneof_index": null,
+          "proto3_optional": false
+        },
+        {
+          "name": "run_id",
+          "number": 2,
+          "label": 1,
+          "type": 9,
+          "type_name": "",
+          "oneof_index": null,
+          "proto3_optional": false
+        }
+      ],
+      "oneofs": []
+    },
+    {
+      "name": "dolgorae.public.v1.ControllerCarrierRef",
+      "fields": [
+        {
+          "name": "absolute_file_path",
+          "number": 1,
+          "label": 1,
+          "type": 9,
+          "type_name": "",
+          "oneof_index": null,
+          "proto3_optional": false
+        },
+        {
+          "name": "expected_controller_id",
+          "number": 2,
+          "label": 1,
+          "type": 9,
+          "type_name": "",
+          "oneof_index": null,
+          "proto3_optional": false
+        },
+        {
+          "name": "expected_controller_generation",
+          "number": 3,
+          "label": 1,
+          "type": 4,
+          "type_name": "",
+          "oneof_index": null,
+          "proto3_optional": false
+        }
+      ],
+      "oneofs": []
+    },
+    {
+      "name": "dolgorae.public.v1.ProjectionStamp",
+      "fields": [
+        {
+          "name": "captured_head_cursor",
+          "number": 1,
+          "label": 1,
+          "type": 9,
+          "type_name": "",
+          "oneof_index": null,
+          "proto3_optional": false
+        },
+        {
+          "name": "run_state_revision",
+          "number": 2,
+          "label": 1,
+          "type": 4,
+          "type_name": "",
+          "oneof_index": null,
+          "proto3_optional": false
+        },
+        {
+          "name": "writer_state_revision",
+          "number": 3,
+          "label": 1,
+          "type": 4,
+          "type_name": "",
+          "oneof_index": null,
+          "proto3_optional": false
+        },
+        {
+          "name": "interaction_state_revision",
+          "number": 4,
+          "label": 1,
+          "type": 4,
+          "type_name": "",
+          "oneof_index": null,
+          "proto3_optional": false
+        }
+      ],
+      "oneofs": []
+    }
+  ],
+  "enums": [
+    {
+      "name": "dolgorae.public.v1.ProjectionProfile",
+      "values": [
+        {
+          "name": "PROJECTION_PROFILE_UNSPECIFIED",
+          "number": 0
+        },
+        {
+          "name": "PROJECTION_PROFILE_MINIMAL",
+          "number": 1
+        },
+        {
+          "name": "PROJECTION_PROFILE_OPERATIONAL",
+          "number": 2
+        }
+      ]
+    },
+    {
+      "name": "dolgorae.public.v1.PublicTransport",
+      "values": [
+        {
+          "name": "PUBLIC_TRANSPORT_UNSPECIFIED",
+          "number": 0
+        },
+        {
+          "name": "PUBLIC_TRANSPORT_MACHINE_CLI",
+          "number": 1
+        },
+        {
+          "name": "PUBLIC_TRANSPORT_LOCAL_GRPC",
+          "number": 2
+        }
+      ]
+    },
+    {
+      "name": "dolgorae.public.v1.ProfileLaunchMode",
+      "values": [
+        {
+          "name": "PROFILE_LAUNCH_MODE_UNSPECIFIED",
+          "number": 0
+        },
+        {
+          "name": "PROFILE_LAUNCH_MODE_DOLGORAE_OWNED_DIRECT_EXECUTABLE",
+          "number": 1
+        }
+      ]
+    },
+    {
+      "name": "dolgorae.public.v1.NativeSubagentPolicy",
+      "values": [
+        {
+          "name": "NATIVE_SUBAGENT_POLICY_UNSPECIFIED",
+          "number": 0
+        },
+        {
+          "name": "NATIVE_SUBAGENT_POLICY_ENABLED",
+          "number": 1
+        }
+      ]
+    },
+    {
+      "name": "dolgorae.public.v1.RunLifecycle",
+      "values": [
+        {
+          "name": "RUN_LIFECYCLE_UNSPECIFIED",
+          "number": 0
+        },
+        {
+          "name": "RUN_LIFECYCLE_STARTING",
+          "number": 1
+        },
+        {
+          "name": "RUN_LIFECYCLE_IDLE",
+          "number": 2
+        },
+        {
+          "name": "RUN_LIFECYCLE_RUNNING",
+          "number": 3
+        },
+        {
+          "name": "RUN_LIFECYCLE_WAITING_INTERACTION",
+          "number": 4
+        },
+        {
+          "name": "RUN_LIFECYCLE_RECONCILIATION_REQUIRED",
+          "number": 5
+        },
+        {
+          "name": "RUN_LIFECYCLE_PAUSED",
+          "number": 6
+        },
+        {
+          "name": "RUN_LIFECYCLE_CLOSED",
+          "number": 7
+        },
+        {
+          "name": "RUN_LIFECYCLE_START_FAILED",
+          "number": 8
+        },
+        {
+          "name": "RUN_LIFECYCLE_OUTCOME_UNKNOWN",
+          "number": 9
+        }
+      ]
+    },
+    {
+      "name": "dolgorae.public.v1.ControlMode",
+      "values": [
+        {
+          "name": "CONTROL_MODE_UNSPECIFIED",
+          "number": 0
+        },
+        {
+          "name": "CONTROL_MODE_DIRECT_INTERACTIVE",
+          "number": 1
+        },
+        {
+          "name": "CONTROL_MODE_MANAGED_AGENT",
+          "number": 2
+        }
+      ]
+    },
+    {
+      "name": "dolgorae.public.v1.ExecutionLane",
+      "values": [
+        {
+          "name": "EXECUTION_LANE_UNSPECIFIED",
+          "number": 0
+        },
+        {
+          "name": "EXECUTION_LANE_SHARED_READONLY",
+          "number": 1
+        },
+        {
+          "name": "EXECUTION_LANE_DEDICATED",
+          "number": 2
+        }
+      ]
+    },
+    {
+      "name": "dolgorae.public.v1.WriteIntent",
+      "values": [
+        {
+          "name": "WRITE_INTENT_UNSPECIFIED",
+          "number": 0
+        },
+        {
+          "name": "WRITE_INTENT_READ",
+          "number": 1
+        },
+        {
+          "name": "WRITE_INTENT_WRITE",
+          "number": 2
+        }
+      ]
+    },
+    {
+      "name": "dolgorae.public.v1.ImageDetail",
+      "values": [
+        {
+          "name": "IMAGE_DETAIL_UNSPECIFIED",
+          "number": 0
+        },
+        {
+          "name": "IMAGE_DETAIL_AUTO",
+          "number": 1
+        },
+        {
+          "name": "IMAGE_DETAIL_LOW",
+          "number": 2
+        },
+        {
+          "name": "IMAGE_DETAIL_HIGH",
+          "number": 3
+        }
+      ]
+    },
+    {
+      "name": "dolgorae.public.v1.WriteContinuationReason",
+      "values": [
+        {
+          "name": "WRITE_CONTINUATION_REASON_UNSPECIFIED",
+          "number": 0
+        },
+        {
+          "name": "WRITE_CONTINUATION_REASON_SHARED_READONLY_SOURCE",
+          "number": 1
+        },
+        {
+          "name": "WRITE_CONTINUATION_REASON_ACCESS_TRANSITION_UNAVAILABLE",
+          "number": 2
+        },
+        {
+          "name": "WRITE_CONTINUATION_REASON_ACCESS_TRANSITION_UNVERIFIED",
+          "number": 3
+        }
+      ]
+    },
+    {
+      "name": "dolgorae.public.v1.PurposeKind",
+      "values": [
+        {
+          "name": "PURPOSE_KIND_UNSPECIFIED",
+          "number": 0
+        },
+        {
+          "name": "PURPOSE_KIND_INTERACTIVE",
+          "number": 1
+        },
+        {
+          "name": "PURPOSE_KIND_PLANNING",
+          "number": 2
+        },
+        {
+          "name": "PURPOSE_KIND_IMPLEMENTATION",
+          "number": 3
+        },
+        {
+          "name": "PURPOSE_KIND_REVIEW",
+          "number": 4
+        },
+        {
+          "name": "PURPOSE_KIND_RESEARCH",
+          "number": 5
+        },
+        {
+          "name": "PURPOSE_KIND_DISCUSSION",
+          "number": 6
+        },
+        {
+          "name": "PURPOSE_KIND_WORKFLOW_STAGE",
+          "number": 7
+        },
+        {
+          "name": "PURPOSE_KIND_OTHER",
+          "number": 8
+        }
+      ]
+    },
+    {
+      "name": "dolgorae.public.v1.ControllerKind",
+      "values": [
+        {
+          "name": "CONTROLLER_KIND_UNSPECIFIED",
+          "number": 0
+        },
+        {
+          "name": "CONTROLLER_KIND_HUMAN_CLI",
+          "number": 1
+        },
+        {
+          "name": "CONTROLLER_KIND_INTERACTIVE_CLIENT",
+          "number": 2
+        },
+        {
+          "name": "CONTROLLER_KIND_WORKFLOW_ORCHESTRATOR",
+          "number": 3
+        },
+        {
+          "name": "CONTROLLER_KIND_AUTOMATION",
+          "number": 4
+        },
+        {
+          "name": "CONTROLLER_KIND_OTHER",
+          "number": 5
+        }
+      ]
+    },
+    {
+      "name": "dolgorae.public.v1.SupportState",
+      "values": [
+        {
+          "name": "SUPPORT_STATE_UNSPECIFIED",
+          "number": 0
+        },
+        {
+          "name": "SUPPORT_STATE_SUPPORTED",
+          "number": 1
+        },
+        {
+          "name": "SUPPORT_STATE_UNAVAILABLE",
+          "number": 2
+        },
+        {
+          "name": "SUPPORT_STATE_UNVERIFIED",
+          "number": 3
+        },
+        {
+          "name": "SUPPORT_STATE_UNSAFE",
+          "number": 4
+        }
+      ]
+    },
+    {
+      "name": "dolgorae.public.v1.InteractionSupport",
+      "values": [
+        {
+          "name": "INTERACTION_SUPPORT_UNSPECIFIED",
+          "number": 0
+        },
+        {
+          "name": "INTERACTION_SUPPORT_SUPPORTED",
+          "number": 1
+        },
+        {
+          "name": "INTERACTION_SUPPORT_RECOGNIZED_UNSUPPORTED",
+          "number": 2
+        },
+        {
+          "name": "INTERACTION_SUPPORT_UNAVAILABLE",
+          "number": 3
+        }
+      ]
+    },
+    {
+      "name": "dolgorae.public.v1.CommandExecutionSupport",
+      "values": [
+        {
+          "name": "COMMAND_EXECUTION_SUPPORT_UNSPECIFIED",
+          "number": 0
+        },
+        {
+          "name": "COMMAND_EXECUTION_SUPPORT_SUPPORTED",
+          "number": 1
+        },
+        {
+          "name": "COMMAND_EXECUTION_SUPPORT_BOUNDED_BEST_EFFORT",
+          "number": 2
+        },
+        {
+          "name": "COMMAND_EXECUTION_SUPPORT_UNAVAILABLE",
+          "number": 3
+        }
+      ]
+    },
+    {
+      "name": "dolgorae.public.v1.BackgroundControlSupport",
+      "values": [
+        {
+          "name": "BACKGROUND_CONTROL_SUPPORT_UNSPECIFIED",
+          "number": 0
+        },
+        {
+          "name": "BACKGROUND_CONTROL_SUPPORT_BEST_EFFORT_PERSONAL_ALPHA",
+          "number": 1
+        },
+        {
+          "name": "BACKGROUND_CONTROL_SUPPORT_PROFILE_AGGREGATE_ONLY",
+          "number": 2
+        },
+        {
+          "name": "BACKGROUND_CONTROL_SUPPORT_UNAVAILABLE",
+          "number": 3
+        },
+        {
+          "name": "BACKGROUND_CONTROL_SUPPORT_UNVERIFIED",
+          "number": 4
+        }
+      ]
+    },
+    {
+      "name": "dolgorae.public.v1.ProcessCleanupSupport",
+      "values": [
+        {
+          "name": "PROCESS_CLEANUP_SUPPORT_UNSPECIFIED",
+          "number": 0
+        },
+        {
+          "name": "PROCESS_CLEANUP_SUPPORT_BOUNDED_PROCESS_CENSUS",
+          "number": 1
+        },
+        {
+          "name": "PROCESS_CLEANUP_SUPPORT_UNAVAILABLE",
+          "number": 2
+        }
+      ]
+    },
+    {
+      "name": "dolgorae.public.v1.AssuranceLevel",
+      "values": [
+        {
+          "name": "ASSURANCE_LEVEL_UNSPECIFIED",
+          "number": 0
+        },
+        {
+          "name": "ASSURANCE_LEVEL_BEST_EFFORT_PERSONAL_ALPHA",
+          "number": 1
+        },
+        {
+          "name": "ASSURANCE_LEVEL_VERIFIED_THREAD_SCOPED_CONTROL",
+          "number": 2
+        },
+        {
+          "name": "ASSURANCE_LEVEL_STRONG_PROCESS_CONTAINMENT",
+          "number": 3
+        }
+      ]
+    },
+    {
+      "name": "dolgorae.public.v1.ProfileCompatibility",
+      "values": [
+        {
+          "name": "PROFILE_COMPATIBILITY_UNSPECIFIED",
+          "number": 0
+        },
+        {
+          "name": "PROFILE_COMPATIBILITY_COMPATIBLE",
+          "number": 1
+        },
+        {
+          "name": "PROFILE_COMPATIBILITY_INCOMPATIBLE",
+          "number": 2
+        },
+        {
+          "name": "PROFILE_COMPATIBILITY_UNVERIFIED",
+          "number": 3
+        },
+        {
+          "name": "PROFILE_COMPATIBILITY_UNAVAILABLE",
+          "number": 4
+        }
+      ]
+    },
+    {
+      "name": "dolgorae.public.v1.RunStateVariant",
+      "values": [
+        {
+          "name": "RUN_STATE_VARIANT_UNSPECIFIED",
+          "number": 0
+        },
+        {
+          "name": "RUN_STATE_VARIANT_SHARED_READONLY",
+          "number": 1
+        },
+        {
+          "name": "RUN_STATE_VARIANT_DEDICATED_UNSTARTED",
+          "number": 2
+        },
+        {
+          "name": "RUN_STATE_VARIANT_DEDICATED_READER",
+          "number": 3
+        },
+        {
+          "name": "RUN_STATE_VARIANT_DEDICATED_WRITER_RESERVED",
+          "number": 4
+        },
+        {
+          "name": "RUN_STATE_VARIANT_DEDICATED_WRITER_ACTIVE",
+          "number": 5
+        },
+        {
+          "name": "RUN_STATE_VARIANT_DEDICATED_RELEASING",
+          "number": 6
+        },
+        {
+          "name": "RUN_STATE_VARIANT_DEDICATED_BLOCKED_UNKNOWN",
+          "number": 7
+        },
+        {
+          "name": "RUN_STATE_VARIANT_DEDICATED_PAUSED",
+          "number": 8
+        },
+        {
+          "name": "RUN_STATE_VARIANT_DEDICATED_GENERATION_FAILED",
+          "number": 9
+        }
+      ]
+    },
+    {
+      "name": "dolgorae.public.v1.EffectiveAccess",
+      "values": [
+        {
+          "name": "EFFECTIVE_ACCESS_UNSPECIFIED",
+          "number": 0
+        },
+        {
+          "name": "EFFECTIVE_ACCESS_READ",
+          "number": 1
+        },
+        {
+          "name": "EFFECTIVE_ACCESS_WRITE",
+          "number": 2
+        },
+        {
+          "name": "EFFECTIVE_ACCESS_TRANSITIONING",
+          "number": 3
+        },
+        {
+          "name": "EFFECTIVE_ACCESS_UNSUPPORTED",
+          "number": 4
+        },
+        {
+          "name": "EFFECTIVE_ACCESS_UNKNOWN",
+          "number": 5
+        }
+      ]
+    },
+    {
+      "name": "dolgorae.public.v1.PolicyVerification",
+      "values": [
+        {
+          "name": "POLICY_VERIFICATION_UNSPECIFIED",
+          "number": 0
+        },
+        {
+          "name": "POLICY_VERIFICATION_VERIFIED",
+          "number": 1
+        },
+        {
+          "name": "POLICY_VERIFICATION_UNVERIFIED",
+          "number": 2
+        },
+        {
+          "name": "POLICY_VERIFICATION_FAILED",
+          "number": 3
+        }
+      ]
+    },
+    {
+      "name": "dolgorae.public.v1.WriterAuthorityState",
+      "values": [
+        {
+          "name": "WRITER_AUTHORITY_STATE_UNSPECIFIED",
+          "number": 0
+        },
+        {
+          "name": "WRITER_AUTHORITY_STATE_NONE",
+          "number": 1
+        },
+        {
+          "name": "WRITER_AUTHORITY_STATE_RESERVED",
+          "number": 2
+        },
+        {
+          "name": "WRITER_AUTHORITY_STATE_ACTIVE",
+          "number": 3
+        },
+        {
+          "name": "WRITER_AUTHORITY_STATE_HANDOFF_PREPARED",
+          "number": 4
+        },
+        {
+          "name": "WRITER_AUTHORITY_STATE_RELEASING",
+          "number": 5
+        },
+        {
+          "name": "WRITER_AUTHORITY_STATE_BLOCKED_UNKNOWN",
+          "number": 6
+        }
+      ]
+    },
+    {
+      "name": "dolgorae.public.v1.ReconciliationAction",
+      "values": [
+        {
+          "name": "RECONCILIATION_ACTION_UNSPECIFIED",
+          "number": 0
+        },
+        {
+          "name": "RECONCILIATION_ACTION_NONE",
+          "number": 1
+        },
+        {
+          "name": "RECONCILIATION_ACTION_RETRY_CENSUS",
+          "number": 2
+        },
+        {
+          "name": "RECONCILIATION_ACTION_RECONCILE_DEDICATED_LANE",
+          "number": 3
+        },
+        {
+          "name": "RECONCILIATION_ACTION_OPERATOR_REPAIR",
+          "number": 4
+        },
+        {
+          "name": "RECONCILIATION_ACTION_REVERIFY_WRITER_POLICY",
+          "number": 5
+        }
+      ]
+    },
+    {
+      "name": "dolgorae.public.v1.ServerLaneState",
+      "values": [
+        {
+          "name": "SERVER_LANE_STATE_UNSPECIFIED",
+          "number": 0
+        },
+        {
+          "name": "SERVER_LANE_STATE_STARTING",
+          "number": 1
+        },
+        {
+          "name": "SERVER_LANE_STATE_READY",
+          "number": 2
+        },
+        {
+          "name": "SERVER_LANE_STATE_STOPPING",
+          "number": 3
+        },
+        {
+          "name": "SERVER_LANE_STATE_ABSENT",
+          "number": 4
+        },
+        {
+          "name": "SERVER_LANE_STATE_UNVERIFIED",
+          "number": 5
+        },
+        {
+          "name": "SERVER_LANE_STATE_FAILED",
+          "number": 6
+        }
+      ]
+    },
+    {
+      "name": "dolgorae.public.v1.BackgroundExecutionState",
+      "values": [
+        {
+          "name": "BACKGROUND_EXECUTION_STATE_UNSPECIFIED",
+          "number": 0
+        },
+        {
+          "name": "BACKGROUND_EXECUTION_STATE_VERIFIED_ABSENT",
+          "number": 1
+        },
+        {
+          "name": "BACKGROUND_EXECUTION_STATE_ACTIVE",
+          "number": 2
+        },
+        {
+          "name": "BACKGROUND_EXECUTION_STATE_UNVERIFIED",
+          "number": 3
+        },
+        {
+          "name": "BACKGROUND_EXECUTION_STATE_NOT_APPLICABLE",
+          "number": 4
+        }
+      ]
+    },
+    {
+      "name": "dolgorae.public.v1.BackgroundExecutionMechanism",
+      "values": [
+        {
+          "name": "BACKGROUND_EXECUTION_MECHANISM_UNSPECIFIED",
+          "number": 0
+        },
+        {
+          "name": "BACKGROUND_EXECUTION_MECHANISM_DEDICATED_LANE_PROCESS_CENSUS",
+          "number": 1
+        },
+        {
+          "name": "BACKGROUND_EXECUTION_MECHANISM_HYBRID",
+          "number": 2
+        },
+        {
+          "name": "BACKGROUND_EXECUTION_MECHANISM_SHARED_PROFILE_AGGREGATE",
+          "number": 3
+        }
+      ]
+    },
+    {
+      "name": "dolgorae.public.v1.RecoveryState",
+      "values": [
+        {
+          "name": "RECOVERY_STATE_UNSPECIFIED",
+          "number": 0
+        },
+        {
+          "name": "RECOVERY_STATE_NOT_REQUIRED",
+          "number": 1
+        },
+        {
+          "name": "RECOVERY_STATE_REQUIRED",
+          "number": 2
+        },
+        {
+          "name": "RECOVERY_STATE_RECONCILIATION_REQUIRED",
+          "number": 3
+        },
+        {
+          "name": "RECOVERY_STATE_OUTCOME_UNKNOWN",
+          "number": 4
+        }
+      ]
+    },
+    {
+      "name": "dolgorae.public.v1.RecoveryAction",
+      "values": [
+        {
+          "name": "RECOVERY_ACTION_UNSPECIFIED",
+          "number": 0
+        },
+        {
+          "name": "RECOVERY_ACTION_NONE",
+          "number": 1
+        },
+        {
+          "name": "RECOVERY_ACTION_REFRESH_SNAPSHOT",
+          "number": 2
+        },
+        {
+          "name": "RECOVERY_ACTION_RECONCILE_RUN",
+          "number": 3
+        },
+        {
+          "name": "RECOVERY_ACTION_RECOVER_RUN",
+          "number": 4
+        },
+        {
+          "name": "RECOVERY_ACTION_OPERATOR_REPAIR",
+          "number": 5
+        }
+      ]
+    },
+    {
+      "name": "dolgorae.public.v1.TurnStatus",
+      "values": [
+        {
+          "name": "TURN_STATUS_UNSPECIFIED",
+          "number": 0
+        },
+        {
+          "name": "TURN_STATUS_RESERVED",
+          "number": 1
+        },
+        {
+          "name": "TURN_STATUS_ACCEPTED",
+          "number": 2
+        },
+        {
+          "name": "TURN_STATUS_RUNNING",
+          "number": 3
+        },
+        {
+          "name": "TURN_STATUS_WAITING_INTERACTION",
+          "number": 4
+        },
+        {
+          "name": "TURN_STATUS_INTERRUPTING",
+          "number": 5
+        },
+        {
+          "name": "TURN_STATUS_COMPLETED",
+          "number": 6
+        },
+        {
+          "name": "TURN_STATUS_FAILED",
+          "number": 7
+        },
+        {
+          "name": "TURN_STATUS_INTERRUPTED",
+          "number": 8
+        },
+        {
+          "name": "TURN_STATUS_OUTCOME_UNKNOWN",
+          "number": 9
+        }
+      ]
+    },
+    {
+      "name": "dolgorae.public.v1.ControllerCarrierRootPolicy",
+      "values": [
+        {
+          "name": "CONTROLLER_CARRIER_ROOT_POLICY_UNSPECIFIED",
+          "number": 0
+        },
+        {
+          "name": "CONTROLLER_CARRIER_ROOT_POLICY_DOLGORAE_OWNED_APPLICATION_SUPPORT",
+          "number": 1
+        }
+      ]
+    },
+    {
+      "name": "dolgorae.public.v1.ControllerCapabilityEncoding",
+      "values": [
+        {
+          "name": "CONTROLLER_CAPABILITY_ENCODING_UNSPECIFIED",
+          "number": 0
+        },
+        {
+          "name": "CONTROLLER_CAPABILITY_ENCODING_BASE64URL_NO_PADDING",
+          "number": 1
+        }
+      ]
+    },
+    {
+      "name": "dolgorae.public.v1.ControllerPrincipalRule",
+      "values": [
+        {
+          "name": "CONTROLLER_PRINCIPAL_RULE_UNSPECIFIED",
+          "number": 0
+        },
+        {
+          "name": "CONTROLLER_PRINCIPAL_RULE_KIND_SUBJECT_ID_ELSE_KIND_INSTANCE_ID",
+          "number": 1
+        }
+      ]
+    },
+    {
+      "name": "dolgorae.public.v1.WorkspaceInspectionStatus",
+      "values": [
+        {
+          "name": "WORKSPACE_INSPECTION_STATUS_UNSPECIFIED",
+          "number": 0
+        },
+        {
+          "name": "WORKSPACE_INSPECTION_STATUS_COMPATIBLE",
+          "number": 1
+        },
+        {
+          "name": "WORKSPACE_INSPECTION_STATUS_BLOCKED",
+          "number": 2
+        },
+        {
+          "name": "WORKSPACE_INSPECTION_STATUS_UNINITIALIZED",
+          "number": 3
+        }
+      ]
+    },
+    {
+      "name": "dolgorae.public.v1.WorkspaceMode",
+      "values": [
+        {
+          "name": "WORKSPACE_MODE_UNSPECIFIED",
+          "number": 0
+        },
+        {
+          "name": "WORKSPACE_MODE_GIT",
+          "number": 1
+        },
+        {
+          "name": "WORKSPACE_MODE_NON_GIT",
+          "number": 2
+        }
+      ]
+    },
+    {
+      "name": "dolgorae.public.v1.CapabilityBlockerCode",
+      "values": [
+        {
+          "name": "CAPABILITY_BLOCKER_CODE_UNSPECIFIED",
+          "number": 0
+        },
+        {
+          "name": "CAPABILITY_BLOCKER_CODE_CONFIG_INVALID",
+          "number": 1
+        },
+        {
+          "name": "CAPABILITY_BLOCKER_CODE_WORKSPACE_NOT_INITIALIZED",
+          "number": 2
+        },
+        {
+          "name": "CAPABILITY_BLOCKER_CODE_WORKSPACE_PATH_UNSAFE",
+          "number": 3
+        },
+        {
+          "name": "CAPABILITY_BLOCKER_CODE_PROFILE_CONFIG_INVALID",
+          "number": 4
+        },
+        {
+          "name": "CAPABILITY_BLOCKER_CODE_PROFILE_RUNTIME_INCOMPATIBLE",
+          "number": 5
+        },
+        {
+          "name": "CAPABILITY_BLOCKER_CODE_PROFILE_MIGRATION_REQUIRED",
+          "number": 6
+        },
+        {
+          "name": "CAPABILITY_BLOCKER_CODE_PROFILE_MEMBERSHIP_INCOMPLETE",
+          "number": 7
+        },
+        {
+          "name": "CAPABILITY_BLOCKER_CODE_PROFILE_SERVER_UNAVAILABLE",
+          "number": 8
+        },
+        {
+          "name": "CAPABILITY_BLOCKER_CODE_EXECUTION_LANE_UNSUPPORTED",
+          "number": 9
+        },
+        {
+          "name": "CAPABILITY_BLOCKER_CODE_ASSURANCE_UNAVAILABLE",
+          "number": 10
+        },
+        {
+          "name": "CAPABILITY_BLOCKER_CODE_ACCESS_TRANSITION_UNAVAILABLE",
+          "number": 11
+        },
+        {
+          "name": "CAPABILITY_BLOCKER_CODE_ACCESS_TRANSITION_UNVERIFIED",
+          "number": 12
+        },
+        {
+          "name": "CAPABILITY_BLOCKER_CODE_BACKGROUND_EXECUTION_UNAVAILABLE",
+          "number": 13
+        },
+        {
+          "name": "CAPABILITY_BLOCKER_CODE_BACKGROUND_EXECUTION_UNVERIFIED",
+          "number": 14
+        },
+        {
+          "name": "CAPABILITY_BLOCKER_CODE_INTERACTION_UNAVAILABLE",
+          "number": 15
+        },
+        {
+          "name": "CAPABILITY_BLOCKER_CODE_NATIVE_SUBAGENT_UNAVAILABLE",
+          "number": 16
+        },
+        {
+          "name": "CAPABILITY_BLOCKER_CODE_NATIVE_SUBAGENT_UNVERIFIED",
+          "number": 17
+        }
+      ]
+    },
+    {
+      "name": "dolgorae.public.v1.InteractionKind",
+      "values": [
+        {
+          "name": "INTERACTION_KIND_UNSPECIFIED",
+          "number": 0
+        },
+        {
+          "name": "INTERACTION_KIND_COMMAND_EXECUTION_APPROVAL",
+          "number": 1
+        },
+        {
+          "name": "INTERACTION_KIND_FILE_CHANGE_APPROVAL",
+          "number": 2
+        },
+        {
+          "name": "INTERACTION_KIND_PERMISSION_REQUEST",
+          "number": 3
+        },
+        {
+          "name": "INTERACTION_KIND_USER_INPUT",
+          "number": 4
+        },
+        {
+          "name": "INTERACTION_KIND_MCP_ELICITATION",
+          "number": 5
+        },
+        {
+          "name": "INTERACTION_KIND_CONNECTOR_APPROVAL",
+          "number": 6
+        },
+        {
+          "name": "INTERACTION_KIND_UNSUPPORTED_REQUEST",
+          "number": 7
+        }
+      ]
+    },
+    {
+      "name": "dolgorae.public.v1.InteractionStatus",
+      "values": [
+        {
+          "name": "INTERACTION_STATUS_UNSPECIFIED",
+          "number": 0
+        },
+        {
+          "name": "INTERACTION_STATUS_PENDING",
+          "number": 1
+        },
+        {
+          "name": "INTERACTION_STATUS_RESOLVED",
+          "number": 2
+        },
+        {
+          "name": "INTERACTION_STATUS_STALE",
+          "number": 3
+        }
+      ]
+    },
+    {
+      "name": "dolgorae.public.v1.InteractionOutcome",
+      "values": [
+        {
+          "name": "INTERACTION_OUTCOME_UNSPECIFIED",
+          "number": 0
+        },
+        {
+          "name": "INTERACTION_OUTCOME_ACCEPTED",
+          "number": 1
+        },
+        {
+          "name": "INTERACTION_OUTCOME_DECLINED",
+          "number": 2
+        },
+        {
+          "name": "INTERACTION_OUTCOME_CANCELLED",
+          "number": 3
+        },
+        {
+          "name": "INTERACTION_OUTCOME_ANSWERED",
+          "number": 4
+        },
+        {
+          "name": "INTERACTION_OUTCOME_STALE",
+          "number": 5
+        },
+        {
+          "name": "INTERACTION_OUTCOME_METHOD_NOT_FOUND",
+          "number": 6
+        }
+      ]
+    },
+    {
+      "name": "dolgorae.public.v1.InteractionDecision",
+      "values": [
+        {
+          "name": "INTERACTION_DECISION_UNSPECIFIED",
+          "number": 0
+        },
+        {
+          "name": "INTERACTION_DECISION_ACCEPT_ONCE",
+          "number": 1
+        },
+        {
+          "name": "INTERACTION_DECISION_DECLINE",
+          "number": 2
+        },
+        {
+          "name": "INTERACTION_DECISION_CANCEL",
+          "number": 3
+        }
+      ]
+    },
+    {
+      "name": "dolgorae.public.v1.FileChangeKind",
+      "values": [
+        {
+          "name": "FILE_CHANGE_KIND_UNSPECIFIED",
+          "number": 0
+        },
+        {
+          "name": "FILE_CHANGE_KIND_ADD",
+          "number": 1
+        },
+        {
+          "name": "FILE_CHANGE_KIND_UPDATE",
+          "number": 2
+        },
+        {
+          "name": "FILE_CHANGE_KIND_DELETE",
+          "number": 3
+        }
+      ]
+    },
+    {
+      "name": "dolgorae.public.v1.UnsupportedInteractionReason",
+      "values": [
+        {
+          "name": "UNSUPPORTED_INTERACTION_REASON_UNSPECIFIED",
+          "number": 0
+        },
+        {
+          "name": "UNSUPPORTED_INTERACTION_REASON_RECOGNIZED_UNSUPPORTED",
+          "number": 1
+        },
+        {
+          "name": "UNSUPPORTED_INTERACTION_REASON_UNAVAILABLE",
+          "number": 2
+        }
+      ]
+    },
+    {
+      "name": "dolgorae.public.v1.StreamEndReason",
+      "values": [
+        {
+          "name": "STREAM_END_REASON_UNSPECIFIED",
+          "number": 0
+        },
+        {
+          "name": "STREAM_END_REASON_SERVER_SHUTDOWN",
+          "number": 1
+        },
+        {
+          "name": "STREAM_END_REASON_RUN_TERMINAL",
+          "number": 2
+        }
+      ]
+    },
+    {
+      "name": "dolgorae.public.v1.TimelineItemType",
+      "values": [
+        {
+          "name": "TIMELINE_ITEM_TYPE_UNSPECIFIED",
+          "number": 0
+        },
+        {
+          "name": "TIMELINE_ITEM_TYPE_USER_INPUT_ACCEPTED",
+          "number": 1
+        },
+        {
+          "name": "TIMELINE_ITEM_TYPE_ASSISTANT_RESPONSE_FINAL",
+          "number": 2
+        },
+        {
+          "name": "TIMELINE_ITEM_TYPE_INTERACTION_OPENED",
+          "number": 3
+        },
+        {
+          "name": "TIMELINE_ITEM_TYPE_INTERACTION_RESOLVED",
+          "number": 4
+        },
+        {
+          "name": "TIMELINE_ITEM_TYPE_TURN_TERMINAL",
+          "number": 5
+        }
+      ]
+    },
+    {
+      "name": "dolgorae.public.v1.TimelineItemStatus",
+      "values": [
+        {
+          "name": "TIMELINE_ITEM_STATUS_UNSPECIFIED",
+          "number": 0
+        },
+        {
+          "name": "TIMELINE_ITEM_STATUS_ACCEPTED",
+          "number": 1
+        },
+        {
+          "name": "TIMELINE_ITEM_STATUS_FINAL",
+          "number": 2
+        },
+        {
+          "name": "TIMELINE_ITEM_STATUS_OPENED",
+          "number": 3
+        },
+        {
+          "name": "TIMELINE_ITEM_STATUS_RESOLVED",
+          "number": 4
+        },
+        {
+          "name": "TIMELINE_ITEM_STATUS_COMPLETED",
+          "number": 5
+        },
+        {
+          "name": "TIMELINE_ITEM_STATUS_FAILED",
+          "number": 6
+        },
+        {
+          "name": "TIMELINE_ITEM_STATUS_INTERRUPTED",
+          "number": 7
+        },
+        {
+          "name": "TIMELINE_ITEM_STATUS_OUTCOME_UNKNOWN",
+          "number": 8
+        }
+      ]
+    },
+    {
+      "name": "dolgorae.public.v1.ArtifactKind",
+      "values": [
+        {
+          "name": "ARTIFACT_KIND_UNSPECIFIED",
+          "number": 0
+        },
+        {
+          "name": "ARTIFACT_KIND_FILE_CHANGE_DIFF",
+          "number": 1
+        },
+        {
+          "name": "ARTIFACT_KIND_USER_INPUT",
+          "number": 2
+        },
+        {
+          "name": "ARTIFACT_KIND_FINAL_RESPONSE",
+          "number": 3
+        }
+      ]
+    },
+    {
+      "name": "dolgorae.public.v1.ArtifactVisibility",
+      "values": [
+        {
+          "name": "ARTIFACT_VISIBILITY_UNSPECIFIED",
+          "number": 0
+        },
+        {
+          "name": "ARTIFACT_VISIBILITY_OBSERVER",
+          "number": 1
+        },
+        {
+          "name": "ARTIFACT_VISIBILITY_CONTROLLER_ONLY",
+          "number": 2
+        }
+      ]
+    },
+    {
+      "name": "dolgorae.public.v1.RetryClassification",
+      "values": [
+        {
+          "name": "RETRY_CLASSIFICATION_UNSPECIFIED",
+          "number": 0
+        },
+        {
+          "name": "RETRY_CLASSIFICATION_FORBIDDEN",
+          "number": 1
+        },
+        {
+          "name": "RETRY_CLASSIFICATION_EXACT_IDEMPOTENCY_KEY",
+          "number": 2
+        },
+        {
+          "name": "RETRY_CLASSIFICATION_TOKENLESS_AFTER_SNAPSHOT",
+          "number": 3
+        },
+        {
+          "name": "RETRY_CLASSIFICATION_AFTER_RECONCILE",
+          "number": 4
+        }
+      ]
+    },
+    {
+      "name": "dolgorae.public.v1.RecoveryClassification",
+      "values": [
+        {
+          "name": "RECOVERY_CLASSIFICATION_UNSPECIFIED",
+          "number": 0
+        },
+        {
+          "name": "RECOVERY_CLASSIFICATION_NONE",
+          "number": 1
+        },
+        {
+          "name": "RECOVERY_CLASSIFICATION_SNAPSHOT_REQUIRED",
+          "number": 2
+        },
+        {
+          "name": "RECOVERY_CLASSIFICATION_RECONCILE_REQUIRED",
+          "number": 3
+        },
+        {
+          "name": "RECOVERY_CLASSIFICATION_OUTCOME_UNKNOWN",
+          "number": 4
+        }
+      ]
+    },
+    {
+      "name": "dolgorae.public.v1.RequiredClientAction",
+      "values": [
+        {
+          "name": "REQUIRED_CLIENT_ACTION_UNSPECIFIED",
+          "number": 0
+        },
+        {
+          "name": "REQUIRED_CLIENT_ACTION_NONE",
+          "number": 1
+        },
+        {
+          "name": "REQUIRED_CLIENT_ACTION_FIX_REQUEST",
+          "number": 2
+        },
+        {
+          "name": "REQUIRED_CLIENT_ACTION_REFRESH_CAPABILITIES",
+          "number": 3
+        },
+        {
+          "name": "REQUIRED_CLIENT_ACTION_REFRESH_SNAPSHOT",
+          "number": 4
+        },
+        {
+          "name": "REQUIRED_CLIENT_ACTION_VERIFY_CONTROLLER",
+          "number": 5
+        },
+        {
+          "name": "REQUIRED_CLIENT_ACTION_USE_COMPATIBLE_CONTROLLER",
+          "number": 6
+        },
+        {
+          "name": "REQUIRED_CLIENT_ACTION_USE_NEW_SAME_PRINCIPAL_CONTROLLER",
+          "number": 7
+        },
+        {
+          "name": "REQUIRED_CLIENT_ACTION_USE_SUPPORTED_PROFILE",
+          "number": 8
+        },
+        {
+          "name": "REQUIRED_CLIENT_ACTION_USE_TERMINAL_SOURCE",
+          "number": 9
+        },
+        {
+          "name": "REQUIRED_CLIENT_ACTION_SUBMIT_WRITE_TURN",
+          "number": 10
+        },
+        {
+          "name": "REQUIRED_CLIENT_ACTION_WAIT",
+          "number": 11
+        },
+        {
+          "name": "REQUIRED_CLIENT_ACTION_RETRY_EXACT_IDEMPOTENCY_KEY",
+          "number": 12
+        },
+        {
+          "name": "REQUIRED_CLIENT_ACTION_REFETCH_INTERACTION",
+          "number": 13
+        },
+        {
+          "name": "REQUIRED_CLIENT_ACTION_RECONCILE_RUN",
+          "number": 14
+        },
+        {
+          "name": "REQUIRED_CLIENT_ACTION_RECOVER_RUN",
+          "number": 15
+        },
+        {
+          "name": "REQUIRED_CLIENT_ACTION_RECONNECT_FROM_COMMITTED_CURSOR",
+          "number": 16
+        },
+        {
+          "name": "REQUIRED_CLIENT_ACTION_RESTART_GATEWAY",
+          "number": 17
+        },
+        {
+          "name": "REQUIRED_CLIENT_ACTION_OPERATOR_REPAIR",
+          "number": 18
+        },
+        {
+          "name": "REQUIRED_CLIENT_ACTION_ABORT",
+          "number": 19
+        },
+        {
+          "name": "REQUIRED_CLIENT_ACTION_FIX_SOCKET_PATH",
+          "number": 20
+        },
+        {
+          "name": "REQUIRED_CLIENT_ACTION_CREATE_WRITE_CONTINUATION",
+          "number": 21
+        }
+      ]
+    }
+  ]
+}

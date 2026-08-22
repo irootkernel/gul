@@ -1,0 +1,387 @@
+{
+  "schema_version": 1,
+  "protocol_handshake": {
+    "initial_protocol_version": 0,
+    "minimum": 1,
+    "maximum": 1,
+    "cases": [
+      {
+        "name": "accepted-version",
+        "server": 1,
+        "outcome": "compatible"
+      },
+      {
+        "name": "below-range",
+        "server": 0,
+        "outcome": "ProtocolIncompatible"
+      },
+      {
+        "name": "above-range",
+        "server": 2,
+        "outcome": "ProtocolIncompatible"
+      }
+    ]
+  },
+  "interaction_limits": {
+    "provider_response_bytes": 1048576,
+    "gul_response_bytes": 65536,
+    "effective_response_bytes": 65536,
+    "provider_safe_payload_bytes": 8388608,
+    "gul_safe_payload_bytes": 8388608,
+    "effective_safe_payload_bytes": 8388608,
+    "protected_response_persistence": "forbidden",
+    "protected_response_replay": "forbidden"
+  },
+  "replay_material": {
+    "StartRun": "protected_durable_exact_request",
+    "CreateWriteContinuation": "protected_durable_exact_request",
+    "SubmitTurn": "process_memory_only",
+    "ResolveInteraction": "never_persist_or_replay",
+    "policies": {
+      "RunService.StartRun": {
+        "rpc": "RunService.StartRun",
+        "cli": "run.start",
+        "idempotency": "required",
+        "identity": [
+          "canonical_workspace_identity",
+          "controller_id_generation",
+          "control_mode",
+          "accepted_profile_snapshot",
+          "purpose_kind_label",
+          "effective_model",
+          "current_default_effort",
+          "execution_lane",
+          "required_assurance",
+          "sorted_unique_required_capabilities",
+          "parent_reference",
+          "controller_instructions_byte_length_sha256"
+        ],
+        "same_key_replay": "return_original_run",
+        "lost_response": "repeat_exact_key",
+        "different_controller": "idempotency_conflict",
+        "different_normalized_request": "idempotency_conflict",
+        "retention": "workspace_lifetime_no_ttl_with_deleted_run_tombstone",
+        "deleted_run_replay": "run_not_found_with_original_run_id_never_allocate",
+        "secondary_reconciliation": "list_runs_by_unique_controller_id",
+        "automatic_retry": "forbidden"
+      },
+      "RunService.ForkRun": {
+        "rpc": "RunService.ForkRun",
+        "cli": "run.fork",
+        "idempotency": "required",
+        "identity": [
+          "source_run",
+          "controller_identity_generation",
+          "fork_mode",
+          "model",
+          "history_or_provenance_boundary"
+        ],
+        "same_key_replay": "return_original_run",
+        "lost_response": "repeat_exact_key",
+        "automatic_retry": "forbidden"
+      },
+      "RunService.SubmitTurn": {
+        "rpc": "RunService.SubmitTurn",
+        "cli": "run.submit",
+        "idempotency": "required",
+        "identity": [
+          "run",
+          "controller_identity_generation",
+          "message_bytes",
+          "ordered_image_metadata_digests",
+          "model_effort",
+          "write_intent_turn_options"
+        ],
+        "same_key_replay": "return_original_accepted_turn",
+        "lost_response": "get_run_then_repeat_exact_key_or_reconcile",
+        "automatic_retry": "forbidden"
+      },
+      "InteractionService.ResolveInteraction": {
+        "rpc": "InteractionService.ResolveInteraction",
+        "cli": "run.respond",
+        "idempotency": "required",
+        "identity": [
+          "run",
+          "interaction",
+          "controller_identity_generation",
+          "normalized_nonsecret_response_or_secret_first_success"
+        ],
+        "same_key_replay": "return_original_resolution_receipt",
+        "lost_response": "refetch summary and authorized interaction; resolved means complete; pending protected input requires explicit user re-entry; indeterminate state is interaction_outcome_unknown",
+        "protected_input_replay": "forbidden",
+        "protected_input_persistence": "forbidden",
+        "winning_secret_key_replay": "return_receipt_without_comparing_or_replaying_body",
+        "automatic_retry": "forbidden"
+      },
+      "RunService.CreateWriteContinuation": {
+        "rpc": "RunService.CreateWriteContinuation",
+        "cli": "run.create_write_continuation",
+        "idempotency": "required",
+        "identity": [
+          "source_run_turn",
+          "creation_reason",
+          "purpose",
+          "model_effort",
+          "assurance_capabilities",
+          "handoff_instruction_digests",
+          "ordered_artifact_refs",
+          "destination_controller_identity_generation"
+        ],
+        "same_key_replay": "return_original_destination_run",
+        "lost_response": "repeat_exact_key",
+        "automatic_retry": "forbidden"
+      },
+      "RunService.InterruptTurn": {
+        "rpc": "RunService.InterruptTurn",
+        "cli": "run.interrupt",
+        "idempotency": "tokenless",
+        "identity": [
+          "run",
+          "controller_identity_generation",
+          "expected_state_revision"
+        ],
+        "same_key_replay": "not_applicable",
+        "lost_response": "get_run_and_reconcile_if_outcome_unknown",
+        "automatic_retry": "forbidden"
+      },
+      "RunService.SetDefaultEffort": {
+        "rpc": "RunService.SetDefaultEffort",
+        "cli": "run.set_effort",
+        "idempotency": "tokenless",
+        "identity": [
+          "run",
+          "controller_identity_generation",
+          "effort",
+          "expected_state_revision"
+        ],
+        "same_key_replay": "not_applicable",
+        "lost_response": "get_run",
+        "automatic_retry": "forbidden"
+      },
+      "RunService.PauseRun": {
+        "rpc": "RunService.PauseRun",
+        "cli": "run.pause",
+        "idempotency": "tokenless",
+        "identity": [
+          "run",
+          "controller_identity_generation",
+          "interrupt",
+          "expected_state_revision"
+        ],
+        "same_key_replay": "not_applicable",
+        "lost_response": "get_run_and_reconcile_if_required",
+        "automatic_retry": "forbidden"
+      },
+      "RunService.ResumeRun": {
+        "rpc": "RunService.ResumeRun",
+        "cli": "run.resume",
+        "idempotency": "tokenless",
+        "identity": [
+          "run",
+          "controller_identity_generation",
+          "expected_state_revision"
+        ],
+        "same_key_replay": "not_applicable",
+        "lost_response": "get_run_and_reconcile_if_required",
+        "automatic_retry": "forbidden"
+      },
+      "RunService.CloseRun": {
+        "rpc": "RunService.CloseRun",
+        "cli": "run.close",
+        "idempotency": "tokenless",
+        "identity": [
+          "run",
+          "controller_identity_generation",
+          "interrupt",
+          "expected_state_revision"
+        ],
+        "same_key_replay": "not_applicable",
+        "lost_response": "get_run_and_reconcile_if_required",
+        "automatic_retry": "forbidden"
+      },
+      "RunService.DeleteRun": {
+        "rpc": "RunService.DeleteRun",
+        "cli": "run.delete",
+        "idempotency": "tokenless",
+        "identity": [
+          "run",
+          "controller_identity_generation",
+          "confirmation",
+          "expected_state_revision"
+        ],
+        "same_key_replay": "not_applicable",
+        "lost_response": "inspect_workspace_run_absence_and_prior_confirmation",
+        "automatic_retry": "forbidden"
+      },
+      "RunService.RecoverRun": {
+        "rpc": "RunService.RecoverRun",
+        "cli": "run.recover",
+        "idempotency": "tokenless",
+        "identity": [
+          "run",
+          "controller_identity_generation",
+          "expected_state_revision"
+        ],
+        "same_key_replay": "not_applicable",
+        "lost_response": "get_run_then_reconcile",
+        "automatic_retry": "forbidden"
+      },
+      "RunService.ReconcileRun": {
+        "rpc": "RunService.ReconcileRun",
+        "cli": "run.reconcile",
+        "idempotency": "tokenless",
+        "identity": [
+          "run",
+          "controller_identity_generation",
+          "expected_state_revision"
+        ],
+        "same_key_replay": "not_applicable",
+        "lost_response": "get_run_before_new_reconcile",
+        "automatic_retry": "forbidden"
+      },
+      "WriterService.AcquireWriter": {
+        "rpc": "WriterService.AcquireWriter",
+        "cli": "run.acquire_write",
+        "idempotency": "tokenless",
+        "identity": [
+          "run",
+          "controller_identity_generation",
+          "expected_state_revision"
+        ],
+        "same_key_replay": "not_applicable",
+        "lost_response": "get_workspace_writer_status_and_get_run",
+        "automatic_retry": "forbidden"
+      },
+      "WriterService.ReleaseWriter": {
+        "rpc": "WriterService.ReleaseWriter",
+        "cli": "run.release_write",
+        "idempotency": "tokenless",
+        "identity": [
+          "run",
+          "controller_identity_generation",
+          "expected_state_revision"
+        ],
+        "same_key_replay": "not_applicable",
+        "lost_response": "get_workspace_writer_status_and_get_run",
+        "automatic_retry": "forbidden"
+      },
+      "WriterService.PrepareWriterHandoff": {
+        "rpc": "WriterService.PrepareWriterHandoff",
+        "cli": "workspace.writer.handoff_prepare",
+        "idempotency": "tokenless",
+        "identity": [
+          "workspace",
+          "source_run",
+          "destination_run",
+          "controller_identity_generation",
+          "expected_writer_generation"
+        ],
+        "same_key_replay": "not_applicable",
+        "lost_response": "get_workspace_writer_status",
+        "automatic_retry": "forbidden"
+      },
+      "WriterService.CommitWriterHandoff": {
+        "rpc": "WriterService.CommitWriterHandoff",
+        "cli": "workspace.writer.handoff_commit",
+        "idempotency": "tokenless",
+        "identity": [
+          "workspace",
+          "handoff_id",
+          "controller_identity_generation",
+          "expected_writer_generation"
+        ],
+        "same_key_replay": "not_applicable",
+        "lost_response": "get_workspace_writer_status",
+        "automatic_retry": "forbidden"
+      },
+      "WriterService.CancelWriterHandoff": {
+        "rpc": "WriterService.CancelWriterHandoff",
+        "cli": "workspace.writer.handoff_cancel",
+        "idempotency": "tokenless",
+        "identity": [
+          "workspace",
+          "handoff_id",
+          "controller_identity_generation"
+        ],
+        "same_key_replay": "not_applicable",
+        "lost_response": "get_workspace_writer_status",
+        "automatic_retry": "forbidden"
+      }
+    }
+  },
+  "projection_convergence": [
+    {
+      "name": "equal-complete-stamps",
+      "run": 7,
+      "writer": 7,
+      "interaction": 7,
+      "floor": 7,
+      "enables": true
+    },
+    {
+      "name": "writer-behind-floor",
+      "run": 8,
+      "writer": 7,
+      "interaction": 8,
+      "floor": 8,
+      "enables": false
+    },
+    {
+      "name": "partial-event-disable-only",
+      "run": 9,
+      "writer": null,
+      "interaction": 9,
+      "floor": 9,
+      "enables": false
+    },
+    {
+      "name": "timeline-head-behind",
+      "run": 10,
+      "writer": 10,
+      "interaction": 10,
+      "floor": 10,
+      "timeline_head": 9,
+      "enables": false
+    }
+  ],
+  "stream_end": {
+    "RUN_TERMINAL": "fetch final required snapshots and do not reconnect indefinitely",
+    "SERVER_SHUTDOWN": "refresh gateway state and reconnect from the last committed cursor",
+    "SLOW_CONSUMER": "RESOURCE_EXHAUSTED typed error; refresh affected Run and resume from the last committed cursor",
+    "TRANSPORT_FAILURE": "never interpret as Run failure"
+  },
+  "event_invalidation_variants": [
+    "RunStateChanged",
+    "TurnStateChanged",
+    "FinalResponseAvailable",
+    "InteractionOpened",
+    "InteractionResolved",
+    "WriterStateChanged",
+    "RecoveryRequired",
+    "RuntimeErrorOccurred",
+    "GenerationChanged",
+    "WorkspaceChanges",
+    "CommandStarted",
+    "CommandCompleted",
+    "UsageReported",
+    "DiagnosticReported",
+    "ReasoningSuppressed",
+    "RunEventHeartbeat",
+    "RunEventStreamEnd(RUN_TERMINAL)",
+    "RunEventStreamEnd(SERVER_SHUTDOWN)",
+    "typed gRPC SLOW_CONSUMER",
+    "other transport failure"
+  ],
+  "unsupported_rpcs": [
+    "RuntimeService.ListProfileDiagnostics",
+    "RunService.SetDefaultEffort",
+    "RunService.ForkRun",
+    "RunService.VerifyRun",
+    "WriterService.PrepareWriterHandoff",
+    "WriterService.CommitWriterHandoff",
+    "WriterService.CancelWriterHandoff"
+  ],
+  "production_cli_fallback": false,
+  "unknown_required_enum": "reject",
+  "unknown_optional_field": "preserve_only_when_allowlisted"
+}

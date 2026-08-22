@@ -11,7 +11,7 @@ case "$mode" in
 esac
 
 if [ ! -x "$delegate" ]; then
-  printf 'ERROR contract %s is unavailable until E0-T7 installs %s\n' "$mode" "${delegate#"$script_dir/../"}" >&2
+  printf 'ERROR contract %s delegate is missing or not executable: %s\n' "$mode" "${delegate#"$script_dir/../"}" >&2
   exit 2
 fi
 

@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "schema_sha256": "4f6570fae7485a410d203503f4694de0ab400bb360aeaa336c9aa7dbb618f838",
+  "production_fallback": false,
+  "valid": {
+    "schema_version": 1,
+    "ok": true,
+    "command": "help",
+    "invocation_id": "019d0000-0000-7000-8000-000000000001",
+    "data": {
+      "text": "diagnostic-only comparison fixture"
+    }
+  },
+  "invalid": {
+    "schema_version": 1,
+    "ok": true,
+    "command": "help",
+    "invocation_id": "019d0000-0000-7000-8000-000000000001",
+    "data": {
+      "text": "diagnostic-only comparison fixture"
+    },
+    "private_worker_socket": "/forbidden"
+  }
+}
