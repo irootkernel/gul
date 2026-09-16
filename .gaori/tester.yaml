@@ -1,0 +1,37 @@
+version: 2
+commands:
+  toolchain-check:
+    command: ["make", "toolchain-check"]
+    tags: [toolchain, check]
+    parser: generic
+    timeout_sec: 300
+  contract-check:
+    command: ["make", "contract-check"]
+    tags: [contract, check]
+    parser: generic
+    timeout_sec: 1800
+  test-prepare:
+    command: ["make", "test-prepare"]
+    tags: [prepare, test]
+    parser: generic
+    timeout_sec: 1800
+  test-unit:
+    command: ["make", "test-unit"]
+    tags: [unit, test]
+    parser: generic
+    timeout_sec: 1800
+  test-int:
+    command: ["make", "test-int"]
+    tags: [integration, test]
+    parser: generic
+    timeout_sec: 1800
+  test-e2e:
+    command: ["make", "test-e2e"]
+    tags: [e2e, test]
+    parser: generic
+    timeout_sec: 1800
+  test:
+    command: ["make", "test"]
+    tags: [full, test]
+    parser: generic
+    timeout_sec: 3600
