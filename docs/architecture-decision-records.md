@@ -4,8 +4,8 @@
 |---|---|
 | Role | Durable architecture decisions and supersession history |
 | Product | Gul |
-| Version | 0.1-grpc-interface-aligned |
-| Last updated | 2026-08-23 |
+| Version | 0.1-dolgorae-consumer-v1 |
+| Last updated | 2026-09-20 |
 
 ## 1. Status model
 
@@ -16,59 +16,63 @@
 
 An ADR records product architecture, not Current State. Requirement promotion remains governed by ADR-0015.
 
+ADR-0050 explicitly amends the product/child-presentation scope in ADR-0021/0022/0024/0032, the first-release continuation obligation in ADR-0033/0036/0044/0047/0049, the contract-ready gate in ADR-0037/0043, and the all-Tasks release denominator in ADR-0041. Those earlier texts remain historical rationale where superseded; unchanged authority/safety rules remain binding. ADR-0045 full timeline and ADR-0048 convergence are retained, not weakened.
+
 ## 2. Index
 
 | ADR | Title | Status | Replacement |
 |---|---|---|---|
-| ADR-0001 | Use Go and Wails v3 for the macOS host | Accepted | — |
-| ADR-0002 | Keep the core independent of Wails | Accepted | — |
-| ADR-0003 | Use Protobuf and ConnectRPC | Accepted | — |
+| ADR-0001 | Use Go and Wails v3 for the macOS host | Accepted | None |
+| ADR-0002 | Keep the core independent of Wails | Accepted | None |
+| ADR-0003 | Use Protobuf and ConnectRPC | Accepted | None |
 | ADR-0004 | Use one Gul-managed Codex App Server | Superseded | ADR-0022, ADR-0023 |
 | ADR-0005 | Map one Gul Session to one Codex thread | Superseded | ADR-0024 |
 | ADR-0006 | Use SQLite as authority for runtime and application state | Superseded | ADR-0025 |
 | ADR-0007 | Use a persistent Gul-owned workspace write lock | Superseded | ADR-0026 |
 | ADR-0008 | Implement Gul-owned lock takeover | Superseded | ADR-0026 |
-| ADR-0009 | Do not create automatic Git worktrees | Accepted, modified | — |
+| ADR-0009 | Do not create automatic Git worktrees | Accepted, modified | None |
 | ADR-0010 | Filter raw App Server output in Gul | Superseded | ADR-0023 |
-| ADR-0011 | Use a guarded Go FileService | Accepted, modified | — |
-| ADR-0012 | Share one responsive React frontend | Accepted | — |
-| ADR-0013 | Use Tailscale Serve plus password authentication | Accepted | — |
-| ADR-0014 | Use unary commands and streamed Gul events | Accepted, modified | — |
-| ADR-0015 | Promote requirements only after task acceptance | Accepted | — |
+| ADR-0011 | Use a guarded Go FileService | Accepted, modified | None |
+| ADR-0012 | Share one responsive React frontend | Accepted | None |
+| ADR-0013 | Use Tailscale Serve plus password authentication | Accepted | None |
+| ADR-0014 | Use unary commands and streamed Gul events | Accepted, modified | None |
+| ADR-0015 | Promote requirements only after task acceptance | Accepted | None |
 | ADR-0016 | Select a Gul background-process policy | Superseded | ADR-0026 |
-| ADR-0017 | Select SQLite driver and concurrency settings | Accepted | — |
-| ADR-0018 | Select SVG preview policy | Proposed | — |
-| ADR-0019 | Separate upstream cursors and Gul delivery sequences | Accepted, modified | — |
-| ADR-0020 | Use bounded host Git for read-only artifact review | Accepted | — |
-| ADR-0021 | Gul is an LLM-free remote operator interface | Accepted | — |
-| ADR-0022 | Dolgorae is the sole v0.1 Direct Runtime Provider | Accepted | — |
-| ADR-0023 | Gul never connects directly to Codex App Server | Accepted | — |
-| ADR-0024 | A Direct Session maps to one Dolgorae Run | Accepted | — |
-| ADR-0025 | SQLite owns presentation state and non-authoritative projections only | Accepted | — |
-| ADR-0026 | Dolgorae owns writer, policy, assurance, and recovery authority | Accepted | — |
-| ADR-0027 | Runtime Controller capabilities remain backend-only | Accepted | — |
-| ADR-0028 | Runtime Providers are trusted built-in out-of-process adapters | Accepted | — |
+| ADR-0017 | Select SQLite driver and concurrency settings | Accepted | None |
+| ADR-0018 | Select SVG preview policy | Proposed | None |
+| ADR-0019 | Separate upstream cursors and Gul delivery sequences | Accepted, modified | None |
+| ADR-0020 | Use bounded host Git for read-only artifact review | Accepted | None |
+| ADR-0021 | Gul is an LLM-free remote operator interface | Accepted | None |
+| ADR-0022 | Dolgorae is the sole v0.1 Direct Runtime Provider | Accepted | None |
+| ADR-0023 | Gul never connects directly to Codex App Server | Accepted | None |
+| ADR-0024 | A Direct Session maps to one Dolgorae Run | Accepted | None |
+| ADR-0025 | SQLite owns presentation state and non-authoritative projections only | Accepted | None |
+| ADR-0026 | Dolgorae owns writer, policy, assurance, and recovery authority | Accepted | None |
+| ADR-0027 | Runtime Controller capabilities remain backend-only | Accepted | None |
+| ADR-0028 | Runtime Providers are trusted built-in out-of-process adapters | Accepted | None |
 | ADR-0029 | Use Dolgorae's public machine interface as initial transport | Superseded | ADR-0043 |
-| ADR-0030 | Defer the Gorae Managed Runtime Provider from v0.1 | Accepted | — |
-| ADR-0031 | Never bypass Gorae to control Gorae-owned Runs | Accepted | — |
-| ADR-0032 | Model Direct and Managed runtime presentation separately | Accepted | — |
-| ADR-0033 | Shared read-only work continues through a dedicated successor | Accepted | — |
+| ADR-0030 | Defer the Gorae Managed Runtime Provider from v0.1 | Accepted | None |
+| ADR-0031 | Never bypass Gorae to control Gorae-owned Runs | Accepted | None |
+| ADR-0032 | Model Direct and Managed runtime presentation separately | Accepted | None |
+| ADR-0033 | Shared read-only work continues through a dedicated successor | Accepted | None |
 | ADR-0034 | Store Controller capabilities as create-exclusive protected files | Superseded | ADR-0047 |
-| ADR-0035 | Scope a Controller capability to one Run and defer atomic writer handoff | Accepted | — |
-| ADR-0036 | Gate in-place write intent on provider access-policy transition support | Accepted | — |
-| ADR-0037 | Decode provider responses under pinned schemas and fail closed on unknown decisive values | Accepted | — |
-| ADR-0038 | Invalidate FileService from a bounded host filesystem watcher | Accepted | — |
-| ADR-0039 | Separate the Wails shell from the core and loopback listener | Accepted | — |
-| ADR-0040 | Register workspaces from a configured root allowlist as well as the host picker | Accepted | — |
-| ADR-0041 | Use release tiers and require every Task complete at release | Accepted | — |
-| ADR-0042 | Record the accepted product identity and its rename history | Accepted | — |
-| ADR-0043 | Use Dolgorae local gRPC over a supervised private Unix socket | Accepted target; executable pin blocked | — |
-| ADR-0044 | Derive a closed Gul action set and activate threadless writing through the first write Turn | Accepted | — |
-| ADR-0045 | Require provider timeline and artifact capabilities in v0.1 | Accepted | — |
-| ADR-0046 | Operate one shared core in desktop and headless modes | Accepted | — |
-| ADR-0047 | Gul locally creates Dolgorae-schema Controller carriers under the Dolgorae-owned root | Accepted | — |
-| ADR-0048 | Converge provider aggregates with ProjectionStamp before enabling mutations | Accepted | — |
-| ADR-0049 | Retain operation-class-specific replay material instead of persisting prompts or secrets | Accepted | — |
+| ADR-0035 | Scope a Controller capability to one Run and defer atomic writer handoff | Accepted | None |
+| ADR-0036 | Gate in-place write intent on provider access-policy transition support | Accepted | None |
+| ADR-0037 | Decode provider responses under pinned schemas and fail closed on unknown decisive values | Accepted | None |
+| ADR-0038 | Invalidate FileService from a bounded host filesystem watcher | Accepted | None |
+| ADR-0039 | Separate the Wails shell from the core and loopback listener | Accepted | None |
+| ADR-0040 | Register workspaces from a configured root allowlist as well as the host picker | Accepted | None |
+| ADR-0041 | Use release tiers and require every Task complete at release | Accepted | None |
+| ADR-0042 | Record the accepted product identity and its rename history | Accepted | None |
+| ADR-0043 | Use Dolgorae local gRPC over a supervised private Unix socket | Accepted target; executable pin blocked | None |
+| ADR-0044 | Derive a closed Gul action set and activate threadless writing through the first write Turn | Accepted | None |
+| ADR-0045 | Require provider timeline and artifact capabilities in v0.1 | Accepted | None |
+| ADR-0046 | Operate one shared core in desktop and headless modes | Accepted | None |
+| ADR-0047 | Gul locally creates Dolgorae-schema Controller carriers under the Dolgorae-owned root | Accepted | None |
+| ADR-0048 | Converge provider aggregates with ProjectionStamp before enabling mutations | Accepted | None |
+| ADR-0049 | Retain operation-class-specific replay material instead of persisting prompts or secrets | Accepted; continuation scope amended | ADR-0050 |
+| ADR-0050 | Adopt the released Dolgorae consumer profile and split mock from live work | Accepted | None |
+| ADR-0051 | Keep future Podway visualization strictly read-only | Accepted, future scope | None |
 
 ## 3. Retained decisions
 
@@ -290,6 +294,9 @@ DirectSession is not a universal runtime abstraction. RuntimeActivity uses close
 
 ### ADR-0033: Shared read-only work continues through a dedicated successor
 
+**Scope amendment, ADR-0050:** the continuation behavior below is retained for
+deferred E4-T4, not the first-release implementation or acceptance boundary.
+
 **Status:** Accepted
 
 A `shared_readonly` Run is immutable in lane and cannot become writable. Gul creates a lineage-linked threadless dedicated continuation, stores its distinct Controller binding, creates a new DirectSession without initial writer authority, and keeps the source read-only. When `threadless_acquire_write=false`, writing begins with one explicit `SubmitTurn(write_intent=WRITE)`; a separate Acquire is invalid.
@@ -305,6 +312,10 @@ Writer transfer between Gul Direct Sessions therefore uses provider Release foll
 Rejected alternative: sharing one Controller per Workspace to unlock handoff. It would widen the blast radius of a leaked or lost capability from one Run to every session in that Workspace, and the atomicity it buys is worth little in a single-operator product.
 
 ### ADR-0036: Gate in-place write intent on provider access-policy transition support
+
+**Scope amendment, ADR-0050:** first-release unsupported transitions produce a
+typed blocker without offering continuation. The successor branch below applies
+only after deferred E4-T4 is adopted; in-place safety remains required now.
 
 **Status:** Accepted
 
@@ -414,13 +425,19 @@ The accepted contract at Dolgorae revision `85a8862f784cc57701751d81a9e03bf7c572
 
 ### ADR-0044: Derive a closed Gul action set and activate threadless writing through the first write Turn
 
+**Scope amendment, ADR-0050:** the first-release closed set is REQ-WRITER-008,
+including Primary lifecycle and whole-session-close request/confirmation
+eligibility, without a continuation action. Session revision/freshness is an
+independent input; requesting close never proves closure. The earlier decision
+below retains its original context rather than adding a second current set.
+
 **Status:** Accepted
 
 Dolgorae projections are authoritative state inputs, but they do not provide one Gul-authoritative `allowed_actions` list because they cannot know Gul session ownership, local credential health, browser operation state, or upstream compatibility. A single domain evaluator consumes those inputs and emits only the closed Gul action and blocker variants. Every button and mutation endpoint invokes the same evaluator immediately before action.
 
-The evaluator's explicit typed input contract contains Run lifecycle, thread presence, active Turn, pending Interaction, control mode, execution lane, writer authority/generation, effective access and policy verification, profile capabilities and compatibility, access-policy transition support, background execution, requested/achieved assurance, recovery state and required recovery action, lineage, Controller binding health, Gul Direct Session ownership, unresolved mutation state, and provider compatibility state. Each is independently required even when another aggregate appears to imply it. It does not parse decision-critical strings; a missing, unknown, or string-only input produces `BlockedByProviderCompatibility`. `CanCreateSuccessor` is not a domain action; “Create successor” may be only a presentation label for `CanCreateWriteContinuation`.
+The evaluator's explicit typed input contract contains Run lifecycle, thread presence, active Turn, pending Interaction, control mode, execution lane, writer authority/generation, effective access and policy verification, profile capabilities and compatibility, access-policy transition support, background execution, requested/achieved assurance, recovery state and required recovery action, lineage, Controller binding health, Gul Direct Session ownership, unresolved mutation state, and provider compatibility state. Each is independently required even when another aggregate appears to imply it. It does not parse decision-critical strings; a missing, unknown, or string-only input produces `BlockedByProviderCompatibility`. Under ADR-0050 the first release has no successor or continuation action.
 
-The final typed `REQUIRED_CLIENT_ACTION_CREATE_WRITE_CONTINUATION` maps only to `CanCreateWriteContinuation`. A shared-readonly write or unsupported access transition offers continuation, never another write on the source Run. A threadless dedicated Run requiring its first write offers `SubmitTurn(WRITE)`; valid existing-thread acquisition offers `AcquireWriter`; outcome unknown and recovery-required states block conflicts and offer only their typed reconciliation/recovery actions.
+Under ADR-0050, `REQUIRED_CLIENT_ACTION_CREATE_WRITE_CONTINUATION` maps to a typed unsupported blocker in the first release. A shared-readonly write or unsupported access transition offers neither another source write nor continuation. A threadless dedicated Run requiring its first write offers `SubmitTurn(WRITE)`; valid existing-thread acquisition offers `AcquireWriter`; outcome unknown and recovery-required states block conflicts and offer only their typed reconciliation or recovery actions. E4-T4 owns any later continuation action.
 
 For a threadless dedicated Run with `threadless_acquire_write=false`, `AcquireWriter` is unavailable. `SubmitTurn(write_intent=WRITE)` performs the first-write activation and only the accepted projection may confirm effective write policy and writer authority. Acquire remains meaningful only for an eligible existing-thread Run whose current projections and capabilities permit the transition.
 
@@ -442,13 +459,17 @@ Tailscale Serve is verified to target only the authenticated loopback listener, 
 
 ### ADR-0047: Gul locally creates Dolgorae-schema Controller carriers under the Dolgorae-owned root
 
+**Scope amendment, ADR-0050:** use the advertised fixed-home carrier root and
+validate its actual schema digest. First-release creation is for StartRun;
+same-principal successor creation below belongs only to deferred E4-T4.
+
 **Status:** Accepted
 
 The public Dolgorae API verifies Controller carriers but does not create them for Gul. Gul therefore owns `DolgoraeControllerCredentialStore` with `Create`, `Validate`, `ResolveCarrierReference`, `RemoveUnused`, and a same-principal successor operation. Dolgorae remains authoritative for credential meaning, binding, and authorization and verifies the supplied carrier before StartRun, CreateWriteContinuation, or another authorized call.
 
-The store writes schema version 1 beneath `~/Library/Application Support/Dolgorae/controller-carriers/gul/<gul-installation-id>/`. A credential contains a UUIDv7 Controller ID, `interactive_client` kind, stable trusted-local installation ID, stable trusted-local account subject ID, and 32 cryptographically random bytes encoded as unpadded base64url. Files are exclusive-create `0600`, parents are `0700`, no overwrite or symlink is permitted, file and parent are fsynced, and secret buffers are cleared where practical. Ordinary SQLite stores only a logical relative key; every authorized call derives and revalidates the absolute carrier for containment, owner, type, mode, and symlink absence.
+The store writes schema version 1 beneath `~/.dolgorae/controller-carriers/gul/<gul-installation-id>/`. A credential contains a UUIDv7 Controller ID, `interactive_client` kind, stable trusted-local installation ID, stable trusted-local account subject ID, and 32 cryptographically random bytes encoded as unpadded base64url. Files are exclusive-create `0600`, parents are `0700`, no overwrite or symlink is permitted, file and parent are fsynced, and secret buffers are cleared where practical. Ordinary SQLite stores only a logical relative key; every authorized call derives and revalidates the absolute carrier for containment, owner, type, mode, and symlink absence.
 
-A continuation receives a distinct Controller ID and capability at generation 1 while preserving the source `kind`, `subject_id`, and stable Gul `instance_id` individually. It also preserves the normalized principal `(kind, subject_id)` when subject ID exists, otherwise `(kind, instance_id)`; a matching subject never permits a different installation identity. Its credential identity and idempotency key are persisted before the first call and retained across ambiguous responses. One credential per Direct Session/Run remains a Gul security policy rather than a universal Dolgorae invariant. Operator capabilities remain prohibited. External Controller adoption is a Gul application workflow—not a credential-store capability—and requires host-controlled selection, local carrier validation/resolution, side-effect-free provider `VerifyController`, atomic binding replacement, and fresh Run including recovery/configuration, Writer, Interaction, and timeline reads as needed.
+A continuation receives a distinct Controller ID and capability at generation 1 while preserving the source `kind`, `subject_id`, and stable Gul `instance_id` individually. It also preserves the normalized principal `(kind, subject_id)` when subject ID exists, otherwise `(kind, instance_id)`; a matching subject never permits a different installation identity. Its credential identity and idempotency key are persisted before the first call and retained across ambiguous responses. One credential per Direct Session/Run remains a Gul security policy rather than a universal Dolgorae invariant. Operator capabilities remain prohibited. External Controller adoption is a Gul application workflow, not a credential-store capability. It requires host-controlled selection, local carrier validation/resolution, side-effect-free provider `VerifyController`, atomic binding replacement, and fresh Run including recovery/configuration, Writer, Interaction, and timeline reads as needed.
 
 Rejected alternatives are a provider `CreateControllerCredential` RPC that does not exist, browser-selected carrier paths, generic Gul application-support storage, plaintext SQLite, workspace storage, and creating a fresh destination credential after an ambiguous continuation response.
 
@@ -464,6 +485,11 @@ Every cached Run, Writer, and Interaction aggregate retains the complete provide
 
 ### ADR-0049: Retain operation-class-specific replay material instead of persisting prompts or secrets
 
+**Scope amendment, ADR-0050:** StartRun is the sole first-release durable replay
+operation. The continuation branch below is historical target context for E4-T4,
+not a current replay-store requirement. Accepted prompt history remains separate
+from all replay material.
+
 **Status:** Accepted
 
 Gul must survive a lost allocation response without minting a second Run, but it must not turn every user request into durable retry data. `StartRun` and `CreateWriteContinuation` therefore receive crash-safe exact replay. Before transmission Gul stores their bounded canonical non-secret request material in an exclusive owner-only `ProviderReplayStore`, persists its digest and logical reference with the operation attempt, and reuses the same idempotency key and Controller identity after restart. Exact carrier reconstruction uses role-tagged logical references rather than a single binding: StartRun records its destination credential-store key and expected Controller ID; continuation records the source Direct Session binding/source Controller ID plus the destination credential-store key/expected destination Controller ID. No absolute carrier path or capability is persisted. The replay file is removed immediately after authoritative terminal resolution. An unresolved replay file has a fixed v0.1 maximum retention of 72 hours, configurable only downward. Startup and at-least-six-hourly purges delete expired canonical material, mark replay unavailable, preserve the non-secret operation attempt as `OutcomeUnknown`, and use only the documented secondary authoritative reconciliation without minting a replacement key or silently repeating the mutation.
@@ -471,6 +497,101 @@ Gul must survive a lost allocation response without minting a second Run, but it
 The replay store may contain bounded Controller instructions or handoff text that is part of the provider idempotency identity. It never contains Controller capability bytes, carrier or socket paths, protected Interaction input, a `SubmitTurn` prompt, or image bytes. It is outside every Workspace and browser/file-service surface and is absent from logs, metrics, traces, diagnostics, and the client event journal.
 
 `SubmitTurn` supports application replay only while the original normalized request remains available in the same process. Gul does not durably retain prompts or images for replay. After process restart it reconciles through `GetRun` and the provider timeline and preserves `OutcomeUnknown` if acceptance cannot be proved. `ResolveInteraction` response bytes are never retained or replayed. Tokenless mutations are reconciled through authoritative reads rather than transport retry. Replay expiry never fabricates success, failure, or permission to issue a semantically new allocation request.
+
+### ADR-0050: Adopt the released Dolgorae consumer profile and split mock from live work
+
+**Status:** Accepted, 2026-09-20
+
+**Producer authority:** Dolgorae `docs/specs/gul-consumer-v1.md`, contract ID
+`dolgorae.gul-consumer/v1`. TASK-053 freezes its checked artifact revision; E12-T1
+pins it in Gul without creating another independently editable source of truth.
+The required profile has 27 methods: original 24, complete Timeline, and two
+read-only aggregate/result queries. The full extended descriptor contains 36;
+known methods are not automatically implemented methods. Historical E0 fixtures
+are retained as old-pin evidence and do not satisfy this new contract.
+
+Build core/UI/auth/persistence/files/history/approval/recovery against explicit
+stateful fakes before release. Only E2/E9 depend on the exact released v0.1.3
+artifact. Fakes can complete scoped Tasks but never count as live provider QA
+or become production fallback. Real Gul acceptance does not gate Dolgorae release.
+The roadmap now excludes Deferred Tasks from first-release completion.
+
+The product session is a Dolgorae Orchestrated Session, with one retained Primary
+Run binding and optional provider-owned Specialists. Creation uses explicit
+orchestration_launch and a preprovisioned Policy. Profiles are global; carriers
+use the advertised fixed-home root. Gul may observe children but holds no child
+Controller and infers no membership authority. Typed aggregate reads provide
+actual status/revision/counts and publicly discoverable Primary-owned results.
+Do not replace those reads with private stores or model-generated text.
+
+Prompt History is a mandatory separate user-only section over the full safe
+provider timeline. Preserve original accepted text, stable identity/order,
+expandable bodies, and Turn navigation through page/restart/close boundaries.
+Identical text submitted separately remains distinct. Pending/rejected/unknown
+attempts are not accepted history. History caches do not authorize automatic
+mutation replay and do not relax protected-input or reasoning exclusions.
+
+The product does not queue or steer ordinary input while the Primary Turn is active. Drafts
+wait for an explicit send after terminal evidence and fresh eligibility; no
+auto-send or auto-interrupt occurs. Current Interaction answers remain usable.
+Whole-session closure uses root CloseRun to instruct the Broker to
+settle owned Specialists. Gul confirms active interruption, shows closing until
+confirmed, and preserves unknown outcomes. It does not loop over child commands,
+roll back files, delete history, or stop unrelated/shared execution. Primary
+Pause/Interrupt is not an aggregate-pause feature. Root Recover/Reconcile follows
+provider-owned aggregate recovery when retained close intent requires it, with
+fresh separate observations; it does not auto-resume paused work.
+
+When owned work is active, close requires explicit interrupt intent and rejects
+`interrupt=false`. A successful root call is not final closure until the fresh
+aggregate read accounts for all owned work. Browser close and hide remain local.
+
+WriteContinuation and Delete remain optional future capabilities. Existing
+continuation safety constraints remain normative when that feature is later
+implemented, but E4-T4 and continuation-only requirements are Deferred now.
+Missing continuation never justifies in-place privilege promotion. Full Timeline
+and typed required aggregate observations may not be deferred from this release.
+A fresh session is always a new explicit orchestration launch and is never
+presented as lineage continuation. The first-release action evaluator exposes no
+Delete or WriteContinuation action even when those optional methods are present.
+
+Browser APIs remain Gul-owned. DirectSessionService explicitly declares
+ListPromptHistory, GetPromptHistoryItem, GetExecutionState and
+ListSpecialistResults. Their page tokens, snapshot/item/operation references and
+DTOs do not expose provider cursors or private identifiers. E1-T3 owns their
+contract fixtures; E3-T3 implements passive state reads; E4-T5 implements
+history/results. E4-T3 supplies the shared evaluator before E5-T1 enables the
+complete CloseRuntime coordinator. Typed in-progress closure is never successful
+termination; transport ambiguity is not proof of failure. E2/E9 retain real-
+provider acceptance. REQ-RUNTIME-022's historical E0 evidence does not satisfy
+REQ-CONSUMER-001's new E12-T1 pinning obligation.
+
+The roadmap owns current lifecycle/order and its Active Task pointer must equal
+the active row set. A canonical append-only permanent-ID registry preserves
+retired/reserved identities without becoming a second status authority or fixing
+the total task count. Negative tests must reject a mismatched pointer and removed
+retired IDs, including removal from the current registry against retained history.
+
+Rejected alternatives: browser-only history; redefining a partial timeline as
+complete; private-provider access; implicit prompt queue; per-child close loops;
+and coupling all Gul development or provider release to actual integration.
+
+### ADR-0051: Keep future Podway visualization strictly read-only
+
+**Status:** Accepted, post-v0.1.3 scope with no assigned release
+
+Podway owns the FSM and execution facts. Dolgorae supplies an optional safe
+projection; Gul renders the complete pinned graph, active node set, loop-specific
+iteration and node execution count. Definition and workflow execution identities
+remain distinct from session/Run identity. Duplicate events, reconnect, and resume
+of one execution never increase counts. Missing evidence is unavailable/stale.
+
+No Gul frontend/backend/API edits FSM or jumps/skips/forces/reexecutes a node or
+resets counters. A change request is an ordinary user prompt considered by the
+running LLM under Podway rules. LLM consent does not move the diagram; actual
+Podway state does. Observation feature absence cannot block basic chat, prompt
+history, approval, or closure. Inspect the actual Podway contract before assigning
+implementation tasks; no imaginary source API or current capability is claimed.
 
 ## 6. Proposed decisions
 

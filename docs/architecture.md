@@ -4,13 +4,15 @@
 |---|---|
 | Role | Target and Current Architecture source of truth |
 | Product | Gul |
-| Version | 0.1-grpc-interface-aligned |
-| Status | Public gRPC wire contract aligned; Gul implementation absent |
-| Last updated | 2026-08-23 |
+| Version | 0.1-dolgorae-consumer-v1 |
+| Status | Approved target rebaseline; new pin and product implementation absent |
+| Last updated | 2026-09-20 |
 
 ## 1. Purpose and change control
 
 This document translates `required-specs.md` and accepted ADRs into component, trust, data, API, event, recovery, and deployment boundaries. Required architecture is not implementation evidence. Part B remains the only Current Architecture statement.
+
+The canonical producer contract is Dolgorae `docs/specs/gul-consumer-v1.md`, ID `dolgorae.gul-consumer/v1`. E12-T1 pins the immutable TASK-053 checked revision. Its first-release profile requires 27 methods, including full timeline and two read-only aggregate queries. The original 34-method pin below remains historical evidence until E12-T1 regenerates the extended 36-method descriptor/clients/maps. Continuation and Delete are optional future functions: their detailed target flows below do not impose first-release gates. No generated contract is claimed updated by this planning change.
 
 # Part A. Target Architecture
 
@@ -50,12 +52,13 @@ Gul is LLM-free. It provides one responsive local/remote interface for trusted l
 
 Gul supervises only the public Dolgorae RPC gateway process. It never crosses that boundary to use App Server stdio, sockets, JSON-RPC, schema generation, process supervision, worker sockets, internal state, or audit files. Restarting the gateway does not imply that durable Runs were destroyed. For a future Gorae-managed activity, Gul calls Gorae only; Gorae alone may operate its internal Dolgorae Runs.
 
-A Direct Session's Codex profile may later expose a trusted tool adapter that
-uses Dolgorae's advertised brokered independent-subagent CLI composition. That
-adapter, not Gul or the parent model, owns the child Controller and lifecycle.
-Gul receives only the bounded tool/result material already present in the parent
-Run's safe projection; it does not discover, persist, navigate, or mutate the
-child as a DirectSession or RuntimeActivity.
+A Gul Orchestrated Session owns presentation around one Primary Run binding.
+Dolgorae's Broker owns Specialists and their credentials. Gul may display public
+child Run observations, but obtains actual aggregate state from the authorized
+GetOrchestratedSession query and permitted result references from
+ListOrchestratedSessionResults. Parent provenance supports navigation only;
+Gul never derives membership authority, creates a child Controller, or mutates
+a child. Dolgorae orchestration is not deferred to a separate Gorae provider.
 
 ## 4. Layered component model
 
@@ -96,7 +99,7 @@ RuntimeCapability
 
 DirectRunCapability
   StartRun, ListRuns, GetRun, SubmitTurn, InterruptTurn
-  PauseRun, ResumeRun, CloseRun, DeleteRun
+  PauseRun, ResumeRun, CloseRun
 
 ObservationCapability
   WatchRunEvents, RefreshRunSnapshot
@@ -109,7 +112,6 @@ ControllerInteractionCapability
 
 WriterCapability
   GetWorkspaceWriterStatus, AcquireWriter, ReleaseWriter
-  CreateWriteContinuation
 
 RecoveryCapability
   RecoverRun, ReconcileRun
@@ -119,11 +121,14 @@ ArtifactCapability
 
 TimelineCapability
   ListRunTimelineItems
+
+OrchestrationObservationCapability
+  GetOrchestratedSession, ListOrchestratedSessionResults
 ```
 
 Generated Protobuf messages exist only inside the adapter. Each accepted-version decoder performs strict message, identifier, enum, and typed-error validation and maps into Gul domain types. No generic `Execute(action, json)`, stdout envelope, exit-status semantic channel, or process-shaped event follower exists in the production port.
 
-`RefreshRunSnapshot` is the semantic adapter operation for the accepted `RunService.GetRun` RPC; semantic names never imply an additional upstream endpoint. Observation remains available without mutation authority where the negotiated contract permits it. Controller-sensitive Interaction detail, Controller verification, and authorized mutations use their explicit capabilities. Artifact and Timeline capabilities are required for v0.1 compatibility. Recovery operations appear only when advertised.
+`RefreshRunSnapshot` is the semantic adapter operation for the accepted `RunService.GetRun` RPC; semantic names never imply an additional upstream endpoint. Observation remains available without mutation authority where the negotiated contract permits it. Controller-sensitive Interaction detail, Controller verification, and authorized mutations use their explicit capabilities. Artifact, complete Timeline, and the two Orchestration observation methods are required by the v0.1 consumer profile. Recovery operations appear only when advertised. DeleteRun and CreateWriteContinuation remain upstream future capabilities, not first-release Gul ports or routes.
 
 Controller credential creation is not a Runtime Provider operation. Gul owns a local port:
 
@@ -133,7 +138,6 @@ DolgoraeControllerCredentialStore
   Validate
   ResolveCarrierReference
   RemoveUnused
-  CreateSamePrincipalSuccessor
 ```
 
 The store emits the accepted Dolgorae credential schema, while Dolgorae remains authoritative for credential meaning, binding, and authorization and verifies a supplied carrier before use.
@@ -148,7 +152,7 @@ ProviderReplayStore
   PurgeExpired
 ```
 
-The replay store is used only for the bounded, non-secret canonical request material required to replay `StartRun` and `CreateWriteContinuation` after a Gul process restart. It never contains Controller capability bytes, protected Interaction input, a `SubmitTurn` prompt, raw image bytes, or a socket/carrier path. The corresponding `ProviderOperationAttempt` stores only a logical replay reference, normalized digest, and a role-tagged logical Controller-reference set sufficient to resolve the exact source and destination carriers without persisting an absolute path or capability.
+The first-release replay store retains bounded non-secret canonical StartRun material only, with a logical credential key and expected Controller ID. It excludes capability bytes, protected Interaction input, SubmitTurn prompts, image bytes and socket/carrier paths. Same-principal successor creation and continuation replay are deferred with E4-T4, not required local-store operations.
 
 ## 6. Dolgorae Provider
 
@@ -166,32 +170,31 @@ Shutdown stops accepting mutations, cancels Run streams, drains unary operations
 
 ### 6.2 Compatibility and schema policy
 
-The handshake selects an explicitly supported public API version and verifies the required Runtime, Direct Run, Observation, Controller verification/interaction, Writer, Recovery where used, Artifact, and Timeline capabilities. Generated decoders for that version are necessary but not sufficient evidence of semantic compatibility. Unknown required enum values, missing typed error details, and missing capabilities are blockers. Unknown optional data is retained only when the accepted version policy permits it; otherwise it is discarded at the adapter boundary and never persisted or forwarded.
+The handshake selects an explicitly supported public API version and verifies the required Runtime, Run, Observation, Controller verification/interaction, Writer, Recovery where used, Artifact, Timeline, and OrchestrationObservation capabilities using the pinned consumer profile, not equality with the server's entire supported-method set. Generated decoders for that version are necessary but not sufficient evidence of semantic compatibility. Unknown required enum values, missing typed error details, and missing capabilities are blockers. Unknown optional data is retained only when the accepted version policy permits it; otherwise it is discarded at the adapter boundary and never persisted or forwarded.
 
-The Dolgorae public contract at accepted revision `85a8862f784cc57701751d81a9e03bf7c5722818` supplies the complete concrete service/method inventory and the typed Run, Turn, writer, policy, assurance, recovery, lineage, profile, event, Controller Interaction, Run configuration, required-action, Interaction-limit, path, timeline, and artifact projections required by Gul. Gate A is closed: its checked Protobuf source, descriptor, capabilities, mutation policy, error/action mapping, client policy, and conformance artifacts are internally consistent. The descriptor reproduces byte-for-byte with protoc 35.1 and the pinned Protobuf v32.1 `timestamp.proto` source-info input. Gate B pins the same source through dependency-lock SHA-256 `c4f91aa3e2add1093880684e5c96fdbb6239aef6a85261a0adf6b585e2db8863` and generated-lock SHA-256 `8a6a614a3a08c585f9a62f74095a0237d47feefba802e2dfa3ce13be5fbe0bf6`; the checked generator reproduces the descriptor, typed clients, exhaustive inventory/maps, policy fixtures, and descriptor-derived fake server.
+Historical E0 evidence: the old Dolgorae contract at revision `85a8862f784cc57701751d81a9e03bf7c5722818` supplied its then-accepted service/method inventory and the typed Run, Turn, writer, policy, assurance, recovery, lineage, profile, event, Controller Interaction, Run configuration, required-action, Interaction-limit, path, timeline, and artifact projections required by Gul. Gate A is closed: its checked Protobuf source, descriptor, capabilities, mutation policy, error/action mapping, client policy, and conformance artifacts are internally consistent. The descriptor reproduces byte-for-byte with protoc 35.1 and the pinned Protobuf v32.1 `timestamp.proto` source-info input. Gate B pins the same source through dependency-lock SHA-256 `c4f91aa3e2add1093880684e5c96fdbb6239aef6a85261a0adf6b585e2db8863` and generated-lock SHA-256 `8a6a614a3a08c585f9a62f74095a0237d47feefba802e2dfa3ce13be5fbe0bf6`; the checked generator reproduces the descriptor, typed clients, exhaustive inventory/maps, policy fixtures, and descriptor-derived fake server.
 
-Every decision input remains independent even when another projection appears to imply it. Gul never parses `effective_access`, `writer_state`, `recovery_status`, `writer_policy_confirmation`, `compatibility`, or `action` strings to reconstruct typed semantics. Production Interaction Card mapping and the final action evaluator wait for Gate B pinning, not for further semantic invention. Gul never infers compatibility from the Codex binary, and the Machine CLI keeps a separate exact closed-schema conformance contract that cannot be selected by production dependency injection.
+Every decision input remains independent even when another projection appears to imply it. Gul never parses `effective_access`, `writer_state`, `recovery_status`, `writer_policy_confirmation`, `compatibility`, or `action` strings to reconstruct typed semantics. New Interaction Card mapping and action evaluation require E12-T1's TASK-053 contract pin; historical Gate B does not supply the new consumer contract. Gul never infers compatibility from the Codex binary, and the Machine CLI keeps a separate exact closed-schema conformance contract that cannot be selected by production dependency injection.
 
 ### 6.3 RPC use and mutation policy
 
 Commands and snapshots are unary; Run events are server streaming; artifacts use the unary `ArtifactService.ReadArtifactChunk` RPC. There is no client-streaming or bidirectional command bus. Stream health is not authorization, and event backpressure is isolated from unary requests.
 
-Transparent gRPC retries, retry middleware, and hedging are disabled for every mutation. Before transmission Gul persists a non-secret `ProviderOperationAttempt` carrying operation kind, target reference, idempotency identity where defined, deadline, state, reconciliation route, normalized-request digest, replay availability, and an optional logical replay-material reference. Deadlines are: StartRun and CreateWriteContinuation 30 seconds; SubmitTurn and ResolveInteraction 20; Interrupt/Pause/Resume/Close 10; DeleteRun 30; Acquire/Release 15; Recover/Reconcile 60. Local credential and replay-material operations are not RPCs and use bounded protected-filesystem policies. Cancellation or a lost response does not prove failure.
+Transparent gRPC retries, retry middleware, and hedging are disabled for every mutation. Before transmission Gul persists a non-secret `ProviderOperationAttempt` carrying operation kind, target reference, idempotency identity where defined, deadline, state, reconciliation route, normalized-request digest, replay availability, and an optional logical replay-material reference. First-release deadlines are: StartRun 30 seconds; SubmitTurn and ResolveInteraction 20; Interrupt/Pause/Resume/Close 10; Acquire/Release 15; Recover/Reconcile 60. Deferred operations have no active route or deadline policy. Local credential and replay-material operations are not RPCs and use bounded protected-filesystem policies. Cancellation or a lost response does not prove failure.
 
 | Semantic mutation | Deadline | Retry eligibility and reconciliation |
 |---|---:|---|
 | StartRun | 30s | Primary recovery is application-level replay of the exact canonical request from the protected replay store with the persisted key, Controller identity, and carrier. `ListRuns` matched by Controller ID is secondary; `GetRun`/`ReconcileRun` apply only after a Run ID is known. |
 | SubmitTurn | 20s | No transparent retry. Exact replay is allowed only while the original normalized request bytes remain available in the same process and the accepted mutation policy permits it. After process restart Gul reconciles through `GetRun` and timeline; if acceptance cannot be proved or disproved, the operation remains `OutcomeUnknown` and is not automatically resubmitted. |
-| InterruptTurn, PauseRun, ResumeRun, CloseRun | 10s | No automatic replay; reconcile through `GetRun`. |
-| DeleteRun | 30s | No automatic replay; reconcile through `ListRuns`/`GetRun`. |
+| InterruptTurn, PauseRun, ResumeRun | 10s | No automatic replay; reconcile Primary state through `GetRun`. |
+| CloseRun | 10s | Whole-session close through the root; no automatic replay. Reconcile aggregate close intent through GetOrchestratedSession plus required Run/Writer/Interaction reads. |
 | ResolveInteraction | 20s | Persist the Interaction ID, key, attempt state, and non-secret metadata, never the response body. Exclude the RPC from automatic retry; refresh pending/full Interaction state and require the protected value again only if it remains unresolved. |
 | AcquireWriter, ReleaseWriter | 15s | No automatic replay; reconcile through `GetWorkspaceWriterStatus` plus `GetRun` when policy-derived actions are affected. |
-| CreateWriteContinuation | 30s | Primary recovery is exact replay from the protected replay store with the same key, destination credential, source terminal Turn, reason, and canonical request. Use `ListRuns` plus the destination Controller ID only as secondary confirmation; call `ReconcileRun` only after the destination Run ID is known and the provider requires it. |
-| RecoverRun, ReconcileRun | 60s | No transparent replay; use the returned `RunProjection`, then explicitly refresh Writer, Interaction, and timeline aggregates when required. After ambiguity, call `GetRun` before a new reconcile. |
+| RecoverRun, ReconcileRun | 60s | No transparent replay. Root recovery accounts for retained aggregate-close intent; use returned Run plus fresh Session/Writer/Interaction/timeline reads as required. Do not interpret Primary recovery as proof that all owned work is settled. |
 
 Every row also defines context cancellation, a browser-visible pending state before transmission, `OutcomeUnknown` after an ambiguous response, conflict blocking, and a final projection supplied only by a validated event, snapshot, timeline, or reconciliation result.
 
-`StartRun` and `CreateWriteContinuation` are the only v0.1 operations whose complete replay material is retained across a Gul restart. Before the first call, Gul canonicalizes the accepted semantic request, stores it in an exclusive owner-only replay file below `~/Library/Application Support/Gul/provider-replay/`, fsyncs the file and parent, stores its SHA-256 plus logical reference in `ProviderOperationAttempt`, and persists the operation attempt before network transmission. The canonical material includes every field in the provider idempotency identity, including instructions or handoff material, but excludes Controller capability bytes and absolute carrier paths. A separate role-tagged logical Controller-reference set records exactly what replay needs: `StartRun` stores the destination credential-store key and expected Controller ID; `CreateWriteContinuation` stores the source Direct Session binding ID and source Controller ID plus the destination credential-store key and expected destination Controller ID. The fixed v0.1 maximum retention is 72 hours and host configuration may only shorten it. Gul purges expired envelopes at startup and at least once every six hours. A terminal authoritative result deletes the envelope immediately; expiry deletes only canonical request material, marks `replay_availability = expired`, preserves the non-secret attempt as `OutcomeUnknown`, attempts only the documented secondary authoritative reconciliation, and never mints a new key or silently repeats the mutation.
+`StartRun` is the only first-release operation whose complete replay material is retained across a Gul restart. Before the first call, Gul canonicalizes the accepted semantic request, stores it in an exclusive owner-only replay file below `~/Library/Application Support/Gul/provider-replay/`, fsyncs the file and parent, stores its SHA-256 plus logical reference in `ProviderOperationAttempt`, and persists the operation attempt before network transmission. The canonical material includes every field in the provider idempotency identity but excludes Controller capability bytes and absolute carrier paths. It records the destination credential-store key and expected Controller ID. The fixed v0.1 maximum retention is 72 hours and host configuration may only shorten it. Gul purges expired envelopes at startup and at least once every six hours. A terminal authoritative result deletes the envelope immediately; expiry deletes only canonical request material, marks `replay_availability = expired`, preserves the non-secret attempt as `OutcomeUnknown`, attempts only documented secondary authoritative reconciliation, and never mints a new key or silently repeats the mutation. Deferred E4-T4 retains separate exact-replay requirements for a future `CreateWriteContinuation` implementation.
 
 `SubmitTurn` deliberately has a different privacy and replay policy. Its prompt, ordered image material, and Turn body are not durably retained by the replay store. Same-process application replay may reuse the in-memory original request and the same key. After a Gul crash or restart, Gul first reconciles from `GetRun` and the provider timeline. If provider evidence does not prove whether the Turn was accepted, the attempt stays `OutcomeUnknown`, conflicting mutations remain blocked, and a new submit requires an explicit user action after non-acceptance is established. `ResolveInteraction` is stricter still: its protected body is never retained or replayed under any circumstance.
 
@@ -208,8 +211,8 @@ The authoritative inventory contains one row per semantic operation with the exa
 |---|---|---|---|---|---|---|---|---|---|---|---|
 | `GetCapabilities` | `RuntimeService.GetCapabilities` | `GetCapabilitiesRequest` → `GetCapabilitiesResponse` | None | None | Read | Handshake read | Bounded repeat | Repeat with protocol zero and the same client range | Replace protocol/capability projection | Method is handshake authority | Gate B pinned |
 | `InspectWorkspace` | `RuntimeService.InspectWorkspace` | `InspectWorkspaceRequest` → `InspectWorkspaceResponse` | None | Host path; absent expected ID on attach, stored ID on revalidation | Read | Bounded read | Bounded repeat | Repeat same path/expected-ID mode | Replace workspace identity/inspection; no profile projection | Supported method | Gate B pinned |
-| `ListProfiles` | `RuntimeService.ListProfiles` | `ListProfilesRequest` → `ListProfilesResponse` | None | Required `WorkspaceRef` | Read | Bounded read | Bounded repeat | Repeat read | Replace profile summaries | Supported method | Gate B pinned |
-| `GetProfile` | `RuntimeService.GetProfile` | `GetProfileRequest` → `GetProfileResponse` | None | Required `WorkspaceRef` and profile name | Read | Bounded read | Bounded repeat | Repeat read | Replace selected profile projection | Supported method | Gate B pinned |
+| `ListProfiles` | `RuntimeService.ListProfiles` | `ListProfilesRequest` → `ListProfilesResponse` | None | None; user-global Profile registry | Read | Bounded read | Bounded repeat | Repeat read | Replace profile summaries | Supported method | Gate B pinned |
+| `GetProfile` | `RuntimeService.GetProfile` | `GetProfileRequest` → `GetProfileResponse` | None | Global profile name; no `WorkspaceRef` | Read | Bounded read | Bounded repeat | Repeat read | Replace selected profile projection | Supported method | Gate B pinned |
 | `StartRun` | `RunService.StartRun` | `StartRunRequest` → `StartRunResponse` | Validated new carrier | Required `WorkspaceRef`; compatible profile | Required key + Controller + normalized request | 30s | No transparent retry; exact replay | Exact replay first; Controller-matched `ListRuns` second; `GetRun`/`ReconcileRun` after ID | Replace Run, binding, and configuration | `persistent_runs`, `controller_binding` | Gate B pinned |
 | `ListRuns` | `RunService.ListRuns` | `ListRunsRequest` → `ListRunsResponse` | None | Required `WorkspaceRef` | Read | Bounded read | Bounded repeat | Repeat read | Replace Run summaries | `persistent_runs` | Gate B pinned |
 | `GetRun` | `RunService.GetRun` | `GetRunRequest` → `GetRunResponse` | None | Required `RunRef`/`WorkspaceRef` | Read | Bounded read | Bounded repeat | Repeat read | Replace authoritative Run snapshot and configuration | `persistent_runs` | Gate B pinned |
@@ -218,11 +221,9 @@ The authoritative inventory contains one row per semantic operation with the exa
 | `InterruptTurn` | `RunService.InterruptTurn` | `InterruptTurnRequest` → `RunMutationResponse` | Session Controller | Required `RunRef`/`WorkspaceRef` | Tokenless expected revision | 10s | No automatic replay | `GetRun`; reconcile if outcome unknown | Replace Run projection | Supported method | Gate B pinned |
 | `PauseRun` | `RunService.PauseRun` | `PauseRunRequest` → `RunMutationResponse` | Session Controller | Required `RunRef`/`WorkspaceRef` | Tokenless expected revision | 10s | No automatic replay | `GetRun`; reconcile if required | Replace Run projection | Supported method | Gate B pinned |
 | `ResumeRun` | `RunService.ResumeRun` | `ResumeRunRequest` → `RunMutationResponse` | Session Controller | Required `RunRef`/`WorkspaceRef` | Tokenless expected revision | 10s | No automatic replay | `GetRun`; reconcile if required | Replace Run projection | Supported method | Gate B pinned |
-| `CloseRun` | `RunService.CloseRun` | `CloseRunRequest` → `RunMutationResponse` | Session Controller | Required `RunRef`/`WorkspaceRef` | Tokenless expected revision | 10s | No automatic replay | `GetRun`; reconcile if required | Replace closed Run projection | Supported method | Gate B pinned |
-| `DeleteRun` | `RunService.DeleteRun` | `DeleteRunRequest` → `DeleteRunResponse` | Session Controller | Required `RunRef`/`WorkspaceRef` | Tokenless confirmation + expected revision | 30s | No automatic replay | Confirm absence through `ListRuns` and prior confirmation | Apply deletion receipt; invalidate/remove Run projection | Supported method | Gate B pinned |
-| `CreateWriteContinuation` | `RunService.CreateWriteContinuation` | `CreateWriteContinuationRequest` → `CreateWriteContinuationResponse` | Source + distinct same-principal destination carriers | Source `RunRef`/`WorkspaceRef` | Required key + exact source/destination/request | 30s | No transparent retry; exact replay | Exact replay first; destination-Controller `ListRuns` second; reconcile after ID | Add destination Run, lineage, Controller, source receipt | `write_continuation` | Gate B pinned |
-| `RecoverRun` | `RunService.RecoverRun` | `RecoverRunRequest` → `RunMutationResponse` | Session Controller | Required `RunRef`/`WorkspaceRef` | Tokenless expected revision | 60s | No automatic replay | `GetRun`, then reconcile | Replace returned Run; explicitly refresh other aggregates | Supported method | Gate B pinned |
-| `ReconcileRun` | `RunService.ReconcileRun` | `ReconcileRunRequest` → `RunMutationResponse` | Session Controller | Required `RunRef`/`WorkspaceRef` | Tokenless expected revision | 60s | No automatic replay | `GetRun` before another reconcile | Replace returned Run; explicitly refresh other aggregates | Supported method | Gate B pinned |
+| `CloseRun` | `RunService.CloseRun` | `CloseRunRequest` → `RunMutationResponse` | Primary Session Controller | Primary `RunRef`/`WorkspaceRef` | Tokenless expected revision; explicit interrupt consent | 10s bounded call | No automatic replay | `GetOrchestratedSession` plus fresh Run/Writer/Interaction; unknown blocks success | Closing intent then confirmed whole-aggregate closure | Required consumer method | Target TASK-053/052, not live evidence |
+| `RecoverRun` | `RunService.RecoverRun` | `RecoverRunRequest` → `RunMutationResponse` | Session Controller | Required root `RunRef`/`WorkspaceRef` | Tokenless expected revision | 60s | No automatic replay | Fresh Run/Session/Writer/Interaction as required | Root recovery accounts for retained close intent; other projections remain separate | Supported method | Target TASK-053/052; E12-T1 pin required |
+| `ReconcileRun` | `RunService.ReconcileRun` | `ReconcileRunRequest` → `RunMutationResponse` | Session Controller | Required root `RunRef`/`WorkspaceRef` | Tokenless expected revision | 60s | No automatic replay | Fresh Run/Session before another reconcile | Resolve supported aggregate-close uncertainty without semantic replay | Supported method | Target TASK-053/052; E12-T1 pin required |
 | `WatchRunEvents` | `ObservationService.WatchRunEvents` | `WatchRunEventsRequest` → stream `RunEventEnvelope` | None | Required `RunRef`/`WorkspaceRef` | Exclusive `after_cursor` | Long-lived stream | Reason-specific reconnect | Snapshot repair, then last committed cursor | Variant-specific update/invalidate rules below | `event_replay` | Gate B pinned |
 | `ListRunTimelineItems` | `ObservationService.ListRunTimelineItems` | `ListRunTimelineItemsRequest` → `ListRunTimelineItemsResponse` | Session Controller | Required `RunRef`/`WorkspaceRef` | Timeline cursor | Bounded read | Bounded repeat | Repeat from committed timeline cursor | Merge validated timeline page | `controller_timeline` | Gate B pinned |
 | `ListPendingInteractions` | `InteractionService.ListPendingInteractions` | `ListPendingInteractionsRequest` → `ListPendingInteractionsResponse` | None | Required `RunRef`/`WorkspaceRef` | Read | Bounded read | Bounded repeat | Repeat read | Replace safe summaries | Advertised Interaction support | Gate B pinned |
@@ -232,17 +233,25 @@ The authoritative inventory contains one row per semantic operation with the exa
 | `AcquireWriter` | `WriterService.AcquireWriter` | `AcquireWriterRequest` → `WriterState` | Eligible existing-thread Session Controller | Required `RunRef`/`WorkspaceRef` | Tokenless expected revision | 15s | No automatic replay | Writer status + `GetRun` | Replace Writer; invalidate Run-derived actions until fresh | Writer features; transition supported | Gate B pinned |
 | `ReleaseWriter` | `WriterService.ReleaseWriter` | `ReleaseWriterRequest` → `WriterState` | Writer-owning Session Controller | Required `RunRef`/`WorkspaceRef` | Tokenless expected revision | 15s | No automatic replay | Writer status + `GetRun` | Replace Writer; invalidate Run-derived actions until fresh | Writer features | Gate B pinned |
 | `VerifyController` | `ControllerService.VerifyController` | `VerifyControllerRequest` → `VerifyControllerResponse` | Host-selected candidate carrier | Required `RunRef`/`WorkspaceRef` | Verification read | Bounded read | Repeat after carrier revalidation | Revalidate carrier and repeat | Replace verification result only | `controller_binding` | Gate B pinned |
+| `GetOrchestratedSession` | `OrchestrationService.GetOrchestratedSession` | `GetOrchestratedSessionRequest` → `GetOrchestratedSessionResponse` | Primary Controller | Primary `RunRef`/`WorkspaceRef` | Read | Bounded read | Bounded repeat | Repeat authorized read; no repair | Replace typed aggregate revision/status/policy/counts/recovery | Required consumer method | Target TASK-053/055; E12-T1 must pin |
+| `ListOrchestratedSessionResults` | `OrchestrationService.ListOrchestratedSessionResults` | `ListOrchestratedSessionResultsRequest` → `ListOrchestratedSessionResultsResponse` | Primary Controller | Primary `RunRef`/`WorkspaceRef` | Opaque session/head-bound cursor | Bounded read | Same cursor repeat | Resume captured-head traversal, new traversal for new results | Merge published results; ArtifactRef owner is Primary RunRef | Required consumer method | Target TASK-053/055; E12-T1 must pin |
 | `GetArtifact` | `ArtifactService.GetArtifact` | `GetArtifactRequest` → `GetArtifactResponse` | Optional by visibility | Required `RunRef`/`WorkspaceRef` | Read | Artifact read | Bounded repeat | Refetch metadata | Replace artifact metadata/chunk bound | `artifact_retrieval` | Gate B pinned |
 | `ReadArtifactChunk` | `ArtifactService.ReadArtifactChunk` | `ReadArtifactChunkRequest` → `ReadArtifactChunkResponse` | Optional by visibility | Required `RunRef`/`WorkspaceRef` | Artifact ID + offset + length | Artifact read | Repeat same chunk after metadata/carrier validation | Refetch metadata; resume after length/digest validation | Append verified inert bytes; no authoritative aggregate | `artifact_retrieval` | Gate B pinned |
 | Credential `Create` | `DolgoraeControllerCredentialStore` | Local filesystem | None | Outside every Workspace | Persisted logical store key and preselected credential identity | Bounded local filesystem | Reconcile existing exact logical key; never overwrite | Validate exact intended carrier | New protected carrier reference | N/A | Defined |
 | Credential `Validate` | `DolgoraeControllerCredentialStore` | Local filesystem | Candidate carrier | Outside every Workspace | N/A, validation read | Bounded local filesystem | Safe repeat | Repeat full containment/owner/type/mode/symlink validation | Carrier health metadata | N/A | Defined |
 | Credential `ResolveCarrierReference` | `DolgoraeControllerCredentialStore` | Local filesystem | Stored logical reference | Outside every Workspace | N/A, validation read | Bounded local filesystem | Safe repeat | Re-derive and revalidate | Ephemeral validated carrier handle | N/A | Defined |
 | Credential `RemoveUnused` | `DolgoraeControllerCredentialStore` | Local filesystem | Proven unbound carrier only | Outside every Workspace | Logical store key | Bounded local filesystem | Retry only after proving it remains unbound | Revalidate binding absence and carrier state | Removed/absent carrier state | N/A | Defined |
-| Credential `CreateSamePrincipalSuccessor` | `DolgoraeControllerCredentialStore` | Local filesystem | Valid source metadata; no source secret reuse | Outside every Workspace | Persisted destination logical key, Controller ID, and capability identity | Bounded local filesystem | Reconcile exact destination key; never generate a replacement identity | Validate exact destination carrier | Distinct generation-1 same-principal carrier reference | N/A | Defined |
 | `AdoptController` workflow | Gul application orchestration | Host selection + local validation + `ControllerService.VerifyController` + atomic binding transaction | Host-selected candidate, then verified Controller | Existing Direct Session and Run | Gul-owned adoption identity | Bounded workflow | No blind replay | Restart from carrier validation and fresh reads | Atomically replace binding; refresh Run/Interaction/Writer | Controller plus local store | Defined |
 | `EvaluateActions` | Gul domain evaluator | Local pure evaluation | Binding health is typed input, never authority inferred from UI | Fresh typed Run/Writer/Interaction/timeline inputs with compatible stamps | Projection convergence tuple | Local | Safe reevaluation | Refresh required inputs | Closed Gul action/blocker set | N/A | Defined |
 | `AllocateDeliveryEvent` | Gul projection/event journal | Local transaction + ConnectRPC delivery | None; authorization-sensitive enrichment already completed | Validated safe projection | Gul `delivery_sequence` transaction | Local | Transaction retry only | Replay journal or coalesced snapshot | Browser-safe delivery event | N/A | Defined |
 <!-- contract-operation-map:end -->
+
+The operation map above contains first-release operations only. Historical
+Gate B labels identify the old wire inventory, not acceptance of new profile
+semantics; E12-T1 must replace these labels with exact new lock/fixture evidence
+when it repins. Current generated files still reflect the old map and must not
+be hand-edited. Deferred continuation contracts remain with E4-T4 and its
+requirements, not inside the active generator input.
 
 ### 6.5 Live subscription window
 
@@ -298,9 +307,9 @@ required_assurance = best_effort_personal_alpha
 
 Before StartRun, Gul locally creates and validates a credential carrier under the Dolgorae-owned Gul carrier root, then supplies its derived carrier reference to Dolgorae. Dolgorae verifies and binds the carrier; it does not create the credential or implicitly invent a Gul binding.
 
-`shared_readonly` is permanent. A later write request uses `CreateWriteContinuation`, preserves the exact current source terminal Turn and immutable lineage, and creates a distinct threadless dedicated Run and Controller without changing the source. When `threadless_acquire_write=false`, the first `SubmitTurn(write_intent=WRITE)` activates writer authority; no Acquire action exists first.
+`shared_readonly` is permanent. The first release blocks a later write request with a typed unsupported-transition result and preserves the source. E4-T4 owns any future `CreateWriteContinuation` flow. Starting a fresh Orchestrated Session is a new launch and is never labeled or recorded as lineage continuation.
 
-An existing-thread `dedicated` Run offers in-place write only while the selected profile reports transition support. When unsupported or unverified, it also uses `CreateWriteContinuation`. An upstream transition rejection is a typed blocker naming continuation, never a retryable failure.
+An existing-thread `dedicated` Run offers in-place write only while the selected profile reports transition support. When unsupported or unverified, the first release blocks the write without offering continuation. An upstream transition rejection is a typed blocker, never a retryable failure.
 
 ## 7. Domain model
 
@@ -362,7 +371,7 @@ The accepted `RunConfigurationProjection` is authoritative for profile, purpose 
 
 ### 7.4 RuntimeActivity
 
-`RuntimeActivity` is a discriminated navigation projection. Initial kind is `dolgorae_direct_session`. Future Gorae kinds may include Mission, Task, Workflow Stage, Finding group, or Artifact collection. Provider-specific payloads remain closed typed variants; a universal Session/Turn hierarchy is prohibited.
+`RuntimeActivity` is a discriminated navigation projection. The initial kind is `dolgorae_orchestrated_session`, with one retained DirectSession Primary binding and observer-only child views. SessionProjection records the authorized provider's aggregate revision/status/policy/counts independently of Run ProjectionStamp. A local cache is not membership authority. Future Gorae and Podway variants remain optional; workflow execution identity must not be equated with Session or Run identity.
 
 An independently brokered subagent used by a profile tool is not a
 `RuntimeActivity`. Its bounded result appears only inside the owning Direct
@@ -382,9 +391,9 @@ ControllerBindingReference
   binding_health
 ```
 
-Secret capability bytes reside in create-exclusive files below `~/Library/Application Support/Dolgorae/controller-carriers/gul/<gul-installation-id>/`, outside every Workspace root and every FileService-resolvable path (ADR-0047). SQLite stores only a logical relative key. The store derives the absolute path and immediately before every authorized RPC proves root containment, current-user ownership, `0700` parent modes, `0600` regular-file mode, and absence of symlinks in every relevant component.
+Secret capability bytes reside in create-exclusive files below the capability-advertised `~/.dolgorae/controller-carriers/gul/<gul-installation-id>/` root, outside every Workspace root and every FileService-resolvable path (ADR-0047). SQLite stores only a logical relative key. The store derives the absolute path and immediately before every authorized RPC proves root containment, current-user ownership, `0700` parent modes, `0600` regular-file mode, and absence of symlinks in every relevant component.
 
-`Create` writes credential schema version 1 with a UUIDv7 `controller_id`, `kind=interactive_client`, stable trusted-local `instance_id` and `subject_id`, and 32 bytes from `crypto/rand` encoded as unpadded base64url. Creation is exclusive with no overwrite, fsyncs the file and parent, and clears capability buffers where practical. Installation and account identifiers originate in trusted local setup, never a browser field. `CreateSamePrincipalSuccessor` creates a new Controller ID and capability at generation 1 while preserving the source `kind`, `subject_id`, and stable Gul `instance_id` individually. It also enforces the normalized-principal rule: `(kind, subject_id)` when `subject_id` exists, otherwise `(kind, instance_id)`. Thus a matching subject never permits a different installation identity. Gul supplies the validated carrier to StartRun or CreateWriteContinuation and Dolgorae verifies it before binding. Neither bytes nor path enter gRPC metadata or ConnectRPC. One distinct credential per Direct Session/Run is Gul policy, not a universal Dolgorae invariant.
+`Create` writes credential schema version 1 with a UUIDv7 `controller_id`, `kind=interactive_client`, stable trusted-local `instance_id` and `subject_id`, 32 crypto-random bytes encoded as unpadded base64url, and explicit orchestration_launch with the selected preprovisioned Policy name. It validates the actual advertised schema digest and the `~/.dolgorae/controller-carriers/gul/<installation-id>/` root policy. Creation is exclusive with no overwrite, fsyncs the file and parent, and clears capability buffers where practical. Installation and account identifiers originate in trusted local setup, never a browser field. Gul supplies the validated carrier to StartRun and Dolgorae verifies it before binding. Same-principal successor creation is deferred with E4-T4 and REQ-CTRL-013; it is not a first-release credential-store operation. Neither bytes nor path enter gRPC metadata or ConnectRPC. One distinct credential per Direct Session/Run is Gul policy, not a universal Dolgorae invariant.
 
 Controller adoption is a Gul application workflow, not a credential-store capability. A host-controlled selector supplies a protected carrier reference; the application calls the store's existing validation/resolution operations, invokes side-effect-free provider `VerifyController` against the session's `runtime_run_id`, atomically replaces the binding, and refreshes the Run including its RecoveryProjection, Writer status, pending Interactions, and timeline as needed. It never accepts capability bytes or an arbitrary absolute path through a browser/API message.
 
@@ -483,7 +492,7 @@ ReplayControllerReference
   direct_session_binding_id?
 ```
 
-`ProviderOperationAttempt` and `ProviderReplayEnvelope` are Gul coordination state, not runtime authority. The replay envelope is allowed only for `StartRun` and `CreateWriteContinuation`, is stored outside SQLite as an exclusive owner-only bounded file, and contains no Controller capability bytes, protected Interaction input, `SubmitTurn` prompt, image bytes, carrier path, or socket path. Its role-tagged Controller references contain only expected public Controller IDs and logical credential-store or Direct Session binding keys. The operation row stores only the replay envelope's logical reference, digest, and equivalent non-secret reference metadata. A resolved envelope is deleted immediately. An unresolved envelope expires after at most 72 hours in v0.1, may be configured to expire sooner, and is purged at startup and at least every six hours; expiry removes canonical material and replay availability while the non-secret attempt remains visible as `OutcomeUnknown` until authoritative evidence or explicit operator handling resolves it.
+`ProviderOperationAttempt` and `ProviderReplayEnvelope` are Gul coordination state, not runtime authority. The first-release replay envelope is allowed only for `StartRun`, is stored outside SQLite as an exclusive owner-only bounded file, and contains no Controller capability bytes, protected Interaction input, `SubmitTurn` prompt, image bytes, carrier path, or socket path. Its role-tagged Controller references contain only expected public Controller IDs and logical credential-store or Direct Session binding keys. The operation row stores only the replay envelope's logical reference, digest, and equivalent non-secret reference metadata. A resolved envelope is deleted immediately. An unresolved envelope expires after at most 72 hours in v0.1, may be configured to expire sooner, and is purged at startup and at least every six hours; expiry removes canonical material and replay availability while the non-secret attempt remains visible as `OutcomeUnknown` until authoritative evidence or explicit operator handling resolves it.
 
 The single closed evaluator consumes an `ActionEvaluationInput` composed of typed provider state plus Gul-owned state:
 
@@ -503,9 +512,11 @@ ActionEvaluationInput
   direct_session_ownership
   unresolved_mutation_state
   provider_compatibility_state
+  orchestrated_session_projection, session_revision, session_freshness
+  aggregate_close_intent, owned_work_counts, explicit_interrupt_consent
 ```
 
-Every field is independently required even when another aggregate appears to imply it. Missing, unknown, string-only, stale, or stamp-incompatible decision input yields `BlockedByProviderCompatibility` or `RequiresFreshSnapshot`; it is never inferred from writer, policy, lifecycle, or diagnostic text. Both UI rendering and every mutation endpoint evaluate this same structure.
+Every field is independently required even when another aggregate appears to imply it. Missing, unknown, string-only, stale, or stamp-incompatible decision input yields `BlockedByProviderCompatibility` or `RequiresFreshSnapshot`; it is never inferred from writer, policy, lifecycle, or diagnostic text. Both UI rendering and every mutation endpoint evaluate this same structure. Aggregate revision has its own domain and is not compared for equality with Run stamps. Session-wide action eligibility requires a fresh authorized aggregate observation; the provider still rechecks actual state at mutation admission.
 
 ## 8. Direct Session flows
 
@@ -525,6 +536,24 @@ The browser sends Gul Session ID, prompt, an explicit closed `write_intent` of `
 
 The normalized Turn request remains in memory only for the lifetime of the active operation. If the response is lost while the same Gul process still holds the exact bytes, application replay may use the original idempotency key under the accepted provider policy. Gul does not persist the prompt or image bytes for crash-safe replay. After process restart it reconciles through `GetRun` and timeline, preserves `OutcomeUnknown` when acceptance cannot be proved, and never automatically submits a reconstructed or new Turn.
 
+### 8.2.1 Human prompt admission and history
+
+While a Primary Turn is active, the composer keeps a draft without creating a
+provider queue item. Explicit send requires authoritative terminal evidence and
+fresh action/session eligibility. No automatic send on idle, auto-interrupt, or
+steering is allowed. The backend and provider recheck busy admission to prevent
+multi-client races. Exact replay of an accepted identity is not a fresh submit.
+Explicit interruption has its own confirmation/unknown-outcome path. Current
+Interaction answers remain possible while the Turn is waiting.
+
+Prompt History is a separate projection of Primary USER_INPUT_ACCEPTED timeline
+items. Stable Run/item/cursor/Turn identity drives ordering and deduplication;
+matching text does not. Show ordinal, provider time, original preview/full body,
+and Turn navigation. Long inputs use authorized user-input artifacts. Rejected,
+pending, draft, and unknown attempts are not silently inserted into accepted
+history. Full pagination and restart/close restore the same original history.
+The timeline cache is not a resend queue and never authorizes mutation replay.
+
 ### 8.3 Interaction
 
 ```text
@@ -539,7 +568,7 @@ Dolgorae interaction summary            observer-safe; carries no decision conte
 
 The stream event is only a notification. The observer summary carries only the accepted safe fields: interaction/request ID, created time, nullable expiry and resolution times, kind, status, Controller kind, protected-input marker, and the final typed user-escalation boolean. It may not contain Controller-sensitive decision material. Any human-readable escalation explanation is a non-authoritative Gul presentation derived from typed state, never a substitute for that boolean. The backend fetches `ControllerInteraction` through the session's binding, merges both shapes by interaction/request ID, and projects a Gul-owned **Interaction Card** typed per kind under a strict allowlist. `expires_at=null` means no upstream expiry. The browser never receives either upstream message directly.
 
-Production card mapping uses the Gate B-pinned typed Protobuf `ControllerInteraction.payload` oneof and client policy. Generated `CommandApprovalInteraction`, `FileChangeApprovalInteraction`, `UserInputInteraction`, and `UnsupportedInteraction` variants are mapped exhaustively; unknown required variants and kind/variant mismatches fail closed. The Protobuf envelope, projection stamp, maximum safe payload size, and per-kind field allowlist are validated before domain mapping. Gul never parses arbitrary JSON based only on `summary.kind`, and each card exposes only fields allowed for that kind.
+New card mapping uses the E12-T1-pinned TASK-053 typed Protobuf `ControllerInteraction.payload` oneof and client policy. Generated `CommandApprovalInteraction`, `FileChangeApprovalInteraction`, `UserInputInteraction`, and `UnsupportedInteraction` variants are mapped exhaustively; unknown required variants and kind/variant mismatches fail closed. The Protobuf envelope, projection stamp, maximum safe payload size, and per-kind field allowlist are validated before domain mapping. Gul never parses arbitrary JSON based only on `summary.kind`, and each card exposes only fields allowed for that kind.
 
 Only the bound backend may fetch `ControllerInteraction`. Advertised kinds are classified supported or unsupported; unknown or unclassified kinds fail closed as visible blockers and are never dropped or auto-resolved. For Gorae-managed work, Gul receives only Gorae-level escalation and cannot resolve the internal Dolgorae interaction.
 
@@ -557,15 +586,45 @@ AND effective_policy.verification = verified
 
 Acquire and release are upstream commands. Writer status is an observation read, so writer state stays visible even when a Controller binding is missing or unhealthy. Acquire is offered only for an eligible existing-thread Run; it is absent for a threadless Run when `threadless_acquire_write=false`.
 
-The closed evaluator emits only `CanSubmitRead`, `CanSubmitWrite`, `CanAcquireWriter`, `CanReleaseWriter`, `CanCreateWriteContinuation`, `CanInterrupt`, `CanResolveInteraction`, `CanRecover`, `CanReconcile`, `CanAdoptController`, `RequiresOperatorAction`, `RequiresFreshSnapshot`, `BlockedByOutcomeUnknown`, `BlockedByCredentialState`, `BlockedByBackgroundExecution`, and `BlockedByProviderCompatibility`. A presentation may label `CanCreateWriteContinuation` as “Create successor,” but no separate `CanCreateSuccessor` domain or provider operation exists. Inputs are the typed Run projection, workspace-writer projection, profile capabilities/compatibility, effective access and verification, transition support, lane, writer authority and generation, requested/achieved assurance, background execution, recovery/action state, lineage, Controller-binding health, Gul session ownership, and unresolved operation state. Unknown or string-only decision state fails closed.
+The first-release closed evaluator emits only `CanSubmitRead`, `CanSubmitWrite`, `CanAcquireWriter`, `CanReleaseWriter`, `CanInterrupt`, `CanResolveInteraction`, `CanRecover`, `CanReconcile`, `CanAdoptController`, `CanPausePrimary`, `CanResumePrimary`, `CanRequestSessionClose`, `RequiresCloseConfirmation`, `RequiresOperatorAction`, `RequiresFreshSnapshot`, `BlockedByOutcomeUnknown`, `BlockedByCredentialState`, `BlockedByBackgroundExecution`, and `BlockedByProviderCompatibility`. These are Gul-owned decisions, not upstream RPC enums. Close request eligibility never asserts that closure is already complete; active owned work requires explicit interrupt confirmation. A continuation-required state maps to a typed unsupported blocker, not a successor action. Inputs are the typed Run projection, workspace-writer projection, profile capabilities/compatibility, effective access and verification, transition support, lane, writer authority and generation, requested/achieved assurance, background execution, recovery/action state, lineage, Controller-binding health, Gul session ownership, and unresolved operation state. Unknown or string-only decision state fails closed.
 
 Because every Gul Direct Session holds its own Controller (ADR-0035), any other session that owns the writer is a different Controller upstream, and the provider's same-controller handoff precondition never holds. Writer transfer is therefore Release in the owning session followed by a separate Acquire in the target session. Gul presents the intervening unowned window, keeps no queue or reservation, and reports a competing acquisition from the provider result. When the owning Controller is one of Gul's own sessions, Gul may offer navigation to it where the provider allows Release from there; when the owner is outside Gul, no mutation action is offered.
 
 ### 8.5 Presentation versus runtime lifecycle
 
-Rename, favorite, archive/hide, panel state, and navigation are local. Pause, resume, close, delete, interrupt, and successor are provider operations. Hiding or removing a presentation record never implicitly mutates the Run.
+Rename, favorite, archive/hide, panel state, browser close, and navigation are local. Pause, resume, and interrupt are Primary-scoped provider operations. Close is a root provider operation over the whole owned aggregate. Delete and successor are absent from the first release. Hiding or removing a presentation record never implicitly mutates the Run.
 
 Recover and Reconcile are provider operations exposed only through an advertised RecoveryCapability.
+
+### 8.5.1 Whole-session close and read-only results
+
+The E5-T1 close coordinator uses the Primary Controller and root CloseRun only,
+after E4-T3 supplies eligibility/confirmation and E3-T3 supplies aggregate reads.
+A declared browser route is unavailable until that coordinator is complete.
+Without interrupt intent,
+active owned work is a typed busy rejection. With explicit confirmation, the
+Broker records closing intent, stops new admissions, and handles all owned
+Specialist work. Gul displays closing/pending until GetOrchestratedSession and
+fresh Run projections prove closure. Unknown work is not reported closed.
+Never loop over children or stop shared Profile Servers. History/results/files
+are retained; hide/navigation/browser exit is not close. Pause/Interrupt is
+Primary-scoped and is not presented as an aggregate-wide pause.
+
+ListOrchestratedSessionResults provides typed stable publication records and
+permitted Primary-owned ArtifactRef values, using bounded captured-head pages.
+GetArtifact/ReadArtifactChunk use that Primary RunRef and its Controller. Do not
+parse model links, read private stores, or fabricate a Primary final response
+for a Specialist result. Reads do not acknowledge Primary delivery or reexecute
+work. Session revision and Run stamps are independent observations; neither
+is synthesized from the other's counter.
+
+Refresh aggregate and result snapshots on opening/reconnect, relevant Run
+notifications, and a coalesced bounded schedule while owned work or closure is
+in progress. Aggregate-only changes need not emit a Primary Run event; event-only
+refresh would miss them. Stale aggregate state disables affected actions and
+never becomes an empty count. Root Recover/Reconcile accounts for retained
+aggregate-close intent under the provider contract, followed by fresh separate
+Run/Session/Writer/Interaction reads. It does not auto-resume paused work.
 
 ### 8.6 Externally reset Controller adoption
 
@@ -599,8 +658,9 @@ WorkspacePresentationService
 
 DirectSessionService
   Create, List, Get, RenamePresentation, ArchivePresentation,
-  Submit, Interrupt, PauseRuntime, ResumeRuntime,
-  CloseRuntime, DeleteRuntime, CreateWriteContinuation,
+  ListPromptHistory, GetPromptHistoryItem, GetExecutionState,
+  ListSpecialistResults,
+  Submit, Interrupt, PauseRuntime, ResumeRuntime, CloseRuntime,
   Recover, Reconcile, BeginControllerAdoption
 
 InteractionPresentationService
@@ -625,9 +685,121 @@ DiagnosticsService
 
 No API returns raw Dolgorae messages, socket or carrier paths, Controller capabilities, private worker identifiers, App Server transport details, arbitrary absolute paths, unclassified artifacts, or arbitrary Git revisions. `BeginControllerAdoption` creates a host-local selection workflow; the browser never submits a carrier path or capability bytes.
 
-`ListRegistrableRoots` and `BrowseRegistrableRoot` expose only allowlist entry identifiers plus relative names, never absolute paths, and `RegisterFromAllowlistPath` accepts an allowlist entry identifier plus a relative path. `InteractionPresentationService.GetCard` returns the allowlisted card, never `ControllerInteraction`. `CreateWriteContinuation` covers shared-readonly and transition-unavailable lineage. Artifact endpoints return only validated chunks. Writer handoff RPCs are absent.
+`ListRegistrableRoots` and `BrowseRegistrableRoot` expose only allowlist entry identifiers plus relative names, never absolute paths, and `RegisterFromAllowlistPath` accepts an allowlist entry identifier plus a relative path. `InteractionPresentationService.GetCard` returns the allowlisted card, never `ControllerInteraction`. Delete and WriteContinuation routes are absent in the first release. Artifact endpoints return only validated chunks. Writer handoff RPCs are absent.
 
-Every error response carries a stable Gul code and closed action class. The domain distinguishes `TransportUnavailable`, `DeadlineExceeded`, `ProtocolIncompatible`, `ControllerMismatch`, `ControllerCarrierInvalid`, `WriteContinuationControllerInvalid`, `WriterConflict`, `ThreadlessRequiresWriteTurn`, `InteractionStale`, `InteractionAlreadyResolved`, `RecoveryRequired`, `OutcomeUnknown`, `SlowConsumer`, `ArtifactUnavailable`, `UnsupportedPathEncoding`, `RunStateConflict`, `RpcServerAlreadyRunning`, and `OperatorActionRequired`. Mapping uses gRPC status plus typed Dolgorae details and a typed provider-required-action enum; it never parses a human-readable status message or action string.
+Every error response carries a stable Gul code and closed action class. The domain distinguishes `TransportUnavailable`, `DeadlineExceeded`, `ProtocolIncompatible`, `ControllerMismatch`, `ControllerCarrierInvalid`, `WriteContinuationControllerInvalid`, `WriterConflict`, `ThreadlessRequiresWriteTurn`, `InteractionStale`, `InteractionAlreadyResolved`, `RecoveryRequired`, `OutcomeUnknown`, `SlowConsumer`, `ArtifactUnavailable`, `UnsupportedPathEncoding`, `RunStateConflict`, `RpcServerAlreadyRunning`, `OperatorActionRequired`, `InvalidPageToken`, and `PageTokenExpired`. Mapping uses gRPC status plus typed Dolgorae details and a typed provider-required-action enum; it never parses a human-readable status message or action string.
+
+### 9.1 Browser read contracts
+
+E1-T3 declares these Protobuf-defined Gul application types and their contract
+fixtures. They are not aliases for generated Dolgorae messages. Session/item/view
+IDs below are Gul-owned opaque references backed by presentation mappings, not
+raw provider IDs or credentials. Get remains presentation metadata; it does not
+implicitly return complete history or all results.
+
+| Operation | Gul request | Gul response and implementation owner |
+| --- | --- | --- |
+| DirectSessionService.ListPromptHistory | session_id, optional page_token, page_size | snapshot_id, ordered PromptHistoryItem summaries, optional next_page_token, traversal_complete, freshness and observed_at. E4-T5. |
+| DirectSessionService.GetPromptHistoryItem | session_id, prompt_item_id | Stable item identity, ordinal, accepted_at, conversation_entry_id and a typed original-content value: exact inline UTF-8 or authorized Gul artifact reference. E4-T5. |
+| DirectSessionService.GetExecutionState | session_id | Gul ExecutionState containing mapped lifecycle/composition/approval policy, safe policy identity, named counts, close progress and recovery classification, optional Gul close_operation_ref, state_version, freshness and observed_at. E3-T3. |
+| DirectSessionService.ListSpecialistResults | session_id, optional page_token, page_size | snapshot_id, ordered SpecialistResult summaries, optional next_page_token, traversal_complete, freshness and observed_at. E4-T5. |
+
+PromptHistoryItem contains prompt_item_id, one-based ordinal, accepted_at,
+exact-original preview, preview_truncated and conversation_entry_id. It contains
+only accepted human input. Ordinals count validated accepted human items from the
+start of the retained history, not ledger gaps, local send attempts or timestamps.
+The backend tracks validated prefix coverage with its checkpoint. It must not
+assign an ordinal from a partial suffix or deduplicate by text. Stable mappings
+survive ordinary reconnect and cache rebuild; loss of a valid mapping requires
+explicit reattachment or unavailable state, not reassignment to another item.
+
+SpecialistResult contains a Gul result_id and specialist_view_id, safe role label,
+publication time/order, typed format, byte_length, SHA-256 and a Gul artifact
+reference. Its provider task/result identity and Primary artifact owner remain
+backend mappings. GetMetadata/ReadChunk in ArtifactPresentationService revalidate
+those mappings, current authorization, size and integrity; a browser must never
+supply a raw provider RunRef or artifact path to obtain bytes. Reading never
+acknowledges private result delivery.
+
+Pages default to 50 items and accept 1..100, with at most 256 KiB of encoded Gul
+metadata per page. A preview is at most 1 KiB of a complete UTF-8 prefix, marked
+truncated when shorter than the original. Full originals use the existing 256 KiB
+browser-inline threshold and verified artifact reads for larger bodies; previews
+are never substituted for full content. All provider and local size limits still
+apply independently. An item that cannot fit the metadata contract is a typed
+limit error, never silently omitted.
+
+### 9.2 Paging, freshness and authorization boundary
+
+A Gul page_token is a bounded opaque handle (maximum 4 KiB), bound to the current
+Gul account, session, query kind, projection version, captured snapshot scope and
+scan position. The backend retains or authenticates its mapping to provider
+cursors. It never forwards the raw provider cursor, publication head, Run stamp,
+Controller generation or private identity as a browser token. Each page request
+rechecks the authenticated session, binding and applicable provider authority;
+the token itself grants no access. Cross-session/query substitution is rejected.
+
+The first history page starts from the validated history prefix and captures an
+upper head. Later provider pages can report later heads; Gul keeps the original
+upper watermark for that browser traversal and leaves new items for a fresh
+traversal. The result list uses the provider's fixed publication-head traversal.
+The snapshot_id is a Gul handle for this scope, not a provider cursor in disguise.
+The backend may read at most four provider pages per browser request, within the
+existing deadline/concurrency budget. A filtered page with no human items may
+return an empty items array and a continuation token; it is not end of history.
+traversal_complete is true only when the captured scope was fully scanned.
+
+Expired, evicted or restart-invalidated token mappings return PageTokenExpired
+and require a fresh traversal. Malformed or wrong-query tokens return
+InvalidPageToken; neither case silently restarts pagination or asserts empty
+history. Gul may retain valid mappings across restart, but provider-backed
+reconstruction and stable item identity do not depend on token survival.
+Unknown timeline types and source corruption follow the pinned fail-closed
+policy; they are not skipped to fabricate a complete page.
+
+GetExecutionState performs a bounded coalesced authoritative refresh. It returns
+an explicit FRESH, STALE or UNAVAILABLE classification; cached authorized data
+may accompany STALE but cannot enable a mutation. Unavailable counts are absent,
+not zero. state_version is Gul-owned change metadata and cannot replace or be
+numerically compared with the independent backend aggregate revision and Run
+ProjectionStamps. Every mutation re-evaluates fresh decision inputs regardless
+of a browser's displayed state_version. On provider reconnect, refresh execution
+state and start or continue valid history/result traversals separately.
+
+ClientEventService supplies Gul-owned invalidation or presentation notifications.
+It is not a replacement for paginated reads and must not imply that the complete
+history or result collection is present in one delivery replay.
+
+### 9.3 Whole-session close application contract and ownership
+
+CloseRuntime accepts the Gul session_id and explicit interrupt choice under the
+existing authenticated mutation-attempt contract. E1-T3 defines CloseOutcome
+and its fixture shapes. E4-T3 supplies the shared eligibility/confirmation
+classification; E5-T1 owns the complete coordinator and enables the route only
+when both that evaluator and E3-T3's execution-state read are available.
+E3-T3 may render passive state but cannot install a temporary direct close route.
+
+CloseOutcome distinguishes REJECTED, IN_PROGRESS, CONFIRMED, OUTCOME_UNKNOWN and
+RECOVERY_REQUIRED. It carries a Gul close_attempt_id allocated before dispatch,
+an optional close_operation_ref when the provider's durable operation is known,
+and typed next-observation/recovery information. REJECTED must additionally carry
+a Gul-owned rejection object with the existing stable domain error code and
+closed action classification, distinguishing authorization, stale revision, busy
+and invalid-target outcomes without exposing provider text or private reasons.
+Requests rejected before Gul authentication or session authorization use the
+existing typed ConnectRPC error and disclose no close attempt or session state.
+The reference maps to the
+provider operation_id only in the backend; a local attempt ID is not proof of
+provider acceptance. GetExecutionState exposes the same Gul close operation
+reference after it is discovered through the root query, including response loss.
+
+SESSION_CLOSE_IN_PROGRESS maps to IN_PROGRESS, not a generic error or CONFIRMED.
+Only provider-confirmed whole-session settlement permits CONFIRMED. Transport
+loss without accepted evidence is OUTCOME_UNKNOWN. No automatic tokenless retry
+or repeated child commands follow either case. Read GetOrchestratedSession via
+the adapter, then required Run/Writer/Interaction projections; use authorized
+root recovery only when indicated. E5-T2/T3 test reconnect and fault behavior,
+E7-T2 integrates the UI, and E2/E9 supply actual released-provider proof.
 
 ## 10. Event and reconnect architecture
 
@@ -637,7 +809,7 @@ Dolgorae owns upstream cursors and events such as Run/Turn state, final response
 
 ### 10.2 Client events
 
-Gul owns browser-facing events such as presentation changes, projection updates, interaction card changes, file invalidation, and runtime disconnect. Each record has a global monotonic `delivery_sequence`, provider/runtime references when applicable, upstream cursor when derived, correlation ID, allowed payload kind, and creation time.
+Gul owns browser-facing events such as presentation changes, projection updates, interaction card changes, file invalidation, and runtime disconnect. Each browser record has a global monotonic `delivery_sequence`, Gul-owned session/item/operation references when applicable, correlation ID, allowed payload kind and creation time. Provider/runtime IDs and upstream cursors needed for correlation remain in backend checkpoint metadata and are not serialized into the browser record.
 
 ### 10.3 Reconnect
 
@@ -674,7 +846,7 @@ Database transactions cover Gul-owned presentation, auth, delivery, non-authorit
 
 ADR-0017 pins modernc SQLite `1.57.0` with WAL, foreign keys, `synchronous=FULL`, and a 5-second busy timeout on every connection. One writer connection serializes short write transactions; a separate read-only pool is capped at four connections. Delivery sequence allocation uses `UPDATE ... RETURNING` inside the same `BEGIN IMMEDIATE` transaction as the journal insert. Backup checkpoints WAL, uses `VACUUM INTO` on the destination filesystem, fsyncs the new file and parent, and publishes by atomic rename; direct copying of the live database is prohibited.
 
-Crash-safe canonical request material for unresolved `StartRun` and `CreateWriteContinuation` attempts lives in a separate protected `ProviderReplayStore` below `~/Library/Application Support/Gul/provider-replay/`. Its parent is `0700`, files are exclusive `0600`, all path components are non-symlinked and current-user-owned, material is bounded and versioned, file and parent are fsynced, and files are deleted on terminal resolution or after the fixed 72-hour v0.1 maximum retention, configurable only downward. `PurgeExpired` runs at startup and at least every six hours. Expiry removes replay availability but does not convert an unresolved operation into success or failure. The store never accepts `SubmitTurn` prompts/images or `ResolveInteraction` response bytes, and it never stores an absolute credential path or capability; exact carrier resolution uses the role-tagged logical Controller references.
+First-release crash-safe canonical request material for unresolved `StartRun` attempts lives in a separate protected `ProviderReplayStore` below `~/Library/Application Support/Gul/provider-replay/`. Its parent is `0700`, files are exclusive `0600`, all path components are non-symlinked and current-user-owned, material is bounded and versioned, file and parent are fsynced, and files are deleted on terminal resolution or after the fixed 72-hour v0.1 maximum retention, configurable only downward. `PurgeExpired` runs at startup and at least every six hours. Expiry removes replay availability but does not convert an unresolved operation into success or failure. The store never accepts `SubmitTurn` prompts/images or `ResolveInteraction` response bytes, and it never stores an absolute credential path or capability; exact carrier resolution uses the role-tagged logical Controller references.
 
 `runtime_projection_cache` stores each aggregate's complete `ProjectionStamp`, freshness, and invalidation floor; `runtime_timeline_cache` stores its `captured_head_cursor`. These remain non-authoritative caches and are marked stale at startup before mutation enablement.
 
@@ -714,7 +886,7 @@ Protected interaction input is a second secret class with its own rules:
 - discarded after the resolve attempt, whatever the provider result;
 - never replayed; a reconnect re-presents the pending card instead.
 
-Canonical replay material is a separate short-lived sensitive class, not a credential or protected Interaction secret. It is permitted only for `StartRun` and `CreateWriteContinuation`, is stored in the owner-only replay store outside every Workspace, is referenced only by a logical key, and is absent from browser APIs, logs, metrics, traces, diagnostics, and the delivery journal. It may contain bounded Controller instructions or handoff text required by the provider idempotency identity, but it never contains capability bytes, carrier/socket paths, a `SubmitTurn` prompt or image, or a protected Interaction answer. Role-tagged Controller references contain only expected Controller IDs and trusted logical store/binding keys. Material is removed immediately on authoritative terminal resolution or by the 72-hour maximum-retention purge; expiry leaves the non-secret attempt unresolved and fail-closed.
+Canonical replay material is a separate short-lived sensitive class, not a credential or protected Interaction secret. In the first release it is permitted only for `StartRun`, is stored in the owner-only replay store outside every Workspace, is referenced only by a logical key, and is absent from browser APIs, logs, metrics, traces, diagnostics, and the delivery journal. It may contain bounded Controller instructions or handoff text required by the provider idempotency identity, but it never contains capability bytes, carrier/socket paths, a `SubmitTurn` prompt or image, or a protected Interaction answer. Role-tagged Controller references contain only expected Controller IDs and trusted logical store/binding keys. Material is removed immediately on authoritative terminal resolution or by the 72-hour maximum-retention purge; expiry leaves the non-secret attempt unresolved and fail-closed.
 
 Gul never stores or uses an Operator capability and never invokes operator-gated reset. If a Controller is lost, mutations remain blocked until an operator uses the explicit local Machine CLI procedure outside Gul and a host-controlled picker starts verified adoption. The browser cannot provide an arbitrary path.
 
@@ -730,16 +902,39 @@ Logs are structured, bounded, retained by policy, and keyed by Gul/provider/runt
 
 Startup order is: acquire the singleton lock; load configuration and validate the Dolgorae-owned Gul credential subtree; open/migrate SQLite; start the authenticated loopback listener; discover and verify Dolgorae; allocate and validate the private socket parent and unused pathname; start the RPC server; verify the Dolgorae-created socket; complete readiness and compatibility handshake; establish the shared channel; load Workspace/Direct Session presentation; verify Controller bindings; fetch authoritative Runs including recovery/configuration, Writer status, pending/Controller Interactions, and timeline; resume Run observation; then enable runtime mutations only for compatible healthy bindings.
 
-RPC gateway exit marks every provider aggregate stale/disconnected but does not change Run, Turn, interaction, writer, or policy state. Gul applies its bounded restart policy, re-handshakes, reconstructs Run/Writer/Interaction/timeline aggregates with complete stamps, and converges them before re-enabling mutations. Ambiguous `StartRun` and `CreateWriteContinuation` results use the persisted replay envelope and exact operation identity; ambiguous `SubmitTurn` after process loss reconciles without prompt replay; protected Interaction input is never replayed. Tokenless operations use fresh authoritative reads. Browser/Tailscale loss affects only delivery. Gul never restarts or reconciles App Server. Controller loss is not reset in product; verified adoption after an external terminal reset is the only recovery path.
+RPC gateway exit marks every provider aggregate stale/disconnected but does not change Run, Turn, interaction, writer, or policy state. Gul applies its bounded restart policy, re-handshakes, reconstructs Run/Writer/Interaction/timeline aggregates with complete stamps, and converges them before re-enabling mutations. Ambiguous `StartRun` results use the persisted replay envelope and exact operation identity; ambiguous `SubmitTurn` after process loss reconciles without prompt replay; protected Interaction input is never replayed. Tokenless operations use fresh authoritative reads. Browser/Tailscale loss affects only delivery. Gul never restarts or reconciles App Server. Controller loss is not reset in product; verified adoption after an external terminal reset is the only recovery path.
 
 Two failure classes are presented distinctly from ordinary errors:
 
 - **Unresolved outcome.** When the provider reports an unknown turn outcome, writer authority blocked as unknown, a required recovery, or unverified background execution, Gul shows an unresolved state until an authoritative snapshot resolves it. It never renders success, failure, or writer release for an unresolved outcome, and dependent mutations stay blocked.
 - **Operator action required.** Provider-side migration, an unavailable or unverifiable provider server, and Controller reset are operator-gated upstream. Gul cannot perform them, so it names the documented external procedure and offers no in-product retry.
 
+## 15.1 Pre-release and actual-provider development
+
+E12-T1 pins the new producer lock; E12-T2 supplies stateful deterministic fakes.
+Core/UI/auth/files/persistence/history/approval/recovery Tasks complete their
+mock-scoped outputs before the released provider exists. Tests exercise actual
+Gul application code with explicit injection, not screenshots or universal
+success stubs. Fakes are unavailable to production dependency fallback.
+E12-T3 proves assembled pre-release readiness and records unverified live edges.
+E2-T0 then pins the released v0.1.3 artifact; E2/E9 qualify real gateway, carrier,
+RPC, multi-browser and restart/close boundaries using the same application ports.
+
+## 15.2 Future read-only Podway observations
+
+A later optional Dolgorae observer surface supplies the pinned graph definition,
+workflow execution identity, active node set, per-loop iteration and stable node
+execution counts with source revision/freshness. Gul renders observations only;
+reconnect or duplicate messages cannot increment counts. Multiple/nested loops
+and simultaneous active nodes remain distinguishable. Missing information is
+unavailable/stale, not zero or completed. No Gul API/backend/UI can edit FSM,
+jump/skip/force/reexecute nodes, or reset counters. Changes are ordinary prompts
+judged by the executing LLM; only actual Podway state updates the graph. Feature
+absence never blocks existing session, history, approval, or close flows.
+
 ## 16. Test architecture
 
-The canonical integration matrix retains every non-conflicting local-gRPC scenario and adds the final alignment cases: concrete RPC/type coverage; protocol-zero handshake; Workspace bootstrap and scoped reads; provider-authoritative Run configuration; crash-safe exact StartRun/continuation replay; process-local-only SubmitTurn replay; deletion and resolution receipts; typed Controller Interaction oneof and 8 MiB local safe-payload bound; protected-input lost-response handling; exact upstream per-variant invalidation; per-aggregate `ProjectionStamp` convergence; typed stream termination; distinct artifact wire/presentation bounds; unsupported-RPC exclusion; digest drift rejection; and zero production CLI fallback. Every numbered scenario in the 2026-08-19 revision request has a traceable automated or manual owner.
+The first-release integration matrix covers the 27-method consumer profile: protocol-zero handshake; workspace bootstrap and global Profile reads; authoritative Run and Session observations; exact StartRun replay; process-local SubmitTurn retry without history-based resend; complete Timeline and original prompt history; public result discovery then verified artifact reads; sequential input and current Interaction replies; whole-session close and retained-intent recovery; independent revisions, event cursors, reconnect and slow consumers; typed secret-safe errors; and no production fake/CLI fallback. E12-T3 executes core/browser flows with explicit fakes; E2/E9 verify the real released provider. Delete, continuation and same-principal successor tests are deferred, not hidden first-release gates. Historical 2026-08-19 cases apply only when consistent with this scope.
 
 Supporting suites include deterministic domain/action-matrix/error-mapping/serialization tests; SQLite migration, operation-attempt, checkpoint, timeline-cache, and delivery replay tests; generated fake gRPC server fixtures; exact closed-schema Machine CLI conformance; socket ownership/symlink/collision/process tests; compatibility and optional-field policy fixtures; Controller and protected-input canaries; and manual Wails/macOS/Tailscale/launchd qualification. Real Dolgorae smoke tests stay opt-in until E2-T0 pins a compatible release.
 
@@ -747,7 +942,7 @@ No test requires Gul to parse raw App Server events or own runtime state.
 
 ## 17. Packaging
 
-The package identity is `Gul.app`, bundle identifier `xyz.rootkernel.gul`, and helper `gul` with production `gul serve`. Application Support, Logs, and Cache use the `Gul` directories defined in Required Specifications; Controller carriers live below Dolgorae's application-support carrier root and the socket runtime parent lives under Gul Cache. A user `launchd` agent may own the headless core at login. Gul.app attaches to that verified core or starts the same core in-process while holding the same lock. Graceful upgrade drains the core and supervised child, replaces binaries externally, re-verifies them, and reconstructs state. Dolgorae remains an external dependency and is not silently bundled.
+The package identity is `Gul.app`, bundle identifier `xyz.rootkernel.gul`, and helper `gul` with production `gul serve`. Application Support, Logs, and Cache use the `Gul` directories defined in Required Specifications; Controller carriers live below the advertised `~/.dolgorae/controller-carriers/gul/<installation-id>/` root and the socket runtime parent lives under Gul Cache. A user `launchd` agent may own the headless core at login. Gul.app attaches to that verified core or starts the same core in-process while holding the same lock. Graceful upgrade drains the core and supervised child, replaces binaries externally, re-verifies them, and reconstructs state. Dolgorae remains an external dependency and is not silently bundled.
 
 ### 17.1 Bootstrap toolchain and command contract
 
@@ -782,9 +977,9 @@ The serial command facade is `toolchain-check`, `generate-contract`, `contract-c
 
 ## 19. Current snapshot
 
-**Snapshot date:** 2026-08-23
+**Snapshot date:** 2026-09-20 (historical checked contract remains the E0 2026-08-23 pin)
 
-**Roadmap point:** E0 `Completed` — Gate B contract generation, maps, fixtures, and fake-server evidence are accepted; no next Task is active
+**Roadmap point:** E0 `Completed` for its historical pin; E12 consumer rebaseline is `Planned`, no Task active. This planning amendment adds no runtime, new generated pin, or live acceptance.
 
 **Maturity:** documentation rebaseline, bootstrap toolchain, and provider-contract fixture boundary accepted; product implementation not started
 

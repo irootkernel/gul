@@ -4,12 +4,69 @@
 |---|---|
 | Role | Non-normative implementation observations, dependencies, risks, and handoff |
 | Product | Gul |
-| Version | 0.1-grpc-interface-aligned |
-| Last updated | 2026-08-23 |
+| Version | 0.1-dolgorae-consumer-v1 |
+| Last updated | 2026-09-20 |
 
 ## 1. Boundary
 
 This memo records current investigation and execution context. It does not override Required Specifications, accepted ADRs, Architecture, or Roadmap. An observation here is not Current State and does not freeze an external protocol.
+
+## 1.1 Approved consumer rebaseline, 2026-09-20
+
+This amendment adopts ADR-0050/0051 and producer-owned `dolgorae.gul-consumer/v1`
+requirements. It does not regenerate artifacts, implement a component, complete
+E12, or establish live compatibility. The revised roadmap separates pre-release
+fake-based work from post-release adapter/integration work. No Task is active.
+
+| New boundary | Owner and evidence still required |
+| --- | --- |
+| Immutable producer lock | Dolgorae TASK-053: 27 required methods, complete timeline, two additive aggregate reads, exact hashes and bounded fixtures |
+| New Gul consumer pin | E12-T1: old upstream/generated files remain historical E0 until checked regeneration |
+| Consumer-realistic fakes | E12-T2: history/session/result/admission/failure behavior, not universal-success stubs |
+| Pre-release readiness | E12-T3: actual Gul core/browser with fakes and explicit remaining live edges |
+| Released-provider integration | E2/E9: exact released v0.1.3 artifact, actual UDS/carriers/RPC and browser evidence |
+| Future FSM display | Deferred-Podway: inspect the source contract before implementation IDs; read-only end to end |
+
+Provider status at this planning snapshot: TASK-025 is Completed at `57e6be8`.
+The immutable order is TASK-053, 047, 048, 049, 050, 051, 054, 055, 052, 056,
+026. TASK-053 is the contract-ready gate. TASK-054 owns complete timeline,
+TASK-055 owns aggregate/result reads, TASK-052 owns whole-session close,
+TASK-056 owns old-client compatibility, and TASK-026 owns final acceptance.
+This is Required State supplied by the producer plan, not Gul runtime evidence.
+
+The product uses drafts and explicit send after an active Turn, with no queue,
+steering, auto-send or auto-interrupt; approval answers remain available. Session
+close covers the whole owned aggregate through the root and Broker. Gul neither
+controls children nor infers closed success while effects remain unknown.
+Accepted original prompts and safe results remain readable after closure.
+
+The older assumption/risk/evidence tables below describe their original E0
+baseline unless retained by ADR-0050. Old Gate A/B hashes, the 34-method inventory,
+mandatory first-release continuation, and the child-navigation prohibition are
+not new consumer authority. E0 remains completed history; E12 owns the new pin.
+Retained security, replay, convergence, FileService and transport principles
+remain applicable. A plan or fake never advertises actual runtime support.
+
+## 1.2 Review refinements, 2026-09-21
+
+This revision leaves the producer TASK-053 lock pending. It declares browser
+ListPromptHistory/GetPromptHistoryItem/GetExecutionState/ListSpecialistResults
+contracts, bounded Gul tokens and references, and CloseOutcome distinctions.
+Provider cursors and close operation IDs remain backend correlations.
+E1-T3 owns browser contract fixtures, E3-T3 passive execution-state reads, E4-T5
+history/result reads, E4-T3 the shared evaluator and E5-T1 the complete close
+coordinator. Real evidence remains in E2/E9; no earlier Task provides a temporary
+unsafe close route. REQ-RUNTIME-022 retains its historical typed-state scope;
+REQ-CONSUMER-001/E12-T1 alone own the new pin.
+
+The documentation checker must match the Active Task header to active rows and
+preserve permanent retired/reserved IDs through the canonical registry and
+historical baseline, without a fixed total count. Negative tests cover pointer
+mismatch and identity loss alongside existing DAG/phase/owner/link checks.
+These checks prove document structure, not runtime or generated-contract readiness.
+The host currently has Buf 1.69.0; the unchanged Gul pin requires 1.66.1, so a
+contract-check failure before generation is a toolchain limitation, not new wire
+or semantic acceptance. No tool installation is implied.
 
 ## 2. Current development snapshot
 
@@ -17,7 +74,7 @@ This memo records current investigation and execution context. It does not overr
 |---|---|
 | Five Gul SOT documents | E0-T4 completed the consumer alignment and Gate A reproduction; E0-T8 completed toolchain/ADR alignment; E0-T7 completed Gate B |
 | Toolchain and developer-command artifacts | E0-T8 accepted one pin manifest and read-only host checks; E0-T7 adds checked contract generation/drift delegates; no installer or application scaffold |
-| Contract boundary | Exact upstream sources, dependency lock, generated Go/TypeScript clients, descriptor-derived fake server, exhaustive maps, policy fixtures, and Machine CLI comparison fixture are accepted pre-implementation evidence |
+| Contract boundary | Historical E0 sources/locks/clients/fakes remain unchanged; the new consumer profile and E12 regeneration are not yet implemented |
 | Production source | None |
 | Wails host/frontend | Not implemented |
 | ConnectRPC schema/services | Not implemented |
@@ -29,12 +86,18 @@ This memo records current investigation and execution context. It does not overr
 
 The repository contains documentation, pre-implementation bootstrap validation, and a checked provider-contract boundary candidate. No application source or live runtime behavior has completed review.
 
-## 3. Current accepted assumptions
+## 3. Historical E0 assumption snapshot
 
-| ID | Assumption | Authority/status |
+This table records the earlier E0 design context, not current contract readiness.
+Any Accepted, published, complete or Gate A/B wording in this historical table
+refers only to that earlier scope. Sections 1.1 and 2 record the current state:
+TASK-053 publication and E12-T1 repinning are pending. Current product rules are
+in Required Specifications and ADR-0050/0051, not these archived assumptions.
+
+| ID | Historical assumption | Status at the recorded baseline |
 |---|---|---|
 | ASM-010 | Gul is a single-user, LLM-free remote operator interface. | Required Specifications; Accepted |
-| ASM-011 | Dolgorae is the sole v0.1 Direct Runtime Provider. | ADR-0022; Accepted target |
+| ASM-011 | Dolgorae is the sole execution provider; the first-release product is its Orchestrated Session consumer profile. | ADR-0050; Approved Required State |
 | ASM-012 | Dolgorae owns all Codex runtime, interaction, writer, policy, assurance, and recovery authority. | ADR-0023/0026; Accepted target |
 | ASM-013 | Every Direct Session references one Dolgorae Run, not a Codex thread. | ADR-0024; Accepted target |
 | ASM-014 | Gul owns UI, auth, FileService, presentation state, and client delivery. | Required Specifications; Accepted target |
@@ -45,7 +108,7 @@ The repository contains documentation, pre-implementation bootstrap validation, 
 | ASM-019 | Runtime calls use a verified canonical workspace path; Runtime Workspace ID/digest only verifies identity. | ADR-0009; Accepted target |
 | ASM-020 | Gul policy assigns one distinct Controller credential to each Direct Session/Run pair; this is not asserted as a universal Dolgorae invariant. | ADR-0035; Accepted target |
 | ASM-021 | A threadless Run with `threadless_acquire_write=false` activates its first writer through SubmitTurn(WRITE); unsupported or unverified existing-thread transition uses CreateWriteContinuation. | ADR-0036/0044; Accepted target |
-| ASM-022 | Observation reads — activity list, status, pending summaries, client-safe events, writer status — need no runtime capability, so state stays visible while a Controller binding is unhealthy. | Upstream contract observation; Unverified dependency |
+| ASM-022 | Observation reads (activity list, status, pending summaries, client-safe events and writer status) need no runtime capability, so state stays visible while a Controller binding is unhealthy. | Upstream contract observation; Unverified dependency |
 | ASM-023 | One shared gRPC channel carries at most eight logical per-Run streams; all other Runs are polled within ten seconds. | ADR-0043, REQ-PROJ-012/013; Accepted target |
 | ASM-024 | File freshness comes from a bounded host filesystem watcher, so no Gul feature requires the upstream operational event projection. | ADR-0038; Accepted target |
 | ASM-025 | Gul locally creates exact-schema Controller carriers below Dolgorae's Gul carrier root, stores only logical keys, and revalidates the derived path before every authorized RPC; Dolgorae verifies/binds but does not create them. | ADR-0047; Accepted target |
@@ -63,13 +126,18 @@ The repository contains documentation, pre-implementation bootstrap validation, 
 | ASM-037 | Unresolved `StartRun` and `CreateWriteContinuation` replay envelopes have a fixed 72-hour v0.1 maximum retention, configurable only downward; startup and at-least-six-hourly purge delete expired canonical material but preserve the non-secret attempt as `OutcomeUnknown`. | ADR-0049/REQ-REC-011; Accepted target |
 | ASM-038 | Allocation replay stores role-tagged logical Controller references only: `StartRun` uses a destination credential-store key/Controller ID, while continuation uses separate source binding/Controller and destination credential-store/Controller references; absolute carrier paths and capabilities are never persisted. | ADR-0049/REQ-REC-011; Accepted target |
 
-Superseded assumptions—one Gul-managed App Server, Session-to-thread mapping, local WriteLock, local App Server recovery, and raw App Server request handling—are retained only in Section 11 as historical context.
+Superseded assumptions about one Gul-managed App Server, Session-to-thread mapping, local WriteLock, local App Server recovery and raw App Server request handling are retained only in Section 11 as historical context.
 
-## 4. External dependency observations
+## 4. Historical external dependency observations
 
-### 4.1 Dolgorae
+These observations are retained from the 2026-08-23 E0 inspection. They do not
+describe today's producer checkout or satisfy the new consumer contract. In
+particular, the earlier pre-implementation status and completeness claims below
+must not be used to start E12 or certify v0.1.3 compatibility.
 
-The authoritative Dolgorae source is repository `git@github-irootkernel:irootkernel/dolgorae.git`, with clean accepted remote-main revision `85a8862f784cc57701751d81a9e03bf7c5722818` inspected on 2026-08-23. The local sibling `../dolgorae` is read-only context and its unrelated dirty/ahead state is not evidence. The accepted revision supplies the complete public RPC inventory, exact request/response types, typed Run/events, `RunConfigurationProjection`, typed Controller Interaction payload, Interaction byte limits, continuation required action, opaque-path handling, and normative event aggregate semantics required by Gul.
+### 4.1 Dolgorae at the E0 snapshot
+
+The source inspected for E0 was repository `git@github-irootkernel:irootkernel/dolgorae.git`, with clean accepted remote-main revision `85a8862f784cc57701751d81a9e03bf7c5722818` inspected on 2026-08-23. The local sibling `../dolgorae` is read-only context and its unrelated dirty/ahead state is not evidence. The accepted revision supplies the complete public RPC inventory, exact request/response types, typed Run/events, `RunConfigurationProjection`, typed Controller Interaction payload, Interaction byte limits, continuation required action, opaque-path handling, and normative event aggregate semantics required by Gul.
 
 Architecture 6.4 records every semantic-to-RPC mapping including `RefreshRunSnapshot` → `RunService.GetRun`. Gate A is closed by the clean revision and deterministic checked-artifact evidence. The descriptor reproduces byte-for-byte with protoc 35.1 plus official Protobuf v32.1 commit `7fcfd66022455635fa29af92987cdc0967efd4f3`'s `google/protobuf/timestamp.proto` (SHA-256 `14052c6042c1dd2d0b50245f2812eaab6eaf82db0b6e8ce483eae527f73b6ee8`); Buf 1.66.1 lint passes. E0-T7/Gate B pins those sources and digests, generates Go/TypeScript clients, calls all 34 RPCs through a descriptor-derived fake server, and freezes 36-operation, 20-event, capability, identifier/enum, error/action, mutation, replay, convergence, limit, and unsupported-RPC policy evidence. E2-T0 separately pins a reproducible executable/release plus live evidence.
 
@@ -89,14 +157,19 @@ The upstream project was comprehensively renamed from Gomchi to Dolgorae at comm
 
 The retained direction is Wails v3 with a Go core, generated ConnectRPC clients, one responsive frontend, Tailscale Serve to a loopback listener, and bounded read-only host Git operations. Versions and changed upstream behavior require E0-T8 verification before implementation.
 
-## 5. Dependency ledger
+## 5. Historical E0 dependency ledger
 
-Gate A's clean external source and checked-artifact digests are fixed below. E0-T7 records them in `contract/dependency-lock.json` (SHA-256 `c4f91aa3e2add1093880684e5c96fdbb6239aef6a85261a0adf6b585e2db8863`) and records every generated output in `contract/generated/generated-lock.json` (SHA-256 `8a6a614a3a08c585f9a62f74095a0237d47feefba802e2dfa3ce13be5fbe0bf6`).
+The current consumer pin is **not yet available**: Dolgorae TASK-053 must publish
+it and Gul E12-T1 must reproduce and adopt it. No hash in this historical table
+is asserted to identify that future publication. Existing checked/generated
+files are intentionally unchanged, preserving E0 completion evidence.
 
-| Dependency field | Current value | Required evidence | Owner |
+Gate A's earlier source and checked-artifact digests are recorded below. E0-T7 records them in `contract/dependency-lock.json` (SHA-256 `c4f91aa3e2add1093880684e5c96fdbb6239aef6a85261a0adf6b585e2db8863`) and records every generated output in `contract/generated/generated-lock.json` (SHA-256 `8a6a614a3a08c585f9a62f74095a0237d47feefba802e2dfa3ce13be5fbe0bf6`).
+
+| Historical dependency field | E0 recorded value, not the new consumer pin | Original evidence requirement | Original owner |
 |---|---|---|---|
 | Dolgorae SOT source | `git@github-irootkernel:irootkernel/dolgorae.git` remote `main` at `85a8862f784cc57701751d81a9e03bf7c5722818`; clean Gate A source | Pin with the Gul revision and reject source drift | E0-T7 |
-| Dolgorae executable | Unset; E2-T0 Blocked on external TASK-020 | Resolved absolute executable and provenance | E2-T0 |
+| Dolgorae executable | Unset; E2-T0 waits for the exact released v0.1.3 artifact after TASK-026 and RC QA | Resolved absolute executable and provenance | E2-T0 |
 | Dolgorae semantic version | Unset | Accepted release/version output | E2-T0 |
 | Public gRPC proto/descriptor digest | Proto `bdb9916026f82725c1f0592a4d00a280dca43ef8fc968e3503cbf61059d09163`; descriptor `22e605dddc26c145ab6c682955fa4bfcf078b8356d38e94982e118b948965318` | Accepted protocol range, generated inventory, and pinned reproduction check | E0-T7/E2-T0 |
 | Capability schema digest | `99393b430f014eec861cdba57258594f21cb65d2f3b1c9dfc23a3c0051e067e7` | Required capability/version/limit matrix | E0-T7 |
@@ -117,20 +190,30 @@ Gate A's clean external source and checked-artifact digests are fixed below. E0-
 | Host platform | macOS `>=14.0.0`, `arm64`; Git `>=2.39.0,<3.0.0` | Range checks; no installation or mutation | E0-T8 |
 | SQLite driver/settings | modernc.org/sqlite `1.57.0`; WAL; foreign keys; `synchronous=FULL`; 5-second busy timeout; one writer and at most four read-only connections; immediate transactional sequence allocation; checkpoint plus `VACUUM INTO` backup | Accepted ADR-0017 and future E1-T4 fault/race/backup tests | E0-T8 |
 
-## 6. Open decisions
+## 6. Historical E0 decision register
+
+This records decisions and questions at E0. It is not the current execution gate
+list. The current contract-ready and released-provider gates are in the roadmap;
+ADR-0050 resolves the new input/closure/scope decisions. Source-only SVG remains
+the safe first-release default unless a later accepted ADR changes it.
 
 | Decision | Status | Required action | Blocking scope |
 |---|---|---|---|
-| Dolgorae executable and live compatibility | Gate A contract publication is complete, but external TASK-020 has not produced an accepted compatible executable | Complete E0-T7 Gate B, then let E2-T0 pin executable, lifecycle, version, binary identity, and smoke evidence. | E2-T0 Blocked; blocks production provider/evaluator, not E0 or transport-independent E1 |
+| Dolgorae executable and live compatibility | Historical E0 contract evidence exists; the new immutable contract starts at TASK-053 and the exact release follows TASK-026 plus RC QA | Complete E12-T1..T3 before E2-T0 pins the released executable, lifecycle, version, binary identity, and smoke evidence. | E2-T0 release-gated; does not block pre-release work |
 | Gorae release scope | Deferred by ADR-0030 | Explicit SOT/ADR approval required to enter v0.1. | Deferred epic |
 | Local draft Direct Session behavior | Unspecified | Decide whether a presentation may exist before Run creation and define cleanup/idempotency. | E3-T3 |
 | SVG preview | ADR-0018 Proposed | Select source-only, rasterization, or isolated sanitization. | Active SVG preview |
 
 No unresolved item is silently decided by this memo. Source-only SVG remains the safe fallback, and explicit refresh remains the Release-tier behavior beneath the Recommended-tier watcher.
 
-Decisions closed in this round: ADR-0017 selects modernc SQLite with bounded WAL concurrency, immediate transactional delivery-sequence allocation, and checkpointed `VACUUM INTO` backup. ADR-0043 assigns socket lifecycle ownership while retaining supervised local gRPC and diagnostic-only CLI; ADR-0044 requires the typed-state evaluator and threadless first-write flow; ADR-0045 requires timeline and Artifact capabilities; ADR-0046 selects one shared headless/desktop core; ADR-0047 assigns exact-schema credential creation/storage to Gul and verification/binding to Dolgorae. Gate A clean publication and reproduction are complete; E0-T7 supplies Gate B's checked consumer maps, replay/convergence fixtures, generated clients/fake server, and digest manifests, while executable/version evidence remains E2-T0 work.
+Decisions closed in the historical E0 round: ADR-0017 selects modernc SQLite with bounded WAL concurrency, immediate transactional delivery-sequence allocation, and checkpointed `VACUUM INTO` backup. ADR-0043 assigns socket lifecycle ownership while retaining supervised local gRPC and diagnostic-only CLI; ADR-0044 requires the typed-state evaluator and threadless first-write flow; ADR-0045 requires timeline and Artifact capabilities; ADR-0046 selects one shared headless/desktop core; ADR-0047 assigns exact-schema credential creation/storage to Gul and verification/binding to Dolgorae. Gate A clean publication and reproduction are complete; E0-T7 supplies Gate B's checked consumer maps, replay/convergence fixtures, generated clients/fake server, and digest manifests, while executable/version evidence remains E2-T0 work.
 
-## 7. Risk register
+## 7. Historical E0 risk register
+
+The probabilities, producer status and mitigation owners below are historical,
+not a fresh assessment. Current mitigation ownership follows E12/E2/E9 and the
+revised roadmap. Continuation-only scenarios are deferred with E4-T4; none of
+these archived rows adds a first-release requirement.
 
 | ID | Risk | Likelihood | Impact | Mitigation/owner |
 |---|---|---:|---:|---|
@@ -168,7 +251,7 @@ Decisions closed in this round: ADR-0017 selects modernc SQLite with bounded WAL
 
 ## 8. E0-T4 completion record
 
-### E0-T4 — Rebaseline the five Gul SOT documents
+### E0-T4: Rebaseline the five Gul SOT documents
 
 **Status:** `Completed`
 **Started:** 2026-08-17
@@ -252,7 +335,7 @@ Rows dated before 2026-08-23 are historical. E0-T4 lifecycle evidence remains re
 
 ### 9.1 Boundary gate pack
 
-The corrective pack must verify: unique/permanent requirement IDs and valid owners; 36-task acyclic DAG and one active task; ADR index/body equality with ADR-0029 and ADR-0034 superseded; 46 contiguous invariants; concrete RPC/type and provider/local-store/API/error/action agreement; caller-owned credential schema/root/principal rules; Dolgorae-owned socket bind/unlink; bootstrap plus workspace-scoped reads; provider-authoritative Run configuration; exact StartRun/continuation replay; receipt-based protected Interaction recovery and byte limits; typed event end/invalidation policy; no browser secret/path fields; no CLI fallback; threadless first write; eight-stream/ten-second polling and independent cursors; distinct artifact wire/presentation bounds; headless/Tailscale/FileService boundaries; release tiers; and the canonical integration matrix.
+The current boundary pack must verify unique permanent requirement IDs and valid active and deferred owners; the dynamic acyclic DAG with at most one active Task; ADR index/body equality; concrete RPC/type and provider/local-store/API/error/action agreement; caller-owned credential schema/root/principal rules; Dolgorae-owned socket bind/unlink; bootstrap plus global Profile reads; provider-authoritative configuration; exact StartRun replay; deferred continuation exclusion; protected Interaction recovery and byte limits; typed event invalidation; no browser secret/path fields; no CLI fallback; threadless first write; bounded streams and independent cursors; complete Prompt History; aggregate/result reads and whole-session close; artifact bounds; headless/Tailscale/FileService boundaries; release tiers; and the canonical first-release integration matrix.
 
 ### 9.2 Prompt completion criteria
 

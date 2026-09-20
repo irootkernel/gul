@@ -22,6 +22,7 @@ test-unit:
 
 test-int:
 	@./scripts/toolchain-check.sh --manifest-only
+	@node scripts/test-sot.mjs
 	@./scripts/check-sot.sh
 	@./scripts/contract-command.sh check
 	@git diff --check
