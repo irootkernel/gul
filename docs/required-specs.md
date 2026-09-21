@@ -7,8 +7,8 @@
 | Product | Gul (굴) |
 | Subtitle | Remote operator interface for local development runtimes |
 | Version | 0.1-dolgorae-consumer-v1 |
-| Status | Approved Required State; historical E0 completed; E12 consumer rebaseline not implemented |
-| Last updated | 2026-09-20 |
+| Status | Approved Required State; historical E0 completed; whole-Epic consumer implementation not started |
+| Last updated | 2026-09-21 |
 | Target | macOS host; modern desktop, iPad, and iPhone browsers |
 
 ## 1. Purpose, authority, and lifecycle
@@ -173,16 +173,40 @@ Owner IDs identify responsibility, while the roadmap's phase determines whether
 completion evidence is mock-scoped or live. Pre-release completion cannot claim
 real credentials, gateway, or provider acceptance; E2/E9 qualify those boundaries.
 Historical E0 evidence is retained only for its old pin. New contract pinning,
-fake scenarios, and pre-release readiness belong to E12-T1/T2/T3.
+provider scenario fakes, and assembled pre-release readiness belong to E12-T1,
+E13-T1, and E14-T1, respectively. Former E12-T2/T3 are Retired, not incomplete
+members of E12. The roadmap orders complete Epics; no pre-release Epic requires
+a later Epic's implementation to satisfy its own acceptance.
+
+Foundation Tasks prove their named ports, schemas, repositories, bundle and shell
+against isolated test dependencies. They do not promote a requirement whose
+acceptance needs the assembled application. The complete requirements retain
+these explicit acceptance owners:
+
+| Required outcome | Foundation or feature contribution | Complete requirement owner |
+| --- | --- | --- |
+| Authenticated runtime-independent core and shared bundle | E1-T1/T2 foundation and E8 authentication | REQ-HOST-001/002: E14-T1 |
+| Authenticated Wails singleton/verified attach | E1-T5 shell and E8 packaging | REQ-HOST-007: E8-T3 |
+| Production headless runtime assembly | E1 core, E6 files, E8 authentication/packaging, E2 adapter | REQ-HOST-008: E2-T3 |
+| Complete declared application services | E1-T3 contracts and each feature's service implementation | REQ-API-001: E14-T1 |
+| No duplicate state-changing operation on browser retry | E1-T3 concurrency contract and E5 attempt/replay implementation | REQ-API-002: E5-T3 |
+| Installed PWA navigation across refresh | E7-T1 navigation and E8 PWA packaging | REQ-UI-007: E8-T3 |
+
+Until E8 supplies real account/session protection, production product access MUST
+remain denied. Test principals and fake dependencies are explicit isolated test
+injections, never production bypasses. E13-T1 proves provider scenario behavior
+without requiring Gul feature implementations; E14-T1 proves those completed
+features together. This splits evidence ownership, not product safety or release
+scope. E2/E9 still own actual-provider proof.
 
 ### 5.1 Host, authentication, and network
 
 | ID | Requirement | Acceptance | Owner |
 |---|---|---|---|
-| REQ-HOST-001 | Gul MUST provide a Go core, loopback delivery, and persistence that run without Wails and without an LLM runtime. | The core, listener, and persistence start and serve an authenticated remote client with no Wails process present. | E1-T1 |
-| REQ-HOST-002 | One frontend bundle MUST serve both authenticated remote clients and the desktop shell. | The bundle is served over the authenticated listener and the shell reuses it with no second bundle or API surface. | E1-T2 |
-| REQ-HOST-007 | Gul MUST ship a macOS Wails v3 desktop shell that starts the shared core in-process when absent or attaches to the verified existing `gul serve`, adding no domain authority or second runtime path. | Desktop smoke tests pass against the same API; capability inventory shows the shell adds only WebView delivery and host-native affordances. | E1-T5 |
-| REQ-HOST-008 | Gul MUST provide production `gul serve` headless mode that starts the shared core, authenticated HTTPS/ConnectRPC service, Dolgorae supervision, event aggregation, and FileService without a Wails window. | Headless browser E2E passes with no Wails process. | E1-T1 |
+| REQ-HOST-001 | Gul MUST provide a Go core, loopback delivery, and persistence that run without Wails and without an LLM runtime. | The assembled core, listener, and persistence serve an authenticated client with no Wails process or real provider present; E1 supplies the foundation and E8 supplies authentication. | E14-T1 |
+| REQ-HOST-002 | One frontend bundle MUST serve both authenticated remote clients and the desktop shell. | The bundle is served over the authenticated listener and the shell reuses it with no second bundle or API surface. | E14-T1 |
+| REQ-HOST-007 | Gul MUST ship a macOS Wails v3 desktop shell that starts the shared core in-process when absent or attaches to the verified existing `gul serve`, adding no domain authority or second runtime path. | Authenticated desktop and singleton/verified-attach tests pass against the same API; E1-T5 supplies the shell foundation. Capability inventory shows only WebView delivery and host-native affordances. | E8-T3 |
+| REQ-HOST-008 | Gul MUST provide production `gul serve` headless mode that starts the shared core, authenticated HTTPS/ConnectRPC service, Dolgorae supervision, event aggregation, and FileService without a Wails window. | Headless browser E2E passes with the released provider and no Wails process; E1's foundation or E14's fake evidence alone cannot promote this requirement. | E2-T3 |
 | REQ-HOST-009 | Exactly one Gul core per user and data directory MUST own the runtime lock. Gul.app MUST attach to a verified healthy existing `gul serve`; a second headless invocation MUST exit without starting another core or Dolgorae server. | Desktop/headless contention and spoofed-owner tests pass. | E8-T3 |
 | REQ-HOST-010 | Headless packaging MUST include user `launchd` operation, graceful upgrade/restart, host sleep/wake recovery, owned-process and protected-log locations, and actionable port-collision behavior. | Login, upgrade, sleep/wake, collision, and log-permission drills pass. | E8-T3 |
 | REQ-HOST-003 | Gul APIs MUST use Protobuf-defined ConnectRPC services. | Generated Go and TypeScript clients compile without handwritten feature REST APIs. | E1-T3 |
@@ -369,7 +393,7 @@ fake scenarios, and pre-release readiness belong to E12-T1/T2/T3.
 | REQ-UI-003 | Navigation MUST display provider connectivity, activity, writer, policy, assurance, and interaction state without implying local authority. | State combinations remain unambiguous. | E7-T2 |
 | REQ-UI-004 | The file pane MUST switch between explorer and preview while retaining navigation context. | Back navigation restores directory and selection. | E7-T1 |
 | REQ-UI-006 | Interaction cards MUST take visual priority over passive progress. | Required action is reachable without hidden scrolling on supported mobile layouts. | E7-T2 |
-| REQ-UI-007 | The PWA MUST preserve safe presentation navigation across ordinary refresh. | Runtime state is revalidated and stale projection is never promoted. | E7-T1 |
+| REQ-UI-007 | The PWA MUST preserve safe presentation navigation across ordinary refresh. | The installed PWA preserves E7-T1's navigation state; runtime state is revalidated and stale projection is never promoted. | E8-T3 |
 | REQ-UI-008 | Primary flows MUST be keyboard accessible and use semantic controls. | Automated and manual accessibility checks pass. | E7-T3 |
 | REQ-UI-009 | Typed blockers including unprovisioned workspace, missing profile, lost Controller, denied provider root, and incompatible provider MUST be presented distinctly. | Every blocker has a safe explanation and allowed next action. | E7-T2 |
 | REQ-UI-010 | Blockers requiring action outside Gul, including provider-side migration, an unavailable or unverifiable provider server, and Controller reset, MUST be a distinct operator-action-required class naming the external procedure, and unresolved-outcome states MUST be visually distinct from ordinary errors. | Fixtures for each condition present no in-product retry, name the documented external step, and never render as a transient failure. | E7-T2 |
@@ -378,8 +402,8 @@ fake scenarios, and pre-release readiness belong to E12-T1/T2/T3.
 
 | ID | Requirement | Acceptance | Owner |
 |---|---|---|---|
-| REQ-API-001 | Application services MUST be declared in Protobuf and implemented with ConnectRPC. | Auth, Runtime, WorkspacePresentation, DirectSession, InteractionPresentation, WriterAction, File, ClientEvent, and Diagnostics clients are generated and versioned. | E1-T3 |
-| REQ-API-002 | Retryable state-changing operations MUST use unary RPCs with typed provider-aware concurrency semantics. | Browser retries never create duplicate provider operations. | E1-T3 |
+| REQ-API-001 | Application services MUST be declared in Protobuf and implemented with ConnectRPC. | Auth, Runtime, WorkspacePresentation, DirectSession, InteractionPresentation, WriterAction, File, ClientEvent, and Diagnostics clients are generated and versioned. E1-T3 proves the declarations and transport contracts; E14 verifies first-release service wiring across completed features with fake-provider diagnostics, while E9-T2 owns actual-provider diagnostic/security qualification. | E14-T1 |
+| REQ-API-002 | Retryable state-changing operations MUST use unary RPCs with typed provider-aware concurrency semantics. | Browser retry fault tests prove no duplicate provider effect using the E1-T3 contract and completed attempt/replay implementation; actual-provider proof remains E2/E9. | E5-T3 |
 | REQ-API-003 | Client updates MUST use server-streaming RPCs with a Gul delivery sequence distinct from upstream cursors. | Replay and snapshot fallback converge in order. | E4-T1 |
 | REQ-API-004 | Unknown, expired, stale, unauthorized, conflict, unavailable, and recovery-required conditions MUST have stable Gul error codes. | Clients never parse human text or raw provider errors. | E1-T3 |
 | REQ-API-005 | Public APIs MUST NOT expose raw provider envelopes, capability material, unrestricted absolute paths, unvalidated or unauthorized artifact content, or arbitrary Git revisions. | Contract scans and negative serialization tests pass. | E1-T3 |
@@ -390,10 +414,10 @@ fake scenarios, and pre-release readiness belong to E12-T1/T2/T3.
 | REQ-OBS-002 | Diagnostic output MUST be bounded and redacted. | Oversized provider output, secret canaries, prompts, and local sensitive paths remain absent. | E9-T2 |
 | REQ-OBS-003 | The user MUST be able to view a diagnostic summary reporting Gul/toolchain/database/Tailscale/provider version, compatibility, capabilities, reachability, checkpoint state, safe errors, and Controller binding health. | No App Server process ownership, capability material, or Operator-gated diagnostic operation is present. | E9-T2 |
 | REQ-QA-001 | Core presentation, path, projection, cursor, and adapter behavior MUST have deterministic unit tests. | Tests require no real LLM. | E9-T1 |
-| REQ-QA-003 | Browser E2E MUST cover auth, inspection, Direct Session, read/write submit, final response, interaction, writer actions, successor, reconnect, and files. | Supported flow matrix passes. | E9-T3 |
+| REQ-QA-003 | Browser E2E MUST cover auth, inspection, Direct Session, read/write submit, final response, interaction, writer actions, unsupported-continuation rejection, reconnect, and files. | The first-release flow matrix passes; actual successor creation remains Deferred with E4-T4. | E9-T3 |
 | REQ-QA-004 | Manual checks MUST cover Wails, macOS browser, iPhone Safari/PWA, and iPad Safari/PWA. | Results and suspension limitations are recorded. | E9-T3 |
 | REQ-QA-005 | Release docs MUST cover installation, Dolgorae compatibility, Tailscale Serve, backup, fail-closed Controller loss, external terminal reset followed by verified adoption, and the prohibition on hard links into `.dolgorae`. | Clean-host and credential-loss documentation dry runs succeed without claiming in-product reset and deployment guidance covers the hard-link residual. | E9-T3 |
-| REQ-QA-006 | Release acceptance MUST require every Release-tier requirement to be in Current State with evidence, every Recommended-tier requirement to be promoted or explicitly recorded as accepted-incomplete, and every Roadmap Task to be `Completed`. | Qualification fails while any Release-tier item remains unpromoted, while a Recommended-tier item has no recorded disposition, or while any Task is not `Completed`. | E9-T3 |
+| REQ-QA-006 | Release acceptance MUST require every Release-tier requirement to be in Current State with evidence, every Recommended-tier requirement to be promoted or explicitly recorded as accepted-incomplete, and every first-release Roadmap Task and Epic to be `Completed`. | E9-T3 verifies guards that reject an unpromoted Release-tier item, an undispositioned Recommended-tier item or an incomplete required Task/Epic. Deferred and Retired Tasks are excluded, not marked passed. The final release declaration follows E9 closeout; E9-T3 does not require its own Epic to have closed before it can test these guards. | E9-T3 |
 | REQ-QA-007 | Dolgorae integration MUST have a fake public gRPC server plus opt-in smoke tests against an accepted compatible executable, and a separate exact-schema Machine CLI conformance harness. | Private interfaces are never used; production DI contains no CLI fallback; live smoke tests remain blocked until E2-T0 completes. | E9-T1 |
 | REQ-QA-008 | Provider conformance MUST map every port/API operation, required identifier, enum, error/action detail, projection, event form, and carrier schema to the accepted public contract. | Checked inventories and positive/negative fixtures cover every mapping and are regenerated from the accepted descriptor/schema digests. | E9-T1 |
 | REQ-QA-009 | Security tests MUST cover `.dolgorae/**` across every surface, Controller-capability and protected-interaction-input canaries across process/browser/storage paths, and Controller-loss recovery without Operator possession. | All escape and recovery drills fail closed. | E9-T2 |
@@ -411,8 +435,9 @@ success. Pre-release acceptance is fake-scoped; E2/E9 own real-provider proof.
 | ID | Requirement | Acceptance | Owner |
 |---|---|---|---|
 | REQ-CONSUMER-001 | Pin TASK-053's immutable producer contract before new contract-based implementation, including exact wire, credential-schema digest, 27 required methods, error and close-outcome mappings, client/mutation policies, bounds, field-sourceability fixtures and independent typed-state inputs. | Regenerated consumer artifacts reproduce the new lock and required fixtures; old E0 evidence is not new pinning or implementation acceptance. | E12-T1 |
-| REQ-CONSUMER-002 | Pre-release implementation MUST use explicit stateful contract-derived fakes and MUST never enable a fake as production failure fallback. | Actual core/browser workflows pass against fakes with all remaining live boundaries recorded. | E12-T2 |
+| REQ-CONSUMER-002 | Pre-release implementation MUST use explicit stateful contract-derived fakes and MUST never enable a fake as production failure fallback. | Deterministic scenario drivers prove the 27-method provider behavior, failure/recovery boundaries and explicit injection over frozen ports without depending on future Gul features. REQ-CONSUMER-004 owns assembled application acceptance. | E13-T1 |
 | REQ-CONSUMER-003 | Actual adapter qualification MUST use the exact released Dolgorae v0.1.3 artifact and matching consumer lock. | E2-T0 records released build identity, hashes, capabilities, and real gateway evidence; no unreleased substitution. | E2-T0 |
+| REQ-CONSUMER-004 | Before released-provider integration, the actual Gul core/browser MUST pass the assembled first-release scenarios against the explicit stateful fake, with real Gul account/session protection and no production fake fallback. | Authentication, workspace/session flows, history/originals, approvals, results, close, files and restart/reconnect pass together. Remaining real-provider, credential, UDS and deployment evidence is listed for E2/E9, not inferred passed. | E14-T1 |
 | REQ-PROMPT-001 | Each session MUST expose a separate user-only Prompt History section from accepted Primary timeline items. | UI displays ordered original previews, ordinal, provider time, expandable full original, and linked Turn/chat; AI/internal Specialist prompts are excluded. | E7-T2 |
 | REQ-PROMPT-002 | Original accepted prompt history MUST survive pagination, browser/Gul/provider restart and session closure. | Complete timeline and long-input artifact fixtures reconstruct exact Unicode/line endings without text-based deduplication. | E4-T5 |
 | REQ-PROMPT-003 | Distinct accepted submissions with identical text MUST remain distinct; exact replay/reconnect MUST not duplicate one submission. | Identity/cursor tests, multi-client races, failed/interrupted Turn history retention, and append-during-pagination tests pass. | E4-T5 |
@@ -448,7 +473,7 @@ REQ-WRITER-004 retains its original ID and meaning and is deferred, not supersed
 
 ## 7. Current State ledger
 
-No Gul product runtime behavior exists. The 2026-09-20 amendment is approved planning only. E12-T1..T3 and all new requirements remain Required State. The following completed authorities refer only to the historical E0 toolchain/old contract:
+No Gul product runtime behavior exists. The 2026-09-20 consumer amendment and 2026-09-21 whole-Epic reorganization are approved planning only. E12-T1, E13-T1, E14-T1 and all new requirements remain Required State. Former E12-T2/T3 are Retired without implementation evidence. The following completed authorities refer only to the historical E0 toolchain/old contract:
 
 | Requirement | Accepted Current State | Evidence |
 |---|---|---|

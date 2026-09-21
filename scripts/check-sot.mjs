@@ -164,6 +164,28 @@ export function validateRepository(root, options = {}) {
   }
   if (!tasks.size) errors.push('No canonical Task DAG rows found');
 
+  // A topological Task order can still require leaving and re-entering an Epic.
+  // Retired and deferred identities are not members of first-release execution.
+  const epicBlocks = [];
+  for (const [id, task] of tasks) {
+    if (['Deferred', 'Retired'].includes(task.state)) continue;
+    const epic = id.split('-')[0];
+    if (epic === epicBlocks.at(-1)) continue;
+    if (epicBlocks.includes(epic)) errors.push(`First-release Epic ${epic} is interleaved across Task blocks`);
+    epicBlocks.push(epic);
+  }
+  const epicSummaries = [...roadmap.matchAll(/^\| (E\d+) \| ([^|]+) \|/gm)];
+  const summaryIds = epicSummaries.map(match => match[1]);
+  if (summaryIds.length !== new Set(summaryIds).size) errors.push('Duplicate Epic summary row');
+  for (const [, epic, state] of epicSummaries) {
+    if (!states.has(state.trim())) errors.push(`Invalid Epic summary status: ${epic}: ${state.trim()}`);
+    if (![...tasks.keys()].some(id => id.startsWith(`${epic}-`))) errors.push(`Epic summary ${epic} has no Task rows`);
+  }
+  const releaseSummaryOrder = summaryIds.filter(epic => epicBlocks.includes(epic));
+  if (releaseSummaryOrder.join(',') !== epicBlocks.join(',')) {
+    errors.push(`Epic summary order must match first-release Task blocks: ${epicBlocks.join(', ')}`);
+  }
+
   const active = [...tasks].filter(([, task]) => ['In Progress', 'In Review'].includes(task.state));
   if (active.length > 1) errors.push(`Multiple active Tasks: ${active.map(([id]) => id).join(', ')}`);
   const activeHeaders = [...roadmap.matchAll(/^\| Active Task \| ([^|]+) \|$/gm)].map(match => match[1].trim());
@@ -276,7 +298,7 @@ export function validateRepository(root, options = {}) {
   return {
     errors,
     warnings,
-    summary: `${requiredCount} first-release Tasks, ${deferredCount} deferred, ${active.length} active, ${currentIds.length} active requirements, ${deferredIds.length} deferred requirements, ${index.size} ADRs, ${registry.size} permanent Task IDs (${reservedCount} reserved); DAG, phases, owners, identities, and links valid; ${evidence.mode === 'source-export' ? 'historical nondeletion unverified' : 'committed identity history verified'}`,
+    summary: `${requiredCount} first-release Tasks, ${deferredCount} deferred, ${active.length} active, ${currentIds.length} active requirements, ${deferredIds.length} deferred requirements, ${index.size} ADRs, ${registry.size} permanent Task IDs (${reservedCount} reserved); DAG, Epic blocks/order, phases, owners, identities, and links valid; ${evidence.mode === 'source-export' ? 'historical nondeletion unverified' : 'committed identity history verified'}`,
   };
 }
 

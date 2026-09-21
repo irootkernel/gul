@@ -5,7 +5,7 @@
 | Role | Durable architecture decisions and supersession history |
 | Product | Gul |
 | Version | 0.1-dolgorae-consumer-v1 |
-| Last updated | 2026-09-20 |
+| Last updated | 2026-09-21 |
 
 ## 1. Status model
 
@@ -73,6 +73,7 @@ ADR-0050 explicitly amends the product/child-presentation scope in ADR-0021/0022
 | ADR-0049 | Retain operation-class-specific replay material instead of persisting prompts or secrets | Accepted; continuation scope amended | ADR-0050 |
 | ADR-0050 | Adopt the released Dolgorae consumer profile and split mock from live work | Accepted | None |
 | ADR-0051 | Keep future Podway visualization strictly read-only | Accepted, future scope | None |
+| ADR-0052 | Execute complete Epics without cross-Epic interleaving | Accepted | None |
 
 ## 3. Retained decisions
 
@@ -592,6 +593,56 @@ running LLM under Podway rules. LLM consent does not move the diagram; actual
 Podway state does. Observation feature absence cannot block basic chat, prompt
 history, approval, or closure. Inspect the actual Podway contract before assigning
 implementation tasks; no imaginary source API or current capability is claimed.
+
+### ADR-0052: Execute complete Epics without cross-Epic interleaving
+
+**Status:** Accepted, 2026-09-21
+
+Master requested a roadmap that can be delivered through one Aquarium
+`epic-handler` invocation per Epic. The previous Task DAG was acyclic, but E12
+spanned contract pinning, later stateful fakes and final application acceptance.
+E1 needed E12-T1 while E12-T2/T3 needed E1 and later feature Epics. Contracting
+that Task DAG to whole Epics created a cycle. E8 also appeared in separate early
+and late passes. Reordering the summary alone would not fix execution.
+
+Keep E12-T1 as the contract-pinning Epic. Retire unstarted E12-T2/T3 without
+removing or reusing their identities. Allocate E13-T1 for stateful provider
+scenario fakes and E14-T1 for assembled pre-release application acceptance.
+E1 closes on its core/port/schema/persistence/bundle/shell foundation without
+requiring E13 or later features. E13 closes on independently driven provider
+scenarios, not application flows that do not yet exist. E8 delivers authentication
+and packaging together after the UI. The roadmap owns the exact current order,
+Task membership, external entry gates and completion rules.
+
+This changes evidence ownership, not product scope. Full authenticated host and
+bundle acceptance belongs to E14, shell singleton/verified attach and installed
+PWA behavior to E8, and actual headless provider assembly to E2. Complete API
+assembly belongs to E14; no-duplicate-mutation behavior belongs to E5. E1 still
+implements its reusable foundation and contract tests. A contributor Task cannot
+promote another Task's complete requirement by citing its partial implementation.
+REQ-CONSUMER-002 covers the provider fake harness; REQ-CONSUMER-004 explicitly
+owns the application acceptance formerly bundled into its fake requirement.
+
+Before authentication is implemented, production product access remains denied.
+Isolated test principals are never a bypass, and fakes remain explicit test
+injections rather than automatic production fallback. No remote deployment or
+real-provider readiness is inferred from a foundation or feature test.
+
+Every first-release Epic closes before the next begins, including its own audit
+and required evidence. Deferred E4-T4 and Retired IDs are excluded from current
+Epic membership and release completion. Current E4 may complete without future
+continuation work. Shared dossier links are owned per Epic; a closeout removes
+only its own reference and retains the file until the final consumer closes.
+
+Structural validation must reject interleaved first-release Epic blocks and a
+summary order that disagrees with the Task blocks, in addition to existing
+Task-DAG, lifecycle, identity and requirement-owner checks. This does not claim
+semantic acceptance or verify producer release status.
+
+Rejected alternatives: asking the operator to suspend/resume partially completed
+Epics; changing only the summary order; deleting or reusing old Task IDs;
+combining the entire application into one oversized Epic; or weakening security
+and actual-provider acceptance to make an earlier Epic appear complete.
 
 ## 6. Proposed decisions
 

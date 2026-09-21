@@ -7,7 +7,7 @@
 | Consumer contract | `dolgorae.gul-consumer/v1` |
 | Producer source | Dolgorae `docs/specs/gul-consumer-v1.md` |
 | Target provider | Exact released Dolgorae v0.1.3 artifact |
-| Updated | 2026-09-20 |
+| Updated | 2026-09-21 |
 
 ## 1. Scope
 
@@ -16,27 +16,56 @@ It does not claim generated-contract drift is resolved, start a Task, or provide
 runtime evidence. The five canonical Gul documents remain authoritative in their
 declared precedence order.
 
-Allowed implementation sequence:
+Use the whole-Epic sequence and membership in [the roadmap](../roadmap.md).
+Each handler invocation delivers exactly one Epic through its own closeout;
+never suspend a partial Epic to implement a later Epic's Tasks. Verify earlier
+Epic completion and explicit external gates before entry. This dossier carries
+acceptance context, not a duplicate lifecycle or dependency ledger.
 
-1. TASK-053 freezes the immutable producer wire, clients, fixtures, schema and
-   policy hashes, and exact revision.
-2. E12-T1 repins Gul to that immutable contract and regenerates checked consumer
-   artifacts through the repository generator.
-3. E12-T2 builds explicit stateful consumer fakes.
-4. E12-T3 proves the assembled pre-release core and browser against those fakes.
-5. E2 and E9 integrate and qualify only against the exact released v0.1.3
-   artifact after producer RC QA.
+The delivery boundaries are:
+
+| Boundary | Responsibility |
+| --- | --- |
+| Producer contract ready | **Satisfied:** TASK-053 froze wire, clients, fixtures, schema/policy hashes and immutable revision at `21aefe5b2a8dc6fb18a58338090348b23d2f0a4a`. |
+| E12-T1 | Repin and regenerate checked consumer artifacts; no application prerequisite. |
+| E1 foundation | Core, typed ports, SQLite, bundle and shell tested with isolated dependencies; no stateful scenario-fake or full-feature prerequisite. |
+| E13-T1 | Build and independently test stateful provider scenarios over the completed ports; replaces retired E12-T2. |
+| Feature Epics | Complete workspace/session, events/history/approval, close/recovery, files, UI, then authentication/packaging in roadmap order. |
+| E14-T1 | Prove the assembled authenticated application with those fakes; replaces retired E12-T3. |
+| E2 and E9 | Integrate and qualify the exact released v0.1.3 artifact after producer RC QA, with separate actual-provider evidence. |
 
 No pre-release Task may depend directly or transitively on release-gated E2 or
-E9. A fake is an explicit test dependency and never a production fallback.
+E9. Product access stays denied before E8 supplies real Gul authentication;
+test principals never become production bypasses. A fake is an explicit test
+dependency and never a production fallback.
+
+### 1.1 Shared dossier lifecycle and completion scope
+
+Each active consumer Epic has its own roadmap link to this shared dossier. At
+closeout, promote durable facts to their canonical owners, remove only the
+closing Epic's dossier link, and keep the file while other consumer links remain.
+Only the last consumer closeout may delete it under the approved envelope.
+
+E4-T4 is outside the current E4 delivery scope. Retired E12-T2/T3 are historical
+identities, not unfinished E12 members. Neither Deferred nor Retired Tasks enter
+the first-release completion denominator.
+
+Foundation and feature contributions do not promote assembled requirements.
+E14 owns complete authenticated core/bundle/API acceptance; E8 owns authenticated
+shell singleton/attach and installed-PWA behavior; E2 owns actual headless
+provider assembly. The exact requirement owners are in Required Specifications.
+E13's scenario tests need no future UI; E14's tests must exercise the real Gul
+application, not just replay the E13 provider drivers.
 
 ## 2. Producer order and evidence boundary
 
-TASK-025 is Completed at `57e6be8`. The provider order is fixed:
+TASK-025 is Completed at `57e6be8`, and TASK-053 is Completed at
+`21aefe5b2a8dc6fb18a58338090348b23d2f0a4a`. The provider order is fixed; its
+remaining sequence is:
 
-`TASK-053 -> TASK-047 -> TASK-048 -> TASK-049 -> TASK-050 -> TASK-051 -> TASK-054 -> TASK-055 -> TASK-052 -> TASK-056 -> TASK-026`
+`TASK-047 -> TASK-048 -> TASK-049 -> TASK-050 -> TASK-051 -> TASK-054 -> TASK-055 -> TASK-052 -> TASK-056 -> TASK-026`
 
-- TASK-053 freezes checked wire, clients, fixtures, and the immutable revision.
+- TASK-053 froze checked wire, clients, fixtures, and the immutable revision.
 - TASK-054 completes `ListRunTimelineItems` semantics.
 - TASK-055 completes `GetOrchestratedSession` and
   `ListOrchestratedSessionResults`.
@@ -70,7 +99,7 @@ continuation implementation.
 - [ ] E4-T3 completes the shared close-eligibility and interrupt-confirmation evaluator.
 - [ ] E4-T5 implements browser history/item/result reads, empty-but-continuable pages, complete original text, fixed traversal scope, token expiry and authorization.
 - [ ] E5-T1 uses those completed predecessors for whole-session close, stable operation correlation and pending/confirmed/unknown/recovery handling. E7-T2 integrates UI; E2/E9 prove the real provider.
-- [ ] Documentation checks reject mismatched Active Task pointers, removed retired/reserved permanent IDs, invalid dependencies/owners and cross-ledger duplicates. Negative fixtures never alter the live worktree.
+- [ ] Documentation checks reject mismatched Active Task pointers, removed retired/reserved permanent IDs, interleaved Epic blocks, summary/Task-order disagreement, invalid dependencies/owners and cross-ledger duplicates. Negative fixtures never alter the live worktree.
 - [ ] Check shell syntax and staged/unstaged whitespace. Run contract-check only with the pinned toolchain, or report the exact mismatch without rewriting generated output.
 
 ## 4. Product session contract
@@ -135,8 +164,10 @@ Pause and Interrupt remain Primary-scoped. Neither is an aggregate pause.
 
 ## 7. Stateful fake acceptance
 
-E12-T2 fakes model behavior rather than universal success. Required scenarios
-include:
+E13-T1 fakes model behavior rather than universal success. Test them through the
+completed E1 ports with deterministic scenario drivers, reset/clock/fault control
+and isolated state. Do not require later Gul features or copy their application
+logic into the fake. Required scenarios include:
 
 - stable prompt identities, same-text new requests, and request retry;
 - timeline pagination, captured heads, CRLF, Korean, and long-input artifacts;
@@ -148,9 +179,10 @@ include:
 - reconnect, duplicate events, slow consumers, and projection convergence;
 - optional method presence without a corresponding Gul action.
 
-E12-T3 uses actual Gul core and browser code with these fakes. It is not a
-screenshot-only proof and does not claim real credentials, UDS lifecycle,
-supervision, or native binding behavior.
+E14-T1 uses actual Gul core and browser code with these fakes and completed Gul
+authentication. It must cover the integrated feature routes, not just the E13
+harness. It is not a screenshot-only proof and does not claim real Dolgorae
+credentials, UDS lifecycle, supervision, or native binding behavior.
 
 ## 8. Released-provider acceptance
 
@@ -180,10 +212,16 @@ state changes. Missing Podway observation cannot block existing functionality.
 - [ ] The consumer matrix distinguishes 27 required methods from all 36 methods.
 - [ ] Global Profile reads contain no Workspace reference.
 - [ ] The fixed carrier-root contract and no-Operator boundary pass fixtures.
-- [ ] E12-T2 stateful fake scenarios pass.
-- [ ] E12-T3 assembled pre-release browser proof passes.
+- [ ] E13-T1 stateful fake scenarios pass independently of future Gul features.
+- [ ] E14-T1 assembled authenticated pre-release browser proof passes.
+- [ ] Earlier required Epics close before the next Epic starts; no cross-Epic
+      Task interleaving is needed.
+- [ ] E8 authentication and packaging run as one complete Epic; earlier product
+      access remains denied outside isolated test injection.
+- [ ] E12-T2/T3 remain Retired with preserved IDs and no active requirement owner.
 - [ ] No pre-release Task depends on E2 or E9.
-- [ ] E4-T4 remains Deferred and no first-release action offers continuation.
+- [ ] E4-T4 remains Deferred outside current E4 membership, and no first-release
+      action offers continuation.
 - [ ] E2 pins the exact released v0.1.3 artifact after RC QA.
 - [ ] E9 records actual-provider acceptance separately from fake evidence.
 - [ ] All canonical documents, requirement owners, DAG phases, and local links

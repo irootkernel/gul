@@ -5,7 +5,7 @@
 | Role | Non-normative implementation observations, dependencies, risks, and handoff |
 | Product | Gul |
 | Version | 0.1-dolgorae-consumer-v1 |
-| Last updated | 2026-09-20 |
+| Last updated | 2026-09-21 |
 
 ## 1. Boundary
 
@@ -18,21 +18,23 @@ requirements. It does not regenerate artifacts, implement a component, complete
 E12, or establish live compatibility. The revised roadmap separates pre-release
 fake-based work from post-release adapter/integration work. No Task is active.
 
-| New boundary | Owner and evidence still required |
+| New boundary | Current authority or remaining owner |
 | --- | --- |
-| Immutable producer lock | Dolgorae TASK-053: 27 required methods, complete timeline, two additive aggregate reads, exact hashes and bounded fixtures |
+| Immutable producer lock | **Available:** Dolgorae TASK-053 completed at `21aefe5b2a8dc6fb18a58338090348b23d2f0a4a` with 27 required methods, complete timeline, two additive aggregate reads, exact hashes and bounded fixtures |
 | New Gul consumer pin | E12-T1: old upstream/generated files remain historical E0 until checked regeneration |
-| Consumer-realistic fakes | E12-T2: history/session/result/admission/failure behavior, not universal-success stubs |
-| Pre-release readiness | E12-T3: actual Gul core/browser with fakes and explicit remaining live edges |
+| Consumer-realistic fakes | E13-T1, replacing retired E12-T2: independently tested history/session/result/admission/failure scenarios |
+| Pre-release readiness | E14-T1, replacing retired E12-T3: assembled authenticated core/browser with fakes and explicit remaining live edges |
 | Released-provider integration | E2/E9: exact released v0.1.3 artifact, actual UDS/carriers/RPC and browser evidence |
 | Future FSM display | Deferred-Podway: inspect the source contract before implementation IDs; read-only end to end |
 
-Provider status at this planning snapshot: TASK-025 is Completed at `57e6be8`.
-The immutable order is TASK-053, 047, 048, 049, 050, 051, 054, 055, 052, 056,
-026. TASK-053 is the contract-ready gate. TASK-054 owns complete timeline,
-TASK-055 owns aggregate/result reads, TASK-052 owns whole-session close,
-TASK-056 owns old-client compatibility, and TASK-026 owns final acceptance.
-This is Required State supplied by the producer plan, not Gul runtime evidence.
+Provider status at this planning snapshot: TASK-025 is Completed at `57e6be8`,
+and TASK-053 is Completed at immutable commit
+`21aefe5b2a8dc6fb18a58338090348b23d2f0a4a`. The contract-ready gate is therefore
+satisfied. The remaining producer order is 047, 048, 049, 050, 051, 054, 055,
+052, 056, 026. TASK-054 owns complete timeline, TASK-055 owns aggregate/result
+reads, TASK-052 owns whole-session close, TASK-056 owns old-client compatibility,
+and TASK-026 owns final acceptance. This proves the checked producer contract,
+not Gul adoption, runtime implementation, or released-provider compatibility.
 
 The product uses drafts and explicit send after an active Turn, with no queue,
 steering, auto-send or auto-interrupt; approval answers remain available. Session
@@ -49,7 +51,9 @@ remain applicable. A plan or fake never advertises actual runtime support.
 
 ## 1.2 Review refinements, 2026-09-21
 
-This revision leaves the producer TASK-053 lock pending. It declares browser
+The producer TASK-053 lock is available at immutable commit
+`21aefe5b2a8dc6fb18a58338090348b23d2f0a4a`; Gul adoption remains pending under
+E12-T1. This revision declares browser
 ListPromptHistory/GetPromptHistoryItem/GetExecutionState/ListSpecialistResults
 contracts, bounded Gul tokens and references, and CloseOutcome distinctions.
 Provider cursors and close operation IDs remain backend correlations.
@@ -67,6 +71,49 @@ These checks prove document structure, not runtime or generated-contract readine
 The host currently has Buf 1.69.0; the unchanged Gul pin requires 1.66.1, so a
 contract-check failure before generation is a toolchain limitation, not new wire
 or semantic acceptance. No tool installation is implied.
+
+## 1.3 Whole-Epic execution reorganization, 2026-09-21
+
+ADR-0052 responds to Master's request to drive development through one complete
+Aquarium `epic-handler` invocation at a time. The earlier Task DAG was valid,
+but E12's pin preceded E1 while its fake and final-readiness Tasks required E1
+and later feature Epics. That prevented whole-Epic execution. E8 also appeared
+in separate early and late passes.
+
+The roadmap now groups each required Epic's Tasks contiguously and displays the
+Epics in execution order. E12 retains only contract pinning. E13-T1 replaces
+unstarted E12-T2 for stateful provider scenarios; E14-T1 replaces E12-T3 for
+assembled pre-release acceptance. Both old IDs remain Retired with unchanged
+registry entries. E8 delivers authentication and packaging together after UI.
+No existing E0 completion or product feature is changed. The contract-ready gate
+is recorded as satisfied by TASK-053; the released-provider gate remains pending.
+No Task is activated and no provider checkout is modified.
+
+Completion boundaries now distinguish E1's isolated foundation tests, E13's
+provider scenario tests, each feature Epic's behavior, E8 authentication and
+packaging, and E14 assembly. Required Specifications move full authenticated
+host/bundle/API acceptance to E14, shell attachment and PWA qualification to E8,
+actual headless provider assembly to E2, and browser mutation retry behavior to
+E5. REQ-CONSUMER-004 names assembled fake-application acceptance separately from
+the provider fake harness. Early production access remains denied, rather than
+using a temporary authentication bypass to finish an Epic.
+
+The current E4 scope excludes Deferred E4-T4. Required release completion also
+excludes Retired IDs, and the old generic successor E2E wording now names the
+first-release unsupported-continuation check instead. Each consumer Epic has a
+separate link to the shared dossier so its closeout cannot delete another Epic's
+remaining acceptance context. The final consumer owns dossier deletion.
+
+Verification for this amendment is limited to documentation structure and the
+changed validator's fixtures, plus whitespace/syntax checks. `bash
+scripts/check-sot.sh`, `node scripts/test-sot.mjs`, JavaScript syntax checks and
+`git diff --check` passed on the amended worktree. The fixture runner reports
+17 exercised negative cases, including the new Epic-order and retired-owner
+cases. The first-release Task count remains 38 including three Completed E0
+Tasks; 35 implementation Tasks remain Planned. Generated artifacts, product
+implementation and live integration are unchanged and are not certified by these
+checks. TASK-053 completion is separate immutable producer evidence, not an
+inference from the Gul structural checks.
 
 ## 2. Current development snapshot
 
@@ -91,8 +138,10 @@ The repository contains documentation, pre-implementation bootstrap validation, 
 This table records the earlier E0 design context, not current contract readiness.
 Any Accepted, published, complete or Gate A/B wording in this historical table
 refers only to that earlier scope. Sections 1.1 and 2 record the current state:
-TASK-053 publication and E12-T1 repinning are pending. Current product rules are
-in Required Specifications and ADR-0050/0051, not these archived assumptions.
+TASK-053 publication is complete at
+`21aefe5b2a8dc6fb18a58338090348b23d2f0a4a`, while E12-T1 repinning remains
+pending. Current product rules are in Required Specifications and ADR-0050/0051,
+not these archived assumptions.
 
 | ID | Historical assumption | Status at the recorded baseline |
 |---|---|---|
@@ -159,10 +208,11 @@ The retained direction is Wails v3 with a Go core, generated ConnectRPC clients,
 
 ## 5. Historical E0 dependency ledger
 
-The current consumer pin is **not yet available**: Dolgorae TASK-053 must publish
-it and Gul E12-T1 must reproduce and adopt it. No hash in this historical table
-is asserted to identify that future publication. Existing checked/generated
-files are intentionally unchanged, preserving E0 completion evidence.
+The new consumer lock is **available from the producer** at Dolgorae TASK-053
+commit `21aefe5b2a8dc6fb18a58338090348b23d2f0a4a`; Gul E12-T1 must still reproduce
+and adopt it. No hash in this historical table is asserted to identify that new
+publication. Existing checked/generated files are intentionally unchanged,
+preserving E0 completion evidence.
 
 Gate A's earlier source and checked-artifact digests are recorded below. E0-T7 records them in `contract/dependency-lock.json` (SHA-256 `c4f91aa3e2add1093880684e5c96fdbb6239aef6a85261a0adf6b585e2db8863`) and records every generated output in `contract/generated/generated-lock.json` (SHA-256 `8a6a614a3a08c585f9a62f74095a0237d47feefba802e2dfa3ce13be5fbe0bf6`).
 
@@ -199,7 +249,7 @@ the safe first-release default unless a later accepted ADR changes it.
 
 | Decision | Status | Required action | Blocking scope |
 |---|---|---|---|
-| Dolgorae executable and live compatibility | Historical E0 contract evidence exists; the new immutable contract starts at TASK-053 and the exact release follows TASK-026 plus RC QA | Complete E12-T1..T3 before E2-T0 pins the released executable, lifecycle, version, binary identity, and smoke evidence. | E2-T0 release-gated; does not block pre-release work |
+| Dolgorae executable and live compatibility | Historical E0 contract evidence exists; the new immutable contract starts at TASK-053 and the exact release follows TASK-026 plus RC QA | Complete the pre-release Epic sequence through E14 before E2-T0 pins the released executable, lifecycle, version, binary identity, and smoke evidence. | E2-T0 release-gated; does not block pre-release work |
 | Gorae release scope | Deferred by ADR-0030 | Explicit SOT/ADR approval required to enter v0.1. | Deferred epic |
 | Local draft Direct Session behavior | Unspecified | Decide whether a presentation may exist before Run creation and define cleanup/idempotency. | E3-T3 |
 | SVG preview | ADR-0018 Proposed | Select source-only, rasterization, or isolated sanitization. | Active SVG preview |
@@ -211,8 +261,8 @@ Decisions closed in the historical E0 round: ADR-0017 selects modernc SQLite wit
 ## 7. Historical E0 risk register
 
 The probabilities, producer status and mitigation owners below are historical,
-not a fresh assessment. Current mitigation ownership follows E12/E2/E9 and the
-revised roadmap. Continuation-only scenarios are deferred with E4-T4; none of
+not a fresh assessment. Current mitigation ownership follows E12/E13/E14/E2/E9
+and the revised roadmap. Continuation-only scenarios are deferred with E4-T4; none of
 these archived rows adds a first-release requirement.
 
 | ID | Risk | Likelihood | Impact | Mitigation/owner |

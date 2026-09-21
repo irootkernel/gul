@@ -29,12 +29,15 @@ function run(root, baseline = baselineRegistry) {
   });
 }
 
+let negativeCases = 0;
+
 function expectFailure(name, mutate, pattern, baseline = baselineRegistry) {
   const root = fixture();
   try {
     mutate(root);
     const result = run(root, baseline);
     assert(result.errors.some(error => pattern.test(error)), `${name}: expected ${pattern}, got:\n${result.errors.join('\n')}`);
+    negativeCases += 1;
   } finally {
     fs.rmSync(root, {recursive: true, force: true});
   }
@@ -218,4 +221,29 @@ expectFailure('duplicate task', root => {
   ));
 }, /Duplicate Task: E0-T5/);
 
-console.log('SOT validator fixtures passed: Git baseline, first-adoption, source-export, and 17 negative cases');
+expectFailure('topological tasks still interleave an Epic', root => {
+  write(root, 'docs/roadmap.md', text => {
+    const moved = text.match(/^\| E1-T5 \|.*\n/m)[0];
+    return text.replace(moved, '').replace(/^\| E13-T1 \|.*\n/m, row => `${row}${moved}`);
+  });
+}, /First-release Epic E1 is interleaved across Task blocks/);
+
+expectFailure('Epic summary order differs from execution', root => {
+  write(root, 'docs/roadmap.md', text => {
+    const first = text.match(/^\| E12 \|.*$/m)[0];
+    const second = text.match(/^\| E1 \|.*$/m)[0];
+    return text.replace(/^\| (E12|E1) \|.*$/gm, row => row === first ? second : first);
+  });
+}, /Epic summary order must match first-release Task blocks/);
+
+expectFailure('missing Epic summary', root => {
+  write(root, 'docs/roadmap.md', text => text.replace(/^\| E13 \|.*\n/m, ''));
+}, /Epic summary order must match first-release Task blocks/);
+
+expectFailure('migrated fake requirement cannot retain retired owner', root => {
+  write(root, 'docs/required-specs.md', text => text.replace(
+    /^(\| REQ-CONSUMER-002 \|.*)\| E13-T1 \|$/m, '$1| E12-T2 |',
+  ));
+}, /Active requirement REQ-CONSUMER-002 has non-release owner E12-T2/);
+
+console.log(`SOT validator fixtures passed: Git baseline, first-adoption, source-export, and ${negativeCases} negative cases`);

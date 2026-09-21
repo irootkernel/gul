@@ -6,7 +6,7 @@
 | Product | Gul |
 | Version | 0.1-dolgorae-consumer-v1 |
 | Status | Approved target rebaseline; new pin and product implementation absent |
-| Last updated | 2026-09-20 |
+| Last updated | 2026-09-21 |
 
 ## 1. Purpose and change control
 
@@ -911,14 +911,27 @@ Two failure classes are presented distinctly from ordinary errors:
 
 ## 15.1 Pre-release and actual-provider development
 
-E12-T1 pins the new producer lock; E12-T2 supplies stateful deterministic fakes.
-Core/UI/auth/files/persistence/history/approval/recovery Tasks complete their
-mock-scoped outputs before the released provider exists. Tests exercise actual
-Gul application code with explicit injection, not screenshots or universal
-success stubs. Fakes are unavailable to production dependency fallback.
-E12-T3 proves assembled pre-release readiness and records unverified live edges.
-E2-T0 then pins the released v0.1.3 artifact; E2/E9 qualify real gateway, carrier,
-RPC, multi-browser and restart/close boundaries using the same application ports.
+ADR-0052 organizes development into complete Epics in roadmap order. E12-T1 pins
+the new producer lock. E1 builds the shared core, typed ports, SQLite, bundle and
+shell foundation, using isolated test dependencies without requiring later
+features. E13-T1 then supplies stateful deterministic provider fakes over those
+ports. Its scenario drivers verify provider behavior without requiring Gul UI or
+coordinators; it does not duplicate their application logic.
+
+Workspace/session, event/history/approval, close/recovery, files and UI Epics
+complete their own scoped behaviors using that harness. E8 delivers account and
+cookie protection together with shell/headless/PWA/tailnet packaging. Product
+access stays denied before real Gul authentication is installed; test principals
+are isolated injections, never production bypasses.
+
+E14-T1 verifies the assembled authenticated core/bundle/API and feature flows
+against explicit fakes, then records the unverified live boundaries. E12-T2/T3
+are retained as Retired identities, replaced by E13-T1/E14-T1. Tests exercise
+actual application code, not screenshots or universal-success stubs. Fakes are
+unavailable to production dependency fallback. E2-T0 then pins the released
+v0.1.3 artifact; E2/E9 qualify real gateway, carrier, RPC, production headless
+assembly, multi-browser and restart/close boundaries through the same ports.
+A foundation Task never claims complete authenticated or live assembly evidence.
 
 ## 15.2 Future read-only Podway observations
 
@@ -934,7 +947,7 @@ absence never blocks existing session, history, approval, or close flows.
 
 ## 16. Test architecture
 
-The first-release integration matrix covers the 27-method consumer profile: protocol-zero handshake; workspace bootstrap and global Profile reads; authoritative Run and Session observations; exact StartRun replay; process-local SubmitTurn retry without history-based resend; complete Timeline and original prompt history; public result discovery then verified artifact reads; sequential input and current Interaction replies; whole-session close and retained-intent recovery; independent revisions, event cursors, reconnect and slow consumers; typed secret-safe errors; and no production fake/CLI fallback. E12-T3 executes core/browser flows with explicit fakes; E2/E9 verify the real released provider. Delete, continuation and same-principal successor tests are deferred, not hidden first-release gates. Historical 2026-08-19 cases apply only when consistent with this scope.
+The first-release integration matrix covers the 27-method consumer profile: protocol-zero handshake; workspace bootstrap and global Profile reads; authoritative Run and Session observations; exact StartRun replay; process-local SubmitTurn retry without history-based resend; complete Timeline and original prompt history; public result discovery then verified artifact reads; sequential input and current Interaction replies; whole-session close and retained-intent recovery; independent revisions, event cursors, reconnect and slow consumers; typed secret-safe errors; and no production fake/CLI fallback. E13-T1 verifies the provider scenario harness independently; E14-T1 executes assembled authenticated core/browser flows with those explicit fakes. E2/E9 verify the real released provider. Delete, continuation and same-principal successor tests are deferred, not hidden first-release gates. Historical 2026-08-19 cases apply only when consistent with this scope.
 
 Supporting suites include deterministic domain/action-matrix/error-mapping/serialization tests; SQLite migration, operation-attempt, checkpoint, timeline-cache, and delivery replay tests; generated fake gRPC server fixtures; exact closed-schema Machine CLI conformance; socket ownership/symlink/collision/process tests; compatibility and optional-field policy fixtures; Controller and protected-input canaries; and manual Wails/macOS/Tailscale/launchd qualification. Real Dolgorae smoke tests stay opt-in until E2-T0 pins a compatible release.
 
@@ -977,9 +990,9 @@ The serial command facade is `toolchain-check`, `generate-contract`, `contract-c
 
 ## 19. Current snapshot
 
-**Snapshot date:** 2026-09-20 (historical checked contract remains the E0 2026-08-23 pin)
+**Snapshot date:** 2026-09-21 (historical checked contract remains the E0 2026-08-23 pin)
 
-**Roadmap point:** E0 `Completed` for its historical pin; E12 consumer rebaseline is `Planned`, no Task active. This planning amendment adds no runtime, new generated pin, or live acceptance.
+**Roadmap point:** E0 `Completed` for its historical pin; whole-Epic implementation starts with Planned E12, then the ordered Epics in the roadmap. E13 owns the fake harness and E14 owns pre-release application acceptance; former E12-T2/T3 are Retired. No Task is active. This planning amendment adds no runtime, new generated pin, or live acceptance.
 
 **Maturity:** documentation rebaseline, bootstrap toolchain, and provider-contract fixture boundary accepted; product implementation not started
 

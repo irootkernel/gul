@@ -64,6 +64,8 @@
     { "id": "E11-T3", "roadmapPresence": "reserved" },
     { "id": "E12-T1", "roadmapPresence": "required" },
     { "id": "E12-T2", "roadmapPresence": "required" },
-    { "id": "E12-T3", "roadmapPresence": "required" }
+    { "id": "E12-T3", "roadmapPresence": "required" },
+    { "id": "E13-T1", "roadmapPresence": "required" },
+    { "id": "E14-T1", "roadmapPresence": "required" }
   ]
 }
