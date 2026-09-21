@@ -12,6 +12,30 @@ trap cleanup EXIT HUP INT TERM
 cd "$contract_root"
 . "$version_manifest"
 
+version_cmp() {
+  local left=$1
+  local op=$2
+  local right=$3
+  awk -v left="$left" -v right="$right" -v op="$op" '
+    function component(value, position, parts, count) {
+      count = split(value, parts, /[.]/)
+      return position <= count ? parts[position] + 0 : 0
+    }
+    BEGIN {
+      cmp = 0
+      for (i = 1; i <= 4; i++) {
+        a = component(left, i)
+        b = component(right, i)
+        if (a < b) { cmp = -1; break }
+        if (a > b) { cmp = 1; break }
+      }
+      if (op == "ge") exit !(cmp >= 0)
+      if (op == "lt") exit !(cmp < 0)
+      exit 2
+    }
+  '
+}
+
 if [ "$(go version)" != "go version go${GUL_GO_VERSION} darwin/arm64" ]; then
   printf 'ERROR contract generation requires Go %s on darwin/arm64\n' "$GUL_GO_VERSION" >&2
   exit 2
@@ -20,8 +44,10 @@ if [ "$(protoc --version)" != "libprotoc $GUL_PROTOC_VERSION" ]; then
   printf 'ERROR contract generation requires protoc %s\n' "$GUL_PROTOC_VERSION" >&2
   exit 2
 fi
-if [ "$(buf --version)" != "$GUL_BUF_VERSION" ]; then
-  printf 'ERROR contract generation requires Buf %s\n' "$GUL_BUF_VERSION" >&2
+buf_version=$(buf --version)
+if ! version_cmp "$buf_version" ge "$GUL_BUF_MIN_VERSION" || ! version_cmp "$buf_version" lt "$GUL_BUF_MAX_EXCLUSIVE_VERSION"; then
+  printf 'ERROR contract generation requires Buf >= %s and < %s; found %s\n' \
+    "$GUL_BUF_MIN_VERSION" "$GUL_BUF_MAX_EXCLUSIVE_VERSION" "$buf_version" >&2
   exit 2
 fi
 for executable in node_modules/.bin/protoc-gen-es node_modules/.bin/protoc-gen-connect-es; do

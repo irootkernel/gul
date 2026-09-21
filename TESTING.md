@@ -17,7 +17,8 @@ exists.
 
 The pinned Wails executable is `wails3` at exactly `v3.0.0-beta.8`. A `wails`
 v2 installation is not a substitute. The host check also requires macOS 14 or
-newer on arm64 and Git `>=2.39.0,<3.0.0`.
+newer on arm64, Git `>=2.39.0,<3.0.0`, and the system `buf` from `PATH` at
+`>=1.66.1,<2.0.0`. Buf performs linting only; generators remain exactly pinned.
 
 The nested contract Go/Bun graphs match the version manifest and exist only to
 compile contract fixtures; they are not an application scaffold. Later Tasks may

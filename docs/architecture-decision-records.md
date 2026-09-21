@@ -74,6 +74,7 @@ ADR-0050 explicitly amends the product/child-presentation scope in ADR-0021/0022
 | ADR-0050 | Adopt the released Dolgorae consumer profile and split mock from live work | Accepted | None |
 | ADR-0051 | Keep future Podway visualization strictly read-only | Accepted, future scope | None |
 | ADR-0052 | Execute complete Epics without cross-Epic interleaving | Accepted | None |
+| ADR-0053 | Use a compatible system Buf for contract linting | Accepted | None |
 
 ## 3. Retained decisions
 
@@ -643,6 +644,20 @@ Rejected alternatives: asking the operator to suspend/resume partially completed
 Epics; changing only the summary order; deleting or reusing old Task IDs;
 combining the entire application into one oversized Epic; or weakening security
 and actual-provider acceptance to make an earlier Epic appear complete.
+
+### ADR-0053: Use a compatible system Buf for contract linting
+
+**Status:** Accepted, 2026-09-21
+
+Resolve Buf from the system `PATH` and accept versions `>=1.66.1,<2.0.0`. Buf is
+used only for `buf lint`; `protoc` and every checked-artifact generator retain
+their exact pins. Contract generation therefore remains byte-reproducible while
+compatible Buf v1 patch and minor releases do not block the command facade.
+
+Both the host checker and contract-generation boundary fail closed below the
+minimum or at the next major version, and lint itself remains mandatory. The
+historical Gate A record that Buf 1.66.1 passed is unchanged evidence of that
+completed run, not a current exact-host requirement.
 
 ## 6. Proposed decisions
 

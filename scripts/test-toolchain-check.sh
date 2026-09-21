@@ -34,7 +34,7 @@ write_command go "go version go$GUL_GO_VERSION darwin/arm64"
 write_command wails3 "v$GUL_WAILS_VERSION"
 write_command node "v$GUL_NODE_VERSION"
 write_command bun "$GUL_BUN_VERSION"
-write_command buf "$GUL_BUF_VERSION"
+write_command buf 1.69.0
 write_command protoc "libprotoc $GUL_PROTOC_VERSION"
 write_command protoc-gen-go "protoc-gen-go v$GUL_PROTOC_GEN_GO_VERSION"
 write_command protoc-gen-connect-go "$GUL_PROTOC_GEN_CONNECT_GO_VERSION"
@@ -43,6 +43,30 @@ write_command protoc-gen-connect-es "v$GUL_PROTOC_GEN_CONNECT_ES_VERSION"
 write_command git "git version $GUL_GIT_MIN_VERSION"
 
 PATH="$fixture_dir:/usr/bin:/bin" "$checker" >/dev/null
+
+write_command buf 1.65.0
+if PATH="$fixture_dir:/usr/bin:/bin" "$checker" >"$fixture_dir/out" 2>"$fixture_dir/err"; then
+  printf 'ERROR unsupported old Buf unexpectedly passed\n' >&2
+  exit 1
+fi
+if ! grep -q "Buf: expected >= $GUL_BUF_MIN_VERSION and < $GUL_BUF_MAX_EXCLUSIVE_VERSION, found 1.65.0" "$fixture_dir/err"; then
+  printf 'ERROR old Buf mismatch was not reported precisely\n' >&2
+  cat "$fixture_dir/err" >&2
+  exit 1
+fi
+
+write_command buf 2.0.0
+if PATH="$fixture_dir:/usr/bin:/bin" "$checker" >"$fixture_dir/out" 2>"$fixture_dir/err"; then
+  printf 'ERROR unsupported Buf major unexpectedly passed\n' >&2
+  exit 1
+fi
+if ! grep -q "Buf: expected >= $GUL_BUF_MIN_VERSION and < $GUL_BUF_MAX_EXCLUSIVE_VERSION, found 2.0.0" "$fixture_dir/err"; then
+  printf 'ERROR Buf upper bound was not reported precisely\n' >&2
+  cat "$fixture_dir/err" >&2
+  exit 1
+fi
+
+write_command buf 1.69.0
 
 write_command wails3 v2.11.0
 if PATH="$fixture_dir:/usr/bin:/bin" "$checker" >"$fixture_dir/out" 2>"$fixture_dir/err"; then

@@ -68,9 +68,10 @@ preserve permanent retired/reserved IDs through the canonical registry and
 historical baseline, without a fixed total count. Negative tests cover pointer
 mismatch and identity loss alongside existing DAG/phase/owner/link checks.
 These checks prove document structure, not runtime or generated-contract readiness.
-The host currently has Buf 1.69.0; the unchanged Gul pin requires 1.66.1, so a
-contract-check failure before generation is a toolchain limitation, not new wire
-or semantic acceptance. No tool installation is implied.
+The host currently has Buf 1.69.0, which satisfies the current
+`>=1.66.1,<2.0.0` lint-tool range. Buf is resolved from the system `PATH`; the
+descriptor and generated-client tools remain exactly pinned. No tool installation
+is implied, and tool availability is not wire or semantic acceptance.
 
 ## 1.3 Whole-Epic execution reorganization, 2026-09-21
 
@@ -236,7 +237,7 @@ Gate A's earlier source and checked-artifact digests are recorded below. E0-T7 r
 | Gul adapter version | Unset | Versioned adapter contract | E2-T1 |
 | Last successful compatibility probe | None | Timestamp, environment, result, redacted evidence | E2-T1 |
 | Go/Wails/Node/Bun/TypeScript/React | Go `1.26.6`; Wails `3.0.0-beta.8` (`wails3`); Node `26.7.0`; Bun `1.3.14`; TypeScript `7.0.2`; React/DOM `19.2.7` | `toolchain/versions.env`; read-only exact/missing/mismatch checks and clean-host fixtures | E0-T8 |
-| Protobuf/Buf/ConnectRPC | Buf `1.66.1`; protoc `35.1`; protoc-gen-go/protobuf-go `1.36.12`; connect-go/protoc-gen-connect-go `1.20.0`; Connect-ES/Web `2.1.2`; Protobuf-ES/protoc-gen-es `2.14.0`; protoc-gen-connect-es `1.7.0` | Same manifest; generated dependency manifests must match before use | E0-T8 |
+| Protobuf/Buf/ConnectRPC | System Buf `>=1.66.1,<2.0.0`; protoc `35.1`; protoc-gen-go/protobuf-go `1.36.12`; connect-go/protoc-gen-connect-go `1.20.0`; Connect-ES/Web `2.1.2`; Protobuf-ES/protoc-gen-es `2.14.0`; protoc-gen-connect-es `1.7.0` | Same manifest; Buf lint must pass and generated dependency manifests must match before use | E0-T8 |
 | Host platform | macOS `>=14.0.0`, `arm64`; Git `>=2.39.0,<3.0.0` | Range checks; no installation or mutation | E0-T8 |
 | SQLite driver/settings | modernc.org/sqlite `1.57.0`; WAL; foreign keys; `synchronous=FULL`; 5-second busy timeout; one writer and at most four read-only connections; immediate transactional sequence allocation; checkpoint plus `VACUUM INTO` backup | Accepted ADR-0017 and future E1-T4 fault/race/backup tests | E0-T8 |
 
@@ -556,7 +557,12 @@ These cases are normative future acceptance owned by the Roadmap tasks named in 
 
 The root Makefile provides the non-rewriting serial facade `toolchain-check`, `generate-contract`, `contract-check`, `test-prepare`, `test-unit`, `test-int`, `test-e2e`, and `test`. `test` invokes the four test phases serially. E0-T7's checked delegates require exact generator versions, verify imported source hashes, reproduce the descriptor and all tracked outputs, run the all-RPC fake-server tests and TypeScript checker, and validate generated policies plus the separate Machine CLI fixture. Later Tasks extend these stable targets for frontend/browser E2E and opt-in pinned-runtime smoke tests. Real provider tests remain opt-in and must never reveal Controller capabilities, carrier/socket paths, or protected input.
 
-The current host check is honest evidence, not an installation workflow: it matches Go, Node, Bun, Buf, protoc, protoc-gen-connect-es, Git, macOS, and architecture, and reports missing Wails v3 plus three older generators. The clean-host fixture proves the exact supported matrix; mismatch and missing-command fixtures prove fail-closed diagnostics. E0-T8 does not install or silently substitute those tools.
+The current host check is honest evidence, not an installation workflow: it
+matches Go, Node, Buf, protoc, protoc-gen-connect-es, Git, macOS and architecture,
+and reports missing Wails v3, a newer unsupported Bun and three older generators.
+The clean-host fixture proves the exact pins and supported ranges; mismatch and
+missing-command fixtures prove fail-closed diagnostics. E0-T8 does not install
+or silently substitute those tools.
 
 ### E0-T8 completion record
 

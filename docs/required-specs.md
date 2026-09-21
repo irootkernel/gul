@@ -477,7 +477,7 @@ No Gul product runtime behavior exists. The 2026-09-20 consumer amendment and 20
 
 | Requirement | Accepted Current State | Evidence |
 |---|---|---|
-| REQ-HOST-005 | Exact bootstrap toolchain and target compatibility authority with read-only host reporting | E0-T8; `toolchain/versions.env`; checker fixtures; serial `make test` |
+| REQ-HOST-005 | Bootstrap toolchain exact pins and compatibility ranges with read-only host reporting | E0-T8; `toolchain/versions.env`; checker fixtures; serial `make test` |
 | REQ-RUNTIME-011 | Versioned public gRPC inventory, exact semantic-operation ownership, generated clients, descriptor-derived fake server, exhaustive maps, and separate Machine CLI fixture | E0-T7; dependency/generated locks; contract validator; fake-server tests |
 | REQ-RUNTIME-022 | Independently typed projection inputs, public enum/event inventory, convergence and fail-closed compatibility fixtures | E0-T7; conformance pin; capability/error/mutation/projection policy maps |
 

@@ -959,7 +959,7 @@ The package identity is `Gul.app`, bundle identifier `xyz.rootkernel.gul`, and h
 
 ### 17.1 Bootstrap toolchain and command contract
 
-`toolchain/versions.env` is the single E0-T8 bootstrap authority. The supported host is macOS `>=14.0.0` on `arm64` with Git `>=2.39.0,<3.0.0`. Exact executable pins are Go `1.26.6`, Wails `3.0.0-beta.8` through `wails3`, Node `26.7.0`, Bun `1.3.14`, Buf `1.66.1`, protoc `35.1`, protoc-gen-go `1.36.12`, protoc-gen-connect-go `1.20.0`, protoc-gen-es `2.14.0`, and protoc-gen-connect-es `1.7.0`.
+`toolchain/versions.env` is the single E0-T8 bootstrap authority. The supported host is macOS `>=14.0.0` on `arm64` with Git `>=2.39.0,<3.0.0`. Exact executable pins are Go `1.26.6`, Wails `3.0.0-beta.8` through `wails3`, Node `26.7.0`, Bun `1.3.14`, protoc `35.1`, protoc-gen-go `1.36.12`, protoc-gen-connect-go `1.20.0`, protoc-gen-es `2.14.0`, and protoc-gen-connect-es `1.7.0`. Buf is the system executable resolved from `PATH` and must be `>=1.66.1,<2.0.0`; it performs linting and does not generate checked artifacts.
 
 Future dependency manifests must match TypeScript `7.0.2`, React/React DOM `19.2.7`, protobuf-go `1.36.12`, connect-go `1.20.0`, Connect-ES/Connect-Web `2.1.2`, Protobuf-ES `2.14.0`, and modernc SQLite `1.57.0`. The read-only `make toolchain-check` reports all mismatches; it never installs or substitutes a dependency. In particular, Wails v2 does not satisfy the Wails v3 beta pin.
 
