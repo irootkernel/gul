@@ -131,6 +131,18 @@ function section(text, start, end, errors) {
   return text.slice(first, last);
 }
 
+function uniqueMarkerSection(text, start, end, errors, label) {
+  const firstStart = text.indexOf(start);
+  const secondStart = firstStart < 0 ? -1 : text.indexOf(start, firstStart + start.length);
+  const firstEnd = firstStart < 0 ? -1 : text.indexOf(end, firstStart + start.length);
+  const secondEnd = firstEnd < 0 ? -1 : text.indexOf(end, firstEnd + end.length);
+  if (firstStart < 0 || firstEnd < 0 || secondStart >= 0 || secondEnd >= 0) {
+    errors.push(`Architecture must contain exactly one ${label} marker pair`);
+    return '';
+  }
+  return text.slice(firstStart + start.length, firstEnd);
+}
+
 export function validateRepository(root, options = {}) {
   const errors = [];
   const warnings = [];
@@ -151,6 +163,29 @@ export function validateRepository(root, options = {}) {
   if (errors.length) return {errors, warnings};
 
   const roadmap = documents.get('roadmap.md');
+  const architecture = documents.get('architecture.md');
+  const currentOperationMap = uniqueMarkerSection(
+    architecture,
+    '<!-- contract-operation-map:start -->',
+    '<!-- contract-operation-map:end -->',
+    errors,
+    'current checked operation map',
+  );
+  const requiredOperationMap = uniqueMarkerSection(
+    architecture,
+    '<!-- contract-required-operation-map:start -->',
+    '<!-- contract-required-operation-map:end -->',
+    errors,
+    'required consumer operation map',
+  );
+  for (const operation of ['GetOrchestratedSession', 'ListOrchestratedSessionResults']) {
+    if (currentOperationMap.includes(`OrchestrationService.${operation}`)) {
+      errors.push(`Current checked operation map contains unpinned RPC OrchestrationService.${operation}`);
+    }
+    if (!requiredOperationMap.includes(`OrchestrationService.${operation}`)) {
+      errors.push(`Required consumer operation map is missing OrchestrationService.${operation}`);
+    }
+  }
   const tasks = new Map();
   for (const line of roadmap.split('\n')) {
     const cells = line.split('|').map(cell => cell.trim());

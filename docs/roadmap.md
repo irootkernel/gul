@@ -396,6 +396,10 @@ Current State for its original scope. It does not prove the new 27-method
 consumer profile, two new observer methods, fixed-home credential semantics,
 Prompt History UI, or any product runtime. E12-T1 owns replacement consumer
 artifacts; do not reset E0 to incomplete or count old success as new pinning.
+The historical pin remains bound to dependency-lock SHA-256
+`c4f91aa3e2add1093880684e5c96fdbb6239aef6a85261a0adf6b585e2db8863` and
+generated-lock SHA-256
+`8a6a614a3a08c585f9a62f74095a0237d47feefba802e2dfa3ce13be5fbe0bf6`.
 
 E0-T9's executable qualification responsibility remains E2-T0. Retired E0-T5,
 E0-T6, E0-T9 and superseded E0-T1..T3 must never be reused. Former E10/E11 Task

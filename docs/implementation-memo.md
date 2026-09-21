@@ -73,6 +73,13 @@ The host currently has Buf 1.69.0, which satisfies the current
 descriptor and generated-client tools remain exactly pinned. No tool installation
 is implied, and tool availability is not wire or semantic acceptance.
 
+Architecture Section 6.4 now separates the historical checked E0 operation map
+from the approved E12 target map. Contract generation consumes only the Current
+State table and continues to reject any RPC absent from the checked descriptor;
+SOT checks preserve both marker pairs, keep the two new Orchestration reads in
+Required State, and prevent them from leaking into the current generator input.
+E12-T1 owns convergence after it imports the immutable TASK-053 contract.
+
 ## 1.3 Whole-Epic execution reorganization, 2026-09-21
 
 ADR-0052 responds to Master's request to drive development through one complete
@@ -493,7 +500,7 @@ These twenty-two criteria come from the originating brief. The local-gRPC revisi
 
 | # | Required evidence and current disposition |
 |---:|---|
-| 1 | Architecture 6.4 gives every semantic operation one row with exact RPC and request/response types, Controller/workspace prerequisites, idempotency, timeout class, retry, reconciliation, projection effect, capability, and verification state. The generated operation map verifies all 36 rows against the accepted descriptor or explicit local/Gul ownership. |
+| 1 | Architecture 6.4.1 preserves every checked E0 semantic operation with exact RPC and request/response types, Controller/workspace prerequisites, idempotency, timeout class, retry, reconciliation, projection effect, capability, and verification state. The generated operation map verifies all 36 Current State rows against the accepted descriptor or explicit local/Gul ownership; Section 6.4.2 separately owns the Required State target. |
 | 2 | Runtime Provider no longer contains `CreateControllerCredential`; ADR-0047 assigns creation to Gul. |
 | 3 | ADR-0047 and REQ-CTRL-002/012 define exact local credential creation under the Dolgorae carrier root. |
 | 4 | REQ-CTRL-013 defines distinct same-principal continuation credentials and independently preserves source kind, subject ID, and stable Gul instance ID. |

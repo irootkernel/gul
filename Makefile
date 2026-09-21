@@ -25,7 +25,7 @@ test-int:
 	@node scripts/test-sot.mjs
 	@./scripts/check-sot.sh
 	@./scripts/contract-command.sh check
-	@git diff --check
+	@git --no-pager diff --check
 
 test-e2e:
 	@./scripts/test-toolchain-check.sh

@@ -246,4 +246,25 @@ expectFailure('migrated fake requirement cannot retain retired owner', root => {
   ));
 }, /Active requirement REQ-CONSUMER-002 has non-release owner E12-T2/);
 
+expectFailure('missing required operation-map boundary', root => {
+  write(root, 'docs/architecture.md', text => text.replace(
+    '<!-- contract-required-operation-map:start -->',
+    '<!-- missing-required-operation-map:start -->',
+  ));
+}, /exactly one required consumer operation map marker pair/);
+
+expectFailure('future RPC leaks into current checked map', root => {
+  write(root, 'docs/architecture.md', text => text.replace(
+    '<!-- contract-operation-map:end -->',
+    '| `GetOrchestratedSession` | `OrchestrationService.GetOrchestratedSession` |\n<!-- contract-operation-map:end -->',
+  ));
+}, /Current checked operation map contains unpinned RPC OrchestrationService.GetOrchestratedSession/);
+
+expectFailure('required operation map loses aggregate read', root => {
+  write(root, 'docs/architecture.md', text => text.replace(
+    /^\| `GetOrchestratedSession` \|.*\n/m,
+    '',
+  ));
+}, /Required consumer operation map is missing OrchestrationService.GetOrchestratedSession/);
+
 console.log(`SOT validator fixtures passed: Git baseline, first-adoption, source-export, and ${negativeCases} negative cases`);
