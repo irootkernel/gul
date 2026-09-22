@@ -5,6 +5,7 @@ contract_root=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 # shellcheck disable=SC1091
 . "$contract_root/../toolchain/versions.env"
 fixture_directory=$(mktemp -d "${TMPDIR:-/tmp}/gul-breaking-fixture.XXXXXX")
+system_buf=$(command -v buf)
 cleanup() { rm -rf "$fixture_directory"; }
 trap cleanup EXIT HUP INT TERM
 
@@ -39,16 +40,16 @@ PATH="$fixture_directory/bin:/usr/bin:/bin" "$contract_root/breaking-check.sh" \
   "$contract_root/upstream" \
   "$contract_root/upstream/baselines/dolgorae-public-v1-pre-task-053.descriptor.pb" \
   >"$fixture_directory/out" 2>"$fixture_directory/err"
-range_status=$?
+minimum_status=$?
 set -e
-if [ "$range_status" -ne 2 ] || ! grep -q 'found 1.65.0' "$fixture_directory/err"; then
-  printf 'ERROR breaking-check Buf range gate did not fail precisely\n' >&2
+if [ "$minimum_status" -ne 2 ] || ! grep -q 'found 1.65.0' "$fixture_directory/err"; then
+  printf 'ERROR breaking-check Buf minimum gate did not fail precisely\n' >&2
   exit 1
 fi
 
 cat > "$fixture_directory/bin/buf" <<'EOF'
 #!/bin/sh
-printf '%s\n' 2.0.0
+printf '%s\n' 1.66.1-rc.1
 EOF
 chmod +x "$fixture_directory/bin/buf"
 set +e
@@ -56,12 +57,26 @@ PATH="$fixture_directory/bin:/usr/bin:/bin" "$contract_root/breaking-check.sh" \
   "$contract_root/upstream" \
   "$contract_root/upstream/baselines/dolgorae-public-v1-pre-task-053.descriptor.pb" \
   >"$fixture_directory/out" 2>"$fixture_directory/err"
-upper_status=$?
+prerelease_status=$?
 set -e
-if [ "$upper_status" -ne 2 ] || ! grep -q "< $GUL_BUF_MAX_EXCLUSIVE_VERSION; found 2.0.0" "$fixture_directory/err"; then
-  printf 'ERROR breaking-check Buf upper bound did not fail precisely\n' >&2
+if [ "$prerelease_status" -ne 2 ] || ! grep -q 'found 1.66.1-rc.1' "$fixture_directory/err"; then
+  printf 'ERROR breaking-check accepted a below-minimum Buf prerelease\n' >&2
   exit 1
 fi
+
+cat > "$fixture_directory/bin/buf" <<EOF
+#!/bin/sh
+if [ "\${1-}" = "--version" ]; then
+  printf '%s\n' 99.0.0
+  exit 0
+fi
+exec "$system_buf" "\$@"
+EOF
+chmod +x "$fixture_directory/bin/buf"
+PATH="$fixture_directory/bin:/usr/bin:/bin" "$contract_root/breaking-check.sh" \
+  "$contract_root/upstream" \
+  "$contract_root/upstream/baselines/dolgorae-public-v1-pre-task-053.descriptor.pb" \
+  >"$fixture_directory/out" 2>"$fixture_directory/err"
 
 mv "$fixture_directory/bin/buf" "$fixture_directory/bin/not-buf"
 set +e

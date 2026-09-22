@@ -384,11 +384,39 @@ for (const document of ["architecture-decision-records.md", "architecture.md", "
 }
 const implementationMemoText = await readFile(join(contractRoot, "../docs/implementation-memo.md"), "utf8");
 const testingText = await readFile(join(contractRoot, "../TESTING.md"), "utf8");
-const bunMinimum = versionManifest.GUL_BUN_MIN_VERSION;
+const adrText = await readFile(join(contractRoot, "../docs/architecture-decision-records.md"), "utf8");
 const markdownCode = (value) => `\`${value}\``;
-const bunMinimumCode = markdownCode(`>=${bunMinimum}`);
-if (!implementationMemoText.includes(`system Bun ${bunMinimumCode}`) || !implementationMemoText.includes(`satisfies the ${bunMinimumCode} minimum`) || !implementationMemoText.includes("except Bun's minimum-only system policy") || !implementationMemoText.includes("Historical E0-T8 manifest; Buf lint")) throw new Error("implementation memo toolchain ledger drifted from the current Bun minimum and historical generator boundary");
-if (!architectureText.includes(`system Bun from ${markdownCode("PATH")} must be ${bunMinimumCode}`) || !testingText.includes(`system ${markdownCode("bun")} resolved from ${markdownCode("PATH")} must be at least ${markdownCode(bunMinimum)}`)) throw new Error("documented Bun minimum drifted from the toolchain authority");
+const hostMinimums = [
+  ["Wails", versionManifest.GUL_WAILS_MIN_VERSION],
+  ["Node", versionManifest.GUL_NODE_MIN_VERSION],
+  ["Bun", versionManifest.GUL_BUN_MIN_VERSION],
+  ["Buf", versionManifest.GUL_BUF_MIN_VERSION],
+  ["protoc", versionManifest.GUL_PROTOC_MIN_VERSION],
+  ["Git", versionManifest.GUL_GIT_MIN_VERSION],
+  ["macOS", versionManifest.GUL_MACOS_MIN_VERSION],
+];
+for (const [name, minimum] of hostMinimums) {
+  const minimumCode = markdownCode(`>=${minimum}`);
+  if (!architectureText.includes(minimumCode) || !testingText.includes(minimumCode) || !implementationMemoText.includes(minimumCode)) {
+    throw new Error(`${name} minimum ${minimum} is not synchronized across the toolchain documentation`);
+  }
+}
+const goExactCode = markdownCode(versionManifest.GUL_GO_VERSION);
+if (!architectureText.includes(`Go exactly ${goExactCode}`) || !testingText.includes(`Go is fixed at exactly ${goExactCode}`) || !implementationMemoText.includes(`Host Go exactly ${goExactCode}`)) throw new Error(`Go exact pin ${versionManifest.GUL_GO_VERSION} is not synchronized across the toolchain documentation`);
+if (!architectureText.includes("Non-Go host checks do not impose upper bounds") || !testingText.includes("Newer non-Go host tools are accepted") || !testingText.includes("PATH copies of those generators are not part of the host check") || !implementationMemoText.includes("exact generator and library")) throw new Error("host-version and project-pin policy drifted across documentation");
+if (!requiredSpecsText.includes("enforces the exact Go version and minimum versions for other host executables") || !requiredSpecsText.includes("Exact Go toolchain with minimum-compatible non-Go host tools")) throw new Error("REQ-HOST-005 drifted from the host-version and project-pin policy");
+const adr0053Start = adrText.indexOf("\n### ADR-0053:");
+const adr0054Start = adrText.indexOf("\n### ADR-0054:", adr0053Start);
+const proposedStart = adrText.indexOf("## 6. Proposed decisions", adr0054Start);
+if (adr0053Start < 0 || adr0054Start < 0 || proposedStart < 0) throw new Error("toolchain ADR boundaries are missing");
+const adr0053Text = adrText.slice(adr0053Start, adr0054Start);
+const adr0054Text = adrText.slice(adr0054Start, proposedStart);
+const adr0053Compact = adr0053Text.replace(/\s+/g, " ");
+if (!adr0053Compact.includes("**Status:** Accepted, modified") || adr0053Compact.includes(">=1.66.1,<2.0.0") || !adr0053Compact.includes("former `<2.0.0` ceiling") || !adr0053Compact.includes("protoc `35.1` as a host minimum")) throw new Error("ADR-0053 does not carry its ADR-0054 amendment");
+for (const [, minimum] of hostMinimums) {
+  if (!adr0054Text.includes(markdownCode(minimum))) throw new Error(`ADR-0054 is missing host minimum ${minimum}`);
+}
+if (!adr0054Text.includes(`Go remains exactly pinned at ${goExactCode}`) || !adr0054Text.includes("minimum versions with no upper bound") || !adr0054Text.includes("Project Go and Bun manifests retain exact dependency and code-generator pins")) throw new Error("ADR-0054 policy text drifted");
 if (implementationMemoText.includes("E12-T1 must still reproduce") || implementationMemoText.includes("Existing checked/generated files are intentionally unchanged")) throw new Error("implementation memo still describes TASK-053 adoption as outstanding");
 
 console.log(`contract validation passed: ${inventory.method_count} RPCs, ${operations.operations.length} operations, ${events.events.length} event variants, ${generatedLock.files.length} generated files`);

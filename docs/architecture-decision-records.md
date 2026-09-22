@@ -5,7 +5,7 @@
 | Role | Durable architecture decisions and supersession history |
 | Product | Gul |
 | Version | 0.1-dolgorae-consumer-v1 |
-| Last updated | 2026-09-21 |
+| Last updated | 2026-09-22 |
 
 ## 1. Status model
 
@@ -22,7 +22,7 @@ ADR-0050 explicitly amends the product/child-presentation scope in ADR-0021/0022
 
 | ADR | Title | Status | Replacement |
 |---|---|---|---|
-| ADR-0001 | Use Go and Wails v3 for the macOS host | Accepted | None |
+| ADR-0001 | Use Go and Wails v3 for the macOS host | Accepted, modified | ADR-0054 |
 | ADR-0002 | Keep the core independent of Wails | Accepted | None |
 | ADR-0003 | Use Protobuf and ConnectRPC | Accepted | None |
 | ADR-0004 | Use one Gul-managed Codex App Server | Superseded | ADR-0022, ADR-0023 |
@@ -74,15 +74,16 @@ ADR-0050 explicitly amends the product/child-presentation scope in ADR-0021/0022
 | ADR-0050 | Adopt the released Dolgorae consumer profile and split mock from live work | Accepted | None |
 | ADR-0051 | Keep future Podway visualization strictly read-only | Accepted, future scope | None |
 | ADR-0052 | Execute complete Epics without cross-Epic interleaving | Accepted | None |
-| ADR-0053 | Use a compatible system Buf for contract linting | Accepted | None |
+| ADR-0053 | Use a compatible system Buf for contract linting | Accepted, modified | ADR-0054 |
+| ADR-0054 | Pin Go and separate other host minimums from project pins | Accepted | None |
 
 ## 3. Retained decisions
 
 ### ADR-0001: Use Go and Wails v3 for the macOS host
 
-**Status:** Accepted
+**Status:** Accepted, modified
 
-Gul uses a Go application core hosted by Wails v3. Wails provides desktop lifecycle and WebView delivery, not domain authority. Exact versions are pinned by E0-T8. Under ADR-0039 the core and its loopback listener are built and accepted before the shell, so the desktop framework is not a precondition for any other capability.
+Gul uses a Go application core hosted by Wails v3. Wails provides desktop lifecycle and WebView delivery, not domain authority. ADR-0054 retains an exact Go pin, uses minimum-compatible versions for other host executables, and retains exact project pins. Under ADR-0039 the core and its loopback listener are built and accepted before the shell, so the desktop framework is not a precondition for any other capability.
 
 ### ADR-0002: Keep the core independent of Wails
 
@@ -649,18 +650,37 @@ and actual-provider acceptance to make an earlier Epic appear complete.
 
 ### ADR-0053: Use a compatible system Buf for contract checks
 
-**Status:** Accepted, 2026-09-21
+**Status:** Accepted, modified, 2026-09-21
 
-Resolve Buf from the system `PATH` and accept versions `>=1.66.1,<2.0.0`. Buf is
-used for linting, descriptor-set construction, and additive breaking checks.
-The checked descriptor was reproduced with Buf 1.69.0 and is compared byte for
-byte; an in-range release that emits different bytes fails closed. `protoc` and
-the language-client generators retain their exact pins.
+Resolve Buf from the system `PATH` for linting, descriptor-set construction, and
+additive breaking checks. ADR-0054 replaces this decision's former `<2.0.0`
+ceiling with a `>=1.66.1` host minimum and treats protoc `35.1` as a host minimum.
+Language-client generators remain exactly pinned in project manifests.
 
-Both the host checker and contract-generation boundary fail closed below the
-minimum or at the next major version, and every Buf check remains mandatory. The
-historical Gate A record that Buf 1.66.1 passed is unchanged evidence of that
-completed run, not a current exact-host requirement.
+The checked descriptor was reproduced with Buf 1.69.0 and remains subject to a
+byte-for-byte comparison. Every Buf check remains mandatory, and a different
+descriptor fails closed regardless of the accepted host version. The Gate A
+record that Buf 1.66.1 passed is evidence of that completed run, not a current
+exact-host requirement.
+
+### ADR-0054: Pin Go and separate other host minimums from project pins
+
+**Status:** Accepted, 2026-09-22
+
+Go remains exactly pinned at `1.26.6` until an explicit toolchain upgrade. Other
+host executables use minimum versions with no upper bound: Wails
+`3.0.0-beta.8`, Node `26.7.0`, Bun `1.4.2`, Buf `1.66.1`, protoc `35.1`, Git
+`2.39.0`, and macOS `14.0.0` on arm64. Newer non-Go host versions do not fail
+the host check solely because their version differs.
+
+Project Go and Bun manifests retain exact dependency and code-generator pins.
+Contract generation invokes those project-owned generators instead of unrelated
+PATH copies. Every newer host tool must still pass compilation, tests, schema
+validation, and byte-for-byte generated-output checks. This preserves reproducible
+project output without making a developer install an older compatible host tool.
+
+This decision amends ADR-0001 and ADR-0053. Historical completed-run evidence and
+the exact versions recorded for those runs remain unchanged.
 
 ## 6. Proposed decisions
 

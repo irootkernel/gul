@@ -21,7 +21,7 @@ fi
 # shellcheck disable=SC1090
 . "$manifest"
 
-required_keys='GUL_GO_VERSION GUL_WAILS_VERSION GUL_NODE_VERSION GUL_BUN_MIN_VERSION GUL_TYPESCRIPT_VERSION GUL_REACT_VERSION GUL_REACT_DOM_VERSION GUL_BUF_MIN_VERSION GUL_BUF_MAX_EXCLUSIVE_VERSION GUL_PROTOC_VERSION GUL_PROTOC_GEN_GO_VERSION GUL_PROTOC_GEN_CONNECT_GO_VERSION GUL_PROTOBUF_GO_VERSION GUL_CONNECT_GO_VERSION GUL_CONNECT_ES_VERSION GUL_CONNECT_WEB_VERSION GUL_PROTOBUF_ES_VERSION GUL_PROTOC_GEN_ES_VERSION GUL_MODERNC_SQLITE_VERSION GUL_GIT_MIN_VERSION GUL_GIT_MAX_EXCLUSIVE_VERSION GUL_MACOS_MIN_VERSION GUL_TARGET_ARCH'
+required_keys='GUL_GO_VERSION GUL_WAILS_MIN_VERSION GUL_NODE_MIN_VERSION GUL_BUN_MIN_VERSION GUL_TYPESCRIPT_VERSION GUL_REACT_VERSION GUL_REACT_DOM_VERSION GUL_BUF_MIN_VERSION GUL_PROTOC_MIN_VERSION GUL_PROTOC_GEN_GO_VERSION GUL_PROTOC_GEN_CONNECT_GO_VERSION GUL_PROTOBUF_GO_VERSION GUL_CONNECT_GO_VERSION GUL_CONNECT_ES_VERSION GUL_CONNECT_WEB_VERSION GUL_PROTOBUF_ES_VERSION GUL_PROTOC_GEN_ES_VERSION GUL_MODERNC_SQLITE_VERSION GUL_GIT_MIN_VERSION GUL_MACOS_MIN_VERSION GUL_TARGET_ARCH'
 for key in $required_keys; do
   eval "value=\${$key-}"
   if [ -z "$value" ]; then
@@ -34,8 +34,8 @@ if [ "${1-}" = "--manifest-only" ]; then
   printf 'OK manifest: %s\n' "$manifest"
   exit 0
 fi
-if [ "${1-}" != "" ] && [ "${1-}" != "--bun-only" ]; then
-  printf 'usage: %s [--manifest-only|--bun-only]\n' "$0" >&2
+if [ "${1-}" != "" ] && [ "${1-}" != "--bun-only" ] && [ "${1-}" != "--version-at-least" ]; then
+  printf 'usage: %s [--manifest-only|--bun-only|--version-at-least <actual> <minimum>]\n' "$0" >&2
   exit 2
 fi
 
@@ -66,45 +66,63 @@ command_output() {
   printf '%s\n' "$gul_command_output" | awk 'NR == 1 { print; exit }'
 }
 
-check_exact() {
-  local label=$1
-  local expected=$2
-  local command_name=$3
-  local output
-  local gul_exact_rc
-  local actual
-  shift 3
-  output=$(command_output "$command_name" "$@")
-  gul_exact_rc=$?
-  if [ "$gul_exact_rc" -ne 0 ]; then
-    fail "$label: missing command '$command_name'"
-    return
-  fi
-  actual=$(printf '%s\n' "$output" | sed -E 's/^go version go//; s/^go//; s/^v//; s/^libprotoc[[:space:]]+//; s/^[^0-9]*//; s/[[:space:]].*$//')
-  if [ "$actual" != "$expected" ]; then
-    fail "$label: expected $expected, found $actual ($command_name)"
-    return
-  fi
-  pass "$label $actual"
-}
-
 version_cmp() {
   local left=$1
   local op=$2
   local right=$3
   awk -v left="$left" -v right="$right" -v op="$op" '
-    function component(value, position, parts, count) {
-      count = split(value, parts, /[.]/)
-      return position <= count ? parts[position] + 0 : 0
+    function compare(left_value, right_value, left_main, right_main, left_pre, right_pre, left_parts, right_parts, left_count, right_count, count, i, a, b, a_numeric, b_numeric) {
+      sub(/[+].*$/, "", left_value)
+      sub(/[+].*$/, "", right_value)
+      left_main = left_value
+      right_main = right_value
+      left_pre = ""
+      right_pre = ""
+      if (index(left_main, "-") > 0) {
+        left_pre = substr(left_main, index(left_main, "-") + 1)
+        left_main = substr(left_main, 1, index(left_main, "-") - 1)
+      }
+      if (index(right_main, "-") > 0) {
+        right_pre = substr(right_main, index(right_main, "-") + 1)
+        right_main = substr(right_main, 1, index(right_main, "-") - 1)
+      }
+      left_count = split(left_main, left_parts, /[.]/)
+      right_count = split(right_main, right_parts, /[.]/)
+      count = left_count > right_count ? left_count : right_count
+      for (i = 1; i <= count; i++) {
+        if ((i <= left_count && left_parts[i] !~ /^[0-9]+$/) || (i <= right_count && right_parts[i] !~ /^[0-9]+$/)) exit 2
+        a = i <= left_count ? left_parts[i] + 0 : 0
+        b = i <= right_count ? right_parts[i] + 0 : 0
+        if (a < b) return -1
+        if (a > b) return 1
+      }
+      if (left_pre == "" && right_pre == "") return 0
+      if (left_pre == "") return 1
+      if (right_pre == "") return -1
+      left_count = split(left_pre, left_parts, /[.]/)
+      right_count = split(right_pre, right_parts, /[.]/)
+      count = left_count > right_count ? left_count : right_count
+      for (i = 1; i <= count; i++) {
+        if (i > left_count) return -1
+        if (i > right_count) return 1
+        a = left_parts[i]
+        b = right_parts[i]
+        a_numeric = a ~ /^[0-9]+$/
+        b_numeric = b ~ /^[0-9]+$/
+        if (a_numeric && b_numeric) {
+          if (a + 0 < b + 0) return -1
+          if (a + 0 > b + 0) return 1
+        } else if (a_numeric != b_numeric) {
+          return a_numeric ? -1 : 1
+        } else {
+          if (a < b) return -1
+          if (a > b) return 1
+        }
+      }
+      return 0
     }
     BEGIN {
-      cmp = 0
-      for (i = 1; i <= 4; i++) {
-        a = component(left, i)
-        b = component(right, i)
-        if (a < b) { cmp = -1; break }
-        if (a > b) { cmp = 1; break }
-      }
+      cmp = compare(left, right)
       if (op == "ge") exit !(cmp >= 0)
       if (op == "lt") exit !(cmp < 0)
       exit 2
@@ -112,28 +130,14 @@ version_cmp() {
   '
 }
 
-check_range() {
-  local label=$1
-  local minimum=$2
-  local maximum_exclusive=$3
-  local command_name=$4
-  local output
-  local gul_range_rc
-  local actual
-  shift 4
-  output=$(command_output "$command_name" "$@")
-  gul_range_rc=$?
-  if [ "$gul_range_rc" -ne 0 ]; then
-    fail "$label: missing command '$command_name'"
-    return
+if [ "${1-}" = "--version-at-least" ]; then
+  if [ "$#" -ne 3 ]; then
+    printf 'usage: %s --version-at-least <actual> <minimum>\n' "$0" >&2
+    exit 2
   fi
-  actual=$(printf '%s\n' "$output" | sed -E 's/^v//; s/^[^0-9]*//; s/[[:space:]].*$//')
-  if version_cmp "$actual" ge "$minimum" && version_cmp "$actual" lt "$maximum_exclusive"; then
-    pass "$label $actual (>= $minimum, < $maximum_exclusive)"
-  else
-    fail "$label: expected >= $minimum and < $maximum_exclusive, found $actual ($command_name)"
-  fi
-}
+  version_cmp "$2" ge "$3"
+  exit $?
+fi
 
 check_minimum() {
   local label=$1
@@ -154,6 +158,28 @@ check_minimum() {
     pass "$label $actual (>= $minimum)"
   else
     fail "$label: expected >= $minimum, found $actual ($command_name)"
+  fi
+}
+
+check_exact() {
+  local label=$1
+  local expected=$2
+  local command_name=$3
+  local output
+  local gul_exact_rc
+  local actual
+  shift 3
+  output=$(command_output "$command_name" "$@")
+  gul_exact_rc=$?
+  if [ "$gul_exact_rc" -ne 0 ]; then
+    fail "$label: missing command '$command_name'"
+    return
+  fi
+  actual=$(printf '%s\n' "$output" | sed -E 's/^v//; s/^[^0-9]*//; s/[[:space:]].*$//')
+  if [ "$actual" = "$expected" ]; then
+    pass "$label $actual (exact)"
+  else
+    fail "$label: expected exactly $expected, found $actual ($command_name)"
   fi
 }
 
@@ -190,24 +216,21 @@ else
 fi
 
 check_exact Go "$GUL_GO_VERSION" go version
-check_exact Wails "$GUL_WAILS_VERSION" wails3 version
-check_exact Node "$GUL_NODE_VERSION" node --version
+check_minimum Wails "$GUL_WAILS_MIN_VERSION" wails3 version
+check_minimum Node "$GUL_NODE_MIN_VERSION" node --version
 check_minimum Bun "$GUL_BUN_MIN_VERSION" bun --version
-check_range Buf "$GUL_BUF_MIN_VERSION" "$GUL_BUF_MAX_EXCLUSIVE_VERSION" buf --version
-check_exact protoc "$GUL_PROTOC_VERSION" protoc --version
-check_exact protoc-gen-go "$GUL_PROTOC_GEN_GO_VERSION" protoc-gen-go --version
-check_exact protoc-gen-connect-go "$GUL_PROTOC_GEN_CONNECT_GO_VERSION" protoc-gen-connect-go --version
-check_exact protoc-gen-es "$GUL_PROTOC_GEN_ES_VERSION" protoc-gen-es --version
+check_minimum Buf "$GUL_BUF_MIN_VERSION" buf --version
+check_minimum protoc "$GUL_PROTOC_MIN_VERSION" protoc --version
 
 git_line=$(command_output git --version)
 if [ $? -ne 0 ]; then
   fail "Git: missing command 'git'"
 else
   git_version=$(printf '%s\n' "$git_line" | sed -E 's/^git version[[:space:]]+//; s/[[:space:]].*$//')
-  if version_cmp "$git_version" ge "$GUL_GIT_MIN_VERSION" && version_cmp "$git_version" lt "$GUL_GIT_MAX_EXCLUSIVE_VERSION"; then
-    pass "Git $git_version (>= $GUL_GIT_MIN_VERSION, < $GUL_GIT_MAX_EXCLUSIVE_VERSION)"
+  if version_cmp "$git_version" ge "$GUL_GIT_MIN_VERSION"; then
+    pass "Git $git_version (>= $GUL_GIT_MIN_VERSION)"
   else
-    fail "Git: expected >= $GUL_GIT_MIN_VERSION and < $GUL_GIT_MAX_EXCLUSIVE_VERSION, found $git_version"
+    fail "Git: expected >= $GUL_GIT_MIN_VERSION, found $git_version"
   fi
 fi
 

@@ -69,7 +69,7 @@ historical baseline, without a fixed total count. Negative tests cover pointer
 mismatch and identity loss alongside existing DAG/phase/owner/link checks.
 These checks prove document structure, not runtime or generated-contract readiness.
 The host currently has Buf 1.69.0, which satisfies the current
-`>=1.66.1,<2.0.0` range and reproduces the checked descriptor. Buf is resolved
+`>=1.66.1` minimum and reproduces the checked descriptor. Buf is resolved
 from the system `PATH` for lint, descriptor construction, and additive checks;
 different descriptor bytes fail closed. Language-client tools remain exactly pinned. No tool installation
 is implied, and tool availability is not wire or semantic acceptance.
@@ -280,9 +280,9 @@ Gate A's earlier source and checked-artifact digests are recorded below. E0-T7 r
 | Public transport | Accepted target: supervised local gRPC over private UDS | Pinned release/descriptor/lifecycle evidence; private, TCP, REST, and operator interfaces excluded | E0-T7/E2-T0 |
 | Gul adapter version | Unset | Versioned adapter contract | E2-T1 |
 | Last successful compatibility probe | None | Timestamp, environment, result, redacted evidence | E2-T1 |
-| Go/Wails/Node/Bun/TypeScript/React | Go `1.26.6`; Wails `3.0.0-beta.8` (`wails3`); Node `26.7.0`; system Bun `>=1.4.2`; TypeScript `7.0.2`; React/DOM `19.2.7` | `toolchain/versions.env`; exact checks except Bun's minimum-only system policy; clean-host fixtures | E0-T8 |
-| Protobuf/Buf/ConnectRPC | System Buf `>=1.66.1,<2.0.0`; protoc `35.1`; protoc-gen-go/protobuf-go `1.36.12`; connect-go/protoc-gen-connect-go `1.20.0`; Connect-ES/Web `2.1.2`; Protobuf-ES/protoc-gen-es `2.14.0`; historical protoc-gen-connect-es `1.7.0` | Historical E0-T8 manifest; Buf lint must pass and generated dependency manifests must match before use | E0-T8 |
-| Host platform | macOS `>=14.0.0`, `arm64`; Git `>=2.39.0,<3.0.0` | Range checks; no installation or mutation | E0-T8 |
+| Go/Wails/Node/Bun/TypeScript/React | Host Go exactly `1.26.6`; Wails `>=3.0.0-beta.8` (`wails3`); Node `>=26.7.0`; Bun `>=1.4.2`; project TypeScript `7.0.2`; React/DOM `19.2.7` | `toolchain/versions.env`; exact Go and non-Go host minimum checks; exact project manifests; clean-host fixtures | E0-T8; ADR-0054 |
+| Protobuf/Buf/ConnectRPC | Host Buf `>=1.66.1`; protoc `>=35.1`; project protoc-gen-go/protobuf-go `1.36.12`; connect-go/protoc-gen-connect-go `1.20.0`; Connect-ES/Web `2.1.2`; Protobuf-ES/protoc-gen-es `2.14.0`; historical protoc-gen-connect-es `1.7.0` | Host minimum checks; exact project manifests; Buf lint and generated-output drift checks | E0-T8; ADR-0054 |
+| Host platform | macOS `>=14.0.0`, exact `arm64`; Git `>=2.39.0` | Minimum checks for macOS and Git; exact architecture check; no installation or mutation | E0-T8; ADR-0054 |
 | SQLite driver/settings | modernc.org/sqlite `1.57.0`; WAL; foreign keys; `synchronous=FULL`; 5-second busy timeout; one writer and at most four read-only connections; immediate transactional sequence allocation; checkpoint plus `VACUUM INTO` backup | Accepted ADR-0017 and future E1-T4 fault/race/backup tests | E0-T8 |
 
 ## 6. Historical E0 decision register
@@ -401,10 +401,10 @@ Rows dated before 2026-08-23 are historical. E0-T4 lifecycle evidence remains re
 | Requirement ownership coverage | Only E0-T4, the documentation Task, owns no requirement | Passed 2026-08-19 corrective rerun |
 | Release tier assignment | Four Recommended-tier IDs are named in Section 5 with a Release-tier fallback each; every other requirement is Release tier by default | Passed, post-review rerun |
 | Product invariants | Invariants number contiguously 1 through 46 | Passed 2026-08-19 corrective rerun |
-| ADR index/body | 49 index IDs and 49 body IDs/statuses match; only ADR-0018 remains `Proposed`; ADR-0017 is Accepted; ADR-0034 is superseded by ADR-0047 | Passed 2026-08-23 E0-T8 rerun |
+| ADR index/body | 54 index IDs and 54 body IDs/statuses match; only ADR-0018 remains `Proposed`; ADR-0054 defines the current host-version policy | Passed 2026-09-22 prerequisite rerun |
 | Roadmap active Task | 36 executable Tasks plus retired E0-T9: all three E0 Tasks `Completed`, E2-T0 `Blocked`, and zero Active Tasks | Passed 2026-08-23 completion transition |
-| Bootstrap pins | One data-only manifest fixes all approved executable, dependency, Git, macOS, and architecture values; manifest validation rejects missing or malformed authority | Passed `make test` 2026-08-23 |
-| Clean-host and drift behavior | Exact clean-host fixture passes; mismatched and missing Wails fail precisely; the current host reports four real readiness differences without installation or substitution | Passed fixture; current-host check intentionally exits 1 with four blockers |
+| Bootstrap pins | One data-only manifest records the exact Go version, minimum versions for other host tools, and exact project dependency and generator versions; manifest validation rejects missing or malformed authority | Passed `make test` 2026-09-22 |
+| Clean-host and drift behavior | Minimum-version fixtures accept newer hosts and reject old or missing Wails; project validation and generation still reject pin or output drift | Passed fixture and current-host check 2026-09-22 |
 | Standard commands | Serial `make test` invokes checked generation/drift validation, Go fake-server tests, TypeScript checking, SOT checks, and toolchain fixtures without rewriting tracked output | Passed 2026-08-23 E0-T7 candidate |
 | Independent E0-T8 review | Full logic/maintainability/documentation/testing review plus logic/documentation lifecycle delta; complete coverage; CI pass; publication committed | Runs `r_01a02b4a-038b-74c8-950d-ab766eda7036` and `r_01a02b52-2423-79f2-9c3a-da129769792c`; zero findings |
 | ADR gates in the DAG | Only unresolved ADRs appear as predecessors; ADR-0034 is superseded and accepted ADR-0047 owns credential storage | Passed 2026-08-19 corrective rerun |
@@ -599,19 +599,19 @@ These cases are normative future acceptance owned by the Roadmap tasks named in 
 
 ## 10. Standard command contract
 
-The root Makefile provides the non-rewriting serial facade `toolchain-check`, `generate-contract`, `contract-check`, `test-prepare`, `test-unit`, `test-int`, `test-e2e`, and `test`. `test` invokes the four test phases serially. E0-T7's checked delegates require exact generator versions, verify imported source hashes, reproduce the descriptor and all tracked outputs, run the all-RPC fake-server tests and TypeScript checker, and validate generated policies plus the separate Machine CLI fixture. Later Tasks extend these stable targets for frontend/browser E2E and opt-in pinned-runtime smoke tests. Real provider tests remain opt-in and must never reveal Controller capabilities, carrier/socket paths, or protected input.
+The root Makefile provides the serial facade `toolchain-check`, `generate-contract`, `contract-check`, `test-prepare`, `test-unit`, `test-int`, `test-e2e`, and `test`. `generate-contract` rewrites checked contract output, `test-prepare` downloads locked contract dependencies, and the checking targets do not rewrite tracked files. `test` invokes the four test phases serially. E0-T7's checked delegates require exact generator versions, verify imported source hashes, reproduce the descriptor and all tracked outputs, run the all-RPC fake-server tests and TypeScript checker, and validate generated policies plus the separate Machine CLI fixture. Later Tasks extend these stable targets for frontend/browser E2E and opt-in pinned-runtime smoke tests. Real provider tests remain opt-in and must never reveal Controller capabilities, carrier/socket paths, or protected input.
 
-The current host check is honest evidence, not an installation workflow: it
-matches Go, Node, Bun, Buf, protoc, protoc-gen-es, Git, macOS and architecture,
-and reports missing Wails v3 and two older PATH generators. System Bun 1.4.2
-satisfies the `>=1.4.2` minimum and is used directly with the tracked text
-`bun.lock` and frozen contract pipeline. The clean-host fixture proves the exact pins and supported ranges; mismatch and
-missing-command fixtures prove fail-closed diagnostics. E0-T8 does not install
-or silently substitute those tools.
+The current host check requires Go exactly `1.26.6`, requires architecture to
+match `arm64` exactly, and reports Wails, Node, Bun, Buf, protoc, Git, and macOS
+against minimum versions. It does not inspect PATH copies of project
+generators. Project Go and Bun manifests provide the exact generator and library
+pins, while contract generation proves that their output remains reproducible.
+Missing-command and below-minimum fixtures prove fail-closed diagnostics. The
+checker does not install or silently substitute tools.
 
 ### E0-T8 completion record
 
-E0-T8 completed on 2026-08-23 after serial tests and independent review. It promotes REQ-HOST-005 for the bootstrap pin/reporting surface and accepts ADR-0017. The accepted artifacts are `toolchain/versions.env`, the root Make facade, `TESTING.md`, and the read-only scripts under `scripts/`. This promotion proves the bootstrap contract only: the current host still needs Wails v3 and three generator upgrades, no application dependency manifest exists, and no runtime behavior is claimed.
+E0-T8 completed on 2026-08-23 after serial tests and independent review. It promotes REQ-HOST-005 for the bootstrap pin/reporting surface and accepts ADR-0017. ADR-0054 keeps Go exactly pinned, changes other host executable checks to minimum versions, and leaves exact project pins and generated-output validation intact. The accepted artifacts are `toolchain/versions.env`, the root Make facade, `TESTING.md`, and the read-only scripts under `scripts/`. This promotion proves the bootstrap contract only; no product runtime behavior is claimed.
 
 ### E0-T7 completion record
 

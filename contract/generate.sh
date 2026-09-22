@@ -12,43 +12,38 @@ trap cleanup EXIT HUP INT TERM
 cd "$contract_root"
 . "$version_manifest"
 
-version_cmp() {
-  local left=$1
-  local op=$2
-  local right=$3
-  awk -v left="$left" -v right="$right" -v op="$op" '
-    function component(value, position, parts, count) {
-      count = split(value, parts, /[.]/)
-      return position <= count ? parts[position] + 0 : 0
-    }
-    BEGIN {
-      cmp = 0
-      for (i = 1; i <= 4; i++) {
-        a = component(left, i)
-        b = component(right, i)
-        if (a < b) { cmp = -1; break }
-        if (a > b) { cmp = 1; break }
-      }
-      if (op == "ge") exit !(cmp >= 0)
-      if (op == "lt") exit !(cmp < 0)
-      exit 2
-    }
-  '
-}
-
-if [ "$(go version)" != "go version go${GUL_GO_VERSION} darwin/arm64" ]; then
-  printf 'ERROR contract generation requires Go %s on darwin/arm64\n' "$GUL_GO_VERSION" >&2
+if ! go_line=$(go version 2>/dev/null); then
+  printf 'ERROR contract generation requires Go exactly %s on darwin/%s; found unavailable\n' \
+    "$GUL_GO_VERSION" "$GUL_TARGET_ARCH" >&2
   exit 2
 fi
-if [ "$(protoc --version)" != "libprotoc $GUL_PROTOC_VERSION" ]; then
-  printf 'ERROR contract generation requires protoc %s\n' "$GUL_PROTOC_VERSION" >&2
+go_version=$(printf '%s\n' "$go_line" | sed -E 's/^go version go([^[:space:]]+).*/\1/')
+go_platform=$(printf '%s\n' "$go_line" | awk '{print $4}')
+if [ "$go_platform" != "darwin/$GUL_TARGET_ARCH" ]; then
+  printf 'ERROR contract generation requires Go on darwin/%s; found %s\n' "$GUL_TARGET_ARCH" "${go_platform:-unknown}" >&2
+  exit 2
+fi
+if [ "$go_version" != "$GUL_GO_VERSION" ]; then
+  printf 'ERROR contract generation requires Go exactly %s; found %s\n' "$GUL_GO_VERSION" "$go_version" >&2
+  exit 2
+fi
+if ! protoc_line=$(protoc --version 2>/dev/null); then
+  printf 'ERROR contract generation requires protoc >= %s; found unavailable\n' "$GUL_PROTOC_MIN_VERSION" >&2
+  exit 2
+fi
+protoc_version=$(printf '%s\n' "$protoc_line" | sed -E 's/^[^0-9]*//')
+if ! "$contract_root/../scripts/toolchain-check.sh" --version-at-least "$protoc_version" "$GUL_PROTOC_MIN_VERSION"; then
+  printf 'ERROR contract generation requires protoc >= %s; found %s\n' "$GUL_PROTOC_MIN_VERSION" "$protoc_version" >&2
   exit 2
 fi
 "$contract_root/../scripts/toolchain-check.sh" --bun-only >/dev/null
-buf_version=$(buf --version)
-if ! version_cmp "$buf_version" ge "$GUL_BUF_MIN_VERSION" || ! version_cmp "$buf_version" lt "$GUL_BUF_MAX_EXCLUSIVE_VERSION"; then
-  printf 'ERROR contract generation requires Buf >= %s and < %s; found %s\n' \
-    "$GUL_BUF_MIN_VERSION" "$GUL_BUF_MAX_EXCLUSIVE_VERSION" "$buf_version" >&2
+if ! buf_version=$(buf --version 2>/dev/null); then
+  printf 'ERROR contract generation requires Buf >= %s; found unavailable\n' "$GUL_BUF_MIN_VERSION" >&2
+  exit 2
+fi
+if ! "$contract_root/../scripts/toolchain-check.sh" --version-at-least "$buf_version" "$GUL_BUF_MIN_VERSION"; then
+  printf 'ERROR contract generation requires Buf >= %s; found %s\n' \
+    "$GUL_BUF_MIN_VERSION" "$buf_version" >&2
   exit 2
 fi
 for executable in node_modules/.bin/protoc-gen-es; do
@@ -57,16 +52,28 @@ for executable in node_modules/.bin/protoc-gen-es; do
     exit 2
   fi
 done
-if [ "$(go tool protoc-gen-go --version)" != "protoc-gen-go v$GUL_PROTOC_GEN_GO_VERSION" ]; then
-  printf 'ERROR contract generation requires protoc-gen-go %s\n' "$GUL_PROTOC_GEN_GO_VERSION" >&2
+if ! protoc_gen_go_version=$(go tool protoc-gen-go --version 2>/dev/null); then
+  protoc_gen_go_version=unavailable
+fi
+if [ "$protoc_gen_go_version" != "protoc-gen-go v$GUL_PROTOC_GEN_GO_VERSION" ]; then
+  printf 'ERROR contract generation requires protoc-gen-go %s; found %s\n' \
+    "$GUL_PROTOC_GEN_GO_VERSION" "$protoc_gen_go_version" >&2
   exit 2
 fi
-if [ "$(go tool protoc-gen-connect-go --version)" != "$GUL_PROTOC_GEN_CONNECT_GO_VERSION" ]; then
-  printf 'ERROR contract generation requires protoc-gen-connect-go %s\n' "$GUL_PROTOC_GEN_CONNECT_GO_VERSION" >&2
+if ! protoc_gen_connect_go_version=$(go tool protoc-gen-connect-go --version 2>/dev/null); then
+  protoc_gen_connect_go_version=unavailable
+fi
+if [ "$protoc_gen_connect_go_version" != "$GUL_PROTOC_GEN_CONNECT_GO_VERSION" ]; then
+  printf 'ERROR contract generation requires protoc-gen-connect-go %s; found %s\n' \
+    "$GUL_PROTOC_GEN_CONNECT_GO_VERSION" "$protoc_gen_connect_go_version" >&2
   exit 2
 fi
-if [ "$(node_modules/.bin/protoc-gen-es --version)" != "protoc-gen-es v$GUL_PROTOC_GEN_ES_VERSION" ]; then
-  printf 'ERROR contract generation requires protoc-gen-es %s\n' "$GUL_PROTOC_GEN_ES_VERSION" >&2
+if ! protoc_gen_es_version=$(node_modules/.bin/protoc-gen-es --version 2>/dev/null); then
+  protoc_gen_es_version=unavailable
+fi
+if [ "$protoc_gen_es_version" != "protoc-gen-es v$GUL_PROTOC_GEN_ES_VERSION" ]; then
+  printf 'ERROR contract generation requires protoc-gen-es %s; found %s\n' \
+    "$GUL_PROTOC_GEN_ES_VERSION" "$protoc_gen_es_version" >&2
   exit 2
 fi
 bun scripts/build-contract.mjs "$output_root"
