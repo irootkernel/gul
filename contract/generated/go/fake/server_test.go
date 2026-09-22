@@ -210,3 +210,16 @@ func TestArtifactService(t *testing.T) {
 		t.Fatalf("ArtifactService.ReadArtifactChunk: %v", err)
 	}
 }
+
+func TestOrchestrationService(t *testing.T) {
+	t.Parallel()
+	server := newGRPCServer(t)
+	client := connectv1.NewOrchestrationServiceClient(server.Client(), server.URL, connect.WithGRPC())
+	ctx := context.Background()
+	if _, err := client.GetOrchestratedSession(ctx, connect.NewRequest(&v1.GetOrchestratedSessionRequest{})); err != nil {
+		t.Fatalf("OrchestrationService.GetOrchestratedSession: %v", err)
+	}
+	if _, err := client.ListOrchestratedSessionResults(ctx, connect.NewRequest(&v1.ListOrchestratedSessionResultsRequest{})); err != nil {
+		t.Fatalf("OrchestrationService.ListOrchestratedSessionResults: %v", err)
+	}
+}

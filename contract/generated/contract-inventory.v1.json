@@ -1,12 +1,12 @@
 {
   "schema_version": 1,
-  "source_revision": "85a8862f784cc57701751d81a9e03bf7c5722818",
-  "source_descriptor_sha256": "22e605dddc26c145ab6c682955fa4bfcf078b8356d38e94982e118b948965318",
+  "source_revision": "21aefe5b2a8dc6fb18a58338090348b23d2f0a4a",
+  "source_descriptor_sha256": "28b132842bbeb48123c2b7cc529de689e6e6286b0783cbde8551d17ba4921ed5",
   "package": "dolgorae.public.v1",
-  "service_count": 7,
-  "method_count": 34,
-  "message_count": 131,
-  "enum_count": 50,
+  "service_count": 8,
+  "method_count": 36,
+  "message_count": 137,
+  "enum_count": 57,
   "services": [
     {
       "name": "RuntimeService",
@@ -317,6 +317,28 @@
           "full_name": "dolgorae.public.v1.ArtifactService.ReadArtifactChunk",
           "input_type": "dolgorae.public.v1.ReadArtifactChunkRequest",
           "output_type": "dolgorae.public.v1.ReadArtifactChunkResponse",
+          "client_streaming": false,
+          "server_streaming": false
+        }
+      ]
+    },
+    {
+      "name": "OrchestrationService",
+      "full_name": "dolgorae.public.v1.OrchestrationService",
+      "methods": [
+        {
+          "name": "GetOrchestratedSession",
+          "full_name": "dolgorae.public.v1.OrchestrationService.GetOrchestratedSession",
+          "input_type": "dolgorae.public.v1.GetOrchestratedSessionRequest",
+          "output_type": "dolgorae.public.v1.GetOrchestratedSessionResponse",
+          "client_streaming": false,
+          "server_streaming": false
+        },
+        {
+          "name": "ListOrchestratedSessionResults",
+          "full_name": "dolgorae.public.v1.OrchestrationService.ListOrchestratedSessionResults",
+          "input_type": "dolgorae.public.v1.ListOrchestratedSessionResultsRequest",
+          "output_type": "dolgorae.public.v1.ListOrchestratedSessionResultsResponse",
           "client_streaming": false,
           "server_streaming": false
         }
@@ -2861,15 +2883,6 @@
           "type_name": "dolgorae.public.v1.RequestContext",
           "oneof_index": null,
           "proto3_optional": false
-        },
-        {
-          "name": "workspace",
-          "number": 2,
-          "label": 1,
-          "type": 11,
-          "type_name": "dolgorae.public.v1.WorkspaceRef",
-          "oneof_index": null,
-          "proto3_optional": false
         }
       ],
       "oneofs": []
@@ -3079,15 +3092,6 @@
           "proto3_optional": false
         },
         {
-          "name": "workspace",
-          "number": 2,
-          "label": 1,
-          "type": 11,
-          "type_name": "dolgorae.public.v1.WorkspaceRef",
-          "oneof_index": null,
-          "proto3_optional": false
-        },
-        {
           "name": "profile_name",
           "number": 3,
           "label": 1,
@@ -3132,15 +3136,6 @@
           "label": 1,
           "type": 11,
           "type_name": "dolgorae.public.v1.RequestContext",
-          "oneof_index": null,
-          "proto3_optional": false
-        },
-        {
-          "name": "workspace",
-          "number": 2,
-          "label": 1,
-          "type": 11,
-          "type_name": "dolgorae.public.v1.WorkspaceRef",
           "oneof_index": null,
           "proto3_optional": false
         },
@@ -7147,6 +7142,507 @@
       "oneofs": []
     },
     {
+      "name": "dolgorae.public.v1.OrchestratedSessionProjection",
+      "fields": [
+        {
+          "name": "session_id",
+          "number": 1,
+          "label": 1,
+          "type": 9,
+          "type_name": "",
+          "oneof_index": null,
+          "proto3_optional": false
+        },
+        {
+          "name": "primary_run",
+          "number": 2,
+          "label": 1,
+          "type": 11,
+          "type_name": "dolgorae.public.v1.RunRef",
+          "oneof_index": null,
+          "proto3_optional": false
+        },
+        {
+          "name": "aggregate_revision",
+          "number": 3,
+          "label": 1,
+          "type": 4,
+          "type_name": "",
+          "oneof_index": null,
+          "proto3_optional": false
+        },
+        {
+          "name": "lifecycle",
+          "number": 4,
+          "label": 1,
+          "type": 14,
+          "type_name": "dolgorae.public.v1.OrchestratedSessionLifecycle",
+          "oneof_index": null,
+          "proto3_optional": false
+        },
+        {
+          "name": "composition",
+          "number": 5,
+          "label": 1,
+          "type": 14,
+          "type_name": "dolgorae.public.v1.OrchestratedSessionComposition",
+          "oneof_index": null,
+          "proto3_optional": false
+        },
+        {
+          "name": "approval_policy",
+          "number": 6,
+          "label": 1,
+          "type": 14,
+          "type_name": "dolgorae.public.v1.OrchestratedSessionApprovalPolicy",
+          "oneof_index": null,
+          "proto3_optional": false
+        },
+        {
+          "name": "specialist_policy_name",
+          "number": 7,
+          "label": 1,
+          "type": 9,
+          "type_name": "",
+          "oneof_index": null,
+          "proto3_optional": false
+        },
+        {
+          "name": "specialist_policy_revision",
+          "number": 8,
+          "label": 1,
+          "type": 4,
+          "type_name": "",
+          "oneof_index": null,
+          "proto3_optional": false
+        },
+        {
+          "name": "specialist_policy_sha256",
+          "number": 9,
+          "label": 1,
+          "type": 9,
+          "type_name": "",
+          "oneof_index": null,
+          "proto3_optional": false
+        },
+        {
+          "name": "nonretired_member_count",
+          "number": 10,
+          "label": 1,
+          "type": 4,
+          "type_name": "",
+          "oneof_index": null,
+          "proto3_optional": false
+        },
+        {
+          "name": "nonterminal_spawn_count",
+          "number": 11,
+          "label": 1,
+          "type": 4,
+          "type_name": "",
+          "oneof_index": null,
+          "proto3_optional": false
+        },
+        {
+          "name": "pending_approval_count",
+          "number": 12,
+          "label": 1,
+          "type": 4,
+          "type_name": "",
+          "oneof_index": null,
+          "proto3_optional": false
+        },
+        {
+          "name": "accepted_unfinished_task_count",
+          "number": 13,
+          "label": 1,
+          "type": 4,
+          "type_name": "",
+          "oneof_index": null,
+          "proto3_optional": false
+        },
+        {
+          "name": "unknown_outcome_task_count",
+          "number": 14,
+          "label": 1,
+          "type": 4,
+          "type_name": "",
+          "oneof_index": null,
+          "proto3_optional": false
+        },
+        {
+          "name": "published_result_count",
+          "number": 15,
+          "label": 1,
+          "type": 4,
+          "type_name": "",
+          "oneof_index": null,
+          "proto3_optional": false
+        },
+        {
+          "name": "close_intent",
+          "number": 16,
+          "label": 1,
+          "type": 14,
+          "type_name": "dolgorae.public.v1.SessionCloseIntent",
+          "oneof_index": null,
+          "proto3_optional": false
+        },
+        {
+          "name": "close_progress",
+          "number": 17,
+          "label": 1,
+          "type": 14,
+          "type_name": "dolgorae.public.v1.SessionCloseProgress",
+          "oneof_index": null,
+          "proto3_optional": false
+        },
+        {
+          "name": "close_operation_id",
+          "number": 18,
+          "label": 1,
+          "type": 9,
+          "type_name": "",
+          "oneof_index": 0,
+          "proto3_optional": true
+        },
+        {
+          "name": "recovery_classification",
+          "number": 19,
+          "label": 1,
+          "type": 14,
+          "type_name": "dolgorae.public.v1.RecoveryClassification",
+          "oneof_index": null,
+          "proto3_optional": false
+        },
+        {
+          "name": "required_action",
+          "number": 20,
+          "label": 1,
+          "type": 14,
+          "type_name": "dolgorae.public.v1.RequiredClientAction",
+          "oneof_index": null,
+          "proto3_optional": false
+        },
+        {
+          "name": "captured_at",
+          "number": 21,
+          "label": 1,
+          "type": 11,
+          "type_name": "google.protobuf.Timestamp",
+          "oneof_index": null,
+          "proto3_optional": false
+        },
+        {
+          "name": "source_revision",
+          "number": 22,
+          "label": 1,
+          "type": 4,
+          "type_name": "",
+          "oneof_index": null,
+          "proto3_optional": false
+        },
+        {
+          "name": "availability",
+          "number": 23,
+          "label": 1,
+          "type": 14,
+          "type_name": "dolgorae.public.v1.OrchestratedSessionAvailability",
+          "oneof_index": null,
+          "proto3_optional": false
+        }
+      ],
+      "oneofs": [
+        "_close_operation_id"
+      ]
+    },
+    {
+      "name": "dolgorae.public.v1.GetOrchestratedSessionRequest",
+      "fields": [
+        {
+          "name": "context",
+          "number": 1,
+          "label": 1,
+          "type": 11,
+          "type_name": "dolgorae.public.v1.RequestContext",
+          "oneof_index": null,
+          "proto3_optional": false
+        },
+        {
+          "name": "root_run",
+          "number": 2,
+          "label": 1,
+          "type": 11,
+          "type_name": "dolgorae.public.v1.RunRef",
+          "oneof_index": null,
+          "proto3_optional": false
+        },
+        {
+          "name": "controller",
+          "number": 3,
+          "label": 1,
+          "type": 11,
+          "type_name": "dolgorae.public.v1.ControllerCarrierRef",
+          "oneof_index": null,
+          "proto3_optional": false
+        }
+      ],
+      "oneofs": []
+    },
+    {
+      "name": "dolgorae.public.v1.GetOrchestratedSessionResponse",
+      "fields": [
+        {
+          "name": "context",
+          "number": 1,
+          "label": 1,
+          "type": 11,
+          "type_name": "dolgorae.public.v1.ResponseContext",
+          "oneof_index": null,
+          "proto3_optional": false
+        },
+        {
+          "name": "session",
+          "number": 2,
+          "label": 1,
+          "type": 11,
+          "type_name": "dolgorae.public.v1.OrchestratedSessionProjection",
+          "oneof_index": null,
+          "proto3_optional": false
+        }
+      ],
+      "oneofs": []
+    },
+    {
+      "name": "dolgorae.public.v1.OrchestratedSessionResult",
+      "fields": [
+        {
+          "name": "result_id",
+          "number": 1,
+          "label": 1,
+          "type": 9,
+          "type_name": "",
+          "oneof_index": null,
+          "proto3_optional": false
+        },
+        {
+          "name": "task_id",
+          "number": 2,
+          "label": 1,
+          "type": 9,
+          "type_name": "",
+          "oneof_index": null,
+          "proto3_optional": false
+        },
+        {
+          "name": "specialist_run",
+          "number": 3,
+          "label": 1,
+          "type": 11,
+          "type_name": "dolgorae.public.v1.RunRef",
+          "oneof_index": null,
+          "proto3_optional": false
+        },
+        {
+          "name": "specialist_role",
+          "number": 4,
+          "label": 1,
+          "type": 9,
+          "type_name": "",
+          "oneof_index": null,
+          "proto3_optional": false
+        },
+        {
+          "name": "publication_order",
+          "number": 5,
+          "label": 1,
+          "type": 4,
+          "type_name": "",
+          "oneof_index": null,
+          "proto3_optional": false
+        },
+        {
+          "name": "published_at",
+          "number": 6,
+          "label": 1,
+          "type": 11,
+          "type_name": "google.protobuf.Timestamp",
+          "oneof_index": null,
+          "proto3_optional": false
+        },
+        {
+          "name": "format",
+          "number": 7,
+          "label": 1,
+          "type": 14,
+          "type_name": "dolgorae.public.v1.OrchestratedResultFormat",
+          "oneof_index": null,
+          "proto3_optional": false
+        },
+        {
+          "name": "byte_length",
+          "number": 8,
+          "label": 1,
+          "type": 4,
+          "type_name": "",
+          "oneof_index": null,
+          "proto3_optional": false
+        },
+        {
+          "name": "sha256",
+          "number": 9,
+          "label": 1,
+          "type": 9,
+          "type_name": "",
+          "oneof_index": null,
+          "proto3_optional": false
+        },
+        {
+          "name": "artifact",
+          "number": 10,
+          "label": 1,
+          "type": 11,
+          "type_name": "dolgorae.public.v1.ArtifactRef",
+          "oneof_index": null,
+          "proto3_optional": false
+        },
+        {
+          "name": "artifact_owner",
+          "number": 11,
+          "label": 1,
+          "type": 11,
+          "type_name": "dolgorae.public.v1.RunRef",
+          "oneof_index": null,
+          "proto3_optional": false
+        }
+      ],
+      "oneofs": []
+    },
+    {
+      "name": "dolgorae.public.v1.ListOrchestratedSessionResultsRequest",
+      "fields": [
+        {
+          "name": "context",
+          "number": 1,
+          "label": 1,
+          "type": 11,
+          "type_name": "dolgorae.public.v1.RequestContext",
+          "oneof_index": null,
+          "proto3_optional": false
+        },
+        {
+          "name": "root_run",
+          "number": 2,
+          "label": 1,
+          "type": 11,
+          "type_name": "dolgorae.public.v1.RunRef",
+          "oneof_index": null,
+          "proto3_optional": false
+        },
+        {
+          "name": "controller",
+          "number": 3,
+          "label": 1,
+          "type": 11,
+          "type_name": "dolgorae.public.v1.ControllerCarrierRef",
+          "oneof_index": null,
+          "proto3_optional": false
+        },
+        {
+          "name": "page_cursor",
+          "number": 4,
+          "label": 1,
+          "type": 9,
+          "type_name": "",
+          "oneof_index": 0,
+          "proto3_optional": true
+        },
+        {
+          "name": "limit",
+          "number": 5,
+          "label": 1,
+          "type": 13,
+          "type_name": "",
+          "oneof_index": null,
+          "proto3_optional": false
+        },
+        {
+          "name": "projection_version",
+          "number": 6,
+          "label": 1,
+          "type": 13,
+          "type_name": "",
+          "oneof_index": null,
+          "proto3_optional": false
+        }
+      ],
+      "oneofs": [
+        "_page_cursor"
+      ]
+    },
+    {
+      "name": "dolgorae.public.v1.ListOrchestratedSessionResultsResponse",
+      "fields": [
+        {
+          "name": "context",
+          "number": 1,
+          "label": 1,
+          "type": 11,
+          "type_name": "dolgorae.public.v1.ResponseContext",
+          "oneof_index": null,
+          "proto3_optional": false
+        },
+        {
+          "name": "captured_publication_head",
+          "number": 2,
+          "label": 1,
+          "type": 4,
+          "type_name": "",
+          "oneof_index": null,
+          "proto3_optional": false
+        },
+        {
+          "name": "source_revision",
+          "number": 3,
+          "label": 1,
+          "type": 4,
+          "type_name": "",
+          "oneof_index": null,
+          "proto3_optional": false
+        },
+        {
+          "name": "captured_at",
+          "number": 4,
+          "label": 1,
+          "type": 11,
+          "type_name": "google.protobuf.Timestamp",
+          "oneof_index": null,
+          "proto3_optional": false
+        },
+        {
+          "name": "items",
+          "number": 5,
+          "label": 3,
+          "type": 11,
+          "type_name": "dolgorae.public.v1.OrchestratedSessionResult",
+          "oneof_index": null,
+          "proto3_optional": false
+        },
+        {
+          "name": "next_page_cursor",
+          "number": 6,
+          "label": 1,
+          "type": 9,
+          "type_name": "",
+          "oneof_index": 0,
+          "proto3_optional": true
+        }
+      ],
+      "oneofs": [
+        "_next_page_cursor"
+      ]
+    },
+    {
       "name": "dolgorae.public.v1.DolgoraeErrorDetail",
       "fields": [
         {
@@ -8028,6 +8524,10 @@
         {
           "name": "CONTROLLER_CARRIER_ROOT_POLICY_DOLGORAE_OWNED_APPLICATION_SUPPORT",
           "number": 1
+        },
+        {
+          "name": "CONTROLLER_CARRIER_ROOT_POLICY_DOLGORAE_OWNED_HOME",
+          "number": 2
         }
       ]
     },
@@ -8444,6 +8944,169 @@
         {
           "name": "ARTIFACT_VISIBILITY_CONTROLLER_ONLY",
           "number": 2
+        }
+      ]
+    },
+    {
+      "name": "dolgorae.public.v1.OrchestratedSessionLifecycle",
+      "values": [
+        {
+          "name": "ORCHESTRATED_SESSION_LIFECYCLE_UNSPECIFIED",
+          "number": 0
+        },
+        {
+          "name": "ORCHESTRATED_SESSION_LIFECYCLE_CREATING",
+          "number": 1
+        },
+        {
+          "name": "ORCHESTRATED_SESSION_LIFECYCLE_ACTIVE",
+          "number": 2
+        },
+        {
+          "name": "ORCHESTRATED_SESSION_LIFECYCLE_DEGRADED",
+          "number": 3
+        },
+        {
+          "name": "ORCHESTRATED_SESSION_LIFECYCLE_RECOVERING",
+          "number": 4
+        },
+        {
+          "name": "ORCHESTRATED_SESSION_LIFECYCLE_COMPLETING",
+          "number": 5
+        },
+        {
+          "name": "ORCHESTRATED_SESSION_LIFECYCLE_ABORTING",
+          "number": 6
+        },
+        {
+          "name": "ORCHESTRATED_SESSION_LIFECYCLE_COMPLETED",
+          "number": 7
+        },
+        {
+          "name": "ORCHESTRATED_SESSION_LIFECYCLE_ABORTED",
+          "number": 8
+        }
+      ]
+    },
+    {
+      "name": "dolgorae.public.v1.OrchestratedSessionComposition",
+      "values": [
+        {
+          "name": "ORCHESTRATED_SESSION_COMPOSITION_UNSPECIFIED",
+          "number": 0
+        },
+        {
+          "name": "ORCHESTRATED_SESSION_COMPOSITION_STANDALONE_PRIMARY",
+          "number": 1
+        },
+        {
+          "name": "ORCHESTRATED_SESSION_COMPOSITION_BROKERED_HIERARCHY",
+          "number": 2
+        }
+      ]
+    },
+    {
+      "name": "dolgorae.public.v1.OrchestratedSessionApprovalPolicy",
+      "values": [
+        {
+          "name": "ORCHESTRATED_SESSION_APPROVAL_POLICY_UNSPECIFIED",
+          "number": 0
+        },
+        {
+          "name": "ORCHESTRATED_SESSION_APPROVAL_POLICY_USER_APPROVAL_REQUIRED",
+          "number": 1
+        },
+        {
+          "name": "ORCHESTRATED_SESSION_APPROVAL_POLICY_FULLY_DELEGATED",
+          "number": 2
+        }
+      ]
+    },
+    {
+      "name": "dolgorae.public.v1.OrchestratedSessionAvailability",
+      "values": [
+        {
+          "name": "ORCHESTRATED_SESSION_AVAILABILITY_UNSPECIFIED",
+          "number": 0
+        },
+        {
+          "name": "ORCHESTRATED_SESSION_AVAILABILITY_AVAILABLE",
+          "number": 1
+        },
+        {
+          "name": "ORCHESTRATED_SESSION_AVAILABILITY_UNAVAILABLE",
+          "number": 2
+        },
+        {
+          "name": "ORCHESTRATED_SESSION_AVAILABILITY_RECOVERY_REQUIRED",
+          "number": 3
+        }
+      ]
+    },
+    {
+      "name": "dolgorae.public.v1.SessionCloseIntent",
+      "values": [
+        {
+          "name": "SESSION_CLOSE_INTENT_UNSPECIFIED",
+          "number": 0
+        },
+        {
+          "name": "SESSION_CLOSE_INTENT_NONE",
+          "number": 1
+        },
+        {
+          "name": "SESSION_CLOSE_INTENT_COMPLETE",
+          "number": 2
+        },
+        {
+          "name": "SESSION_CLOSE_INTENT_ABORT",
+          "number": 3
+        }
+      ]
+    },
+    {
+      "name": "dolgorae.public.v1.SessionCloseProgress",
+      "values": [
+        {
+          "name": "SESSION_CLOSE_PROGRESS_UNSPECIFIED",
+          "number": 0
+        },
+        {
+          "name": "SESSION_CLOSE_PROGRESS_NONE",
+          "number": 1
+        },
+        {
+          "name": "SESSION_CLOSE_PROGRESS_SETTLING",
+          "number": 2
+        },
+        {
+          "name": "SESSION_CLOSE_PROGRESS_COMPLETED",
+          "number": 3
+        },
+        {
+          "name": "SESSION_CLOSE_PROGRESS_ABORTED",
+          "number": 4
+        },
+        {
+          "name": "SESSION_CLOSE_PROGRESS_RECOVERY_REQUIRED",
+          "number": 5
+        },
+        {
+          "name": "SESSION_CLOSE_PROGRESS_OUTCOME_UNKNOWN",
+          "number": 6
+        }
+      ]
+    },
+    {
+      "name": "dolgorae.public.v1.OrchestratedResultFormat",
+      "values": [
+        {
+          "name": "ORCHESTRATED_RESULT_FORMAT_UNSPECIFIED",
+          "number": 0
+        },
+        {
+          "name": "ORCHESTRATED_RESULT_FORMAT_UTF8_TEXT",
+          "number": 1
         }
       ]
     },

@@ -93,7 +93,7 @@ continuation implementation.
 
 ## 3.1 Review closure checklist
 
-- [ ] E12-T1 pins TASK-053's exact CloseRun progress/error/operation correlation and field-sourceability fixtures. Historical REQ-RUNTIME-022/E0-T7 evidence is not the new pin.
+- [x] E12-T1 pins TASK-053's exact CloseRun progress/error/operation correlation and field-sourceability fixtures. Historical REQ-RUNTIME-022/E0-T7 evidence is not the new pin.
 - [ ] E1-T3 declares ListPromptHistory, GetPromptHistoryItem, GetExecutionState, ListSpecialistResults and CloseOutcome with Gul-owned DTOs, IDs, tokens and bounds.
 - [ ] E3-T3 completes passive aggregate reads and member status only. No temporary executable close route is installed.
 - [ ] E4-T3 completes the shared close-eligibility and interrupt-confirmation evaluator.
@@ -207,11 +207,11 @@ state changes. Missing Podway observation cannot block existing functionality.
 
 ## 10. Completion checklist
 
-- [ ] E12-T1 pins the immutable TASK-053 revision and regenerates, without
+- [x] E12-T1 pins the immutable TASK-053 revision and regenerates, without
       hand-editing generated outputs.
-- [ ] The consumer matrix distinguishes 27 required methods from all 36 methods.
-- [ ] Global Profile reads contain no Workspace reference.
-- [ ] The fixed carrier-root contract and no-Operator boundary pass fixtures.
+- [x] The consumer matrix distinguishes 27 required methods from all 36 methods.
+- [x] Global Profile reads contain no Workspace reference.
+- [x] The fixed carrier-root contract and no-Operator boundary pass fixtures.
 - [ ] E13-T1 stateful fake scenarios pass independently of future Gul features.
 - [ ] E14-T1 assembled authenticated pre-release browser proof passes.
 - [ ] Earlier required Epics close before the next Epic starts; no cross-Epic

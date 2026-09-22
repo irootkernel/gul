@@ -131,8 +131,8 @@ function gitValidationFixture(runGit) {
   const root = fixture();
   try {
     write(root, 'docs/roadmap.md', text => text
-      .replace('| Active Task | None |', '| Active Task | E12-T1 |')
-      .replace('| E12-T1 | Pre-release | Planned |', '| E12-T1 | Pre-release | In Review |'));
+      .replace('| Active Task | None |', '| Active Task | E1-T1 |')
+      .replace('| E1-T1 | Pre-release | Planned |', '| E1-T1 | Pre-release | In Review |'));
     assert.deepEqual(run(root).errors, []);
   } finally {
     fs.rmSync(root, {recursive: true, force: true});
@@ -147,9 +147,9 @@ expectFailure('duplicate requirement is not normalized away', root => {
 
 expectFailure('multiple active rows', root => {
   write(root, 'docs/roadmap.md', text => text
-    .replace('| Active Task | None |', '| Active Task | E12-T1 |')
-    .replace('| E12-T1 | Pre-release | Planned |', '| E12-T1 | Pre-release | In Progress |')
-    .replace('| E1-T1 | Pre-release | Planned |', '| E1-T1 | Pre-release | In Review |'));
+    .replace('| Active Task | None |', '| Active Task | E1-T1 |')
+    .replace('| E1-T1 | Pre-release | Planned |', '| E1-T1 | Pre-release | In Progress |')
+    .replace('| E1-T2 | Pre-release | Planned |', '| E1-T2 | Pre-release | In Review |'));
 }, /Multiple active Tasks/);
 
 expectFailure('active header mismatch', root => {
@@ -158,10 +158,10 @@ expectFailure('active header mismatch', root => {
 
 expectFailure('active row mismatch', root => {
   write(root, 'docs/roadmap.md', text => text.replace(
-    '| E12-T1 | Pre-release | Planned |',
-    '| E12-T1 | Pre-release | In Progress |',
+    '| E1-T1 | Pre-release | Planned |',
+    '| E1-T1 | Pre-release | In Progress |',
   ));
-}, /Active Task header must be exactly E12-T1/);
+}, /Active Task header must be exactly E1-T1/);
 
 expectFailure('missing retired row', root => {
   write(root, 'docs/roadmap.md', text => text.replace(/^\| E0-T5 \|.*\n/m, ''));
@@ -198,17 +198,17 @@ expectFailure('dependency cycle', root => {
 
 expectFailure('retired dependency', root => {
   write(root, 'docs/roadmap.md', text => text.replace(
-    '| E12-T1 | Pre-release | Planned | E0-T7; Contract ready |',
-    '| E12-T1 | Pre-release | Planned | E0-T5 |',
+    '| E1-T1 | Pre-release | Planned | E12-T1 |',
+    '| E1-T1 | Pre-release | Planned | E0-T5 |',
   ));
-}, /E12-T1 depends on retired E0-T5/);
+}, /E1-T1 depends on retired E0-T5/);
 
 expectFailure('reserved dependency', root => {
   write(root, 'docs/roadmap.md', text => text.replace(
-    '| E12-T1 | Pre-release | Planned | E0-T7; Contract ready |',
-    '| E12-T1 | Pre-release | Planned | E10-T1 |',
+    '| E1-T1 | Pre-release | Planned | E12-T1 |',
+    '| E1-T1 | Pre-release | Planned | E10-T1 |',
   ));
-}, /E12-T1 depends on reserved E10-T1/);
+}, /E1-T1 depends on reserved E10-T1/);
 
 expectFailure('invalid owner', root => {
   write(root, 'docs/required-specs.md', text => text.replace(/\| E12-T1 \|/, '| E99-T99 |'));
@@ -246,25 +246,25 @@ expectFailure('migrated fake requirement cannot retain retired owner', root => {
   ));
 }, /Active requirement REQ-CONSUMER-002 has non-release owner E12-T2/);
 
-expectFailure('missing required operation-map boundary', root => {
+expectFailure('missing checked operation-map boundary', root => {
   write(root, 'docs/architecture.md', text => text.replace(
-    '<!-- contract-required-operation-map:start -->',
-    '<!-- missing-required-operation-map:start -->',
+    '<!-- contract-operation-map:start -->',
+    '<!-- missing-operation-map:start -->',
   ));
-}, /exactly one required consumer operation map marker pair/);
+}, /exactly one current checked operation map marker pair/);
 
-expectFailure('future RPC leaks into current checked map', root => {
+expectFailure('unavailable RPC leaks into checked map', root => {
   write(root, 'docs/architecture.md', text => text.replace(
     '<!-- contract-operation-map:end -->',
-    '| `GetOrchestratedSession` | `OrchestrationService.GetOrchestratedSession` |\n<!-- contract-operation-map:end -->',
+    '| `DeleteRun` | `RunService.DeleteRun` |\n<!-- contract-operation-map:end -->',
   ));
-}, /Current checked operation map contains unpinned RPC OrchestrationService.GetOrchestratedSession/);
+}, /Checked consumer operation map contains unavailable RPC RunService.DeleteRun/);
 
-expectFailure('required operation map loses aggregate read', root => {
+expectFailure('checked operation map loses aggregate read', root => {
   write(root, 'docs/architecture.md', text => text.replace(
     /^\| `GetOrchestratedSession` \|.*\n/m,
     '',
   ));
-}, /Required consumer operation map is missing OrchestrationService.GetOrchestratedSession/);
+}, /Checked consumer operation map is missing OrchestrationService.GetOrchestratedSession/);
 
 console.log(`SOT validator fixtures passed: Git baseline, first-adoption, source-export, and ${negativeCases} negative cases`);

@@ -5,7 +5,7 @@
 | Role | Non-normative implementation observations, dependencies, risks, and handoff |
 | Product | Gul |
 | Version | 0.1-dolgorae-consumer-v1 |
-| Last updated | 2026-09-21 |
+| Last updated | 2026-09-22 |
 
 ## 1. Boundary
 
@@ -21,7 +21,7 @@ fake-based work from post-release adapter/integration work. No Task is active.
 | New boundary | Current authority or remaining owner |
 | --- | --- |
 | Immutable producer lock | **Available:** Dolgorae TASK-053 completed at `21aefe5b2a8dc6fb18a58338090348b23d2f0a4a` with 27 required methods, complete timeline, two additive aggregate reads, exact hashes and bounded fixtures |
-| New Gul consumer pin | E12-T1: old upstream/generated files remain historical E0 until checked regeneration |
+| New Gul consumer pin | **Accepted by E12-T1:** immutable TASK-053 inputs and regenerated consumer outputs |
 | Consumer-realistic fakes | E13-T1, replacing retired E12-T2: independently tested history/session/result/admission/failure scenarios |
 | Pre-release readiness | E14-T1, replacing retired E12-T3: assembled authenticated core/browser with fakes and explicit remaining live edges |
 | Released-provider integration | E2/E9: exact released v0.1.3 artifact, actual UDS/carriers/RPC and browser evidence |
@@ -52,8 +52,8 @@ remain applicable. A plan or fake never advertises actual runtime support.
 ## 1.2 Review refinements, 2026-09-21
 
 The producer TASK-053 lock is available at immutable commit
-`21aefe5b2a8dc6fb18a58338090348b23d2f0a4a`; Gul adoption remains pending under
-E12-T1. This revision declares browser
+`21aefe5b2a8dc6fb18a58338090348b23d2f0a4a`; E12-T1 subsequently accepted its
+Gul consumer pin. This revision declares browser
 ListPromptHistory/GetPromptHistoryItem/GetExecutionState/ListSpecialistResults
 contracts, bounded Gul tokens and references, and CloseOutcome distinctions.
 Provider cursors and close operation IDs remain backend correlations.
@@ -69,16 +69,15 @@ historical baseline, without a fixed total count. Negative tests cover pointer
 mismatch and identity loss alongside existing DAG/phase/owner/link checks.
 These checks prove document structure, not runtime or generated-contract readiness.
 The host currently has Buf 1.69.0, which satisfies the current
-`>=1.66.1,<2.0.0` lint-tool range. Buf is resolved from the system `PATH`; the
-descriptor and generated-client tools remain exactly pinned. No tool installation
+`>=1.66.1,<2.0.0` range and reproduces the checked descriptor. Buf is resolved
+from the system `PATH` for lint, descriptor construction, and additive checks;
+different descriptor bytes fail closed. Language-client tools remain exactly pinned. No tool installation
 is implied, and tool availability is not wire or semantic acceptance.
 
-Architecture Section 6.4 now separates the historical checked E0 operation map
-from the approved E12 target map. Contract generation consumes only the Current
-State table and continues to reject any RPC absent from the checked descriptor;
-SOT checks preserve both marker pairs, keep the two new Orchestration reads in
-Required State, and prevent them from leaking into the current generator input.
-E12-T1 owns convergence after it imports the immutable TASK-053 contract.
+Architecture Section 6.4 now carries one checked E12 operation map. Contract
+generation rejects RPCs absent from the descriptor and derives the required and
+unavailable sets from the pinned consumer profile rather than treating descriptor
+presence as runtime support.
 
 ## 1.3 Whole-Epic execution reorganization, 2026-09-21
 
@@ -106,22 +105,37 @@ E5. REQ-CONSUMER-004 names assembled fake-application acceptance separately from
 the provider fake harness. Early production access remains denied, rather than
 using a temporary authentication bypass to finish an Epic.
 
+## 1.4 E12-T1 contract pin completion, 2026-09-22
+
+E12-T1 imports immutable TASK-053 commit
+`21aefe5b2a8dc6fb18a58338090348b23d2f0a4a` and records dependency-lock SHA-256
+`8f52ae66e126f37013d7842b2113fc509d21af4e4fc465cecdbeef7e21619f01` plus
+generated-lock SHA-256
+`43fecc3b63ca47b8a4330d1509047a2b3a8be4735c0bee5e6f5b43edca81c3d5`.
+The generator reproduces the 8-service, 36-method descriptor with Buf 1.69,
+checks additive compatibility against the pre-TASK-053 descriptor, and emits
+typed Go/TypeScript clients, an all-method transport fake, 31 semantic operations,
+and explicit 27-required/9-unavailable policy maps. Validation covers global
+Profile requests without `WorkspaceRef`, the fixed carrier root, no Operator or
+production CLI fallback, CloseRun operation correlation and forbidden retry,
+field sourceability, producer-lock correlation, and exact generated hashes.
+This promotes REQ-CONSUMER-001 as contract/tooling Current State only. No Gul
+product runtime, stateful scenario fake, released executable, or live provider
+compatibility is claimed.
+
 The current E4 scope excludes Deferred E4-T4. Required release completion also
 excludes Retired IDs, and the old generic successor E2E wording now names the
 first-release unsupported-continuation check instead. Each consumer Epic has a
 separate link to the shared dossier so its closeout cannot delete another Epic's
 remaining acceptance context. The final consumer owns dossier deletion.
 
-Verification for this amendment is limited to documentation structure and the
-changed validator's fixtures, plus whitespace/syntax checks. `bash
-scripts/check-sot.sh`, `node scripts/test-sot.mjs`, JavaScript syntax checks and
-`git diff --check` passed on the amended worktree. The fixture runner reports
-17 exercised negative cases, including the new Epic-order and retired-owner
-cases. The first-release Task count remains 38 including three Completed E0
-Tasks; 35 implementation Tasks remain Planned. Generated artifacts, product
-implementation and live integration are unchanged and are not certified by these
-checks. TASK-053 completion is separate immutable producer evidence, not an
-inference from the Gul structural checks.
+Verification for E12-T1 includes contract regeneration and drift comparison,
+Go and TypeScript compilation, all-method fake transport tests, descriptor
+breaking fixtures, contract/schema/policy validation, SOT checks and their
+negative fixtures, toolchain fixtures, whitespace checks, and the serial
+`make test` facade. These checks certify the generated contract boundary only.
+Product implementation and live integration remain absent. TASK-053 completion
+is immutable producer evidence, not an inference from Gul's local tests.
 
 ## 2. Current development snapshot
 
@@ -129,7 +143,7 @@ inference from the Gul structural checks.
 |---|---|
 | Five Gul SOT documents | E0-T4 completed the consumer alignment and Gate A reproduction; E0-T8 completed toolchain/ADR alignment; E0-T7 completed Gate B |
 | Toolchain and developer-command artifacts | E0-T8 accepted one pin manifest and read-only host checks; E0-T7 adds checked contract generation/drift delegates; no installer or application scaffold |
-| Contract boundary | Historical E0 sources/locks/clients/fakes remain unchanged; the new consumer profile and E12 regeneration are not yet implemented |
+| Contract boundary | E12-T1 pins TASK-053 and regenerates checked clients/maps/fake transport for 36 known, 27 required, and 9 unavailable methods |
 | Production source | None |
 | Wails host/frontend | Not implemented |
 | ConnectRPC schema/services | Not implemented |
@@ -137,7 +151,7 @@ inference from the Gul structural checks.
 | Dolgorae RPC supervisor/provider | Not implemented |
 | Controller credential store | Caller-owned mechanism selected by ADR-0047; not implemented |
 | FileService/auth/PWA/Tailscale integration | Not implemented |
-| Current State promotions | REQ-HOST-005, REQ-RUNTIME-011, and REQ-RUNTIME-022; no product runtime behavior |
+| Current State promotions | REQ-HOST-005, REQ-RUNTIME-011, REQ-RUNTIME-022, and REQ-CONSUMER-001; no product runtime behavior |
 
 The repository contains documentation, pre-implementation bootstrap validation, and a checked provider-contract boundary candidate. No application source or live runtime behavior has completed review.
 
@@ -147,8 +161,8 @@ This table records the earlier E0 design context, not current contract readiness
 Any Accepted, published, complete or Gate A/B wording in this historical table
 refers only to that earlier scope. Sections 1.1 and 2 record the current state:
 TASK-053 publication is complete at
-`21aefe5b2a8dc6fb18a58338090348b23d2f0a4a`, while E12-T1 repinning remains
-pending. Current product rules are in Required Specifications and ADR-0050/0051,
+`21aefe5b2a8dc6fb18a58338090348b23d2f0a4a`; E12-T1 has accepted that contract
+boundary. Current product rules are in Required Specifications and ADR-0050/0051,
 not these archived assumptions.
 
 | ID | Historical assumption | Status at the recorded baseline |
@@ -216,11 +230,11 @@ The retained direction is Wails v3 with a Go core, generated ConnectRPC clients,
 
 ## 5. Historical E0 dependency ledger
 
-The new consumer lock is **available from the producer** at Dolgorae TASK-053
-commit `21aefe5b2a8dc6fb18a58338090348b23d2f0a4a`; Gul E12-T1 must still reproduce
-and adopt it. No hash in this historical table is asserted to identify that new
-publication. Existing checked/generated files are intentionally unchanged,
-preserving E0 completion evidence.
+E12-T1 adopted the producer lock at Dolgorae TASK-053 completion commit
+`21aefe5b2a8dc6fb18a58338090348b23d2f0a4a`. The live dependency and generated
+lock paths now carry the E12 digests recorded in section 1.4. The E0 digests in
+this historical table remain provenance records only and are not the contents
+of those live paths.
 
 Gate A's earlier source and checked-artifact digests are recorded below. E0-T7 records them in `contract/dependency-lock.json` (SHA-256 `c4f91aa3e2add1093880684e5c96fdbb6239aef6a85261a0adf6b585e2db8863`) and records every generated output in `contract/generated/generated-lock.json` (SHA-256 `8a6a614a3a08c585f9a62f74095a0237d47feefba802e2dfa3ce13be5fbe0bf6`).
 
@@ -243,7 +257,7 @@ Gate A's earlier source and checked-artifact digests are recorded below. E0-T7 r
 | Public transport | Accepted target: supervised local gRPC over private UDS | Pinned release/descriptor/lifecycle evidence; private, TCP, REST, and operator interfaces excluded | E0-T7/E2-T0 |
 | Gul adapter version | Unset | Versioned adapter contract | E2-T1 |
 | Last successful compatibility probe | None | Timestamp, environment, result, redacted evidence | E2-T1 |
-| Go/Wails/Node/Bun/TypeScript/React | Go `1.26.6`; Wails `3.0.0-beta.8` (`wails3`); Node `26.7.0`; Bun `1.3.14`; TypeScript `7.0.2`; React/DOM `19.2.7` | `toolchain/versions.env`; read-only exact/missing/mismatch checks and clean-host fixtures | E0-T8 |
+| Go/Wails/Node/Bun/TypeScript/React | Go `1.26.6`; Wails `3.0.0-beta.8` (`wails3`); Node `26.7.0`; system Bun `>=1.3.14`; TypeScript `7.0.2`; React/DOM `19.2.7` | `toolchain/versions.env`; exact checks except Bun's minimum-only system policy; clean-host fixtures | E0-T8/E12-T1 |
 | Protobuf/Buf/ConnectRPC | System Buf `>=1.66.1,<2.0.0`; protoc `35.1`; protoc-gen-go/protobuf-go `1.36.12`; connect-go/protoc-gen-connect-go `1.20.0`; Connect-ES/Web `2.1.2`; Protobuf-ES/protoc-gen-es `2.14.0`; protoc-gen-connect-es `1.7.0` | Same manifest; Buf lint must pass and generated dependency manifests must match before use | E0-T8 |
 | Host platform | macOS `>=14.0.0`, `arm64`; Git `>=2.39.0,<3.0.0` | Range checks; no installation or mutation | E0-T8 |
 | SQLite driver/settings | modernc.org/sqlite `1.57.0`; WAL; foreign keys; `synchronous=FULL`; 5-second busy timeout; one writer and at most four read-only connections; immediate transactional sequence allocation; checkpoint plus `VACUUM INTO` backup | Accepted ADR-0017 and future E1-T4 fault/race/backup tests | E0-T8 |
@@ -298,14 +312,14 @@ these archived rows adds a first-release requirement.
 | RISK-031 | Allowlist-bounded registration browsing discloses host layout or resolves outside its roots through traversal, symlink, or case-alias probes. | Medium | High | Canonical resolution at load, containment proof per browse, one indistinguishable typed error for every outside-root outcome, provider-private denial, negative path fixtures; ADR-0040; E3-T1/E9-T2. |
 | RISK-032 | Recommended-tier requirements silently become permanent omissions and v0.1 ships thinner than intended. | Medium | Medium | Tier changes require an accepted ADR and Roadmap change, the release gate demands a recorded disposition for every Recommended item, and each has a named Release-tier fallback; ADR-0041; E9-T3. |
 | RISK-033 | Gul unlinks a stale, symlinked, foreign, or live socket, or the socket is remotely exposed. | Low | Critical | Gul never unlinks; Dolgorae owns stale proof/cleanup; Gul validates parent and resulting node, refuses active gateways, and prohibits TCP/Serve exposure; ADR-0043/E2-T1/E9-T2. |
-| RISK-034 | A lost mutation response is retried without the exact original semantic request and creates a duplicate or conflicting operation. | Medium | Critical | Disable transparent retries; persist crash-safe replay envelopes only for StartRun/continuation; keep SubmitTurn replay process-local; stable keys/credentials, semantic reconciliation, and outcome-unknown blocking; ADR-0049/E5-T3. |
+| RISK-034 | A lost mutation response is retried without the exact original semantic request and creates a duplicate or conflicting operation. | Medium | Critical | Disable transparent retries; persist first-release crash-safe replay envelopes only for StartRun; keep SubmitTurn replay process-local; defer continuation replay to E4-T4; stable keys/credentials, semantic reconciliation, and outcome-unknown blocking; ADR-0049/E5-T3. |
 | RISK-035 | Missing timeline or Artifact capability produces fabricated history or truncated success. | Medium | High | Required handshake capabilities, authoritative timeline merge, verified bounded artifact reads; E4-T5/E9-T1. |
 | RISK-036 | Machine CLI silently becomes a divergent production fallback. | Medium | Critical | Separate adapter/DI graph, explicit diagnostic entrypoints, failure tests proving a gRPC blocker; ADR-0043/E9-T1. |
 | RISK-037 | Gul implements against an unpinned revision or weakens a typed provider rule while adapting it. | High | Critical | Gate A/B require one clean regenerated checked set; exact typed field and event-invalidation inventory, fail-closed compatibility tests, and no diagnostic-string parsing; E0-T7/E4-T1/E4-T3. |
 | RISK-038 | Workspace registration creates an ID bootstrap cycle or trusts a browser-supplied provider identity. | Medium | High | First InspectWorkspace has no expected ID; later calls use the stored returned ID; browser path/ID remains non-authoritative; E3-T1. |
 | RISK-039 | Continuation response loss creates a second destination, loses canonical request material, or relies on a nonexistent lineage lookup. | Medium | Critical | Persist owner-only canonical replay envelope and same-principal credential first, exact-key replay, Controller-ID secondary lookup, delayed ReconcileRun, retention/cleanup tests; ADR-0049/E4-T4/E5-T3. |
 | RISK-040 | Gul accepts the typed event variant but omits one of Dolgorae's required aggregate invalidations or combines incompatible projection revisions. | High | Critical | ADR-0048, exact generated event-invalidation map, per-aggregate ProjectionStamp storage, convergence gating, and descriptor/client-policy drift tests; E0-T7/E4-T1/E5-T2. |
-| RISK-041 | Gul cannot reproduce an exact allocation request after restart, retains replay material indefinitely, or persists user prompts/secrets to make replay possible. | Medium | Critical | ADR-0049 protected replay store for StartRun/continuation only, terminal-result deletion, fixed 72-hour maximum expiry, process-local SubmitTurn replay, no protected-response replay, canary and crash tests; E1-T4/E5-T3. |
+| RISK-041 | Gul cannot reproduce an exact allocation request after restart, retains replay material indefinitely, or persists user prompts/secrets to make replay possible. | Medium | Critical | ADR-0049 first-release protected replay store for StartRun only, terminal-result deletion, fixed 72-hour maximum expiry, process-local SubmitTurn replay, no protected-response replay, deferred continuation replay in E4-T4, canary and crash tests; E1-T4/E5-T3. |
 
 ## 8. E0-T4 completion record
 
@@ -500,7 +514,7 @@ These twenty-two criteria come from the originating brief. The local-gRPC revisi
 
 | # | Required evidence and current disposition |
 |---:|---|
-| 1 | Architecture 6.4.1 preserves every checked E0 semantic operation with exact RPC and request/response types, Controller/workspace prerequisites, idempotency, timeout class, retry, reconciliation, projection effect, capability, and verification state. The generated operation map verifies all 36 Current State rows against the accepted descriptor or explicit local/Gul ownership; Section 6.4.2 separately owns the Required State target. |
+| 1 | Architecture 6.4.1 records the checked E12 first-release operation set with exact RPC or Gul owner, prerequisites, retry, reconciliation, projection, capability, and verification fields. The generated map verifies 31 semantic operations against the accepted descriptor or explicit Gul ownership. |
 | 2 | Runtime Provider no longer contains `CreateControllerCredential`; ADR-0047 assigns creation to Gul. |
 | 3 | ADR-0047 and REQ-CTRL-002/012 define exact local credential creation under the Dolgorae carrier root. |
 | 4 | REQ-CTRL-013 defines distinct same-principal continuation credentials and independently preserves source kind, subject ID, and stable Gul instance ID. |
@@ -530,12 +544,12 @@ These cases are normative future acceptance owned by the Roadmap tasks named in 
 | 1 | Every Gul semantic operation resolves to one exact accepted RPC/type pair or local/Gul owner. |
 | 2 | The accepted operation map contains no unresolved RPC placeholder. |
 | 3 | Initial `InspectWorkspace` omits expected Workspace ID; revalidation supplies the stored path and ID. |
-| 4 | `ListProfiles` and `GetProfile` carry the verified `WorkspaceRef`. |
+| 4 | `ListProfiles` and `GetProfile` carry no `WorkspaceRef` and read the user-global Profile registry. |
 | 5 | StartRun/GetRun configuration replaces Direct Session presentation state. |
 | 6 | Exact same-key StartRun replay returns the original Run and Controller binding. |
 | 7 | StartRun recovery never requires `GetRun` before a Run ID is known. |
-| 8 | Exact same-key continuation replay returns the original destination and lineage receipt. |
-| 9 | Shared-readonly/unsupported-transition write failure exposes continuation, not source write resubmission. |
+| 8 | Optional continuation RPC presence does not create a first-release Gul route. |
+| 9 | Shared-readonly or unsupported-transition write failure exposes a typed unsupported blocker, not source write resubmission. |
 | 10 | A threadless dedicated Run exposes first `SubmitTurn(WRITE)`, not Acquire. |
 | 11 | Protected Interaction response bytes are absent from every durable and diagnostic surface. |
 | 12 | Lost protected-response results reconcile without automatic secret replay. |
@@ -547,14 +561,14 @@ These cases are normative future acceptance owned by the Roadmap tasks named in 
 | 18 | `SERVER_SHUTDOWN` resumes each live Run from its committed upstream cursor. |
 | 19 | Partial Writer events cannot enable mutation before the required Run refresh. |
 | 20 | Upstream cursor and Gul delivery sequence remain independent across reconnect. |
-| 21 | The seven intentionally unsupported public RPCs have no passthrough route. |
+| 21 | The nine consumer-profile methods unavailable until later tasks have no passthrough route. |
 | 22 | Descriptor, registry, or required capability drift blocks production startup. |
 | 23 | Production failure never falls back to Machine CLI. |
 | 24 | Every Dolgorae durable event variant produces exactly the provider-required Run, Writer, Interaction, or timeline invalidation; Gul-local FileService/profile effects are additive only. |
 | 25 | Run, Writer, and Interaction caches retain complete ProjectionStamps and timeline retains captured head; an event invalidation cannot be cleared by an older or incompatible snapshot. |
 | 26 | A partial event can immediately disable an action but cannot enable it until every required aggregate stamp converges. |
 | 27 | StartRun survives Gul process loss by reusing the same protected canonical replay envelope, key, Controller identity, and carrier. |
-| 28 | CreateWriteContinuation survives Gul process loss with the same destination Controller and canonical replay envelope and returns the original destination. |
+| 28 | CloseRun response loss is reconciled through `GetOrchestratedSession` with stable operation correlation and no automatic resubmission. |
 | 29 | SubmitTurn exact replay is possible only while the original request remains in memory; after restart no prompt/image is persisted or automatically replayed and unresolved acceptance remains `OutcomeUnknown`. |
 | 30 | ResolveInteraction response bytes are never retained, and a lost result is reconciled without secret replay. |
 | 31 | Incoming Controller safe payloads enforce `min(provider limit, 8 MiB)` and outgoing protected responses enforce `min(provider limit, 64 KiB)`. |
@@ -566,8 +580,8 @@ The root Makefile provides the non-rewriting serial facade `toolchain-check`, `g
 
 The current host check is honest evidence, not an installation workflow: it
 matches Go, Node, Buf, protoc, protoc-gen-connect-es, Git, macOS and architecture,
-and reports missing Wails v3, a newer unsupported Bun and three older generators.
-The clean-host fixture proves the exact pins and supported ranges; mismatch and
+and reports missing Wails v3 and three older PATH generators. System Bun 1.4.2
+satisfies the `>=1.3.14` minimum and is used directly. The clean-host fixture proves the exact pins and supported ranges; mismatch and
 missing-command fixtures prove fail-closed diagnostics. E0-T8 does not install
 or silently substitute those tools.
 
@@ -577,7 +591,7 @@ E0-T8 completed on 2026-08-23 after serial tests and independent review. It prom
 
 ### E0-T7 completion record
 
-E0-T7 completed on 2026-08-23 with the exact Dolgorae revision and exhaustive imported source hashes in `contract/dependency-lock.json`, 16 generated outputs in `contract/generated/generated-lock.json`, generated Go/TypeScript clients, a descriptor-derived fake server covering all 34 RPCs plus typed error transport, exhaustive operation and policy maps, consumer fixtures, and a separate closed-schema Machine CLI comparison fixture. `make test` and direct clean regeneration pass. This promotes REQ-RUNTIME-011 and REQ-RUNTIME-022 as contract/tooling Current State only; E2-T0 still owns the compatible executable and live smoke boundary.
+E0-T7 completed on 2026-08-23 with Dolgorae revision `85a8862f784cc57701751d81a9e03bf7c5722818`, dependency-lock SHA-256 `c4f91aa3e2add1093880684e5c96fdbb6239aef6a85261a0adf6b585e2db8863`, generated-lock SHA-256 `8a6a614a3a08c585f9a62f74095a0237d47feefba802e2dfa3ce13be5fbe0bf6`, generated clients, and a fake server covering the historical 34-RPC descriptor. E12-T1 later replaced the live lock and generated paths, so those paths are not evidence bytes for the E0 pin. The historical completion promotes REQ-RUNTIME-011 and REQ-RUNTIME-022 within its original contract/tooling scope only; E2-T0 still owns the compatible executable and live smoke boundary.
 
 ## 11. Superseded design note
 
@@ -585,4 +599,4 @@ The initial documentation assumed Gul would manage one Codex App Server, map Ses
 
 ## 12. Handoff
 
-E0 is complete and no Task is active. E0-T4's Gate A, E0-T8's toolchain/ADR decisions, and E0-T7's Gate B locks and generated fixtures are authoritative. E1-T1 is eligible for a separately approved workflow; E2-T0 remains blocked on an accepted compatible Dolgorae executable and live smoke evidence. No next Task is activated automatically.
+E12-T1 is complete and E12 is in completion review. The TASK-053 consumer lock and generated contract tooling are authoritative for new implementation, while historical E0 evidence remains scoped to its original pin. E1-T1 becomes eligible only after E12 closeout; E2-T0 remains blocked on an accepted compatible Dolgorae executable and live smoke evidence. No product runtime or next Task is activated automatically.

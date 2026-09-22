@@ -44,6 +44,7 @@ if [ "$(protoc --version)" != "libprotoc $GUL_PROTOC_VERSION" ]; then
   printf 'ERROR contract generation requires protoc %s\n' "$GUL_PROTOC_VERSION" >&2
   exit 2
 fi
+"$contract_root/../scripts/toolchain-check.sh" --bun-only >/dev/null
 buf_version=$(buf --version)
 if ! version_cmp "$buf_version" ge "$GUL_BUF_MIN_VERSION" || ! version_cmp "$buf_version" lt "$GUL_BUF_MAX_EXCLUSIVE_VERSION"; then
   printf 'ERROR contract generation requires Buf >= %s and < %s; found %s\n' \
@@ -76,13 +77,18 @@ fi
 bun scripts/build-contract.mjs "$output_root"
 (cd upstream && buf lint dolgorae/public/v1/dolgorae.proto)
 
-protoc -I upstream --include_imports --include_source_info \
-  --descriptor_set_out="$descriptor_path" \
-  upstream/dolgorae/public/v1/dolgorae.proto
+buf build upstream --as-file-descriptor-set -o "$descriptor_path"
 if ! cmp -s "$descriptor_path" upstream/dolgorae-public-v1.descriptor.pb; then
-  printf 'ERROR reproduced descriptor differs from the pinned Gate A descriptor\n' >&2
+  pinned_buf_version=$(bun -e 'const value = await Bun.file("upstream/dolgorae-public-v1.descriptor.json").json(); process.stdout.write(value.generator.buf)')
+  reproduced_sha256=$(shasum -a 256 "$descriptor_path" | awk '{print $1}')
+  pinned_sha256=$(shasum -a 256 upstream/dolgorae-public-v1.descriptor.pb | awk '{print $1}')
+  printf 'ERROR reproduced descriptor differs from the pinned TASK-053 descriptor\n' >&2
+  printf 'running Buf %s; pinned descriptor producer Buf %s\n' "$buf_version" "$pinned_buf_version" >&2
+  printf 'reproduced SHA-256 %s; pinned SHA-256 %s\n' "$reproduced_sha256" "$pinned_sha256" >&2
+  printf 'compare by rerunning: buf build upstream --as-file-descriptor-set -o <path>\n' >&2
   exit 1
 fi
+./breaking-check.sh upstream upstream/baselines/dolgorae-public-v1-pre-task-053.descriptor.pb
 
 mkdir -p "$wrapper_dir/bin" "$output_root/go" "$output_root/ts"
 printf '#!/bin/sh\nexec go tool protoc-gen-go "$@"\n' > "$wrapper_dir/bin/protoc-gen-go"
@@ -90,6 +96,7 @@ printf '#!/bin/sh\nexec go tool protoc-gen-connect-go "$@"\n' > "$wrapper_dir/bi
 chmod +x "$wrapper_dir/bin/protoc-gen-go" "$wrapper_dir/bin/protoc-gen-connect-go"
 
 NODE_NO_WARNINGS=1 PATH="$wrapper_dir/bin:$contract_root/node_modules/.bin:$PATH" protoc -I upstream \
+  --descriptor_set_in=upstream/dolgorae-public-v1.descriptor.pb \
   --go_out="$output_root/go" \
   --go_opt=paths=source_relative \
   --go_opt=Mdolgorae/public/v1/dolgorae.proto=github.com/rootkernel/gul/contract/generated/go/dolgorae/public/v1 \

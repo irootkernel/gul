@@ -1,10 +1,10 @@
 {
   "schema_version": 1,
-  "source_revision": "85a8862f784cc57701751d81a9e03bf7c5722818",
+  "source_revision": "21aefe5b2a8dc6fb18a58338090348b23d2f0a4a",
   "files": [
     {
       "path": "contract-inventory.v1.json",
-      "sha256": "9b32ba73c62553bb13098fe88f1d112ab713a89497ab36db8c76fbd8c83e8abd"
+      "sha256": "4705fd3a3d9c63bb57590a69de666b71069c7ee23ec96677df2c9aca8f8468a3"
     },
     {
       "path": "event-invalidation-map.v1.json",
@@ -12,59 +12,63 @@
     },
     {
       "path": "fixtures/consumer-policy.v1.json",
-      "sha256": "66e0098be360e74640a775695a82a619e530da10f4955e5db1f2561ee7cc04b5"
+      "sha256": "9440bb877860e75f23a805cbaeb9a9437c2e6fd6609c9ed8adf026103fcda37f"
     },
     {
       "path": "fixtures/machine-cli-comparison.v1.json",
-      "sha256": "2b4db4de4e8cf1604defdde69b6f03023be0026c3374e83e87c5ade542b71883"
+      "sha256": "36ed04a414920e4dfbf57b54592f00bc687a563ad0812202ea1e5107473f0c17"
     },
     {
       "path": "go/dolgorae/public/v1/dolgorae.pb.go",
-      "sha256": "932eafcce4cce1899c4f1446fbfb17d355376815a1bcaa5a3bf537ab23e0c031"
+      "sha256": "aeca54772b14d4d0d1d9683e250b3800104a0a7294e6e236710565e812cc56ed"
     },
     {
       "path": "go/dolgorae/public/v1/dolgoraev1connect/dolgorae.connect.go",
-      "sha256": "1938a8891984a7691fbbab7969f25249cc001a189603a4d15d2931f6b214af79"
+      "sha256": "8fa1ad76ae75d1466a85c246d3f396aa8ce98e75bc4505c92b8b92508b221f20"
     },
     {
       "path": "go/fake/server.go",
-      "sha256": "28e444ee63c45634ccc103b8f48821d76cb2bb3f8cd3ee62e29188742984cb76"
+      "sha256": "53fee7c5538270c2a832d8a675dc9ca3970c2920b360ab6f5ae375001e21dd74"
     },
     {
       "path": "go/fake/server_test.go",
-      "sha256": "e410de0ed7bc5f87b5cd163576fa0b5d0ffc7553242ce6fb350dffc52f2a7ec4"
+      "sha256": "aabc737ab45d97f72cdb5a592e5a8ec244e043d3070e99b6ba9e084475f0baac"
     },
     {
       "path": "gul-operation-map.v1.json",
-      "sha256": "400e1ff74430d757b05d9b27d1a7075bc3bace81b58756829e4a19a583fb2cba"
+      "sha256": "56ef2d2d33af7941e7f39ee2ecd9afcfdffc70fe6b0efab8722a812e875c6563"
     },
     {
       "path": "policy/capability-map.v1.json",
-      "sha256": "5feb15600a1dea61d001ad05a9aef41b829db3a38ccc328e7da9213eb34c57ad"
+      "sha256": "651ee9b623f24c3e1b7bd56acfdfa90bdb87dd7d72f07d37022f284df25edf29"
+    },
+    {
+      "path": "policy/credential-boundary.v1.json",
+      "sha256": "304d3da8d3e90237d3e6aced0a47c2d24462e95c65fc4cc18875713e34d359ec"
     },
     {
       "path": "policy/error-action-map.v1.json",
-      "sha256": "1042f0d568bfec5c81fb64dd79e1ba7478e3b7f1f9c9ebae70a52037d4abea4f"
+      "sha256": "e0fb5a866acb17daf921e8b6b70e8b2b081ece76cde664d70e0022403a838714"
     },
     {
       "path": "policy/identifier-enum-map.v1.json",
-      "sha256": "92b3ecd77f4011dbfc5a472d8bca14765e71e7c2ddf64be993293d00f7c70149"
+      "sha256": "8bc6909c6d21aec954cb0ab679f664f8cc0720727f3d98b3d8cedd41cbea0504"
     },
     {
       "path": "policy/mutation-map.v1.json",
-      "sha256": "ea093af64f3514f466e5bb6c7bd34872e140e455b30c132f2b8420325171f2fe"
+      "sha256": "1594fca277f6e24684b7828300ba9a4bcf90ee20a7aa0a39ed1c1641c2bb4d0e"
     },
     {
       "path": "policy/projection-replay-map.v1.json",
-      "sha256": "f64c685b8a4534bef0b877b3b109aceeb941343c6b2ad623e4bb023044dcb2c6"
+      "sha256": "12038c586ad72398a8ff2f8ac49a4fd942eadfa8033097120089b381cdd1cc5d"
     },
     {
       "path": "ts/dolgorae/public/v1/dolgorae_connect.ts",
-      "sha256": "1b78084720eb906ac634962265bf7c24a9b7e27ffdbb10bb4751e9dba38d7e22"
+      "sha256": "0c5082cc286f9da27df6bc52f629a444e91a0c95dfcfa9bb86fe8b398c98b90a"
     },
     {
       "path": "ts/dolgorae/public/v1/dolgorae_pb.ts",
-      "sha256": "42960addd0d6d23774f0f9fb1d540c42c29ec72f274413ee0abd267e55091139"
+      "sha256": "bfdf1e052d15f6fc46a6bda22e8a51051a2d4e1455828f58a6ff770719038ba3"
     }
   ]
 }

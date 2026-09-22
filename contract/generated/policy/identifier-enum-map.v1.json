@@ -962,6 +962,10 @@
         {
           "name": "CONTROLLER_CARRIER_ROOT_POLICY_DOLGORAE_OWNED_APPLICATION_SUPPORT",
           "number": 1
+        },
+        {
+          "name": "CONTROLLER_CARRIER_ROOT_POLICY_DOLGORAE_OWNED_HOME",
+          "number": 2
         }
       ]
     },
@@ -1378,6 +1382,169 @@
         {
           "name": "ARTIFACT_VISIBILITY_CONTROLLER_ONLY",
           "number": 2
+        }
+      ]
+    },
+    {
+      "name": "dolgorae.public.v1.OrchestratedSessionLifecycle",
+      "values": [
+        {
+          "name": "ORCHESTRATED_SESSION_LIFECYCLE_UNSPECIFIED",
+          "number": 0
+        },
+        {
+          "name": "ORCHESTRATED_SESSION_LIFECYCLE_CREATING",
+          "number": 1
+        },
+        {
+          "name": "ORCHESTRATED_SESSION_LIFECYCLE_ACTIVE",
+          "number": 2
+        },
+        {
+          "name": "ORCHESTRATED_SESSION_LIFECYCLE_DEGRADED",
+          "number": 3
+        },
+        {
+          "name": "ORCHESTRATED_SESSION_LIFECYCLE_RECOVERING",
+          "number": 4
+        },
+        {
+          "name": "ORCHESTRATED_SESSION_LIFECYCLE_COMPLETING",
+          "number": 5
+        },
+        {
+          "name": "ORCHESTRATED_SESSION_LIFECYCLE_ABORTING",
+          "number": 6
+        },
+        {
+          "name": "ORCHESTRATED_SESSION_LIFECYCLE_COMPLETED",
+          "number": 7
+        },
+        {
+          "name": "ORCHESTRATED_SESSION_LIFECYCLE_ABORTED",
+          "number": 8
+        }
+      ]
+    },
+    {
+      "name": "dolgorae.public.v1.OrchestratedSessionComposition",
+      "values": [
+        {
+          "name": "ORCHESTRATED_SESSION_COMPOSITION_UNSPECIFIED",
+          "number": 0
+        },
+        {
+          "name": "ORCHESTRATED_SESSION_COMPOSITION_STANDALONE_PRIMARY",
+          "number": 1
+        },
+        {
+          "name": "ORCHESTRATED_SESSION_COMPOSITION_BROKERED_HIERARCHY",
+          "number": 2
+        }
+      ]
+    },
+    {
+      "name": "dolgorae.public.v1.OrchestratedSessionApprovalPolicy",
+      "values": [
+        {
+          "name": "ORCHESTRATED_SESSION_APPROVAL_POLICY_UNSPECIFIED",
+          "number": 0
+        },
+        {
+          "name": "ORCHESTRATED_SESSION_APPROVAL_POLICY_USER_APPROVAL_REQUIRED",
+          "number": 1
+        },
+        {
+          "name": "ORCHESTRATED_SESSION_APPROVAL_POLICY_FULLY_DELEGATED",
+          "number": 2
+        }
+      ]
+    },
+    {
+      "name": "dolgorae.public.v1.OrchestratedSessionAvailability",
+      "values": [
+        {
+          "name": "ORCHESTRATED_SESSION_AVAILABILITY_UNSPECIFIED",
+          "number": 0
+        },
+        {
+          "name": "ORCHESTRATED_SESSION_AVAILABILITY_AVAILABLE",
+          "number": 1
+        },
+        {
+          "name": "ORCHESTRATED_SESSION_AVAILABILITY_UNAVAILABLE",
+          "number": 2
+        },
+        {
+          "name": "ORCHESTRATED_SESSION_AVAILABILITY_RECOVERY_REQUIRED",
+          "number": 3
+        }
+      ]
+    },
+    {
+      "name": "dolgorae.public.v1.SessionCloseIntent",
+      "values": [
+        {
+          "name": "SESSION_CLOSE_INTENT_UNSPECIFIED",
+          "number": 0
+        },
+        {
+          "name": "SESSION_CLOSE_INTENT_NONE",
+          "number": 1
+        },
+        {
+          "name": "SESSION_CLOSE_INTENT_COMPLETE",
+          "number": 2
+        },
+        {
+          "name": "SESSION_CLOSE_INTENT_ABORT",
+          "number": 3
+        }
+      ]
+    },
+    {
+      "name": "dolgorae.public.v1.SessionCloseProgress",
+      "values": [
+        {
+          "name": "SESSION_CLOSE_PROGRESS_UNSPECIFIED",
+          "number": 0
+        },
+        {
+          "name": "SESSION_CLOSE_PROGRESS_NONE",
+          "number": 1
+        },
+        {
+          "name": "SESSION_CLOSE_PROGRESS_SETTLING",
+          "number": 2
+        },
+        {
+          "name": "SESSION_CLOSE_PROGRESS_COMPLETED",
+          "number": 3
+        },
+        {
+          "name": "SESSION_CLOSE_PROGRESS_ABORTED",
+          "number": 4
+        },
+        {
+          "name": "SESSION_CLOSE_PROGRESS_RECOVERY_REQUIRED",
+          "number": 5
+        },
+        {
+          "name": "SESSION_CLOSE_PROGRESS_OUTCOME_UNKNOWN",
+          "number": 6
+        }
+      ]
+    },
+    {
+      "name": "dolgorae.public.v1.OrchestratedResultFormat",
+      "values": [
+        {
+          "name": "ORCHESTRATED_RESULT_FORMAT_UNSPECIFIED",
+          "number": 0
+        },
+        {
+          "name": "ORCHESTRATED_RESULT_FORMAT_UTF8_TEXT",
+          "number": 1
         }
       ]
     },

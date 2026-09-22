@@ -5,17 +5,18 @@
   "minimum_client_protocol_version": 1,
   "maximum_client_protocol_version": 1,
   "source": "dolgorae/public/v1/dolgorae.proto",
-  "source_sha256": "bdb9916026f82725c1f0592a4d00a280dca43ef8fc968e3503cbf61059d09163",
+  "source_sha256": "561ccf51658b50703f9fb1a37c4de7c52188b34ab4db2ac9885ef3ccabdf0e48",
   "descriptor": "dolgorae-public-v1.descriptor.pb",
-  "descriptor_sha256": "22e605dddc26c145ab6c682955fa4bfcf078b8356d38e94982e118b948965318",
+  "descriptor_sha256": "28b132842bbeb48123c2b7cc529de689e6e6286b0783cbde8551d17ba4921ed5",
   "include_imports": true,
   "include_source_info": true,
   "buf_breaking": {
-    "baseline": null,
-    "result": "not_applicable_initial_public_v1"
+    "baseline": "baselines/dolgorae-public-v1-pre-task-053.descriptor.pb",
+    "baseline_sha256": "c29b70f6d1bfca5447ddfc396cb62a9ff4f3bbd10532518af78e4726b7de1252",
+    "result": "compatible_additive"
   },
   "generator": {
     "protoc": "35.1",
-    "buf": "1.66.1"
+    "buf": "1.69.0"
   }
 }

@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "supported_methods": [
+  "known_methods": [
     "ArtifactService.GetArtifact",
     "ArtifactService.ReadArtifactChunk",
     "ControllerService.VerifyController",
@@ -9,6 +9,8 @@
     "InteractionService.ResolveInteraction",
     "ObservationService.ListRunTimelineItems",
     "ObservationService.WatchRunEvents",
+    "OrchestrationService.GetOrchestratedSession",
+    "OrchestrationService.ListOrchestratedSessionResults",
     "RunService.CloseRun",
     "RunService.CreateWriteContinuation",
     "RunService.DeleteRun",
@@ -35,6 +37,46 @@
     "WriterService.GetWorkspaceWriterStatus",
     "WriterService.PrepareWriterHandoff",
     "WriterService.ReleaseWriter"
+  ],
+  "required_methods": [
+    "ArtifactService.GetArtifact",
+    "ArtifactService.ReadArtifactChunk",
+    "ControllerService.VerifyController",
+    "InteractionService.GetControllerInteraction",
+    "InteractionService.ListPendingInteractions",
+    "InteractionService.ResolveInteraction",
+    "ObservationService.ListRunTimelineItems",
+    "ObservationService.WatchRunEvents",
+    "OrchestrationService.GetOrchestratedSession",
+    "OrchestrationService.ListOrchestratedSessionResults",
+    "RunService.CloseRun",
+    "RunService.GetRun",
+    "RunService.InterruptTurn",
+    "RunService.ListRuns",
+    "RunService.PauseRun",
+    "RunService.ReconcileRun",
+    "RunService.RecoverRun",
+    "RunService.ResumeRun",
+    "RunService.StartRun",
+    "RunService.SubmitTurn",
+    "RuntimeService.GetCapabilities",
+    "RuntimeService.GetProfile",
+    "RuntimeService.InspectWorkspace",
+    "RuntimeService.ListProfiles",
+    "WriterService.AcquireWriter",
+    "WriterService.GetWorkspaceWriterStatus",
+    "WriterService.ReleaseWriter"
+  ],
+  "unavailable_methods": [
+    "RunService.CreateWriteContinuation",
+    "RunService.DeleteRun",
+    "RunService.ForkRun",
+    "RunService.SetDefaultEffort",
+    "RunService.VerifyRun",
+    "RuntimeService.ListProfileDiagnostics",
+    "WriterService.CancelWriterHandoff",
+    "WriterService.CommitWriterHandoff",
+    "WriterService.PrepareWriterHandoff"
   ],
   "stage_requirements": {
     "MILESTONE-BH1": [
@@ -63,6 +105,35 @@
       "WriterService.GetWorkspaceWriterStatus",
       "WriterService.ReleaseWriter"
     ],
+    "MILESTONE-BH1-P": [
+      "ArtifactService.GetArtifact",
+      "ArtifactService.ReadArtifactChunk",
+      "ControllerService.VerifyController",
+      "InteractionService.GetControllerInteraction",
+      "InteractionService.ListPendingInteractions",
+      "InteractionService.ResolveInteraction",
+      "ObservationService.ListRunTimelineItems",
+      "ObservationService.WatchRunEvents",
+      "OrchestrationService.GetOrchestratedSession",
+      "OrchestrationService.ListOrchestratedSessionResults",
+      "RunService.CloseRun",
+      "RunService.GetRun",
+      "RunService.InterruptTurn",
+      "RunService.ListRuns",
+      "RunService.PauseRun",
+      "RunService.ReconcileRun",
+      "RunService.RecoverRun",
+      "RunService.ResumeRun",
+      "RunService.StartRun",
+      "RunService.SubmitTurn",
+      "RuntimeService.GetCapabilities",
+      "RuntimeService.GetProfile",
+      "RuntimeService.InspectWorkspace",
+      "RuntimeService.ListProfiles",
+      "WriterService.AcquireWriter",
+      "WriterService.GetWorkspaceWriterStatus",
+      "WriterService.ReleaseWriter"
+    ],
     "MILESTONE-PA1": [
       "ArtifactService.GetArtifact",
       "ArtifactService.ReadArtifactChunk",
@@ -72,6 +143,8 @@
       "InteractionService.ResolveInteraction",
       "ObservationService.ListRunTimelineItems",
       "ObservationService.WatchRunEvents",
+      "OrchestrationService.GetOrchestratedSession",
+      "OrchestrationService.ListOrchestratedSessionResults",
       "RunService.CloseRun",
       "RunService.CreateWriteContinuation",
       "RunService.DeleteRun",
@@ -151,15 +224,7 @@
     },
     {
       "operation": "CloseRun",
-      "capability": "Supported method"
-    },
-    {
-      "operation": "DeleteRun",
-      "capability": "Supported method"
-    },
-    {
-      "operation": "CreateWriteContinuation",
-      "capability": "write_continuation"
+      "capability": "Required consumer method"
     },
     {
       "operation": "RecoverRun",
@@ -206,32 +271,20 @@
       "capability": "controller_binding"
     },
     {
+      "operation": "GetOrchestratedSession",
+      "capability": "Required consumer method"
+    },
+    {
+      "operation": "ListOrchestratedSessionResults",
+      "capability": "Required consumer method"
+    },
+    {
       "operation": "GetArtifact",
       "capability": "artifact_retrieval"
     },
     {
       "operation": "ReadArtifactChunk",
       "capability": "artifact_retrieval"
-    },
-    {
-      "operation": "Credential Create",
-      "capability": "N/A"
-    },
-    {
-      "operation": "Credential Validate",
-      "capability": "N/A"
-    },
-    {
-      "operation": "Credential ResolveCarrierReference",
-      "capability": "N/A"
-    },
-    {
-      "operation": "Credential RemoveUnused",
-      "capability": "N/A"
-    },
-    {
-      "operation": "Credential CreateSamePrincipalSuccessor",
-      "capability": "N/A"
     },
     {
       "operation": "AdoptController workflow",

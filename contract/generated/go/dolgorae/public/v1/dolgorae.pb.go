@@ -1681,8 +1681,10 @@ func (TurnStatus) EnumDescriptor() ([]byte, []int) {
 type ControllerCarrierRootPolicy int32
 
 const (
-	ControllerCarrierRootPolicy_CONTROLLER_CARRIER_ROOT_POLICY_UNSPECIFIED                        ControllerCarrierRootPolicy = 0
+	ControllerCarrierRootPolicy_CONTROLLER_CARRIER_ROOT_POLICY_UNSPECIFIED ControllerCarrierRootPolicy = 0
+	// Deprecated: Marked as deprecated in dolgorae/public/v1/dolgorae.proto.
 	ControllerCarrierRootPolicy_CONTROLLER_CARRIER_ROOT_POLICY_DOLGORAE_OWNED_APPLICATION_SUPPORT ControllerCarrierRootPolicy = 1
+	ControllerCarrierRootPolicy_CONTROLLER_CARRIER_ROOT_POLICY_DOLGORAE_OWNED_HOME                ControllerCarrierRootPolicy = 2
 )
 
 // Enum value maps for ControllerCarrierRootPolicy.
@@ -1690,10 +1692,12 @@ var (
 	ControllerCarrierRootPolicy_name = map[int32]string{
 		0: "CONTROLLER_CARRIER_ROOT_POLICY_UNSPECIFIED",
 		1: "CONTROLLER_CARRIER_ROOT_POLICY_DOLGORAE_OWNED_APPLICATION_SUPPORT",
+		2: "CONTROLLER_CARRIER_ROOT_POLICY_DOLGORAE_OWNED_HOME",
 	}
 	ControllerCarrierRootPolicy_value = map[string]int32{
 		"CONTROLLER_CARRIER_ROOT_POLICY_UNSPECIFIED":                        0,
 		"CONTROLLER_CARRIER_ROOT_POLICY_DOLGORAE_OWNED_APPLICATION_SUPPORT": 1,
+		"CONTROLLER_CARRIER_ROOT_POLICY_DOLGORAE_OWNED_HOME":                2,
 	}
 )
 
@@ -2616,6 +2620,382 @@ func (ArtifactVisibility) EnumDescriptor() ([]byte, []int) {
 	return file_dolgorae_public_v1_dolgorae_proto_rawDescGZIP(), []int{46}
 }
 
+type OrchestratedSessionLifecycle int32
+
+const (
+	OrchestratedSessionLifecycle_ORCHESTRATED_SESSION_LIFECYCLE_UNSPECIFIED OrchestratedSessionLifecycle = 0
+	OrchestratedSessionLifecycle_ORCHESTRATED_SESSION_LIFECYCLE_CREATING    OrchestratedSessionLifecycle = 1
+	OrchestratedSessionLifecycle_ORCHESTRATED_SESSION_LIFECYCLE_ACTIVE      OrchestratedSessionLifecycle = 2
+	OrchestratedSessionLifecycle_ORCHESTRATED_SESSION_LIFECYCLE_DEGRADED    OrchestratedSessionLifecycle = 3
+	OrchestratedSessionLifecycle_ORCHESTRATED_SESSION_LIFECYCLE_RECOVERING  OrchestratedSessionLifecycle = 4
+	OrchestratedSessionLifecycle_ORCHESTRATED_SESSION_LIFECYCLE_COMPLETING  OrchestratedSessionLifecycle = 5
+	OrchestratedSessionLifecycle_ORCHESTRATED_SESSION_LIFECYCLE_ABORTING    OrchestratedSessionLifecycle = 6
+	OrchestratedSessionLifecycle_ORCHESTRATED_SESSION_LIFECYCLE_COMPLETED   OrchestratedSessionLifecycle = 7
+	OrchestratedSessionLifecycle_ORCHESTRATED_SESSION_LIFECYCLE_ABORTED     OrchestratedSessionLifecycle = 8
+)
+
+// Enum value maps for OrchestratedSessionLifecycle.
+var (
+	OrchestratedSessionLifecycle_name = map[int32]string{
+		0: "ORCHESTRATED_SESSION_LIFECYCLE_UNSPECIFIED",
+		1: "ORCHESTRATED_SESSION_LIFECYCLE_CREATING",
+		2: "ORCHESTRATED_SESSION_LIFECYCLE_ACTIVE",
+		3: "ORCHESTRATED_SESSION_LIFECYCLE_DEGRADED",
+		4: "ORCHESTRATED_SESSION_LIFECYCLE_RECOVERING",
+		5: "ORCHESTRATED_SESSION_LIFECYCLE_COMPLETING",
+		6: "ORCHESTRATED_SESSION_LIFECYCLE_ABORTING",
+		7: "ORCHESTRATED_SESSION_LIFECYCLE_COMPLETED",
+		8: "ORCHESTRATED_SESSION_LIFECYCLE_ABORTED",
+	}
+	OrchestratedSessionLifecycle_value = map[string]int32{
+		"ORCHESTRATED_SESSION_LIFECYCLE_UNSPECIFIED": 0,
+		"ORCHESTRATED_SESSION_LIFECYCLE_CREATING":    1,
+		"ORCHESTRATED_SESSION_LIFECYCLE_ACTIVE":      2,
+		"ORCHESTRATED_SESSION_LIFECYCLE_DEGRADED":    3,
+		"ORCHESTRATED_SESSION_LIFECYCLE_RECOVERING":  4,
+		"ORCHESTRATED_SESSION_LIFECYCLE_COMPLETING":  5,
+		"ORCHESTRATED_SESSION_LIFECYCLE_ABORTING":    6,
+		"ORCHESTRATED_SESSION_LIFECYCLE_COMPLETED":   7,
+		"ORCHESTRATED_SESSION_LIFECYCLE_ABORTED":     8,
+	}
+)
+
+func (x OrchestratedSessionLifecycle) Enum() *OrchestratedSessionLifecycle {
+	p := new(OrchestratedSessionLifecycle)
+	*p = x
+	return p
+}
+
+func (x OrchestratedSessionLifecycle) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (OrchestratedSessionLifecycle) Descriptor() protoreflect.EnumDescriptor {
+	return file_dolgorae_public_v1_dolgorae_proto_enumTypes[47].Descriptor()
+}
+
+func (OrchestratedSessionLifecycle) Type() protoreflect.EnumType {
+	return &file_dolgorae_public_v1_dolgorae_proto_enumTypes[47]
+}
+
+func (x OrchestratedSessionLifecycle) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use OrchestratedSessionLifecycle.Descriptor instead.
+func (OrchestratedSessionLifecycle) EnumDescriptor() ([]byte, []int) {
+	return file_dolgorae_public_v1_dolgorae_proto_rawDescGZIP(), []int{47}
+}
+
+type OrchestratedSessionComposition int32
+
+const (
+	OrchestratedSessionComposition_ORCHESTRATED_SESSION_COMPOSITION_UNSPECIFIED        OrchestratedSessionComposition = 0
+	OrchestratedSessionComposition_ORCHESTRATED_SESSION_COMPOSITION_STANDALONE_PRIMARY OrchestratedSessionComposition = 1
+	OrchestratedSessionComposition_ORCHESTRATED_SESSION_COMPOSITION_BROKERED_HIERARCHY OrchestratedSessionComposition = 2
+)
+
+// Enum value maps for OrchestratedSessionComposition.
+var (
+	OrchestratedSessionComposition_name = map[int32]string{
+		0: "ORCHESTRATED_SESSION_COMPOSITION_UNSPECIFIED",
+		1: "ORCHESTRATED_SESSION_COMPOSITION_STANDALONE_PRIMARY",
+		2: "ORCHESTRATED_SESSION_COMPOSITION_BROKERED_HIERARCHY",
+	}
+	OrchestratedSessionComposition_value = map[string]int32{
+		"ORCHESTRATED_SESSION_COMPOSITION_UNSPECIFIED":        0,
+		"ORCHESTRATED_SESSION_COMPOSITION_STANDALONE_PRIMARY": 1,
+		"ORCHESTRATED_SESSION_COMPOSITION_BROKERED_HIERARCHY": 2,
+	}
+)
+
+func (x OrchestratedSessionComposition) Enum() *OrchestratedSessionComposition {
+	p := new(OrchestratedSessionComposition)
+	*p = x
+	return p
+}
+
+func (x OrchestratedSessionComposition) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (OrchestratedSessionComposition) Descriptor() protoreflect.EnumDescriptor {
+	return file_dolgorae_public_v1_dolgorae_proto_enumTypes[48].Descriptor()
+}
+
+func (OrchestratedSessionComposition) Type() protoreflect.EnumType {
+	return &file_dolgorae_public_v1_dolgorae_proto_enumTypes[48]
+}
+
+func (x OrchestratedSessionComposition) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use OrchestratedSessionComposition.Descriptor instead.
+func (OrchestratedSessionComposition) EnumDescriptor() ([]byte, []int) {
+	return file_dolgorae_public_v1_dolgorae_proto_rawDescGZIP(), []int{48}
+}
+
+type OrchestratedSessionApprovalPolicy int32
+
+const (
+	OrchestratedSessionApprovalPolicy_ORCHESTRATED_SESSION_APPROVAL_POLICY_UNSPECIFIED            OrchestratedSessionApprovalPolicy = 0
+	OrchestratedSessionApprovalPolicy_ORCHESTRATED_SESSION_APPROVAL_POLICY_USER_APPROVAL_REQUIRED OrchestratedSessionApprovalPolicy = 1
+	OrchestratedSessionApprovalPolicy_ORCHESTRATED_SESSION_APPROVAL_POLICY_FULLY_DELEGATED        OrchestratedSessionApprovalPolicy = 2
+)
+
+// Enum value maps for OrchestratedSessionApprovalPolicy.
+var (
+	OrchestratedSessionApprovalPolicy_name = map[int32]string{
+		0: "ORCHESTRATED_SESSION_APPROVAL_POLICY_UNSPECIFIED",
+		1: "ORCHESTRATED_SESSION_APPROVAL_POLICY_USER_APPROVAL_REQUIRED",
+		2: "ORCHESTRATED_SESSION_APPROVAL_POLICY_FULLY_DELEGATED",
+	}
+	OrchestratedSessionApprovalPolicy_value = map[string]int32{
+		"ORCHESTRATED_SESSION_APPROVAL_POLICY_UNSPECIFIED":            0,
+		"ORCHESTRATED_SESSION_APPROVAL_POLICY_USER_APPROVAL_REQUIRED": 1,
+		"ORCHESTRATED_SESSION_APPROVAL_POLICY_FULLY_DELEGATED":        2,
+	}
+)
+
+func (x OrchestratedSessionApprovalPolicy) Enum() *OrchestratedSessionApprovalPolicy {
+	p := new(OrchestratedSessionApprovalPolicy)
+	*p = x
+	return p
+}
+
+func (x OrchestratedSessionApprovalPolicy) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (OrchestratedSessionApprovalPolicy) Descriptor() protoreflect.EnumDescriptor {
+	return file_dolgorae_public_v1_dolgorae_proto_enumTypes[49].Descriptor()
+}
+
+func (OrchestratedSessionApprovalPolicy) Type() protoreflect.EnumType {
+	return &file_dolgorae_public_v1_dolgorae_proto_enumTypes[49]
+}
+
+func (x OrchestratedSessionApprovalPolicy) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use OrchestratedSessionApprovalPolicy.Descriptor instead.
+func (OrchestratedSessionApprovalPolicy) EnumDescriptor() ([]byte, []int) {
+	return file_dolgorae_public_v1_dolgorae_proto_rawDescGZIP(), []int{49}
+}
+
+type OrchestratedSessionAvailability int32
+
+const (
+	OrchestratedSessionAvailability_ORCHESTRATED_SESSION_AVAILABILITY_UNSPECIFIED       OrchestratedSessionAvailability = 0
+	OrchestratedSessionAvailability_ORCHESTRATED_SESSION_AVAILABILITY_AVAILABLE         OrchestratedSessionAvailability = 1
+	OrchestratedSessionAvailability_ORCHESTRATED_SESSION_AVAILABILITY_UNAVAILABLE       OrchestratedSessionAvailability = 2
+	OrchestratedSessionAvailability_ORCHESTRATED_SESSION_AVAILABILITY_RECOVERY_REQUIRED OrchestratedSessionAvailability = 3
+)
+
+// Enum value maps for OrchestratedSessionAvailability.
+var (
+	OrchestratedSessionAvailability_name = map[int32]string{
+		0: "ORCHESTRATED_SESSION_AVAILABILITY_UNSPECIFIED",
+		1: "ORCHESTRATED_SESSION_AVAILABILITY_AVAILABLE",
+		2: "ORCHESTRATED_SESSION_AVAILABILITY_UNAVAILABLE",
+		3: "ORCHESTRATED_SESSION_AVAILABILITY_RECOVERY_REQUIRED",
+	}
+	OrchestratedSessionAvailability_value = map[string]int32{
+		"ORCHESTRATED_SESSION_AVAILABILITY_UNSPECIFIED":       0,
+		"ORCHESTRATED_SESSION_AVAILABILITY_AVAILABLE":         1,
+		"ORCHESTRATED_SESSION_AVAILABILITY_UNAVAILABLE":       2,
+		"ORCHESTRATED_SESSION_AVAILABILITY_RECOVERY_REQUIRED": 3,
+	}
+)
+
+func (x OrchestratedSessionAvailability) Enum() *OrchestratedSessionAvailability {
+	p := new(OrchestratedSessionAvailability)
+	*p = x
+	return p
+}
+
+func (x OrchestratedSessionAvailability) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (OrchestratedSessionAvailability) Descriptor() protoreflect.EnumDescriptor {
+	return file_dolgorae_public_v1_dolgorae_proto_enumTypes[50].Descriptor()
+}
+
+func (OrchestratedSessionAvailability) Type() protoreflect.EnumType {
+	return &file_dolgorae_public_v1_dolgorae_proto_enumTypes[50]
+}
+
+func (x OrchestratedSessionAvailability) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use OrchestratedSessionAvailability.Descriptor instead.
+func (OrchestratedSessionAvailability) EnumDescriptor() ([]byte, []int) {
+	return file_dolgorae_public_v1_dolgorae_proto_rawDescGZIP(), []int{50}
+}
+
+type SessionCloseIntent int32
+
+const (
+	SessionCloseIntent_SESSION_CLOSE_INTENT_UNSPECIFIED SessionCloseIntent = 0
+	SessionCloseIntent_SESSION_CLOSE_INTENT_NONE        SessionCloseIntent = 1
+	SessionCloseIntent_SESSION_CLOSE_INTENT_COMPLETE    SessionCloseIntent = 2
+	SessionCloseIntent_SESSION_CLOSE_INTENT_ABORT       SessionCloseIntent = 3
+)
+
+// Enum value maps for SessionCloseIntent.
+var (
+	SessionCloseIntent_name = map[int32]string{
+		0: "SESSION_CLOSE_INTENT_UNSPECIFIED",
+		1: "SESSION_CLOSE_INTENT_NONE",
+		2: "SESSION_CLOSE_INTENT_COMPLETE",
+		3: "SESSION_CLOSE_INTENT_ABORT",
+	}
+	SessionCloseIntent_value = map[string]int32{
+		"SESSION_CLOSE_INTENT_UNSPECIFIED": 0,
+		"SESSION_CLOSE_INTENT_NONE":        1,
+		"SESSION_CLOSE_INTENT_COMPLETE":    2,
+		"SESSION_CLOSE_INTENT_ABORT":       3,
+	}
+)
+
+func (x SessionCloseIntent) Enum() *SessionCloseIntent {
+	p := new(SessionCloseIntent)
+	*p = x
+	return p
+}
+
+func (x SessionCloseIntent) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (SessionCloseIntent) Descriptor() protoreflect.EnumDescriptor {
+	return file_dolgorae_public_v1_dolgorae_proto_enumTypes[51].Descriptor()
+}
+
+func (SessionCloseIntent) Type() protoreflect.EnumType {
+	return &file_dolgorae_public_v1_dolgorae_proto_enumTypes[51]
+}
+
+func (x SessionCloseIntent) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use SessionCloseIntent.Descriptor instead.
+func (SessionCloseIntent) EnumDescriptor() ([]byte, []int) {
+	return file_dolgorae_public_v1_dolgorae_proto_rawDescGZIP(), []int{51}
+}
+
+type SessionCloseProgress int32
+
+const (
+	SessionCloseProgress_SESSION_CLOSE_PROGRESS_UNSPECIFIED       SessionCloseProgress = 0
+	SessionCloseProgress_SESSION_CLOSE_PROGRESS_NONE              SessionCloseProgress = 1
+	SessionCloseProgress_SESSION_CLOSE_PROGRESS_SETTLING          SessionCloseProgress = 2
+	SessionCloseProgress_SESSION_CLOSE_PROGRESS_COMPLETED         SessionCloseProgress = 3
+	SessionCloseProgress_SESSION_CLOSE_PROGRESS_ABORTED           SessionCloseProgress = 4
+	SessionCloseProgress_SESSION_CLOSE_PROGRESS_RECOVERY_REQUIRED SessionCloseProgress = 5
+	SessionCloseProgress_SESSION_CLOSE_PROGRESS_OUTCOME_UNKNOWN   SessionCloseProgress = 6
+)
+
+// Enum value maps for SessionCloseProgress.
+var (
+	SessionCloseProgress_name = map[int32]string{
+		0: "SESSION_CLOSE_PROGRESS_UNSPECIFIED",
+		1: "SESSION_CLOSE_PROGRESS_NONE",
+		2: "SESSION_CLOSE_PROGRESS_SETTLING",
+		3: "SESSION_CLOSE_PROGRESS_COMPLETED",
+		4: "SESSION_CLOSE_PROGRESS_ABORTED",
+		5: "SESSION_CLOSE_PROGRESS_RECOVERY_REQUIRED",
+		6: "SESSION_CLOSE_PROGRESS_OUTCOME_UNKNOWN",
+	}
+	SessionCloseProgress_value = map[string]int32{
+		"SESSION_CLOSE_PROGRESS_UNSPECIFIED":       0,
+		"SESSION_CLOSE_PROGRESS_NONE":              1,
+		"SESSION_CLOSE_PROGRESS_SETTLING":          2,
+		"SESSION_CLOSE_PROGRESS_COMPLETED":         3,
+		"SESSION_CLOSE_PROGRESS_ABORTED":           4,
+		"SESSION_CLOSE_PROGRESS_RECOVERY_REQUIRED": 5,
+		"SESSION_CLOSE_PROGRESS_OUTCOME_UNKNOWN":   6,
+	}
+)
+
+func (x SessionCloseProgress) Enum() *SessionCloseProgress {
+	p := new(SessionCloseProgress)
+	*p = x
+	return p
+}
+
+func (x SessionCloseProgress) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (SessionCloseProgress) Descriptor() protoreflect.EnumDescriptor {
+	return file_dolgorae_public_v1_dolgorae_proto_enumTypes[52].Descriptor()
+}
+
+func (SessionCloseProgress) Type() protoreflect.EnumType {
+	return &file_dolgorae_public_v1_dolgorae_proto_enumTypes[52]
+}
+
+func (x SessionCloseProgress) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use SessionCloseProgress.Descriptor instead.
+func (SessionCloseProgress) EnumDescriptor() ([]byte, []int) {
+	return file_dolgorae_public_v1_dolgorae_proto_rawDescGZIP(), []int{52}
+}
+
+type OrchestratedResultFormat int32
+
+const (
+	OrchestratedResultFormat_ORCHESTRATED_RESULT_FORMAT_UNSPECIFIED OrchestratedResultFormat = 0
+	OrchestratedResultFormat_ORCHESTRATED_RESULT_FORMAT_UTF8_TEXT   OrchestratedResultFormat = 1
+)
+
+// Enum value maps for OrchestratedResultFormat.
+var (
+	OrchestratedResultFormat_name = map[int32]string{
+		0: "ORCHESTRATED_RESULT_FORMAT_UNSPECIFIED",
+		1: "ORCHESTRATED_RESULT_FORMAT_UTF8_TEXT",
+	}
+	OrchestratedResultFormat_value = map[string]int32{
+		"ORCHESTRATED_RESULT_FORMAT_UNSPECIFIED": 0,
+		"ORCHESTRATED_RESULT_FORMAT_UTF8_TEXT":   1,
+	}
+)
+
+func (x OrchestratedResultFormat) Enum() *OrchestratedResultFormat {
+	p := new(OrchestratedResultFormat)
+	*p = x
+	return p
+}
+
+func (x OrchestratedResultFormat) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (OrchestratedResultFormat) Descriptor() protoreflect.EnumDescriptor {
+	return file_dolgorae_public_v1_dolgorae_proto_enumTypes[53].Descriptor()
+}
+
+func (OrchestratedResultFormat) Type() protoreflect.EnumType {
+	return &file_dolgorae_public_v1_dolgorae_proto_enumTypes[53]
+}
+
+func (x OrchestratedResultFormat) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use OrchestratedResultFormat.Descriptor instead.
+func (OrchestratedResultFormat) EnumDescriptor() ([]byte, []int) {
+	return file_dolgorae_public_v1_dolgorae_proto_rawDescGZIP(), []int{53}
+}
+
 type RetryClassification int32
 
 const (
@@ -2655,11 +3035,11 @@ func (x RetryClassification) String() string {
 }
 
 func (RetryClassification) Descriptor() protoreflect.EnumDescriptor {
-	return file_dolgorae_public_v1_dolgorae_proto_enumTypes[47].Descriptor()
+	return file_dolgorae_public_v1_dolgorae_proto_enumTypes[54].Descriptor()
 }
 
 func (RetryClassification) Type() protoreflect.EnumType {
-	return &file_dolgorae_public_v1_dolgorae_proto_enumTypes[47]
+	return &file_dolgorae_public_v1_dolgorae_proto_enumTypes[54]
 }
 
 func (x RetryClassification) Number() protoreflect.EnumNumber {
@@ -2668,7 +3048,7 @@ func (x RetryClassification) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use RetryClassification.Descriptor instead.
 func (RetryClassification) EnumDescriptor() ([]byte, []int) {
-	return file_dolgorae_public_v1_dolgorae_proto_rawDescGZIP(), []int{47}
+	return file_dolgorae_public_v1_dolgorae_proto_rawDescGZIP(), []int{54}
 }
 
 type RecoveryClassification int32
@@ -2710,11 +3090,11 @@ func (x RecoveryClassification) String() string {
 }
 
 func (RecoveryClassification) Descriptor() protoreflect.EnumDescriptor {
-	return file_dolgorae_public_v1_dolgorae_proto_enumTypes[48].Descriptor()
+	return file_dolgorae_public_v1_dolgorae_proto_enumTypes[55].Descriptor()
 }
 
 func (RecoveryClassification) Type() protoreflect.EnumType {
-	return &file_dolgorae_public_v1_dolgorae_proto_enumTypes[48]
+	return &file_dolgorae_public_v1_dolgorae_proto_enumTypes[55]
 }
 
 func (x RecoveryClassification) Number() protoreflect.EnumNumber {
@@ -2723,7 +3103,7 @@ func (x RecoveryClassification) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use RecoveryClassification.Descriptor instead.
 func (RecoveryClassification) EnumDescriptor() ([]byte, []int) {
-	return file_dolgorae_public_v1_dolgorae_proto_rawDescGZIP(), []int{48}
+	return file_dolgorae_public_v1_dolgorae_proto_rawDescGZIP(), []int{55}
 }
 
 type RequiredClientAction int32
@@ -2816,11 +3196,11 @@ func (x RequiredClientAction) String() string {
 }
 
 func (RequiredClientAction) Descriptor() protoreflect.EnumDescriptor {
-	return file_dolgorae_public_v1_dolgorae_proto_enumTypes[49].Descriptor()
+	return file_dolgorae_public_v1_dolgorae_proto_enumTypes[56].Descriptor()
 }
 
 func (RequiredClientAction) Type() protoreflect.EnumType {
-	return &file_dolgorae_public_v1_dolgorae_proto_enumTypes[49]
+	return &file_dolgorae_public_v1_dolgorae_proto_enumTypes[56]
 }
 
 func (x RequiredClientAction) Number() protoreflect.EnumNumber {
@@ -2829,7 +3209,7 @@ func (x RequiredClientAction) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use RequiredClientAction.Descriptor instead.
 func (RequiredClientAction) EnumDescriptor() ([]byte, []int) {
-	return file_dolgorae_public_v1_dolgorae_proto_rawDescGZIP(), []int{49}
+	return file_dolgorae_public_v1_dolgorae_proto_rawDescGZIP(), []int{56}
 }
 
 type RequestContext struct {
@@ -6277,7 +6657,6 @@ func (x *InspectWorkspaceResponse) GetBlockers() []*CapabilityBlocker {
 type ListProfilesRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Context       *RequestContext        `protobuf:"bytes,1,opt,name=context,proto3" json:"context,omitempty"`
-	Workspace     *WorkspaceRef          `protobuf:"bytes,2,opt,name=workspace,proto3" json:"workspace,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -6315,13 +6694,6 @@ func (*ListProfilesRequest) Descriptor() ([]byte, []int) {
 func (x *ListProfilesRequest) GetContext() *RequestContext {
 	if x != nil {
 		return x.Context
-	}
-	return nil
-}
-
-func (x *ListProfilesRequest) GetWorkspace() *WorkspaceRef {
-	if x != nil {
-		return x.Workspace
 	}
 	return nil
 }
@@ -6589,7 +6961,6 @@ func (x *ListProfilesResponse) GetItems() []*ProfileProjection {
 type GetProfileRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Context       *RequestContext        `protobuf:"bytes,1,opt,name=context,proto3" json:"context,omitempty"`
-	Workspace     *WorkspaceRef          `protobuf:"bytes,2,opt,name=workspace,proto3" json:"workspace,omitempty"`
 	ProfileName   string                 `protobuf:"bytes,3,opt,name=profile_name,json=profileName,proto3" json:"profile_name,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -6628,13 +6999,6 @@ func (*GetProfileRequest) Descriptor() ([]byte, []int) {
 func (x *GetProfileRequest) GetContext() *RequestContext {
 	if x != nil {
 		return x.Context
-	}
-	return nil
-}
-
-func (x *GetProfileRequest) GetWorkspace() *WorkspaceRef {
-	if x != nil {
-		return x.Workspace
 	}
 	return nil
 }
@@ -6701,7 +7065,6 @@ func (x *GetProfileResponse) GetProfile() *ProfileProjection {
 type ListProfileDiagnosticsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Context       *RequestContext        `protobuf:"bytes,1,opt,name=context,proto3" json:"context,omitempty"`
-	Workspace     *WorkspaceRef          `protobuf:"bytes,2,opt,name=workspace,proto3" json:"workspace,omitempty"`
 	ProfileName   string                 `protobuf:"bytes,3,opt,name=profile_name,json=profileName,proto3" json:"profile_name,omitempty"`
 	AfterCursor   string                 `protobuf:"bytes,4,opt,name=after_cursor,json=afterCursor,proto3" json:"after_cursor,omitempty"`
 	Limit         uint32                 `protobuf:"varint,5,opt,name=limit,proto3" json:"limit,omitempty"`
@@ -6743,13 +7106,6 @@ func (*ListProfileDiagnosticsRequest) Descriptor() ([]byte, []int) {
 func (x *ListProfileDiagnosticsRequest) GetContext() *RequestContext {
 	if x != nil {
 		return x.Context
-	}
-	return nil
-}
-
-func (x *ListProfileDiagnosticsRequest) GetWorkspace() *WorkspaceRef {
-	if x != nil {
-		return x.Workspace
 	}
 	return nil
 }
@@ -13132,6 +13488,630 @@ func (x *ReadArtifactChunkResponse) GetSha256() string {
 	return ""
 }
 
+type OrchestratedSessionProjection struct {
+	state                       protoimpl.MessageState            `protogen:"open.v1"`
+	SessionId                   string                            `protobuf:"bytes,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
+	PrimaryRun                  *RunRef                           `protobuf:"bytes,2,opt,name=primary_run,json=primaryRun,proto3" json:"primary_run,omitempty"`
+	AggregateRevision           uint64                            `protobuf:"varint,3,opt,name=aggregate_revision,json=aggregateRevision,proto3" json:"aggregate_revision,omitempty"`
+	Lifecycle                   OrchestratedSessionLifecycle      `protobuf:"varint,4,opt,name=lifecycle,proto3,enum=dolgorae.public.v1.OrchestratedSessionLifecycle" json:"lifecycle,omitempty"`
+	Composition                 OrchestratedSessionComposition    `protobuf:"varint,5,opt,name=composition,proto3,enum=dolgorae.public.v1.OrchestratedSessionComposition" json:"composition,omitempty"`
+	ApprovalPolicy              OrchestratedSessionApprovalPolicy `protobuf:"varint,6,opt,name=approval_policy,json=approvalPolicy,proto3,enum=dolgorae.public.v1.OrchestratedSessionApprovalPolicy" json:"approval_policy,omitempty"`
+	SpecialistPolicyName        string                            `protobuf:"bytes,7,opt,name=specialist_policy_name,json=specialistPolicyName,proto3" json:"specialist_policy_name,omitempty"`
+	SpecialistPolicyRevision    uint64                            `protobuf:"varint,8,opt,name=specialist_policy_revision,json=specialistPolicyRevision,proto3" json:"specialist_policy_revision,omitempty"`
+	SpecialistPolicySha256      string                            `protobuf:"bytes,9,opt,name=specialist_policy_sha256,json=specialistPolicySha256,proto3" json:"specialist_policy_sha256,omitempty"`
+	NonretiredMemberCount       uint64                            `protobuf:"varint,10,opt,name=nonretired_member_count,json=nonretiredMemberCount,proto3" json:"nonretired_member_count,omitempty"`
+	NonterminalSpawnCount       uint64                            `protobuf:"varint,11,opt,name=nonterminal_spawn_count,json=nonterminalSpawnCount,proto3" json:"nonterminal_spawn_count,omitempty"`
+	PendingApprovalCount        uint64                            `protobuf:"varint,12,opt,name=pending_approval_count,json=pendingApprovalCount,proto3" json:"pending_approval_count,omitempty"`
+	AcceptedUnfinishedTaskCount uint64                            `protobuf:"varint,13,opt,name=accepted_unfinished_task_count,json=acceptedUnfinishedTaskCount,proto3" json:"accepted_unfinished_task_count,omitempty"`
+	UnknownOutcomeTaskCount     uint64                            `protobuf:"varint,14,opt,name=unknown_outcome_task_count,json=unknownOutcomeTaskCount,proto3" json:"unknown_outcome_task_count,omitempty"`
+	PublishedResultCount        uint64                            `protobuf:"varint,15,opt,name=published_result_count,json=publishedResultCount,proto3" json:"published_result_count,omitempty"`
+	CloseIntent                 SessionCloseIntent                `protobuf:"varint,16,opt,name=close_intent,json=closeIntent,proto3,enum=dolgorae.public.v1.SessionCloseIntent" json:"close_intent,omitempty"`
+	CloseProgress               SessionCloseProgress              `protobuf:"varint,17,opt,name=close_progress,json=closeProgress,proto3,enum=dolgorae.public.v1.SessionCloseProgress" json:"close_progress,omitempty"`
+	CloseOperationId            *string                           `protobuf:"bytes,18,opt,name=close_operation_id,json=closeOperationId,proto3,oneof" json:"close_operation_id,omitempty"`
+	RecoveryClassification      RecoveryClassification            `protobuf:"varint,19,opt,name=recovery_classification,json=recoveryClassification,proto3,enum=dolgorae.public.v1.RecoveryClassification" json:"recovery_classification,omitempty"`
+	RequiredAction              RequiredClientAction              `protobuf:"varint,20,opt,name=required_action,json=requiredAction,proto3,enum=dolgorae.public.v1.RequiredClientAction" json:"required_action,omitempty"`
+	CapturedAt                  *timestamppb.Timestamp            `protobuf:"bytes,21,opt,name=captured_at,json=capturedAt,proto3" json:"captured_at,omitempty"`
+	SourceRevision              uint64                            `protobuf:"varint,22,opt,name=source_revision,json=sourceRevision,proto3" json:"source_revision,omitempty"`
+	Availability                OrchestratedSessionAvailability   `protobuf:"varint,23,opt,name=availability,proto3,enum=dolgorae.public.v1.OrchestratedSessionAvailability" json:"availability,omitempty"`
+	unknownFields               protoimpl.UnknownFields
+	sizeCache                   protoimpl.SizeCache
+}
+
+func (x *OrchestratedSessionProjection) Reset() {
+	*x = OrchestratedSessionProjection{}
+	mi := &file_dolgorae_public_v1_dolgorae_proto_msgTypes[130]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *OrchestratedSessionProjection) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*OrchestratedSessionProjection) ProtoMessage() {}
+
+func (x *OrchestratedSessionProjection) ProtoReflect() protoreflect.Message {
+	mi := &file_dolgorae_public_v1_dolgorae_proto_msgTypes[130]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use OrchestratedSessionProjection.ProtoReflect.Descriptor instead.
+func (*OrchestratedSessionProjection) Descriptor() ([]byte, []int) {
+	return file_dolgorae_public_v1_dolgorae_proto_rawDescGZIP(), []int{130}
+}
+
+func (x *OrchestratedSessionProjection) GetSessionId() string {
+	if x != nil {
+		return x.SessionId
+	}
+	return ""
+}
+
+func (x *OrchestratedSessionProjection) GetPrimaryRun() *RunRef {
+	if x != nil {
+		return x.PrimaryRun
+	}
+	return nil
+}
+
+func (x *OrchestratedSessionProjection) GetAggregateRevision() uint64 {
+	if x != nil {
+		return x.AggregateRevision
+	}
+	return 0
+}
+
+func (x *OrchestratedSessionProjection) GetLifecycle() OrchestratedSessionLifecycle {
+	if x != nil {
+		return x.Lifecycle
+	}
+	return OrchestratedSessionLifecycle_ORCHESTRATED_SESSION_LIFECYCLE_UNSPECIFIED
+}
+
+func (x *OrchestratedSessionProjection) GetComposition() OrchestratedSessionComposition {
+	if x != nil {
+		return x.Composition
+	}
+	return OrchestratedSessionComposition_ORCHESTRATED_SESSION_COMPOSITION_UNSPECIFIED
+}
+
+func (x *OrchestratedSessionProjection) GetApprovalPolicy() OrchestratedSessionApprovalPolicy {
+	if x != nil {
+		return x.ApprovalPolicy
+	}
+	return OrchestratedSessionApprovalPolicy_ORCHESTRATED_SESSION_APPROVAL_POLICY_UNSPECIFIED
+}
+
+func (x *OrchestratedSessionProjection) GetSpecialistPolicyName() string {
+	if x != nil {
+		return x.SpecialistPolicyName
+	}
+	return ""
+}
+
+func (x *OrchestratedSessionProjection) GetSpecialistPolicyRevision() uint64 {
+	if x != nil {
+		return x.SpecialistPolicyRevision
+	}
+	return 0
+}
+
+func (x *OrchestratedSessionProjection) GetSpecialistPolicySha256() string {
+	if x != nil {
+		return x.SpecialistPolicySha256
+	}
+	return ""
+}
+
+func (x *OrchestratedSessionProjection) GetNonretiredMemberCount() uint64 {
+	if x != nil {
+		return x.NonretiredMemberCount
+	}
+	return 0
+}
+
+func (x *OrchestratedSessionProjection) GetNonterminalSpawnCount() uint64 {
+	if x != nil {
+		return x.NonterminalSpawnCount
+	}
+	return 0
+}
+
+func (x *OrchestratedSessionProjection) GetPendingApprovalCount() uint64 {
+	if x != nil {
+		return x.PendingApprovalCount
+	}
+	return 0
+}
+
+func (x *OrchestratedSessionProjection) GetAcceptedUnfinishedTaskCount() uint64 {
+	if x != nil {
+		return x.AcceptedUnfinishedTaskCount
+	}
+	return 0
+}
+
+func (x *OrchestratedSessionProjection) GetUnknownOutcomeTaskCount() uint64 {
+	if x != nil {
+		return x.UnknownOutcomeTaskCount
+	}
+	return 0
+}
+
+func (x *OrchestratedSessionProjection) GetPublishedResultCount() uint64 {
+	if x != nil {
+		return x.PublishedResultCount
+	}
+	return 0
+}
+
+func (x *OrchestratedSessionProjection) GetCloseIntent() SessionCloseIntent {
+	if x != nil {
+		return x.CloseIntent
+	}
+	return SessionCloseIntent_SESSION_CLOSE_INTENT_UNSPECIFIED
+}
+
+func (x *OrchestratedSessionProjection) GetCloseProgress() SessionCloseProgress {
+	if x != nil {
+		return x.CloseProgress
+	}
+	return SessionCloseProgress_SESSION_CLOSE_PROGRESS_UNSPECIFIED
+}
+
+func (x *OrchestratedSessionProjection) GetCloseOperationId() string {
+	if x != nil && x.CloseOperationId != nil {
+		return *x.CloseOperationId
+	}
+	return ""
+}
+
+func (x *OrchestratedSessionProjection) GetRecoveryClassification() RecoveryClassification {
+	if x != nil {
+		return x.RecoveryClassification
+	}
+	return RecoveryClassification_RECOVERY_CLASSIFICATION_UNSPECIFIED
+}
+
+func (x *OrchestratedSessionProjection) GetRequiredAction() RequiredClientAction {
+	if x != nil {
+		return x.RequiredAction
+	}
+	return RequiredClientAction_REQUIRED_CLIENT_ACTION_UNSPECIFIED
+}
+
+func (x *OrchestratedSessionProjection) GetCapturedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.CapturedAt
+	}
+	return nil
+}
+
+func (x *OrchestratedSessionProjection) GetSourceRevision() uint64 {
+	if x != nil {
+		return x.SourceRevision
+	}
+	return 0
+}
+
+func (x *OrchestratedSessionProjection) GetAvailability() OrchestratedSessionAvailability {
+	if x != nil {
+		return x.Availability
+	}
+	return OrchestratedSessionAvailability_ORCHESTRATED_SESSION_AVAILABILITY_UNSPECIFIED
+}
+
+type GetOrchestratedSessionRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Context       *RequestContext        `protobuf:"bytes,1,opt,name=context,proto3" json:"context,omitempty"`
+	RootRun       *RunRef                `protobuf:"bytes,2,opt,name=root_run,json=rootRun,proto3" json:"root_run,omitempty"`
+	Controller    *ControllerCarrierRef  `protobuf:"bytes,3,opt,name=controller,proto3" json:"controller,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetOrchestratedSessionRequest) Reset() {
+	*x = GetOrchestratedSessionRequest{}
+	mi := &file_dolgorae_public_v1_dolgorae_proto_msgTypes[131]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetOrchestratedSessionRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetOrchestratedSessionRequest) ProtoMessage() {}
+
+func (x *GetOrchestratedSessionRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_dolgorae_public_v1_dolgorae_proto_msgTypes[131]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetOrchestratedSessionRequest.ProtoReflect.Descriptor instead.
+func (*GetOrchestratedSessionRequest) Descriptor() ([]byte, []int) {
+	return file_dolgorae_public_v1_dolgorae_proto_rawDescGZIP(), []int{131}
+}
+
+func (x *GetOrchestratedSessionRequest) GetContext() *RequestContext {
+	if x != nil {
+		return x.Context
+	}
+	return nil
+}
+
+func (x *GetOrchestratedSessionRequest) GetRootRun() *RunRef {
+	if x != nil {
+		return x.RootRun
+	}
+	return nil
+}
+
+func (x *GetOrchestratedSessionRequest) GetController() *ControllerCarrierRef {
+	if x != nil {
+		return x.Controller
+	}
+	return nil
+}
+
+type GetOrchestratedSessionResponse struct {
+	state         protoimpl.MessageState         `protogen:"open.v1"`
+	Context       *ResponseContext               `protobuf:"bytes,1,opt,name=context,proto3" json:"context,omitempty"`
+	Session       *OrchestratedSessionProjection `protobuf:"bytes,2,opt,name=session,proto3" json:"session,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetOrchestratedSessionResponse) Reset() {
+	*x = GetOrchestratedSessionResponse{}
+	mi := &file_dolgorae_public_v1_dolgorae_proto_msgTypes[132]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetOrchestratedSessionResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetOrchestratedSessionResponse) ProtoMessage() {}
+
+func (x *GetOrchestratedSessionResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_dolgorae_public_v1_dolgorae_proto_msgTypes[132]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetOrchestratedSessionResponse.ProtoReflect.Descriptor instead.
+func (*GetOrchestratedSessionResponse) Descriptor() ([]byte, []int) {
+	return file_dolgorae_public_v1_dolgorae_proto_rawDescGZIP(), []int{132}
+}
+
+func (x *GetOrchestratedSessionResponse) GetContext() *ResponseContext {
+	if x != nil {
+		return x.Context
+	}
+	return nil
+}
+
+func (x *GetOrchestratedSessionResponse) GetSession() *OrchestratedSessionProjection {
+	if x != nil {
+		return x.Session
+	}
+	return nil
+}
+
+type OrchestratedSessionResult struct {
+	state            protoimpl.MessageState   `protogen:"open.v1"`
+	ResultId         string                   `protobuf:"bytes,1,opt,name=result_id,json=resultId,proto3" json:"result_id,omitempty"`
+	TaskId           string                   `protobuf:"bytes,2,opt,name=task_id,json=taskId,proto3" json:"task_id,omitempty"`
+	SpecialistRun    *RunRef                  `protobuf:"bytes,3,opt,name=specialist_run,json=specialistRun,proto3" json:"specialist_run,omitempty"`
+	SpecialistRole   string                   `protobuf:"bytes,4,opt,name=specialist_role,json=specialistRole,proto3" json:"specialist_role,omitempty"`
+	PublicationOrder uint64                   `protobuf:"varint,5,opt,name=publication_order,json=publicationOrder,proto3" json:"publication_order,omitempty"`
+	PublishedAt      *timestamppb.Timestamp   `protobuf:"bytes,6,opt,name=published_at,json=publishedAt,proto3" json:"published_at,omitempty"`
+	Format           OrchestratedResultFormat `protobuf:"varint,7,opt,name=format,proto3,enum=dolgorae.public.v1.OrchestratedResultFormat" json:"format,omitempty"`
+	ByteLength       uint64                   `protobuf:"varint,8,opt,name=byte_length,json=byteLength,proto3" json:"byte_length,omitempty"`
+	Sha256           string                   `protobuf:"bytes,9,opt,name=sha256,proto3" json:"sha256,omitempty"`
+	Artifact         *ArtifactRef             `protobuf:"bytes,10,opt,name=artifact,proto3" json:"artifact,omitempty"`
+	ArtifactOwner    *RunRef                  `protobuf:"bytes,11,opt,name=artifact_owner,json=artifactOwner,proto3" json:"artifact_owner,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
+}
+
+func (x *OrchestratedSessionResult) Reset() {
+	*x = OrchestratedSessionResult{}
+	mi := &file_dolgorae_public_v1_dolgorae_proto_msgTypes[133]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *OrchestratedSessionResult) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*OrchestratedSessionResult) ProtoMessage() {}
+
+func (x *OrchestratedSessionResult) ProtoReflect() protoreflect.Message {
+	mi := &file_dolgorae_public_v1_dolgorae_proto_msgTypes[133]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use OrchestratedSessionResult.ProtoReflect.Descriptor instead.
+func (*OrchestratedSessionResult) Descriptor() ([]byte, []int) {
+	return file_dolgorae_public_v1_dolgorae_proto_rawDescGZIP(), []int{133}
+}
+
+func (x *OrchestratedSessionResult) GetResultId() string {
+	if x != nil {
+		return x.ResultId
+	}
+	return ""
+}
+
+func (x *OrchestratedSessionResult) GetTaskId() string {
+	if x != nil {
+		return x.TaskId
+	}
+	return ""
+}
+
+func (x *OrchestratedSessionResult) GetSpecialistRun() *RunRef {
+	if x != nil {
+		return x.SpecialistRun
+	}
+	return nil
+}
+
+func (x *OrchestratedSessionResult) GetSpecialistRole() string {
+	if x != nil {
+		return x.SpecialistRole
+	}
+	return ""
+}
+
+func (x *OrchestratedSessionResult) GetPublicationOrder() uint64 {
+	if x != nil {
+		return x.PublicationOrder
+	}
+	return 0
+}
+
+func (x *OrchestratedSessionResult) GetPublishedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.PublishedAt
+	}
+	return nil
+}
+
+func (x *OrchestratedSessionResult) GetFormat() OrchestratedResultFormat {
+	if x != nil {
+		return x.Format
+	}
+	return OrchestratedResultFormat_ORCHESTRATED_RESULT_FORMAT_UNSPECIFIED
+}
+
+func (x *OrchestratedSessionResult) GetByteLength() uint64 {
+	if x != nil {
+		return x.ByteLength
+	}
+	return 0
+}
+
+func (x *OrchestratedSessionResult) GetSha256() string {
+	if x != nil {
+		return x.Sha256
+	}
+	return ""
+}
+
+func (x *OrchestratedSessionResult) GetArtifact() *ArtifactRef {
+	if x != nil {
+		return x.Artifact
+	}
+	return nil
+}
+
+func (x *OrchestratedSessionResult) GetArtifactOwner() *RunRef {
+	if x != nil {
+		return x.ArtifactOwner
+	}
+	return nil
+}
+
+type ListOrchestratedSessionResultsRequest struct {
+	state             protoimpl.MessageState `protogen:"open.v1"`
+	Context           *RequestContext        `protobuf:"bytes,1,opt,name=context,proto3" json:"context,omitempty"`
+	RootRun           *RunRef                `protobuf:"bytes,2,opt,name=root_run,json=rootRun,proto3" json:"root_run,omitempty"`
+	Controller        *ControllerCarrierRef  `protobuf:"bytes,3,opt,name=controller,proto3" json:"controller,omitempty"`
+	PageCursor        *string                `protobuf:"bytes,4,opt,name=page_cursor,json=pageCursor,proto3,oneof" json:"page_cursor,omitempty"`
+	Limit             uint32                 `protobuf:"varint,5,opt,name=limit,proto3" json:"limit,omitempty"`
+	ProjectionVersion uint32                 `protobuf:"varint,6,opt,name=projection_version,json=projectionVersion,proto3" json:"projection_version,omitempty"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
+}
+
+func (x *ListOrchestratedSessionResultsRequest) Reset() {
+	*x = ListOrchestratedSessionResultsRequest{}
+	mi := &file_dolgorae_public_v1_dolgorae_proto_msgTypes[134]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListOrchestratedSessionResultsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListOrchestratedSessionResultsRequest) ProtoMessage() {}
+
+func (x *ListOrchestratedSessionResultsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_dolgorae_public_v1_dolgorae_proto_msgTypes[134]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListOrchestratedSessionResultsRequest.ProtoReflect.Descriptor instead.
+func (*ListOrchestratedSessionResultsRequest) Descriptor() ([]byte, []int) {
+	return file_dolgorae_public_v1_dolgorae_proto_rawDescGZIP(), []int{134}
+}
+
+func (x *ListOrchestratedSessionResultsRequest) GetContext() *RequestContext {
+	if x != nil {
+		return x.Context
+	}
+	return nil
+}
+
+func (x *ListOrchestratedSessionResultsRequest) GetRootRun() *RunRef {
+	if x != nil {
+		return x.RootRun
+	}
+	return nil
+}
+
+func (x *ListOrchestratedSessionResultsRequest) GetController() *ControllerCarrierRef {
+	if x != nil {
+		return x.Controller
+	}
+	return nil
+}
+
+func (x *ListOrchestratedSessionResultsRequest) GetPageCursor() string {
+	if x != nil && x.PageCursor != nil {
+		return *x.PageCursor
+	}
+	return ""
+}
+
+func (x *ListOrchestratedSessionResultsRequest) GetLimit() uint32 {
+	if x != nil {
+		return x.Limit
+	}
+	return 0
+}
+
+func (x *ListOrchestratedSessionResultsRequest) GetProjectionVersion() uint32 {
+	if x != nil {
+		return x.ProjectionVersion
+	}
+	return 0
+}
+
+type ListOrchestratedSessionResultsResponse struct {
+	state                   protoimpl.MessageState       `protogen:"open.v1"`
+	Context                 *ResponseContext             `protobuf:"bytes,1,opt,name=context,proto3" json:"context,omitempty"`
+	CapturedPublicationHead uint64                       `protobuf:"varint,2,opt,name=captured_publication_head,json=capturedPublicationHead,proto3" json:"captured_publication_head,omitempty"`
+	SourceRevision          uint64                       `protobuf:"varint,3,opt,name=source_revision,json=sourceRevision,proto3" json:"source_revision,omitempty"`
+	CapturedAt              *timestamppb.Timestamp       `protobuf:"bytes,4,opt,name=captured_at,json=capturedAt,proto3" json:"captured_at,omitempty"`
+	Items                   []*OrchestratedSessionResult `protobuf:"bytes,5,rep,name=items,proto3" json:"items,omitempty"`
+	NextPageCursor          *string                      `protobuf:"bytes,6,opt,name=next_page_cursor,json=nextPageCursor,proto3,oneof" json:"next_page_cursor,omitempty"`
+	unknownFields           protoimpl.UnknownFields
+	sizeCache               protoimpl.SizeCache
+}
+
+func (x *ListOrchestratedSessionResultsResponse) Reset() {
+	*x = ListOrchestratedSessionResultsResponse{}
+	mi := &file_dolgorae_public_v1_dolgorae_proto_msgTypes[135]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListOrchestratedSessionResultsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListOrchestratedSessionResultsResponse) ProtoMessage() {}
+
+func (x *ListOrchestratedSessionResultsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_dolgorae_public_v1_dolgorae_proto_msgTypes[135]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListOrchestratedSessionResultsResponse.ProtoReflect.Descriptor instead.
+func (*ListOrchestratedSessionResultsResponse) Descriptor() ([]byte, []int) {
+	return file_dolgorae_public_v1_dolgorae_proto_rawDescGZIP(), []int{135}
+}
+
+func (x *ListOrchestratedSessionResultsResponse) GetContext() *ResponseContext {
+	if x != nil {
+		return x.Context
+	}
+	return nil
+}
+
+func (x *ListOrchestratedSessionResultsResponse) GetCapturedPublicationHead() uint64 {
+	if x != nil {
+		return x.CapturedPublicationHead
+	}
+	return 0
+}
+
+func (x *ListOrchestratedSessionResultsResponse) GetSourceRevision() uint64 {
+	if x != nil {
+		return x.SourceRevision
+	}
+	return 0
+}
+
+func (x *ListOrchestratedSessionResultsResponse) GetCapturedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.CapturedAt
+	}
+	return nil
+}
+
+func (x *ListOrchestratedSessionResultsResponse) GetItems() []*OrchestratedSessionResult {
+	if x != nil {
+		return x.Items
+	}
+	return nil
+}
+
+func (x *ListOrchestratedSessionResultsResponse) GetNextPageCursor() string {
+	if x != nil && x.NextPageCursor != nil {
+		return *x.NextPageCursor
+	}
+	return ""
+}
+
 type DolgoraeErrorDetail struct {
 	state                  protoimpl.MessageState `protogen:"open.v1"`
 	DetailVersion          uint32                 `protobuf:"varint,1,opt,name=detail_version,json=detailVersion,proto3" json:"detail_version,omitempty"`
@@ -13151,7 +14131,7 @@ type DolgoraeErrorDetail struct {
 
 func (x *DolgoraeErrorDetail) Reset() {
 	*x = DolgoraeErrorDetail{}
-	mi := &file_dolgorae_public_v1_dolgorae_proto_msgTypes[130]
+	mi := &file_dolgorae_public_v1_dolgorae_proto_msgTypes[136]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -13163,7 +14143,7 @@ func (x *DolgoraeErrorDetail) String() string {
 func (*DolgoraeErrorDetail) ProtoMessage() {}
 
 func (x *DolgoraeErrorDetail) ProtoReflect() protoreflect.Message {
-	mi := &file_dolgorae_public_v1_dolgorae_proto_msgTypes[130]
+	mi := &file_dolgorae_public_v1_dolgorae_proto_msgTypes[136]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -13176,7 +14156,7 @@ func (x *DolgoraeErrorDetail) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DolgoraeErrorDetail.ProtoReflect.Descriptor instead.
 func (*DolgoraeErrorDetail) Descriptor() ([]byte, []int) {
-	return file_dolgorae_public_v1_dolgorae_proto_rawDescGZIP(), []int{130}
+	return file_dolgorae_public_v1_dolgorae_proto_rawDescGZIP(), []int{136}
 }
 
 func (x *DolgoraeErrorDetail) GetDetailVersion() uint32 {
@@ -13602,10 +14582,9 @@ const file_dolgorae_public_v1_dolgorae_proto_rawDesc = "" +
 	"\x0ecanonical_path\x18\x03 \x01(\v2\".dolgorae.public.v1.PathProjectionR\rcanonicalPath\x125\n" +
 	"\x04mode\x18\x04 \x01(\x0e2!.dolgorae.public.v1.WorkspaceModeR\x04mode\x12E\n" +
 	"\x06status\x18\x05 \x01(\x0e2-.dolgorae.public.v1.WorkspaceInspectionStatusR\x06status\x12A\n" +
-	"\bblockers\x18\x06 \x03(\v2%.dolgorae.public.v1.CapabilityBlockerR\bblockers\"\x93\x01\n" +
+	"\bblockers\x18\x06 \x03(\v2%.dolgorae.public.v1.CapabilityBlockerR\bblockers\"d\n" +
 	"\x13ListProfilesRequest\x12<\n" +
-	"\acontext\x18\x01 \x01(\v2\".dolgorae.public.v1.RequestContextR\acontext\x12>\n" +
-	"\tworkspace\x18\x02 \x01(\v2 .dolgorae.public.v1.WorkspaceRefR\tworkspace\"x\n" +
+	"\acontext\x18\x01 \x01(\v2\".dolgorae.public.v1.RequestContextR\acontextJ\x04\b\x02\x10\x03R\tworkspace\"x\n" +
 	"\x0fModelCapability\x12\x19\n" +
 	"\bmodel_id\x18\x01 \x01(\tR\amodelId\x12\x1d\n" +
 	"\n" +
@@ -13632,23 +14611,21 @@ const file_dolgorae_public_v1_dolgorae_proto_rawDesc = "" +
 	"\x10_runtime_versionJ\x04\b\a\x10\bR\x10default_model_id\"\x92\x01\n" +
 	"\x14ListProfilesResponse\x12=\n" +
 	"\acontext\x18\x01 \x01(\v2#.dolgorae.public.v1.ResponseContextR\acontext\x12;\n" +
-	"\x05items\x18\x02 \x03(\v2%.dolgorae.public.v1.ProfileProjectionR\x05items\"\xb4\x01\n" +
+	"\x05items\x18\x02 \x03(\v2%.dolgorae.public.v1.ProfileProjectionR\x05items\"\x85\x01\n" +
 	"\x11GetProfileRequest\x12<\n" +
-	"\acontext\x18\x01 \x01(\v2\".dolgorae.public.v1.RequestContextR\acontext\x12>\n" +
-	"\tworkspace\x18\x02 \x01(\v2 .dolgorae.public.v1.WorkspaceRefR\tworkspace\x12!\n" +
-	"\fprofile_name\x18\x03 \x01(\tR\vprofileName\"\x94\x01\n" +
+	"\acontext\x18\x01 \x01(\v2\".dolgorae.public.v1.RequestContextR\acontext\x12!\n" +
+	"\fprofile_name\x18\x03 \x01(\tR\vprofileNameJ\x04\b\x02\x10\x03R\tworkspace\"\x94\x01\n" +
 	"\x12GetProfileResponse\x12=\n" +
 	"\acontext\x18\x01 \x01(\v2#.dolgorae.public.v1.ResponseContextR\acontext\x12?\n" +
-	"\aprofile\x18\x02 \x01(\v2%.dolgorae.public.v1.ProfileProjectionR\aprofile\"\xc0\x02\n" +
+	"\aprofile\x18\x02 \x01(\v2%.dolgorae.public.v1.ProfileProjectionR\aprofile\"\x91\x02\n" +
 	"\x1dListProfileDiagnosticsRequest\x12<\n" +
-	"\acontext\x18\x01 \x01(\v2\".dolgorae.public.v1.RequestContextR\acontext\x12>\n" +
-	"\tworkspace\x18\x02 \x01(\v2 .dolgorae.public.v1.WorkspaceRefR\tworkspace\x12!\n" +
+	"\acontext\x18\x01 \x01(\v2\".dolgorae.public.v1.RequestContextR\acontext\x12!\n" +
 	"\fprofile_name\x18\x03 \x01(\tR\vprofileName\x12!\n" +
 	"\fafter_cursor\x18\x04 \x01(\tR\vafterCursor\x12\x14\n" +
 	"\x05limit\x18\x05 \x01(\rR\x05limit\x12E\n" +
 	"\n" +
 	"projection\x18\x06 \x01(\x0e2%.dolgorae.public.v1.ProjectionProfileR\n" +
-	"projection\"\xdf\x01\n" +
+	"projectionJ\x04\b\x02\x10\x03R\tworkspace\"\xdf\x01\n" +
 	"\x11ProfileDiagnostic\x12\x16\n" +
 	"\x06cursor\x18\x01 \x01(\tR\x06cursor\x12#\n" +
 	"\rdiagnostic_id\x18\x02 \x01(\tR\fdiagnosticId\x12\x1a\n" +
@@ -14246,7 +15223,79 @@ const file_dolgorae_public_v1_dolgorae_proto_rawDesc = "" +
 	"\x04data\x18\x05 \x01(\fR\x04data\x12\x10\n" +
 	"\x03eof\x18\x06 \x01(\bR\x03eof\x12*\n" +
 	"\x11total_byte_length\x18\a \x01(\x04R\x0ftotalByteLength\x12\x16\n" +
-	"\x06sha256\x18\b \x01(\tR\x06sha256\"\xc4\x05\n" +
+	"\x06sha256\x18\b \x01(\tR\x06sha256\"\x99\f\n" +
+	"\x1dOrchestratedSessionProjection\x12\x1d\n" +
+	"\n" +
+	"session_id\x18\x01 \x01(\tR\tsessionId\x12;\n" +
+	"\vprimary_run\x18\x02 \x01(\v2\x1a.dolgorae.public.v1.RunRefR\n" +
+	"primaryRun\x12-\n" +
+	"\x12aggregate_revision\x18\x03 \x01(\x04R\x11aggregateRevision\x12N\n" +
+	"\tlifecycle\x18\x04 \x01(\x0e20.dolgorae.public.v1.OrchestratedSessionLifecycleR\tlifecycle\x12T\n" +
+	"\vcomposition\x18\x05 \x01(\x0e22.dolgorae.public.v1.OrchestratedSessionCompositionR\vcomposition\x12^\n" +
+	"\x0fapproval_policy\x18\x06 \x01(\x0e25.dolgorae.public.v1.OrchestratedSessionApprovalPolicyR\x0eapprovalPolicy\x124\n" +
+	"\x16specialist_policy_name\x18\a \x01(\tR\x14specialistPolicyName\x12<\n" +
+	"\x1aspecialist_policy_revision\x18\b \x01(\x04R\x18specialistPolicyRevision\x128\n" +
+	"\x18specialist_policy_sha256\x18\t \x01(\tR\x16specialistPolicySha256\x126\n" +
+	"\x17nonretired_member_count\x18\n" +
+	" \x01(\x04R\x15nonretiredMemberCount\x126\n" +
+	"\x17nonterminal_spawn_count\x18\v \x01(\x04R\x15nonterminalSpawnCount\x124\n" +
+	"\x16pending_approval_count\x18\f \x01(\x04R\x14pendingApprovalCount\x12C\n" +
+	"\x1eaccepted_unfinished_task_count\x18\r \x01(\x04R\x1bacceptedUnfinishedTaskCount\x12;\n" +
+	"\x1aunknown_outcome_task_count\x18\x0e \x01(\x04R\x17unknownOutcomeTaskCount\x124\n" +
+	"\x16published_result_count\x18\x0f \x01(\x04R\x14publishedResultCount\x12I\n" +
+	"\fclose_intent\x18\x10 \x01(\x0e2&.dolgorae.public.v1.SessionCloseIntentR\vcloseIntent\x12O\n" +
+	"\x0eclose_progress\x18\x11 \x01(\x0e2(.dolgorae.public.v1.SessionCloseProgressR\rcloseProgress\x121\n" +
+	"\x12close_operation_id\x18\x12 \x01(\tH\x00R\x10closeOperationId\x88\x01\x01\x12c\n" +
+	"\x17recovery_classification\x18\x13 \x01(\x0e2*.dolgorae.public.v1.RecoveryClassificationR\x16recoveryClassification\x12Q\n" +
+	"\x0frequired_action\x18\x14 \x01(\x0e2(.dolgorae.public.v1.RequiredClientActionR\x0erequiredAction\x12;\n" +
+	"\vcaptured_at\x18\x15 \x01(\v2\x1a.google.protobuf.TimestampR\n" +
+	"capturedAt\x12'\n" +
+	"\x0fsource_revision\x18\x16 \x01(\x04R\x0esourceRevision\x12W\n" +
+	"\favailability\x18\x17 \x01(\x0e23.dolgorae.public.v1.OrchestratedSessionAvailabilityR\favailabilityB\x15\n" +
+	"\x13_close_operation_id\"\xde\x01\n" +
+	"\x1dGetOrchestratedSessionRequest\x12<\n" +
+	"\acontext\x18\x01 \x01(\v2\".dolgorae.public.v1.RequestContextR\acontext\x125\n" +
+	"\broot_run\x18\x02 \x01(\v2\x1a.dolgorae.public.v1.RunRefR\arootRun\x12H\n" +
+	"\n" +
+	"controller\x18\x03 \x01(\v2(.dolgorae.public.v1.ControllerCarrierRefR\n" +
+	"controller\"\xac\x01\n" +
+	"\x1eGetOrchestratedSessionResponse\x12=\n" +
+	"\acontext\x18\x01 \x01(\v2#.dolgorae.public.v1.ResponseContextR\acontext\x12K\n" +
+	"\asession\x18\x02 \x01(\v21.dolgorae.public.v1.OrchestratedSessionProjectionR\asession\"\xa8\x04\n" +
+	"\x19OrchestratedSessionResult\x12\x1b\n" +
+	"\tresult_id\x18\x01 \x01(\tR\bresultId\x12\x17\n" +
+	"\atask_id\x18\x02 \x01(\tR\x06taskId\x12A\n" +
+	"\x0especialist_run\x18\x03 \x01(\v2\x1a.dolgorae.public.v1.RunRefR\rspecialistRun\x12'\n" +
+	"\x0fspecialist_role\x18\x04 \x01(\tR\x0especialistRole\x12+\n" +
+	"\x11publication_order\x18\x05 \x01(\x04R\x10publicationOrder\x12=\n" +
+	"\fpublished_at\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\vpublishedAt\x12D\n" +
+	"\x06format\x18\a \x01(\x0e2,.dolgorae.public.v1.OrchestratedResultFormatR\x06format\x12\x1f\n" +
+	"\vbyte_length\x18\b \x01(\x04R\n" +
+	"byteLength\x12\x16\n" +
+	"\x06sha256\x18\t \x01(\tR\x06sha256\x12;\n" +
+	"\bartifact\x18\n" +
+	" \x01(\v2\x1f.dolgorae.public.v1.ArtifactRefR\bartifact\x12A\n" +
+	"\x0eartifact_owner\x18\v \x01(\v2\x1a.dolgorae.public.v1.RunRefR\rartifactOwner\"\xe1\x02\n" +
+	"%ListOrchestratedSessionResultsRequest\x12<\n" +
+	"\acontext\x18\x01 \x01(\v2\".dolgorae.public.v1.RequestContextR\acontext\x125\n" +
+	"\broot_run\x18\x02 \x01(\v2\x1a.dolgorae.public.v1.RunRefR\arootRun\x12H\n" +
+	"\n" +
+	"controller\x18\x03 \x01(\v2(.dolgorae.public.v1.ControllerCarrierRefR\n" +
+	"controller\x12$\n" +
+	"\vpage_cursor\x18\x04 \x01(\tH\x00R\n" +
+	"pageCursor\x88\x01\x01\x12\x14\n" +
+	"\x05limit\x18\x05 \x01(\rR\x05limit\x12-\n" +
+	"\x12projection_version\x18\x06 \x01(\rR\x11projectionVersionB\x0e\n" +
+	"\f_page_cursor\"\x92\x03\n" +
+	"&ListOrchestratedSessionResultsResponse\x12=\n" +
+	"\acontext\x18\x01 \x01(\v2#.dolgorae.public.v1.ResponseContextR\acontext\x12:\n" +
+	"\x19captured_publication_head\x18\x02 \x01(\x04R\x17capturedPublicationHead\x12'\n" +
+	"\x0fsource_revision\x18\x03 \x01(\x04R\x0esourceRevision\x12;\n" +
+	"\vcaptured_at\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\n" +
+	"capturedAt\x12C\n" +
+	"\x05items\x18\x05 \x03(\v2-.dolgorae.public.v1.OrchestratedSessionResultR\x05items\x12-\n" +
+	"\x10next_page_cursor\x18\x06 \x01(\tH\x00R\x0enextPageCursor\x88\x01\x01B\x13\n" +
+	"\x11_next_page_cursor\"\xc4\x05\n" +
 	"\x13DolgoraeErrorDetail\x12%\n" +
 	"\x0edetail_version\x18\x01 \x01(\rR\rdetailVersion\x12.\n" +
 	"\x13dolgorae_error_code\x18\x02 \x01(\tR\x11dolgoraeErrorCode\x12@\n" +
@@ -14449,10 +15498,11 @@ const file_dolgorae_public_v1_dolgorae_proto_rawDesc = "" +
 	"\x15TURN_STATUS_COMPLETED\x10\x06\x12\x16\n" +
 	"\x12TURN_STATUS_FAILED\x10\a\x12\x1b\n" +
 	"\x17TURN_STATUS_INTERRUPTED\x10\b\x12\x1f\n" +
-	"\x1bTURN_STATUS_OUTCOME_UNKNOWN\x10\t*\x94\x01\n" +
+	"\x1bTURN_STATUS_OUTCOME_UNKNOWN\x10\t*\xd0\x01\n" +
 	"\x1bControllerCarrierRootPolicy\x12.\n" +
-	"*CONTROLLER_CARRIER_ROOT_POLICY_UNSPECIFIED\x10\x00\x12E\n" +
-	"ACONTROLLER_CARRIER_ROOT_POLICY_DOLGORAE_OWNED_APPLICATION_SUPPORT\x10\x01*\x87\x01\n" +
+	"*CONTROLLER_CARRIER_ROOT_POLICY_UNSPECIFIED\x10\x00\x12I\n" +
+	"ACONTROLLER_CARRIER_ROOT_POLICY_DOLGORAE_OWNED_APPLICATION_SUPPORT\x10\x01\x1a\x02\b\x01\x126\n" +
+	"2CONTROLLER_CARRIER_ROOT_POLICY_DOLGORAE_OWNED_HOME\x10\x02*\x87\x01\n" +
 	"\x1cControllerCapabilityEncoding\x12.\n" +
 	"*CONTROLLER_CAPABILITY_ENCODING_UNSPECIFIED\x10\x00\x127\n" +
 	"3CONTROLLER_CAPABILITY_ENCODING_BASE64URL_NO_PADDING\x10\x01*\x89\x01\n" +
@@ -14553,7 +15603,46 @@ const file_dolgorae_public_v1_dolgorae_proto_rawDesc = "" +
 	"\x12ArtifactVisibility\x12#\n" +
 	"\x1fARTIFACT_VISIBILITY_UNSPECIFIED\x10\x00\x12 \n" +
 	"\x1cARTIFACT_VISIBILITY_OBSERVER\x10\x01\x12'\n" +
-	"#ARTIFACT_VISIBILITY_CONTROLLER_ONLY\x10\x02*\xec\x01\n" +
+	"#ARTIFACT_VISIBILITY_CONTROLLER_ONLY\x10\x02*\xb8\x03\n" +
+	"\x1cOrchestratedSessionLifecycle\x12.\n" +
+	"*ORCHESTRATED_SESSION_LIFECYCLE_UNSPECIFIED\x10\x00\x12+\n" +
+	"'ORCHESTRATED_SESSION_LIFECYCLE_CREATING\x10\x01\x12)\n" +
+	"%ORCHESTRATED_SESSION_LIFECYCLE_ACTIVE\x10\x02\x12+\n" +
+	"'ORCHESTRATED_SESSION_LIFECYCLE_DEGRADED\x10\x03\x12-\n" +
+	")ORCHESTRATED_SESSION_LIFECYCLE_RECOVERING\x10\x04\x12-\n" +
+	")ORCHESTRATED_SESSION_LIFECYCLE_COMPLETING\x10\x05\x12+\n" +
+	"'ORCHESTRATED_SESSION_LIFECYCLE_ABORTING\x10\x06\x12,\n" +
+	"(ORCHESTRATED_SESSION_LIFECYCLE_COMPLETED\x10\a\x12*\n" +
+	"&ORCHESTRATED_SESSION_LIFECYCLE_ABORTED\x10\b*\xc4\x01\n" +
+	"\x1eOrchestratedSessionComposition\x120\n" +
+	",ORCHESTRATED_SESSION_COMPOSITION_UNSPECIFIED\x10\x00\x127\n" +
+	"3ORCHESTRATED_SESSION_COMPOSITION_STANDALONE_PRIMARY\x10\x01\x127\n" +
+	"3ORCHESTRATED_SESSION_COMPOSITION_BROKERED_HIERARCHY\x10\x02*\xd4\x01\n" +
+	"!OrchestratedSessionApprovalPolicy\x124\n" +
+	"0ORCHESTRATED_SESSION_APPROVAL_POLICY_UNSPECIFIED\x10\x00\x12?\n" +
+	";ORCHESTRATED_SESSION_APPROVAL_POLICY_USER_APPROVAL_REQUIRED\x10\x01\x128\n" +
+	"4ORCHESTRATED_SESSION_APPROVAL_POLICY_FULLY_DELEGATED\x10\x02*\xf1\x01\n" +
+	"\x1fOrchestratedSessionAvailability\x121\n" +
+	"-ORCHESTRATED_SESSION_AVAILABILITY_UNSPECIFIED\x10\x00\x12/\n" +
+	"+ORCHESTRATED_SESSION_AVAILABILITY_AVAILABLE\x10\x01\x121\n" +
+	"-ORCHESTRATED_SESSION_AVAILABILITY_UNAVAILABLE\x10\x02\x127\n" +
+	"3ORCHESTRATED_SESSION_AVAILABILITY_RECOVERY_REQUIRED\x10\x03*\x9c\x01\n" +
+	"\x12SessionCloseIntent\x12$\n" +
+	" SESSION_CLOSE_INTENT_UNSPECIFIED\x10\x00\x12\x1d\n" +
+	"\x19SESSION_CLOSE_INTENT_NONE\x10\x01\x12!\n" +
+	"\x1dSESSION_CLOSE_INTENT_COMPLETE\x10\x02\x12\x1e\n" +
+	"\x1aSESSION_CLOSE_INTENT_ABORT\x10\x03*\xa8\x02\n" +
+	"\x14SessionCloseProgress\x12&\n" +
+	"\"SESSION_CLOSE_PROGRESS_UNSPECIFIED\x10\x00\x12\x1f\n" +
+	"\x1bSESSION_CLOSE_PROGRESS_NONE\x10\x01\x12#\n" +
+	"\x1fSESSION_CLOSE_PROGRESS_SETTLING\x10\x02\x12$\n" +
+	" SESSION_CLOSE_PROGRESS_COMPLETED\x10\x03\x12\"\n" +
+	"\x1eSESSION_CLOSE_PROGRESS_ABORTED\x10\x04\x12,\n" +
+	"(SESSION_CLOSE_PROGRESS_RECOVERY_REQUIRED\x10\x05\x12*\n" +
+	"&SESSION_CLOSE_PROGRESS_OUTCOME_UNKNOWN\x10\x06*p\n" +
+	"\x18OrchestratedResultFormat\x12*\n" +
+	"&ORCHESTRATED_RESULT_FORMAT_UNSPECIFIED\x10\x00\x12(\n" +
+	"$ORCHESTRATED_RESULT_FORMAT_UTF8_TEXT\x10\x01*\xec\x01\n" +
 	"\x13RetryClassification\x12$\n" +
 	" RETRY_CLASSIFICATION_UNSPECIFIED\x10\x00\x12\"\n" +
 	"\x1eRETRY_CLASSIFICATION_FORBIDDEN\x10\x01\x12.\n" +
@@ -14634,7 +15723,10 @@ const file_dolgorae_public_v1_dolgorae_proto_rawDesc = "" +
 	"\x10VerifyController\x12+.dolgorae.public.v1.VerifyControllerRequest\x1a,.dolgorae.public.v1.VerifyControllerResponse2\xe3\x01\n" +
 	"\x0fArtifactService\x12^\n" +
 	"\vGetArtifact\x12&.dolgorae.public.v1.GetArtifactRequest\x1a'.dolgorae.public.v1.GetArtifactResponse\x12p\n" +
-	"\x11ReadArtifactChunk\x12,.dolgorae.public.v1.ReadArtifactChunkRequest\x1a-.dolgorae.public.v1.ReadArtifactChunkResponseBEZCgithub.com/rootkernel/dolgorae/gen/go/dolgorae/public/v1;dolgoraev1b\x06proto3"
+	"\x11ReadArtifactChunk\x12,.dolgorae.public.v1.ReadArtifactChunkRequest\x1a-.dolgorae.public.v1.ReadArtifactChunkResponse2\xb1\x02\n" +
+	"\x14OrchestrationService\x12\x7f\n" +
+	"\x16GetOrchestratedSession\x121.dolgorae.public.v1.GetOrchestratedSessionRequest\x1a2.dolgorae.public.v1.GetOrchestratedSessionResponse\x12\x97\x01\n" +
+	"\x1eListOrchestratedSessionResults\x129.dolgorae.public.v1.ListOrchestratedSessionResultsRequest\x1a:.dolgorae.public.v1.ListOrchestratedSessionResultsResponseBEZCgithub.com/rootkernel/dolgorae/gen/go/dolgorae/public/v1;dolgoraev1b\x06proto3"
 
 var (
 	file_dolgorae_public_v1_dolgorae_proto_rawDescOnce sync.Once
@@ -14648,194 +15740,207 @@ func file_dolgorae_public_v1_dolgorae_proto_rawDescGZIP() []byte {
 	return file_dolgorae_public_v1_dolgorae_proto_rawDescData
 }
 
-var file_dolgorae_public_v1_dolgorae_proto_enumTypes = make([]protoimpl.EnumInfo, 50)
-var file_dolgorae_public_v1_dolgorae_proto_msgTypes = make([]protoimpl.MessageInfo, 131)
+var file_dolgorae_public_v1_dolgorae_proto_enumTypes = make([]protoimpl.EnumInfo, 57)
+var file_dolgorae_public_v1_dolgorae_proto_msgTypes = make([]protoimpl.MessageInfo, 137)
 var file_dolgorae_public_v1_dolgorae_proto_goTypes = []any{
-	(ProjectionProfile)(0),                        // 0: dolgorae.public.v1.ProjectionProfile
-	(PublicTransport)(0),                          // 1: dolgorae.public.v1.PublicTransport
-	(ProfileLaunchMode)(0),                        // 2: dolgorae.public.v1.ProfileLaunchMode
-	(NativeSubagentPolicy)(0),                     // 3: dolgorae.public.v1.NativeSubagentPolicy
-	(RunLifecycle)(0),                             // 4: dolgorae.public.v1.RunLifecycle
-	(ControlMode)(0),                              // 5: dolgorae.public.v1.ControlMode
-	(ExecutionLane)(0),                            // 6: dolgorae.public.v1.ExecutionLane
-	(WriteIntent)(0),                              // 7: dolgorae.public.v1.WriteIntent
-	(ImageDetail)(0),                              // 8: dolgorae.public.v1.ImageDetail
-	(WriteContinuationReason)(0),                  // 9: dolgorae.public.v1.WriteContinuationReason
-	(PurposeKind)(0),                              // 10: dolgorae.public.v1.PurposeKind
-	(ControllerKind)(0),                           // 11: dolgorae.public.v1.ControllerKind
-	(SupportState)(0),                             // 12: dolgorae.public.v1.SupportState
-	(InteractionSupport)(0),                       // 13: dolgorae.public.v1.InteractionSupport
-	(CommandExecutionSupport)(0),                  // 14: dolgorae.public.v1.CommandExecutionSupport
-	(BackgroundControlSupport)(0),                 // 15: dolgorae.public.v1.BackgroundControlSupport
-	(ProcessCleanupSupport)(0),                    // 16: dolgorae.public.v1.ProcessCleanupSupport
-	(AssuranceLevel)(0),                           // 17: dolgorae.public.v1.AssuranceLevel
-	(ProfileCompatibility)(0),                     // 18: dolgorae.public.v1.ProfileCompatibility
-	(RunStateVariant)(0),                          // 19: dolgorae.public.v1.RunStateVariant
-	(EffectiveAccess)(0),                          // 20: dolgorae.public.v1.EffectiveAccess
-	(PolicyVerification)(0),                       // 21: dolgorae.public.v1.PolicyVerification
-	(WriterAuthorityState)(0),                     // 22: dolgorae.public.v1.WriterAuthorityState
-	(ReconciliationAction)(0),                     // 23: dolgorae.public.v1.ReconciliationAction
-	(ServerLaneState)(0),                          // 24: dolgorae.public.v1.ServerLaneState
-	(BackgroundExecutionState)(0),                 // 25: dolgorae.public.v1.BackgroundExecutionState
-	(BackgroundExecutionMechanism)(0),             // 26: dolgorae.public.v1.BackgroundExecutionMechanism
-	(RecoveryState)(0),                            // 27: dolgorae.public.v1.RecoveryState
-	(RecoveryAction)(0),                           // 28: dolgorae.public.v1.RecoveryAction
-	(TurnStatus)(0),                               // 29: dolgorae.public.v1.TurnStatus
-	(ControllerCarrierRootPolicy)(0),              // 30: dolgorae.public.v1.ControllerCarrierRootPolicy
-	(ControllerCapabilityEncoding)(0),             // 31: dolgorae.public.v1.ControllerCapabilityEncoding
-	(ControllerPrincipalRule)(0),                  // 32: dolgorae.public.v1.ControllerPrincipalRule
-	(WorkspaceInspectionStatus)(0),                // 33: dolgorae.public.v1.WorkspaceInspectionStatus
-	(WorkspaceMode)(0),                            // 34: dolgorae.public.v1.WorkspaceMode
-	(CapabilityBlockerCode)(0),                    // 35: dolgorae.public.v1.CapabilityBlockerCode
-	(InteractionKind)(0),                          // 36: dolgorae.public.v1.InteractionKind
-	(InteractionStatus)(0),                        // 37: dolgorae.public.v1.InteractionStatus
-	(InteractionOutcome)(0),                       // 38: dolgorae.public.v1.InteractionOutcome
-	(InteractionDecision)(0),                      // 39: dolgorae.public.v1.InteractionDecision
-	(FileChangeKind)(0),                           // 40: dolgorae.public.v1.FileChangeKind
-	(UnsupportedInteractionReason)(0),             // 41: dolgorae.public.v1.UnsupportedInteractionReason
-	(StreamEndReason)(0),                          // 42: dolgorae.public.v1.StreamEndReason
-	(TimelineItemType)(0),                         // 43: dolgorae.public.v1.TimelineItemType
-	(TimelineItemStatus)(0),                       // 44: dolgorae.public.v1.TimelineItemStatus
-	(ArtifactKind)(0),                             // 45: dolgorae.public.v1.ArtifactKind
-	(ArtifactVisibility)(0),                       // 46: dolgorae.public.v1.ArtifactVisibility
-	(RetryClassification)(0),                      // 47: dolgorae.public.v1.RetryClassification
-	(RecoveryClassification)(0),                   // 48: dolgorae.public.v1.RecoveryClassification
-	(RequiredClientAction)(0),                     // 49: dolgorae.public.v1.RequiredClientAction
-	(*RequestContext)(nil),                        // 50: dolgorae.public.v1.RequestContext
-	(*ResponseContext)(nil),                       // 51: dolgorae.public.v1.ResponseContext
-	(*WorkspaceRef)(nil),                          // 52: dolgorae.public.v1.WorkspaceRef
-	(*RunRef)(nil),                                // 53: dolgorae.public.v1.RunRef
-	(*ControllerCarrierRef)(nil),                  // 54: dolgorae.public.v1.ControllerCarrierRef
-	(*ControllerProjection)(nil),                  // 55: dolgorae.public.v1.ControllerProjection
-	(*EffectivePolicyProjection)(nil),             // 56: dolgorae.public.v1.EffectivePolicyProjection
-	(*WriterAuthorityProjection)(nil),             // 57: dolgorae.public.v1.WriterAuthorityProjection
-	(*ServerLaneProjection)(nil),                  // 58: dolgorae.public.v1.ServerLaneProjection
-	(*BackgroundExecutionProjection)(nil),         // 59: dolgorae.public.v1.BackgroundExecutionProjection
-	(*RecoveryProjection)(nil),                    // 60: dolgorae.public.v1.RecoveryProjection
-	(*ParentRefProjection)(nil),                   // 61: dolgorae.public.v1.ParentRefProjection
-	(*InstructionContractProjection)(nil),         // 62: dolgorae.public.v1.InstructionContractProjection
-	(*RunConfigurationProjection)(nil),            // 63: dolgorae.public.v1.RunConfigurationProjection
-	(*LineageProjection)(nil),                     // 64: dolgorae.public.v1.LineageProjection
-	(*ThreadProjection)(nil),                      // 65: dolgorae.public.v1.ThreadProjection
-	(*ProjectionStamp)(nil),                       // 66: dolgorae.public.v1.ProjectionStamp
-	(*WriterState)(nil),                           // 67: dolgorae.public.v1.WriterState
-	(*FinalResponse)(nil),                         // 68: dolgorae.public.v1.FinalResponse
-	(*UnavailableContent)(nil),                    // 69: dolgorae.public.v1.UnavailableContent
-	(*RunProjection)(nil),                         // 70: dolgorae.public.v1.RunProjection
-	(*TurnProjection)(nil),                        // 71: dolgorae.public.v1.TurnProjection
-	(*GetCapabilitiesRequest)(nil),                // 72: dolgorae.public.v1.GetCapabilitiesRequest
-	(*ProtocolCapabilities)(nil),                  // 73: dolgorae.public.v1.ProtocolCapabilities
-	(*CredentialCarrierCapabilities)(nil),         // 74: dolgorae.public.v1.CredentialCarrierCapabilities
-	(*RuntimeFeatureCapabilities)(nil),            // 75: dolgorae.public.v1.RuntimeFeatureCapabilities
-	(*InteractionCapability)(nil),                 // 76: dolgorae.public.v1.InteractionCapability
-	(*InteractionCapabilities)(nil),               // 77: dolgorae.public.v1.InteractionCapabilities
-	(*AssuranceCapabilities)(nil),                 // 78: dolgorae.public.v1.AssuranceCapabilities
-	(*LaneCapability)(nil),                        // 79: dolgorae.public.v1.LaneCapability
-	(*LaneCapabilities)(nil),                      // 80: dolgorae.public.v1.LaneCapabilities
-	(*BackgroundExecutionCapabilities)(nil),       // 81: dolgorae.public.v1.BackgroundExecutionCapabilities
-	(*NativeSubagentCapabilities)(nil),            // 82: dolgorae.public.v1.NativeSubagentCapabilities
-	(*ArtifactCapabilities)(nil),                  // 83: dolgorae.public.v1.ArtifactCapabilities
-	(*IndependentRunConcurrencyCapabilities)(nil), // 84: dolgorae.public.v1.IndependentRunConcurrencyCapabilities
-	(*GetCapabilitiesResponse)(nil),               // 85: dolgorae.public.v1.GetCapabilitiesResponse
-	(*InspectWorkspaceRequest)(nil),               // 86: dolgorae.public.v1.InspectWorkspaceRequest
-	(*CapabilityBlocker)(nil),                     // 87: dolgorae.public.v1.CapabilityBlocker
-	(*InspectWorkspaceResponse)(nil),              // 88: dolgorae.public.v1.InspectWorkspaceResponse
-	(*ListProfilesRequest)(nil),                   // 89: dolgorae.public.v1.ListProfilesRequest
-	(*ModelCapability)(nil),                       // 90: dolgorae.public.v1.ModelCapability
-	(*ProfileProjection)(nil),                     // 91: dolgorae.public.v1.ProfileProjection
-	(*ListProfilesResponse)(nil),                  // 92: dolgorae.public.v1.ListProfilesResponse
-	(*GetProfileRequest)(nil),                     // 93: dolgorae.public.v1.GetProfileRequest
-	(*GetProfileResponse)(nil),                    // 94: dolgorae.public.v1.GetProfileResponse
-	(*ListProfileDiagnosticsRequest)(nil),         // 95: dolgorae.public.v1.ListProfileDiagnosticsRequest
-	(*ProfileDiagnostic)(nil),                     // 96: dolgorae.public.v1.ProfileDiagnostic
-	(*ListProfileDiagnosticsResponse)(nil),        // 97: dolgorae.public.v1.ListProfileDiagnosticsResponse
-	(*StartRunRequest)(nil),                       // 98: dolgorae.public.v1.StartRunRequest
-	(*StartRunResponse)(nil),                      // 99: dolgorae.public.v1.StartRunResponse
-	(*ListRunsRequest)(nil),                       // 100: dolgorae.public.v1.ListRunsRequest
-	(*ListRunsResponse)(nil),                      // 101: dolgorae.public.v1.ListRunsResponse
-	(*GetRunRequest)(nil),                         // 102: dolgorae.public.v1.GetRunRequest
-	(*GetRunResponse)(nil),                        // 103: dolgorae.public.v1.GetRunResponse
-	(*ImageInput)(nil),                            // 104: dolgorae.public.v1.ImageInput
-	(*SubmitTurnRequest)(nil),                     // 105: dolgorae.public.v1.SubmitTurnRequest
-	(*SubmitTurnAccepted)(nil),                    // 106: dolgorae.public.v1.SubmitTurnAccepted
-	(*InterruptTurnRequest)(nil),                  // 107: dolgorae.public.v1.InterruptTurnRequest
-	(*SetDefaultEffortRequest)(nil),               // 108: dolgorae.public.v1.SetDefaultEffortRequest
-	(*PauseRunRequest)(nil),                       // 109: dolgorae.public.v1.PauseRunRequest
-	(*ResumeRunRequest)(nil),                      // 110: dolgorae.public.v1.ResumeRunRequest
-	(*CloseRunRequest)(nil),                       // 111: dolgorae.public.v1.CloseRunRequest
-	(*DeleteRunRequest)(nil),                      // 112: dolgorae.public.v1.DeleteRunRequest
-	(*DeleteRunResponse)(nil),                     // 113: dolgorae.public.v1.DeleteRunResponse
-	(*RecoverRunRequest)(nil),                     // 114: dolgorae.public.v1.RecoverRunRequest
-	(*ReconcileRunRequest)(nil),                   // 115: dolgorae.public.v1.ReconcileRunRequest
-	(*RunMutationResponse)(nil),                   // 116: dolgorae.public.v1.RunMutationResponse
-	(*ForkRunRequest)(nil),                        // 117: dolgorae.public.v1.ForkRunRequest
-	(*VerifyRunRequest)(nil),                      // 118: dolgorae.public.v1.VerifyRunRequest
-	(*VerifyRunResponse)(nil),                     // 119: dolgorae.public.v1.VerifyRunResponse
-	(*CreateWriteContinuationRequest)(nil),        // 120: dolgorae.public.v1.CreateWriteContinuationRequest
-	(*SourceRunReceipt)(nil),                      // 121: dolgorae.public.v1.SourceRunReceipt
-	(*CreateWriteContinuationResponse)(nil),       // 122: dolgorae.public.v1.CreateWriteContinuationResponse
-	(*WatchRunEventsRequest)(nil),                 // 123: dolgorae.public.v1.WatchRunEventsRequest
-	(*RunStateChanged)(nil),                       // 124: dolgorae.public.v1.RunStateChanged
-	(*TurnStateChanged)(nil),                      // 125: dolgorae.public.v1.TurnStateChanged
-	(*FinalResponseAvailable)(nil),                // 126: dolgorae.public.v1.FinalResponseAvailable
-	(*PathProjection)(nil),                        // 127: dolgorae.public.v1.PathProjection
-	(*CommandApprovalInteraction)(nil),            // 128: dolgorae.public.v1.CommandApprovalInteraction
-	(*FileChangeProjection)(nil),                  // 129: dolgorae.public.v1.FileChangeProjection
-	(*InlineFileChanges)(nil),                     // 130: dolgorae.public.v1.InlineFileChanges
-	(*FileChangeApprovalInteraction)(nil),         // 131: dolgorae.public.v1.FileChangeApprovalInteraction
-	(*InteractionOption)(nil),                     // 132: dolgorae.public.v1.InteractionOption
-	(*InteractionOptions)(nil),                    // 133: dolgorae.public.v1.InteractionOptions
-	(*InteractionQuestion)(nil),                   // 134: dolgorae.public.v1.InteractionQuestion
-	(*UserInputInteraction)(nil),                  // 135: dolgorae.public.v1.UserInputInteraction
-	(*UnsupportedInteraction)(nil),                // 136: dolgorae.public.v1.UnsupportedInteraction
-	(*InteractionOpenedEvent)(nil),                // 137: dolgorae.public.v1.InteractionOpenedEvent
-	(*InteractionResolvedEvent)(nil),              // 138: dolgorae.public.v1.InteractionResolvedEvent
-	(*WriterStateChangedEvent)(nil),               // 139: dolgorae.public.v1.WriterStateChangedEvent
-	(*RecoveryRequiredEvent)(nil),                 // 140: dolgorae.public.v1.RecoveryRequiredEvent
-	(*RuntimeErrorOccurred)(nil),                  // 141: dolgorae.public.v1.RuntimeErrorOccurred
-	(*UsageReported)(nil),                         // 142: dolgorae.public.v1.UsageReported
-	(*WorkspaceChanges)(nil),                      // 143: dolgorae.public.v1.WorkspaceChanges
-	(*CommandStarted)(nil),                        // 144: dolgorae.public.v1.CommandStarted
-	(*CommandCompleted)(nil),                      // 145: dolgorae.public.v1.CommandCompleted
-	(*DiagnosticReported)(nil),                    // 146: dolgorae.public.v1.DiagnosticReported
-	(*GenerationChanged)(nil),                     // 147: dolgorae.public.v1.GenerationChanged
-	(*ReasoningSuppressed)(nil),                   // 148: dolgorae.public.v1.ReasoningSuppressed
-	(*DurableRunEvent)(nil),                       // 149: dolgorae.public.v1.DurableRunEvent
-	(*RunEventHeartbeat)(nil),                     // 150: dolgorae.public.v1.RunEventHeartbeat
-	(*RunEventStreamEnd)(nil),                     // 151: dolgorae.public.v1.RunEventStreamEnd
-	(*RunEventEnvelope)(nil),                      // 152: dolgorae.public.v1.RunEventEnvelope
-	(*ImageInputMetadata)(nil),                    // 153: dolgorae.public.v1.ImageInputMetadata
-	(*TimelineItem)(nil),                          // 154: dolgorae.public.v1.TimelineItem
-	(*ListRunTimelineItemsRequest)(nil),           // 155: dolgorae.public.v1.ListRunTimelineItemsRequest
-	(*ListRunTimelineItemsResponse)(nil),          // 156: dolgorae.public.v1.ListRunTimelineItemsResponse
-	(*InteractionSummary)(nil),                    // 157: dolgorae.public.v1.InteractionSummary
-	(*ControllerInteraction)(nil),                 // 158: dolgorae.public.v1.ControllerInteraction
-	(*ListPendingInteractionsRequest)(nil),        // 159: dolgorae.public.v1.ListPendingInteractionsRequest
-	(*ListPendingInteractionsResponse)(nil),       // 160: dolgorae.public.v1.ListPendingInteractionsResponse
-	(*GetControllerInteractionRequest)(nil),       // 161: dolgorae.public.v1.GetControllerInteractionRequest
-	(*GetControllerInteractionResponse)(nil),      // 162: dolgorae.public.v1.GetControllerInteractionResponse
-	(*ResolveInteractionRequest)(nil),             // 163: dolgorae.public.v1.ResolveInteractionRequest
-	(*ResolveInteractionResponse)(nil),            // 164: dolgorae.public.v1.ResolveInteractionResponse
-	(*GetWorkspaceWriterStatusRequest)(nil),       // 165: dolgorae.public.v1.GetWorkspaceWriterStatusRequest
-	(*GetWorkspaceWriterStatusResponse)(nil),      // 166: dolgorae.public.v1.GetWorkspaceWriterStatusResponse
-	(*AcquireWriterRequest)(nil),                  // 167: dolgorae.public.v1.AcquireWriterRequest
-	(*ReleaseWriterRequest)(nil),                  // 168: dolgorae.public.v1.ReleaseWriterRequest
-	(*PrepareWriterHandoffRequest)(nil),           // 169: dolgorae.public.v1.PrepareWriterHandoffRequest
-	(*CommitWriterHandoffRequest)(nil),            // 170: dolgorae.public.v1.CommitWriterHandoffRequest
-	(*CancelWriterHandoffRequest)(nil),            // 171: dolgorae.public.v1.CancelWriterHandoffRequest
-	(*WriterHandoffResponse)(nil),                 // 172: dolgorae.public.v1.WriterHandoffResponse
-	(*VerifyControllerRequest)(nil),               // 173: dolgorae.public.v1.VerifyControllerRequest
-	(*VerifyControllerResponse)(nil),              // 174: dolgorae.public.v1.VerifyControllerResponse
-	(*ArtifactRef)(nil),                           // 175: dolgorae.public.v1.ArtifactRef
-	(*GetArtifactRequest)(nil),                    // 176: dolgorae.public.v1.GetArtifactRequest
-	(*GetArtifactResponse)(nil),                   // 177: dolgorae.public.v1.GetArtifactResponse
-	(*ReadArtifactChunkRequest)(nil),              // 178: dolgorae.public.v1.ReadArtifactChunkRequest
-	(*ReadArtifactChunkResponse)(nil),             // 179: dolgorae.public.v1.ReadArtifactChunkResponse
-	(*DolgoraeErrorDetail)(nil),                   // 180: dolgorae.public.v1.DolgoraeErrorDetail
-	(*timestamppb.Timestamp)(nil),                 // 181: google.protobuf.Timestamp
+	(ProjectionProfile)(0),                         // 0: dolgorae.public.v1.ProjectionProfile
+	(PublicTransport)(0),                           // 1: dolgorae.public.v1.PublicTransport
+	(ProfileLaunchMode)(0),                         // 2: dolgorae.public.v1.ProfileLaunchMode
+	(NativeSubagentPolicy)(0),                      // 3: dolgorae.public.v1.NativeSubagentPolicy
+	(RunLifecycle)(0),                              // 4: dolgorae.public.v1.RunLifecycle
+	(ControlMode)(0),                               // 5: dolgorae.public.v1.ControlMode
+	(ExecutionLane)(0),                             // 6: dolgorae.public.v1.ExecutionLane
+	(WriteIntent)(0),                               // 7: dolgorae.public.v1.WriteIntent
+	(ImageDetail)(0),                               // 8: dolgorae.public.v1.ImageDetail
+	(WriteContinuationReason)(0),                   // 9: dolgorae.public.v1.WriteContinuationReason
+	(PurposeKind)(0),                               // 10: dolgorae.public.v1.PurposeKind
+	(ControllerKind)(0),                            // 11: dolgorae.public.v1.ControllerKind
+	(SupportState)(0),                              // 12: dolgorae.public.v1.SupportState
+	(InteractionSupport)(0),                        // 13: dolgorae.public.v1.InteractionSupport
+	(CommandExecutionSupport)(0),                   // 14: dolgorae.public.v1.CommandExecutionSupport
+	(BackgroundControlSupport)(0),                  // 15: dolgorae.public.v1.BackgroundControlSupport
+	(ProcessCleanupSupport)(0),                     // 16: dolgorae.public.v1.ProcessCleanupSupport
+	(AssuranceLevel)(0),                            // 17: dolgorae.public.v1.AssuranceLevel
+	(ProfileCompatibility)(0),                      // 18: dolgorae.public.v1.ProfileCompatibility
+	(RunStateVariant)(0),                           // 19: dolgorae.public.v1.RunStateVariant
+	(EffectiveAccess)(0),                           // 20: dolgorae.public.v1.EffectiveAccess
+	(PolicyVerification)(0),                        // 21: dolgorae.public.v1.PolicyVerification
+	(WriterAuthorityState)(0),                      // 22: dolgorae.public.v1.WriterAuthorityState
+	(ReconciliationAction)(0),                      // 23: dolgorae.public.v1.ReconciliationAction
+	(ServerLaneState)(0),                           // 24: dolgorae.public.v1.ServerLaneState
+	(BackgroundExecutionState)(0),                  // 25: dolgorae.public.v1.BackgroundExecutionState
+	(BackgroundExecutionMechanism)(0),              // 26: dolgorae.public.v1.BackgroundExecutionMechanism
+	(RecoveryState)(0),                             // 27: dolgorae.public.v1.RecoveryState
+	(RecoveryAction)(0),                            // 28: dolgorae.public.v1.RecoveryAction
+	(TurnStatus)(0),                                // 29: dolgorae.public.v1.TurnStatus
+	(ControllerCarrierRootPolicy)(0),               // 30: dolgorae.public.v1.ControllerCarrierRootPolicy
+	(ControllerCapabilityEncoding)(0),              // 31: dolgorae.public.v1.ControllerCapabilityEncoding
+	(ControllerPrincipalRule)(0),                   // 32: dolgorae.public.v1.ControllerPrincipalRule
+	(WorkspaceInspectionStatus)(0),                 // 33: dolgorae.public.v1.WorkspaceInspectionStatus
+	(WorkspaceMode)(0),                             // 34: dolgorae.public.v1.WorkspaceMode
+	(CapabilityBlockerCode)(0),                     // 35: dolgorae.public.v1.CapabilityBlockerCode
+	(InteractionKind)(0),                           // 36: dolgorae.public.v1.InteractionKind
+	(InteractionStatus)(0),                         // 37: dolgorae.public.v1.InteractionStatus
+	(InteractionOutcome)(0),                        // 38: dolgorae.public.v1.InteractionOutcome
+	(InteractionDecision)(0),                       // 39: dolgorae.public.v1.InteractionDecision
+	(FileChangeKind)(0),                            // 40: dolgorae.public.v1.FileChangeKind
+	(UnsupportedInteractionReason)(0),              // 41: dolgorae.public.v1.UnsupportedInteractionReason
+	(StreamEndReason)(0),                           // 42: dolgorae.public.v1.StreamEndReason
+	(TimelineItemType)(0),                          // 43: dolgorae.public.v1.TimelineItemType
+	(TimelineItemStatus)(0),                        // 44: dolgorae.public.v1.TimelineItemStatus
+	(ArtifactKind)(0),                              // 45: dolgorae.public.v1.ArtifactKind
+	(ArtifactVisibility)(0),                        // 46: dolgorae.public.v1.ArtifactVisibility
+	(OrchestratedSessionLifecycle)(0),              // 47: dolgorae.public.v1.OrchestratedSessionLifecycle
+	(OrchestratedSessionComposition)(0),            // 48: dolgorae.public.v1.OrchestratedSessionComposition
+	(OrchestratedSessionApprovalPolicy)(0),         // 49: dolgorae.public.v1.OrchestratedSessionApprovalPolicy
+	(OrchestratedSessionAvailability)(0),           // 50: dolgorae.public.v1.OrchestratedSessionAvailability
+	(SessionCloseIntent)(0),                        // 51: dolgorae.public.v1.SessionCloseIntent
+	(SessionCloseProgress)(0),                      // 52: dolgorae.public.v1.SessionCloseProgress
+	(OrchestratedResultFormat)(0),                  // 53: dolgorae.public.v1.OrchestratedResultFormat
+	(RetryClassification)(0),                       // 54: dolgorae.public.v1.RetryClassification
+	(RecoveryClassification)(0),                    // 55: dolgorae.public.v1.RecoveryClassification
+	(RequiredClientAction)(0),                      // 56: dolgorae.public.v1.RequiredClientAction
+	(*RequestContext)(nil),                         // 57: dolgorae.public.v1.RequestContext
+	(*ResponseContext)(nil),                        // 58: dolgorae.public.v1.ResponseContext
+	(*WorkspaceRef)(nil),                           // 59: dolgorae.public.v1.WorkspaceRef
+	(*RunRef)(nil),                                 // 60: dolgorae.public.v1.RunRef
+	(*ControllerCarrierRef)(nil),                   // 61: dolgorae.public.v1.ControllerCarrierRef
+	(*ControllerProjection)(nil),                   // 62: dolgorae.public.v1.ControllerProjection
+	(*EffectivePolicyProjection)(nil),              // 63: dolgorae.public.v1.EffectivePolicyProjection
+	(*WriterAuthorityProjection)(nil),              // 64: dolgorae.public.v1.WriterAuthorityProjection
+	(*ServerLaneProjection)(nil),                   // 65: dolgorae.public.v1.ServerLaneProjection
+	(*BackgroundExecutionProjection)(nil),          // 66: dolgorae.public.v1.BackgroundExecutionProjection
+	(*RecoveryProjection)(nil),                     // 67: dolgorae.public.v1.RecoveryProjection
+	(*ParentRefProjection)(nil),                    // 68: dolgorae.public.v1.ParentRefProjection
+	(*InstructionContractProjection)(nil),          // 69: dolgorae.public.v1.InstructionContractProjection
+	(*RunConfigurationProjection)(nil),             // 70: dolgorae.public.v1.RunConfigurationProjection
+	(*LineageProjection)(nil),                      // 71: dolgorae.public.v1.LineageProjection
+	(*ThreadProjection)(nil),                       // 72: dolgorae.public.v1.ThreadProjection
+	(*ProjectionStamp)(nil),                        // 73: dolgorae.public.v1.ProjectionStamp
+	(*WriterState)(nil),                            // 74: dolgorae.public.v1.WriterState
+	(*FinalResponse)(nil),                          // 75: dolgorae.public.v1.FinalResponse
+	(*UnavailableContent)(nil),                     // 76: dolgorae.public.v1.UnavailableContent
+	(*RunProjection)(nil),                          // 77: dolgorae.public.v1.RunProjection
+	(*TurnProjection)(nil),                         // 78: dolgorae.public.v1.TurnProjection
+	(*GetCapabilitiesRequest)(nil),                 // 79: dolgorae.public.v1.GetCapabilitiesRequest
+	(*ProtocolCapabilities)(nil),                   // 80: dolgorae.public.v1.ProtocolCapabilities
+	(*CredentialCarrierCapabilities)(nil),          // 81: dolgorae.public.v1.CredentialCarrierCapabilities
+	(*RuntimeFeatureCapabilities)(nil),             // 82: dolgorae.public.v1.RuntimeFeatureCapabilities
+	(*InteractionCapability)(nil),                  // 83: dolgorae.public.v1.InteractionCapability
+	(*InteractionCapabilities)(nil),                // 84: dolgorae.public.v1.InteractionCapabilities
+	(*AssuranceCapabilities)(nil),                  // 85: dolgorae.public.v1.AssuranceCapabilities
+	(*LaneCapability)(nil),                         // 86: dolgorae.public.v1.LaneCapability
+	(*LaneCapabilities)(nil),                       // 87: dolgorae.public.v1.LaneCapabilities
+	(*BackgroundExecutionCapabilities)(nil),        // 88: dolgorae.public.v1.BackgroundExecutionCapabilities
+	(*NativeSubagentCapabilities)(nil),             // 89: dolgorae.public.v1.NativeSubagentCapabilities
+	(*ArtifactCapabilities)(nil),                   // 90: dolgorae.public.v1.ArtifactCapabilities
+	(*IndependentRunConcurrencyCapabilities)(nil),  // 91: dolgorae.public.v1.IndependentRunConcurrencyCapabilities
+	(*GetCapabilitiesResponse)(nil),                // 92: dolgorae.public.v1.GetCapabilitiesResponse
+	(*InspectWorkspaceRequest)(nil),                // 93: dolgorae.public.v1.InspectWorkspaceRequest
+	(*CapabilityBlocker)(nil),                      // 94: dolgorae.public.v1.CapabilityBlocker
+	(*InspectWorkspaceResponse)(nil),               // 95: dolgorae.public.v1.InspectWorkspaceResponse
+	(*ListProfilesRequest)(nil),                    // 96: dolgorae.public.v1.ListProfilesRequest
+	(*ModelCapability)(nil),                        // 97: dolgorae.public.v1.ModelCapability
+	(*ProfileProjection)(nil),                      // 98: dolgorae.public.v1.ProfileProjection
+	(*ListProfilesResponse)(nil),                   // 99: dolgorae.public.v1.ListProfilesResponse
+	(*GetProfileRequest)(nil),                      // 100: dolgorae.public.v1.GetProfileRequest
+	(*GetProfileResponse)(nil),                     // 101: dolgorae.public.v1.GetProfileResponse
+	(*ListProfileDiagnosticsRequest)(nil),          // 102: dolgorae.public.v1.ListProfileDiagnosticsRequest
+	(*ProfileDiagnostic)(nil),                      // 103: dolgorae.public.v1.ProfileDiagnostic
+	(*ListProfileDiagnosticsResponse)(nil),         // 104: dolgorae.public.v1.ListProfileDiagnosticsResponse
+	(*StartRunRequest)(nil),                        // 105: dolgorae.public.v1.StartRunRequest
+	(*StartRunResponse)(nil),                       // 106: dolgorae.public.v1.StartRunResponse
+	(*ListRunsRequest)(nil),                        // 107: dolgorae.public.v1.ListRunsRequest
+	(*ListRunsResponse)(nil),                       // 108: dolgorae.public.v1.ListRunsResponse
+	(*GetRunRequest)(nil),                          // 109: dolgorae.public.v1.GetRunRequest
+	(*GetRunResponse)(nil),                         // 110: dolgorae.public.v1.GetRunResponse
+	(*ImageInput)(nil),                             // 111: dolgorae.public.v1.ImageInput
+	(*SubmitTurnRequest)(nil),                      // 112: dolgorae.public.v1.SubmitTurnRequest
+	(*SubmitTurnAccepted)(nil),                     // 113: dolgorae.public.v1.SubmitTurnAccepted
+	(*InterruptTurnRequest)(nil),                   // 114: dolgorae.public.v1.InterruptTurnRequest
+	(*SetDefaultEffortRequest)(nil),                // 115: dolgorae.public.v1.SetDefaultEffortRequest
+	(*PauseRunRequest)(nil),                        // 116: dolgorae.public.v1.PauseRunRequest
+	(*ResumeRunRequest)(nil),                       // 117: dolgorae.public.v1.ResumeRunRequest
+	(*CloseRunRequest)(nil),                        // 118: dolgorae.public.v1.CloseRunRequest
+	(*DeleteRunRequest)(nil),                       // 119: dolgorae.public.v1.DeleteRunRequest
+	(*DeleteRunResponse)(nil),                      // 120: dolgorae.public.v1.DeleteRunResponse
+	(*RecoverRunRequest)(nil),                      // 121: dolgorae.public.v1.RecoverRunRequest
+	(*ReconcileRunRequest)(nil),                    // 122: dolgorae.public.v1.ReconcileRunRequest
+	(*RunMutationResponse)(nil),                    // 123: dolgorae.public.v1.RunMutationResponse
+	(*ForkRunRequest)(nil),                         // 124: dolgorae.public.v1.ForkRunRequest
+	(*VerifyRunRequest)(nil),                       // 125: dolgorae.public.v1.VerifyRunRequest
+	(*VerifyRunResponse)(nil),                      // 126: dolgorae.public.v1.VerifyRunResponse
+	(*CreateWriteContinuationRequest)(nil),         // 127: dolgorae.public.v1.CreateWriteContinuationRequest
+	(*SourceRunReceipt)(nil),                       // 128: dolgorae.public.v1.SourceRunReceipt
+	(*CreateWriteContinuationResponse)(nil),        // 129: dolgorae.public.v1.CreateWriteContinuationResponse
+	(*WatchRunEventsRequest)(nil),                  // 130: dolgorae.public.v1.WatchRunEventsRequest
+	(*RunStateChanged)(nil),                        // 131: dolgorae.public.v1.RunStateChanged
+	(*TurnStateChanged)(nil),                       // 132: dolgorae.public.v1.TurnStateChanged
+	(*FinalResponseAvailable)(nil),                 // 133: dolgorae.public.v1.FinalResponseAvailable
+	(*PathProjection)(nil),                         // 134: dolgorae.public.v1.PathProjection
+	(*CommandApprovalInteraction)(nil),             // 135: dolgorae.public.v1.CommandApprovalInteraction
+	(*FileChangeProjection)(nil),                   // 136: dolgorae.public.v1.FileChangeProjection
+	(*InlineFileChanges)(nil),                      // 137: dolgorae.public.v1.InlineFileChanges
+	(*FileChangeApprovalInteraction)(nil),          // 138: dolgorae.public.v1.FileChangeApprovalInteraction
+	(*InteractionOption)(nil),                      // 139: dolgorae.public.v1.InteractionOption
+	(*InteractionOptions)(nil),                     // 140: dolgorae.public.v1.InteractionOptions
+	(*InteractionQuestion)(nil),                    // 141: dolgorae.public.v1.InteractionQuestion
+	(*UserInputInteraction)(nil),                   // 142: dolgorae.public.v1.UserInputInteraction
+	(*UnsupportedInteraction)(nil),                 // 143: dolgorae.public.v1.UnsupportedInteraction
+	(*InteractionOpenedEvent)(nil),                 // 144: dolgorae.public.v1.InteractionOpenedEvent
+	(*InteractionResolvedEvent)(nil),               // 145: dolgorae.public.v1.InteractionResolvedEvent
+	(*WriterStateChangedEvent)(nil),                // 146: dolgorae.public.v1.WriterStateChangedEvent
+	(*RecoveryRequiredEvent)(nil),                  // 147: dolgorae.public.v1.RecoveryRequiredEvent
+	(*RuntimeErrorOccurred)(nil),                   // 148: dolgorae.public.v1.RuntimeErrorOccurred
+	(*UsageReported)(nil),                          // 149: dolgorae.public.v1.UsageReported
+	(*WorkspaceChanges)(nil),                       // 150: dolgorae.public.v1.WorkspaceChanges
+	(*CommandStarted)(nil),                         // 151: dolgorae.public.v1.CommandStarted
+	(*CommandCompleted)(nil),                       // 152: dolgorae.public.v1.CommandCompleted
+	(*DiagnosticReported)(nil),                     // 153: dolgorae.public.v1.DiagnosticReported
+	(*GenerationChanged)(nil),                      // 154: dolgorae.public.v1.GenerationChanged
+	(*ReasoningSuppressed)(nil),                    // 155: dolgorae.public.v1.ReasoningSuppressed
+	(*DurableRunEvent)(nil),                        // 156: dolgorae.public.v1.DurableRunEvent
+	(*RunEventHeartbeat)(nil),                      // 157: dolgorae.public.v1.RunEventHeartbeat
+	(*RunEventStreamEnd)(nil),                      // 158: dolgorae.public.v1.RunEventStreamEnd
+	(*RunEventEnvelope)(nil),                       // 159: dolgorae.public.v1.RunEventEnvelope
+	(*ImageInputMetadata)(nil),                     // 160: dolgorae.public.v1.ImageInputMetadata
+	(*TimelineItem)(nil),                           // 161: dolgorae.public.v1.TimelineItem
+	(*ListRunTimelineItemsRequest)(nil),            // 162: dolgorae.public.v1.ListRunTimelineItemsRequest
+	(*ListRunTimelineItemsResponse)(nil),           // 163: dolgorae.public.v1.ListRunTimelineItemsResponse
+	(*InteractionSummary)(nil),                     // 164: dolgorae.public.v1.InteractionSummary
+	(*ControllerInteraction)(nil),                  // 165: dolgorae.public.v1.ControllerInteraction
+	(*ListPendingInteractionsRequest)(nil),         // 166: dolgorae.public.v1.ListPendingInteractionsRequest
+	(*ListPendingInteractionsResponse)(nil),        // 167: dolgorae.public.v1.ListPendingInteractionsResponse
+	(*GetControllerInteractionRequest)(nil),        // 168: dolgorae.public.v1.GetControllerInteractionRequest
+	(*GetControllerInteractionResponse)(nil),       // 169: dolgorae.public.v1.GetControllerInteractionResponse
+	(*ResolveInteractionRequest)(nil),              // 170: dolgorae.public.v1.ResolveInteractionRequest
+	(*ResolveInteractionResponse)(nil),             // 171: dolgorae.public.v1.ResolveInteractionResponse
+	(*GetWorkspaceWriterStatusRequest)(nil),        // 172: dolgorae.public.v1.GetWorkspaceWriterStatusRequest
+	(*GetWorkspaceWriterStatusResponse)(nil),       // 173: dolgorae.public.v1.GetWorkspaceWriterStatusResponse
+	(*AcquireWriterRequest)(nil),                   // 174: dolgorae.public.v1.AcquireWriterRequest
+	(*ReleaseWriterRequest)(nil),                   // 175: dolgorae.public.v1.ReleaseWriterRequest
+	(*PrepareWriterHandoffRequest)(nil),            // 176: dolgorae.public.v1.PrepareWriterHandoffRequest
+	(*CommitWriterHandoffRequest)(nil),             // 177: dolgorae.public.v1.CommitWriterHandoffRequest
+	(*CancelWriterHandoffRequest)(nil),             // 178: dolgorae.public.v1.CancelWriterHandoffRequest
+	(*WriterHandoffResponse)(nil),                  // 179: dolgorae.public.v1.WriterHandoffResponse
+	(*VerifyControllerRequest)(nil),                // 180: dolgorae.public.v1.VerifyControllerRequest
+	(*VerifyControllerResponse)(nil),               // 181: dolgorae.public.v1.VerifyControllerResponse
+	(*ArtifactRef)(nil),                            // 182: dolgorae.public.v1.ArtifactRef
+	(*GetArtifactRequest)(nil),                     // 183: dolgorae.public.v1.GetArtifactRequest
+	(*GetArtifactResponse)(nil),                    // 184: dolgorae.public.v1.GetArtifactResponse
+	(*ReadArtifactChunkRequest)(nil),               // 185: dolgorae.public.v1.ReadArtifactChunkRequest
+	(*ReadArtifactChunkResponse)(nil),              // 186: dolgorae.public.v1.ReadArtifactChunkResponse
+	(*OrchestratedSessionProjection)(nil),          // 187: dolgorae.public.v1.OrchestratedSessionProjection
+	(*GetOrchestratedSessionRequest)(nil),          // 188: dolgorae.public.v1.GetOrchestratedSessionRequest
+	(*GetOrchestratedSessionResponse)(nil),         // 189: dolgorae.public.v1.GetOrchestratedSessionResponse
+	(*OrchestratedSessionResult)(nil),              // 190: dolgorae.public.v1.OrchestratedSessionResult
+	(*ListOrchestratedSessionResultsRequest)(nil),  // 191: dolgorae.public.v1.ListOrchestratedSessionResultsRequest
+	(*ListOrchestratedSessionResultsResponse)(nil), // 192: dolgorae.public.v1.ListOrchestratedSessionResultsResponse
+	(*DolgoraeErrorDetail)(nil),                    // 193: dolgorae.public.v1.DolgoraeErrorDetail
+	(*timestamppb.Timestamp)(nil),                  // 194: google.protobuf.Timestamp
 }
 var file_dolgorae_public_v1_dolgorae_proto_depIdxs = []int32{
-	52,  // 0: dolgorae.public.v1.RunRef.workspace:type_name -> dolgorae.public.v1.WorkspaceRef
+	59,  // 0: dolgorae.public.v1.RunRef.workspace:type_name -> dolgorae.public.v1.WorkspaceRef
 	11,  // 1: dolgorae.public.v1.ControllerProjection.kind:type_name -> dolgorae.public.v1.ControllerKind
 	20,  // 2: dolgorae.public.v1.EffectivePolicyProjection.access:type_name -> dolgorae.public.v1.EffectiveAccess
 	21,  // 3: dolgorae.public.v1.EffectivePolicyProjection.verification:type_name -> dolgorae.public.v1.PolicyVerification
@@ -14845,17 +15950,17 @@ var file_dolgorae_public_v1_dolgorae_proto_depIdxs = []int32{
 	24,  // 7: dolgorae.public.v1.ServerLaneProjection.state:type_name -> dolgorae.public.v1.ServerLaneState
 	25,  // 8: dolgorae.public.v1.BackgroundExecutionProjection.state:type_name -> dolgorae.public.v1.BackgroundExecutionState
 	26,  // 9: dolgorae.public.v1.BackgroundExecutionProjection.mechanism:type_name -> dolgorae.public.v1.BackgroundExecutionMechanism
-	181, // 10: dolgorae.public.v1.BackgroundExecutionProjection.quiescent_since:type_name -> google.protobuf.Timestamp
+	194, // 10: dolgorae.public.v1.BackgroundExecutionProjection.quiescent_since:type_name -> google.protobuf.Timestamp
 	27,  // 11: dolgorae.public.v1.RecoveryProjection.state:type_name -> dolgorae.public.v1.RecoveryState
 	28,  // 12: dolgorae.public.v1.RecoveryProjection.required_action:type_name -> dolgorae.public.v1.RecoveryAction
 	10,  // 13: dolgorae.public.v1.RunConfigurationProjection.purpose:type_name -> dolgorae.public.v1.PurposeKind
-	61,  // 14: dolgorae.public.v1.RunConfigurationProjection.parent:type_name -> dolgorae.public.v1.ParentRefProjection
-	62,  // 15: dolgorae.public.v1.RunConfigurationProjection.instruction_contract:type_name -> dolgorae.public.v1.InstructionContractProjection
+	68,  // 14: dolgorae.public.v1.RunConfigurationProjection.parent:type_name -> dolgorae.public.v1.ParentRefProjection
+	69,  // 15: dolgorae.public.v1.RunConfigurationProjection.instruction_contract:type_name -> dolgorae.public.v1.InstructionContractProjection
 	9,   // 16: dolgorae.public.v1.LineageProjection.creation_reason:type_name -> dolgorae.public.v1.WriteContinuationReason
 	11,  // 17: dolgorae.public.v1.LineageProjection.source_controller_kind:type_name -> dolgorae.public.v1.ControllerKind
 	11,  // 18: dolgorae.public.v1.LineageProjection.destination_controller_kind:type_name -> dolgorae.public.v1.ControllerKind
-	181, // 19: dolgorae.public.v1.LineageProjection.created_at:type_name -> google.protobuf.Timestamp
-	51,  // 20: dolgorae.public.v1.WriterState.context:type_name -> dolgorae.public.v1.ResponseContext
+	194, // 19: dolgorae.public.v1.LineageProjection.created_at:type_name -> google.protobuf.Timestamp
+	58,  // 20: dolgorae.public.v1.WriterState.context:type_name -> dolgorae.public.v1.ResponseContext
 	22,  // 21: dolgorae.public.v1.WriterState.authority_state:type_name -> dolgorae.public.v1.WriterAuthorityState
 	20,  // 22: dolgorae.public.v1.WriterState.effective_access:type_name -> dolgorae.public.v1.EffectiveAccess
 	21,  // 23: dolgorae.public.v1.WriterState.policy_verification:type_name -> dolgorae.public.v1.PolicyVerification
@@ -14863,30 +15968,30 @@ var file_dolgorae_public_v1_dolgorae_proto_depIdxs = []int32{
 	17,  // 25: dolgorae.public.v1.WriterState.requested_assurance:type_name -> dolgorae.public.v1.AssuranceLevel
 	17,  // 26: dolgorae.public.v1.WriterState.achieved_assurance:type_name -> dolgorae.public.v1.AssuranceLevel
 	23,  // 27: dolgorae.public.v1.WriterState.reconciliation_action:type_name -> dolgorae.public.v1.ReconciliationAction
-	66,  // 28: dolgorae.public.v1.WriterState.stamp:type_name -> dolgorae.public.v1.ProjectionStamp
-	175, // 29: dolgorae.public.v1.FinalResponse.artifact:type_name -> dolgorae.public.v1.ArtifactRef
-	69,  // 30: dolgorae.public.v1.FinalResponse.unavailable:type_name -> dolgorae.public.v1.UnavailableContent
+	73,  // 28: dolgorae.public.v1.WriterState.stamp:type_name -> dolgorae.public.v1.ProjectionStamp
+	182, // 29: dolgorae.public.v1.FinalResponse.artifact:type_name -> dolgorae.public.v1.ArtifactRef
+	76,  // 30: dolgorae.public.v1.FinalResponse.unavailable:type_name -> dolgorae.public.v1.UnavailableContent
 	4,   // 31: dolgorae.public.v1.RunProjection.lifecycle:type_name -> dolgorae.public.v1.RunLifecycle
 	5,   // 32: dolgorae.public.v1.RunProjection.control_mode:type_name -> dolgorae.public.v1.ControlMode
 	6,   // 33: dolgorae.public.v1.RunProjection.execution_lane:type_name -> dolgorae.public.v1.ExecutionLane
-	55,  // 34: dolgorae.public.v1.RunProjection.controller:type_name -> dolgorae.public.v1.ControllerProjection
-	65,  // 35: dolgorae.public.v1.RunProjection.thread:type_name -> dolgorae.public.v1.ThreadProjection
-	71,  // 36: dolgorae.public.v1.RunProjection.active_turn:type_name -> dolgorae.public.v1.TurnProjection
-	60,  // 37: dolgorae.public.v1.RunProjection.recovery:type_name -> dolgorae.public.v1.RecoveryProjection
-	56,  // 38: dolgorae.public.v1.RunProjection.effective_policy:type_name -> dolgorae.public.v1.EffectivePolicyProjection
-	57,  // 39: dolgorae.public.v1.RunProjection.writer_authority:type_name -> dolgorae.public.v1.WriterAuthorityProjection
-	68,  // 40: dolgorae.public.v1.RunProjection.last_final_response:type_name -> dolgorae.public.v1.FinalResponse
+	62,  // 34: dolgorae.public.v1.RunProjection.controller:type_name -> dolgorae.public.v1.ControllerProjection
+	72,  // 35: dolgorae.public.v1.RunProjection.thread:type_name -> dolgorae.public.v1.ThreadProjection
+	78,  // 36: dolgorae.public.v1.RunProjection.active_turn:type_name -> dolgorae.public.v1.TurnProjection
+	67,  // 37: dolgorae.public.v1.RunProjection.recovery:type_name -> dolgorae.public.v1.RecoveryProjection
+	63,  // 38: dolgorae.public.v1.RunProjection.effective_policy:type_name -> dolgorae.public.v1.EffectivePolicyProjection
+	64,  // 39: dolgorae.public.v1.RunProjection.writer_authority:type_name -> dolgorae.public.v1.WriterAuthorityProjection
+	75,  // 40: dolgorae.public.v1.RunProjection.last_final_response:type_name -> dolgorae.public.v1.FinalResponse
 	19,  // 41: dolgorae.public.v1.RunProjection.state_variant:type_name -> dolgorae.public.v1.RunStateVariant
-	58,  // 42: dolgorae.public.v1.RunProjection.server_lane:type_name -> dolgorae.public.v1.ServerLaneProjection
-	59,  // 43: dolgorae.public.v1.RunProjection.background_execution:type_name -> dolgorae.public.v1.BackgroundExecutionProjection
+	65,  // 42: dolgorae.public.v1.RunProjection.server_lane:type_name -> dolgorae.public.v1.ServerLaneProjection
+	66,  // 43: dolgorae.public.v1.RunProjection.background_execution:type_name -> dolgorae.public.v1.BackgroundExecutionProjection
 	17,  // 44: dolgorae.public.v1.RunProjection.requested_assurance:type_name -> dolgorae.public.v1.AssuranceLevel
 	17,  // 45: dolgorae.public.v1.RunProjection.achieved_assurance:type_name -> dolgorae.public.v1.AssuranceLevel
-	64,  // 46: dolgorae.public.v1.RunProjection.lineage:type_name -> dolgorae.public.v1.LineageProjection
-	63,  // 47: dolgorae.public.v1.RunProjection.configuration:type_name -> dolgorae.public.v1.RunConfigurationProjection
-	66,  // 48: dolgorae.public.v1.RunProjection.stamp:type_name -> dolgorae.public.v1.ProjectionStamp
+	71,  // 46: dolgorae.public.v1.RunProjection.lineage:type_name -> dolgorae.public.v1.LineageProjection
+	70,  // 47: dolgorae.public.v1.RunProjection.configuration:type_name -> dolgorae.public.v1.RunConfigurationProjection
+	73,  // 48: dolgorae.public.v1.RunProjection.stamp:type_name -> dolgorae.public.v1.ProjectionStamp
 	29,  // 49: dolgorae.public.v1.TurnProjection.status:type_name -> dolgorae.public.v1.TurnStatus
-	68,  // 50: dolgorae.public.v1.TurnProjection.final_response:type_name -> dolgorae.public.v1.FinalResponse
-	50,  // 51: dolgorae.public.v1.GetCapabilitiesRequest.context:type_name -> dolgorae.public.v1.RequestContext
+	75,  // 50: dolgorae.public.v1.TurnProjection.final_response:type_name -> dolgorae.public.v1.FinalResponse
+	57,  // 51: dolgorae.public.v1.GetCapabilitiesRequest.context:type_name -> dolgorae.public.v1.RequestContext
 	0,   // 52: dolgorae.public.v1.ProtocolCapabilities.projection_profiles:type_name -> dolgorae.public.v1.ProjectionProfile
 	11,  // 53: dolgorae.public.v1.CredentialCarrierCapabilities.accepted_controller_kinds:type_name -> dolgorae.public.v1.ControllerKind
 	31,  // 54: dolgorae.public.v1.CredentialCarrierCapabilities.capability_encoding:type_name -> dolgorae.public.v1.ControllerCapabilityEncoding
@@ -14895,7 +16000,7 @@ var file_dolgorae_public_v1_dolgorae_proto_depIdxs = []int32{
 	36,  // 57: dolgorae.public.v1.InteractionCapability.kind:type_name -> dolgorae.public.v1.InteractionKind
 	13,  // 58: dolgorae.public.v1.InteractionCapability.support:type_name -> dolgorae.public.v1.InteractionSupport
 	36,  // 59: dolgorae.public.v1.InteractionCapabilities.known_kinds:type_name -> dolgorae.public.v1.InteractionKind
-	76,  // 60: dolgorae.public.v1.InteractionCapabilities.items:type_name -> dolgorae.public.v1.InteractionCapability
+	83,  // 60: dolgorae.public.v1.InteractionCapabilities.items:type_name -> dolgorae.public.v1.InteractionCapability
 	17,  // 61: dolgorae.public.v1.AssuranceCapabilities.supported:type_name -> dolgorae.public.v1.AssuranceLevel
 	17,  // 62: dolgorae.public.v1.AssuranceCapabilities.maximum_achievable:type_name -> dolgorae.public.v1.AssuranceLevel
 	6,   // 63: dolgorae.public.v1.LaneCapability.lane:type_name -> dolgorae.public.v1.ExecutionLane
@@ -14904,7 +16009,7 @@ var file_dolgorae_public_v1_dolgorae_proto_depIdxs = []int32{
 	16,  // 66: dolgorae.public.v1.LaneCapability.per_run_process_cleanup:type_name -> dolgorae.public.v1.ProcessCleanupSupport
 	17,  // 67: dolgorae.public.v1.LaneCapability.maximum_assurance:type_name -> dolgorae.public.v1.AssuranceLevel
 	6,   // 68: dolgorae.public.v1.LaneCapabilities.supported_lanes:type_name -> dolgorae.public.v1.ExecutionLane
-	79,  // 69: dolgorae.public.v1.LaneCapabilities.items:type_name -> dolgorae.public.v1.LaneCapability
+	86,  // 69: dolgorae.public.v1.LaneCapabilities.items:type_name -> dolgorae.public.v1.LaneCapability
 	12,  // 70: dolgorae.public.v1.BackgroundExecutionCapabilities.support:type_name -> dolgorae.public.v1.SupportState
 	26,  // 71: dolgorae.public.v1.BackgroundExecutionCapabilities.mechanisms:type_name -> dolgorae.public.v1.BackgroundExecutionMechanism
 	12,  // 72: dolgorae.public.v1.NativeSubagentCapabilities.lifecycle_observation:type_name -> dolgorae.public.v1.SupportState
@@ -14913,329 +16018,356 @@ var file_dolgorae_public_v1_dolgorae_proto_depIdxs = []int32{
 	46,  // 75: dolgorae.public.v1.ArtifactCapabilities.visibility_classes:type_name -> dolgorae.public.v1.ArtifactVisibility
 	12,  // 76: dolgorae.public.v1.IndependentRunConcurrencyCapabilities.basic_same_home_coexistence:type_name -> dolgorae.public.v1.SupportState
 	12,  // 77: dolgorae.public.v1.IndependentRunConcurrencyCapabilities.storage_and_long_duration:type_name -> dolgorae.public.v1.SupportState
-	51,  // 78: dolgorae.public.v1.GetCapabilitiesResponse.context:type_name -> dolgorae.public.v1.ResponseContext
-	73,  // 79: dolgorae.public.v1.GetCapabilitiesResponse.protocol:type_name -> dolgorae.public.v1.ProtocolCapabilities
-	74,  // 80: dolgorae.public.v1.GetCapabilitiesResponse.controller_carrier:type_name -> dolgorae.public.v1.CredentialCarrierCapabilities
-	75,  // 81: dolgorae.public.v1.GetCapabilitiesResponse.features:type_name -> dolgorae.public.v1.RuntimeFeatureCapabilities
-	77,  // 82: dolgorae.public.v1.GetCapabilitiesResponse.interactions:type_name -> dolgorae.public.v1.InteractionCapabilities
-	78,  // 83: dolgorae.public.v1.GetCapabilitiesResponse.assurance:type_name -> dolgorae.public.v1.AssuranceCapabilities
-	80,  // 84: dolgorae.public.v1.GetCapabilitiesResponse.lanes:type_name -> dolgorae.public.v1.LaneCapabilities
-	82,  // 85: dolgorae.public.v1.GetCapabilitiesResponse.native_subagents:type_name -> dolgorae.public.v1.NativeSubagentCapabilities
-	83,  // 86: dolgorae.public.v1.GetCapabilitiesResponse.artifacts:type_name -> dolgorae.public.v1.ArtifactCapabilities
+	58,  // 78: dolgorae.public.v1.GetCapabilitiesResponse.context:type_name -> dolgorae.public.v1.ResponseContext
+	80,  // 79: dolgorae.public.v1.GetCapabilitiesResponse.protocol:type_name -> dolgorae.public.v1.ProtocolCapabilities
+	81,  // 80: dolgorae.public.v1.GetCapabilitiesResponse.controller_carrier:type_name -> dolgorae.public.v1.CredentialCarrierCapabilities
+	82,  // 81: dolgorae.public.v1.GetCapabilitiesResponse.features:type_name -> dolgorae.public.v1.RuntimeFeatureCapabilities
+	84,  // 82: dolgorae.public.v1.GetCapabilitiesResponse.interactions:type_name -> dolgorae.public.v1.InteractionCapabilities
+	85,  // 83: dolgorae.public.v1.GetCapabilitiesResponse.assurance:type_name -> dolgorae.public.v1.AssuranceCapabilities
+	87,  // 84: dolgorae.public.v1.GetCapabilitiesResponse.lanes:type_name -> dolgorae.public.v1.LaneCapabilities
+	89,  // 85: dolgorae.public.v1.GetCapabilitiesResponse.native_subagents:type_name -> dolgorae.public.v1.NativeSubagentCapabilities
+	90,  // 86: dolgorae.public.v1.GetCapabilitiesResponse.artifacts:type_name -> dolgorae.public.v1.ArtifactCapabilities
 	5,   // 87: dolgorae.public.v1.GetCapabilitiesResponse.supported_control_modes:type_name -> dolgorae.public.v1.ControlMode
 	12,  // 88: dolgorae.public.v1.GetCapabilitiesResponse.access_policy_transition:type_name -> dolgorae.public.v1.SupportState
-	81,  // 89: dolgorae.public.v1.GetCapabilitiesResponse.background_execution:type_name -> dolgorae.public.v1.BackgroundExecutionCapabilities
+	88,  // 89: dolgorae.public.v1.GetCapabilitiesResponse.background_execution:type_name -> dolgorae.public.v1.BackgroundExecutionCapabilities
 	1,   // 90: dolgorae.public.v1.GetCapabilitiesResponse.supported_transports:type_name -> dolgorae.public.v1.PublicTransport
-	84,  // 91: dolgorae.public.v1.GetCapabilitiesResponse.independent_run_concurrency:type_name -> dolgorae.public.v1.IndependentRunConcurrencyCapabilities
+	91,  // 91: dolgorae.public.v1.GetCapabilitiesResponse.independent_run_concurrency:type_name -> dolgorae.public.v1.IndependentRunConcurrencyCapabilities
 	2,   // 92: dolgorae.public.v1.GetCapabilitiesResponse.profile_launch_mode:type_name -> dolgorae.public.v1.ProfileLaunchMode
 	3,   // 93: dolgorae.public.v1.GetCapabilitiesResponse.native_subagent_policy:type_name -> dolgorae.public.v1.NativeSubagentPolicy
-	50,  // 94: dolgorae.public.v1.InspectWorkspaceRequest.context:type_name -> dolgorae.public.v1.RequestContext
+	57,  // 94: dolgorae.public.v1.InspectWorkspaceRequest.context:type_name -> dolgorae.public.v1.RequestContext
 	35,  // 95: dolgorae.public.v1.CapabilityBlocker.code:type_name -> dolgorae.public.v1.CapabilityBlockerCode
-	51,  // 96: dolgorae.public.v1.InspectWorkspaceResponse.context:type_name -> dolgorae.public.v1.ResponseContext
-	127, // 97: dolgorae.public.v1.InspectWorkspaceResponse.canonical_path:type_name -> dolgorae.public.v1.PathProjection
+	58,  // 96: dolgorae.public.v1.InspectWorkspaceResponse.context:type_name -> dolgorae.public.v1.ResponseContext
+	134, // 97: dolgorae.public.v1.InspectWorkspaceResponse.canonical_path:type_name -> dolgorae.public.v1.PathProjection
 	34,  // 98: dolgorae.public.v1.InspectWorkspaceResponse.mode:type_name -> dolgorae.public.v1.WorkspaceMode
 	33,  // 99: dolgorae.public.v1.InspectWorkspaceResponse.status:type_name -> dolgorae.public.v1.WorkspaceInspectionStatus
-	87,  // 100: dolgorae.public.v1.InspectWorkspaceResponse.blockers:type_name -> dolgorae.public.v1.CapabilityBlocker
-	50,  // 101: dolgorae.public.v1.ListProfilesRequest.context:type_name -> dolgorae.public.v1.RequestContext
-	52,  // 102: dolgorae.public.v1.ListProfilesRequest.workspace:type_name -> dolgorae.public.v1.WorkspaceRef
-	18,  // 103: dolgorae.public.v1.ProfileProjection.compatibility:type_name -> dolgorae.public.v1.ProfileCompatibility
-	90,  // 104: dolgorae.public.v1.ProfileProjection.models:type_name -> dolgorae.public.v1.ModelCapability
-	6,   // 105: dolgorae.public.v1.ProfileProjection.supported_execution_lanes:type_name -> dolgorae.public.v1.ExecutionLane
-	17,  // 106: dolgorae.public.v1.ProfileProjection.maximum_assurance:type_name -> dolgorae.public.v1.AssuranceLevel
-	12,  // 107: dolgorae.public.v1.ProfileProjection.access_policy_transition:type_name -> dolgorae.public.v1.SupportState
-	81,  // 108: dolgorae.public.v1.ProfileProjection.background_execution:type_name -> dolgorae.public.v1.BackgroundExecutionCapabilities
-	36,  // 109: dolgorae.public.v1.ProfileProjection.supported_interaction_kinds:type_name -> dolgorae.public.v1.InteractionKind
-	82,  // 110: dolgorae.public.v1.ProfileProjection.native_subagents:type_name -> dolgorae.public.v1.NativeSubagentCapabilities
-	87,  // 111: dolgorae.public.v1.ProfileProjection.blockers:type_name -> dolgorae.public.v1.CapabilityBlocker
-	51,  // 112: dolgorae.public.v1.ListProfilesResponse.context:type_name -> dolgorae.public.v1.ResponseContext
-	91,  // 113: dolgorae.public.v1.ListProfilesResponse.items:type_name -> dolgorae.public.v1.ProfileProjection
-	50,  // 114: dolgorae.public.v1.GetProfileRequest.context:type_name -> dolgorae.public.v1.RequestContext
-	52,  // 115: dolgorae.public.v1.GetProfileRequest.workspace:type_name -> dolgorae.public.v1.WorkspaceRef
-	51,  // 116: dolgorae.public.v1.GetProfileResponse.context:type_name -> dolgorae.public.v1.ResponseContext
-	91,  // 117: dolgorae.public.v1.GetProfileResponse.profile:type_name -> dolgorae.public.v1.ProfileProjection
-	50,  // 118: dolgorae.public.v1.ListProfileDiagnosticsRequest.context:type_name -> dolgorae.public.v1.RequestContext
-	52,  // 119: dolgorae.public.v1.ListProfileDiagnosticsRequest.workspace:type_name -> dolgorae.public.v1.WorkspaceRef
-	0,   // 120: dolgorae.public.v1.ListProfileDiagnosticsRequest.projection:type_name -> dolgorae.public.v1.ProjectionProfile
-	181, // 121: dolgorae.public.v1.ProfileDiagnostic.occurred_at:type_name -> google.protobuf.Timestamp
-	51,  // 122: dolgorae.public.v1.ListProfileDiagnosticsResponse.context:type_name -> dolgorae.public.v1.ResponseContext
-	96,  // 123: dolgorae.public.v1.ListProfileDiagnosticsResponse.items:type_name -> dolgorae.public.v1.ProfileDiagnostic
-	50,  // 124: dolgorae.public.v1.StartRunRequest.context:type_name -> dolgorae.public.v1.RequestContext
-	52,  // 125: dolgorae.public.v1.StartRunRequest.workspace:type_name -> dolgorae.public.v1.WorkspaceRef
-	54,  // 126: dolgorae.public.v1.StartRunRequest.controller:type_name -> dolgorae.public.v1.ControllerCarrierRef
-	5,   // 127: dolgorae.public.v1.StartRunRequest.control_mode:type_name -> dolgorae.public.v1.ControlMode
-	6,   // 128: dolgorae.public.v1.StartRunRequest.execution_lane:type_name -> dolgorae.public.v1.ExecutionLane
-	10,  // 129: dolgorae.public.v1.StartRunRequest.purpose:type_name -> dolgorae.public.v1.PurposeKind
-	17,  // 130: dolgorae.public.v1.StartRunRequest.required_assurance:type_name -> dolgorae.public.v1.AssuranceLevel
-	61,  // 131: dolgorae.public.v1.StartRunRequest.parent:type_name -> dolgorae.public.v1.ParentRefProjection
-	51,  // 132: dolgorae.public.v1.StartRunResponse.context:type_name -> dolgorae.public.v1.ResponseContext
-	70,  // 133: dolgorae.public.v1.StartRunResponse.run:type_name -> dolgorae.public.v1.RunProjection
-	50,  // 134: dolgorae.public.v1.ListRunsRequest.context:type_name -> dolgorae.public.v1.RequestContext
-	52,  // 135: dolgorae.public.v1.ListRunsRequest.workspace:type_name -> dolgorae.public.v1.WorkspaceRef
-	51,  // 136: dolgorae.public.v1.ListRunsResponse.context:type_name -> dolgorae.public.v1.ResponseContext
-	70,  // 137: dolgorae.public.v1.ListRunsResponse.items:type_name -> dolgorae.public.v1.RunProjection
-	50,  // 138: dolgorae.public.v1.GetRunRequest.context:type_name -> dolgorae.public.v1.RequestContext
-	53,  // 139: dolgorae.public.v1.GetRunRequest.run:type_name -> dolgorae.public.v1.RunRef
-	51,  // 140: dolgorae.public.v1.GetRunResponse.context:type_name -> dolgorae.public.v1.ResponseContext
-	70,  // 141: dolgorae.public.v1.GetRunResponse.run:type_name -> dolgorae.public.v1.RunProjection
-	8,   // 142: dolgorae.public.v1.ImageInput.detail:type_name -> dolgorae.public.v1.ImageDetail
-	50,  // 143: dolgorae.public.v1.SubmitTurnRequest.context:type_name -> dolgorae.public.v1.RequestContext
-	53,  // 144: dolgorae.public.v1.SubmitTurnRequest.run:type_name -> dolgorae.public.v1.RunRef
-	54,  // 145: dolgorae.public.v1.SubmitTurnRequest.controller:type_name -> dolgorae.public.v1.ControllerCarrierRef
-	7,   // 146: dolgorae.public.v1.SubmitTurnRequest.write_intent:type_name -> dolgorae.public.v1.WriteIntent
-	104, // 147: dolgorae.public.v1.SubmitTurnRequest.images:type_name -> dolgorae.public.v1.ImageInput
-	51,  // 148: dolgorae.public.v1.SubmitTurnAccepted.context:type_name -> dolgorae.public.v1.ResponseContext
-	71,  // 149: dolgorae.public.v1.SubmitTurnAccepted.accepted_turn:type_name -> dolgorae.public.v1.TurnProjection
-	70,  // 150: dolgorae.public.v1.SubmitTurnAccepted.run:type_name -> dolgorae.public.v1.RunProjection
-	67,  // 151: dolgorae.public.v1.SubmitTurnAccepted.writer:type_name -> dolgorae.public.v1.WriterState
-	50,  // 152: dolgorae.public.v1.InterruptTurnRequest.context:type_name -> dolgorae.public.v1.RequestContext
-	53,  // 153: dolgorae.public.v1.InterruptTurnRequest.run:type_name -> dolgorae.public.v1.RunRef
-	54,  // 154: dolgorae.public.v1.InterruptTurnRequest.controller:type_name -> dolgorae.public.v1.ControllerCarrierRef
-	50,  // 155: dolgorae.public.v1.SetDefaultEffortRequest.context:type_name -> dolgorae.public.v1.RequestContext
-	53,  // 156: dolgorae.public.v1.SetDefaultEffortRequest.run:type_name -> dolgorae.public.v1.RunRef
-	54,  // 157: dolgorae.public.v1.SetDefaultEffortRequest.controller:type_name -> dolgorae.public.v1.ControllerCarrierRef
-	50,  // 158: dolgorae.public.v1.PauseRunRequest.context:type_name -> dolgorae.public.v1.RequestContext
-	53,  // 159: dolgorae.public.v1.PauseRunRequest.run:type_name -> dolgorae.public.v1.RunRef
-	54,  // 160: dolgorae.public.v1.PauseRunRequest.controller:type_name -> dolgorae.public.v1.ControllerCarrierRef
-	50,  // 161: dolgorae.public.v1.ResumeRunRequest.context:type_name -> dolgorae.public.v1.RequestContext
-	53,  // 162: dolgorae.public.v1.ResumeRunRequest.run:type_name -> dolgorae.public.v1.RunRef
-	54,  // 163: dolgorae.public.v1.ResumeRunRequest.controller:type_name -> dolgorae.public.v1.ControllerCarrierRef
-	50,  // 164: dolgorae.public.v1.CloseRunRequest.context:type_name -> dolgorae.public.v1.RequestContext
-	53,  // 165: dolgorae.public.v1.CloseRunRequest.run:type_name -> dolgorae.public.v1.RunRef
-	54,  // 166: dolgorae.public.v1.CloseRunRequest.controller:type_name -> dolgorae.public.v1.ControllerCarrierRef
-	50,  // 167: dolgorae.public.v1.DeleteRunRequest.context:type_name -> dolgorae.public.v1.RequestContext
-	53,  // 168: dolgorae.public.v1.DeleteRunRequest.run:type_name -> dolgorae.public.v1.RunRef
-	54,  // 169: dolgorae.public.v1.DeleteRunRequest.controller:type_name -> dolgorae.public.v1.ControllerCarrierRef
-	51,  // 170: dolgorae.public.v1.DeleteRunResponse.context:type_name -> dolgorae.public.v1.ResponseContext
-	50,  // 171: dolgorae.public.v1.RecoverRunRequest.context:type_name -> dolgorae.public.v1.RequestContext
-	53,  // 172: dolgorae.public.v1.RecoverRunRequest.run:type_name -> dolgorae.public.v1.RunRef
-	54,  // 173: dolgorae.public.v1.RecoverRunRequest.controller:type_name -> dolgorae.public.v1.ControllerCarrierRef
-	50,  // 174: dolgorae.public.v1.ReconcileRunRequest.context:type_name -> dolgorae.public.v1.RequestContext
-	53,  // 175: dolgorae.public.v1.ReconcileRunRequest.run:type_name -> dolgorae.public.v1.RunRef
-	54,  // 176: dolgorae.public.v1.ReconcileRunRequest.controller:type_name -> dolgorae.public.v1.ControllerCarrierRef
-	51,  // 177: dolgorae.public.v1.RunMutationResponse.context:type_name -> dolgorae.public.v1.ResponseContext
-	70,  // 178: dolgorae.public.v1.RunMutationResponse.run:type_name -> dolgorae.public.v1.RunProjection
-	50,  // 179: dolgorae.public.v1.ForkRunRequest.context:type_name -> dolgorae.public.v1.RequestContext
-	53,  // 180: dolgorae.public.v1.ForkRunRequest.source:type_name -> dolgorae.public.v1.RunRef
-	54,  // 181: dolgorae.public.v1.ForkRunRequest.controller:type_name -> dolgorae.public.v1.ControllerCarrierRef
-	50,  // 182: dolgorae.public.v1.VerifyRunRequest.context:type_name -> dolgorae.public.v1.RequestContext
-	53,  // 183: dolgorae.public.v1.VerifyRunRequest.run:type_name -> dolgorae.public.v1.RunRef
-	51,  // 184: dolgorae.public.v1.VerifyRunResponse.context:type_name -> dolgorae.public.v1.ResponseContext
-	50,  // 185: dolgorae.public.v1.CreateWriteContinuationRequest.context:type_name -> dolgorae.public.v1.RequestContext
-	53,  // 186: dolgorae.public.v1.CreateWriteContinuationRequest.source:type_name -> dolgorae.public.v1.RunRef
-	54,  // 187: dolgorae.public.v1.CreateWriteContinuationRequest.source_controller:type_name -> dolgorae.public.v1.ControllerCarrierRef
-	54,  // 188: dolgorae.public.v1.CreateWriteContinuationRequest.destination_controller:type_name -> dolgorae.public.v1.ControllerCarrierRef
-	9,   // 189: dolgorae.public.v1.CreateWriteContinuationRequest.reason:type_name -> dolgorae.public.v1.WriteContinuationReason
-	10,  // 190: dolgorae.public.v1.CreateWriteContinuationRequest.purpose:type_name -> dolgorae.public.v1.PurposeKind
-	17,  // 191: dolgorae.public.v1.CreateWriteContinuationRequest.required_assurance:type_name -> dolgorae.public.v1.AssuranceLevel
-	51,  // 192: dolgorae.public.v1.CreateWriteContinuationResponse.context:type_name -> dolgorae.public.v1.ResponseContext
-	70,  // 193: dolgorae.public.v1.CreateWriteContinuationResponse.destination_run:type_name -> dolgorae.public.v1.RunProjection
-	64,  // 194: dolgorae.public.v1.CreateWriteContinuationResponse.lineage:type_name -> dolgorae.public.v1.LineageProjection
-	55,  // 195: dolgorae.public.v1.CreateWriteContinuationResponse.destination_controller:type_name -> dolgorae.public.v1.ControllerProjection
-	121, // 196: dolgorae.public.v1.CreateWriteContinuationResponse.source_receipt:type_name -> dolgorae.public.v1.SourceRunReceipt
-	50,  // 197: dolgorae.public.v1.WatchRunEventsRequest.context:type_name -> dolgorae.public.v1.RequestContext
-	53,  // 198: dolgorae.public.v1.WatchRunEventsRequest.run:type_name -> dolgorae.public.v1.RunRef
-	0,   // 199: dolgorae.public.v1.WatchRunEventsRequest.projection:type_name -> dolgorae.public.v1.ProjectionProfile
-	4,   // 200: dolgorae.public.v1.RunStateChanged.previous:type_name -> dolgorae.public.v1.RunLifecycle
-	4,   // 201: dolgorae.public.v1.RunStateChanged.current:type_name -> dolgorae.public.v1.RunLifecycle
-	29,  // 202: dolgorae.public.v1.TurnStateChanged.previous:type_name -> dolgorae.public.v1.TurnStatus
-	29,  // 203: dolgorae.public.v1.TurnStateChanged.current:type_name -> dolgorae.public.v1.TurnStatus
-	68,  // 204: dolgorae.public.v1.FinalResponseAvailable.response:type_name -> dolgorae.public.v1.FinalResponse
-	127, // 205: dolgorae.public.v1.CommandApprovalInteraction.cwd:type_name -> dolgorae.public.v1.PathProjection
-	127, // 206: dolgorae.public.v1.FileChangeProjection.path:type_name -> dolgorae.public.v1.PathProjection
-	40,  // 207: dolgorae.public.v1.FileChangeProjection.kind:type_name -> dolgorae.public.v1.FileChangeKind
-	127, // 208: dolgorae.public.v1.FileChangeProjection.move_path:type_name -> dolgorae.public.v1.PathProjection
-	129, // 209: dolgorae.public.v1.InlineFileChanges.items:type_name -> dolgorae.public.v1.FileChangeProjection
-	130, // 210: dolgorae.public.v1.FileChangeApprovalInteraction.inline_changes:type_name -> dolgorae.public.v1.InlineFileChanges
-	175, // 211: dolgorae.public.v1.FileChangeApprovalInteraction.change_artifact:type_name -> dolgorae.public.v1.ArtifactRef
-	132, // 212: dolgorae.public.v1.InteractionOptions.items:type_name -> dolgorae.public.v1.InteractionOption
-	133, // 213: dolgorae.public.v1.InteractionQuestion.options:type_name -> dolgorae.public.v1.InteractionOptions
-	134, // 214: dolgorae.public.v1.UserInputInteraction.questions:type_name -> dolgorae.public.v1.InteractionQuestion
-	36,  // 215: dolgorae.public.v1.UnsupportedInteraction.original_kind:type_name -> dolgorae.public.v1.InteractionKind
-	41,  // 216: dolgorae.public.v1.UnsupportedInteraction.reason:type_name -> dolgorae.public.v1.UnsupportedInteractionReason
-	36,  // 217: dolgorae.public.v1.InteractionOpenedEvent.kind:type_name -> dolgorae.public.v1.InteractionKind
-	38,  // 218: dolgorae.public.v1.InteractionResolvedEvent.outcome:type_name -> dolgorae.public.v1.InteractionOutcome
-	22,  // 219: dolgorae.public.v1.WriterStateChangedEvent.previous:type_name -> dolgorae.public.v1.WriterAuthorityState
-	22,  // 220: dolgorae.public.v1.WriterStateChangedEvent.current:type_name -> dolgorae.public.v1.WriterAuthorityState
-	127, // 221: dolgorae.public.v1.WorkspaceChanges.paths:type_name -> dolgorae.public.v1.PathProjection
-	181, // 222: dolgorae.public.v1.DurableRunEvent.occurred_at:type_name -> google.protobuf.Timestamp
-	0,   // 223: dolgorae.public.v1.DurableRunEvent.projection:type_name -> dolgorae.public.v1.ProjectionProfile
-	66,  // 224: dolgorae.public.v1.DurableRunEvent.stamp:type_name -> dolgorae.public.v1.ProjectionStamp
-	124, // 225: dolgorae.public.v1.DurableRunEvent.run_state_changed:type_name -> dolgorae.public.v1.RunStateChanged
-	125, // 226: dolgorae.public.v1.DurableRunEvent.turn_state_changed:type_name -> dolgorae.public.v1.TurnStateChanged
-	126, // 227: dolgorae.public.v1.DurableRunEvent.final_response_available:type_name -> dolgorae.public.v1.FinalResponseAvailable
-	137, // 228: dolgorae.public.v1.DurableRunEvent.interaction_opened:type_name -> dolgorae.public.v1.InteractionOpenedEvent
-	138, // 229: dolgorae.public.v1.DurableRunEvent.interaction_resolved:type_name -> dolgorae.public.v1.InteractionResolvedEvent
-	141, // 230: dolgorae.public.v1.DurableRunEvent.runtime_error_occurred:type_name -> dolgorae.public.v1.RuntimeErrorOccurred
-	142, // 231: dolgorae.public.v1.DurableRunEvent.usage_reported:type_name -> dolgorae.public.v1.UsageReported
-	143, // 232: dolgorae.public.v1.DurableRunEvent.workspace_changes:type_name -> dolgorae.public.v1.WorkspaceChanges
-	139, // 233: dolgorae.public.v1.DurableRunEvent.writer_state_changed:type_name -> dolgorae.public.v1.WriterStateChangedEvent
-	140, // 234: dolgorae.public.v1.DurableRunEvent.recovery_required:type_name -> dolgorae.public.v1.RecoveryRequiredEvent
-	144, // 235: dolgorae.public.v1.DurableRunEvent.command_started:type_name -> dolgorae.public.v1.CommandStarted
-	145, // 236: dolgorae.public.v1.DurableRunEvent.command_completed:type_name -> dolgorae.public.v1.CommandCompleted
-	146, // 237: dolgorae.public.v1.DurableRunEvent.diagnostic_reported:type_name -> dolgorae.public.v1.DiagnosticReported
-	147, // 238: dolgorae.public.v1.DurableRunEvent.generation_changed:type_name -> dolgorae.public.v1.GenerationChanged
-	148, // 239: dolgorae.public.v1.DurableRunEvent.reasoning_suppressed:type_name -> dolgorae.public.v1.ReasoningSuppressed
-	4,   // 240: dolgorae.public.v1.RunEventHeartbeat.lifecycle:type_name -> dolgorae.public.v1.RunLifecycle
-	181, // 241: dolgorae.public.v1.RunEventHeartbeat.emitted_at:type_name -> google.protobuf.Timestamp
-	42,  // 242: dolgorae.public.v1.RunEventStreamEnd.reason:type_name -> dolgorae.public.v1.StreamEndReason
-	149, // 243: dolgorae.public.v1.RunEventEnvelope.durable_event:type_name -> dolgorae.public.v1.DurableRunEvent
-	150, // 244: dolgorae.public.v1.RunEventEnvelope.heartbeat:type_name -> dolgorae.public.v1.RunEventHeartbeat
-	151, // 245: dolgorae.public.v1.RunEventEnvelope.stream_end:type_name -> dolgorae.public.v1.RunEventStreamEnd
-	8,   // 246: dolgorae.public.v1.ImageInputMetadata.detail:type_name -> dolgorae.public.v1.ImageDetail
-	43,  // 247: dolgorae.public.v1.TimelineItem.type:type_name -> dolgorae.public.v1.TimelineItemType
-	181, // 248: dolgorae.public.v1.TimelineItem.occurred_at:type_name -> google.protobuf.Timestamp
-	175, // 249: dolgorae.public.v1.TimelineItem.artifact:type_name -> dolgorae.public.v1.ArtifactRef
-	153, // 250: dolgorae.public.v1.TimelineItem.images:type_name -> dolgorae.public.v1.ImageInputMetadata
-	44,  // 251: dolgorae.public.v1.TimelineItem.status:type_name -> dolgorae.public.v1.TimelineItemStatus
-	36,  // 252: dolgorae.public.v1.TimelineItem.interaction_kind:type_name -> dolgorae.public.v1.InteractionKind
-	37,  // 253: dolgorae.public.v1.TimelineItem.interaction_status:type_name -> dolgorae.public.v1.InteractionStatus
-	50,  // 254: dolgorae.public.v1.ListRunTimelineItemsRequest.context:type_name -> dolgorae.public.v1.RequestContext
-	53,  // 255: dolgorae.public.v1.ListRunTimelineItemsRequest.run:type_name -> dolgorae.public.v1.RunRef
-	54,  // 256: dolgorae.public.v1.ListRunTimelineItemsRequest.controller:type_name -> dolgorae.public.v1.ControllerCarrierRef
-	51,  // 257: dolgorae.public.v1.ListRunTimelineItemsResponse.context:type_name -> dolgorae.public.v1.ResponseContext
-	154, // 258: dolgorae.public.v1.ListRunTimelineItemsResponse.items:type_name -> dolgorae.public.v1.TimelineItem
-	66,  // 259: dolgorae.public.v1.ListRunTimelineItemsResponse.stamp:type_name -> dolgorae.public.v1.ProjectionStamp
-	36,  // 260: dolgorae.public.v1.InteractionSummary.kind:type_name -> dolgorae.public.v1.InteractionKind
-	37,  // 261: dolgorae.public.v1.InteractionSummary.status:type_name -> dolgorae.public.v1.InteractionStatus
-	11,  // 262: dolgorae.public.v1.InteractionSummary.controller_kind:type_name -> dolgorae.public.v1.ControllerKind
-	181, // 263: dolgorae.public.v1.InteractionSummary.created_at:type_name -> google.protobuf.Timestamp
-	181, // 264: dolgorae.public.v1.InteractionSummary.expires_at:type_name -> google.protobuf.Timestamp
-	181, // 265: dolgorae.public.v1.InteractionSummary.resolved_at:type_name -> google.protobuf.Timestamp
-	157, // 266: dolgorae.public.v1.ControllerInteraction.summary:type_name -> dolgorae.public.v1.InteractionSummary
-	66,  // 267: dolgorae.public.v1.ControllerInteraction.stamp:type_name -> dolgorae.public.v1.ProjectionStamp
-	128, // 268: dolgorae.public.v1.ControllerInteraction.command_approval:type_name -> dolgorae.public.v1.CommandApprovalInteraction
-	131, // 269: dolgorae.public.v1.ControllerInteraction.file_change_approval:type_name -> dolgorae.public.v1.FileChangeApprovalInteraction
-	135, // 270: dolgorae.public.v1.ControllerInteraction.user_input:type_name -> dolgorae.public.v1.UserInputInteraction
-	136, // 271: dolgorae.public.v1.ControllerInteraction.unsupported:type_name -> dolgorae.public.v1.UnsupportedInteraction
-	39,  // 272: dolgorae.public.v1.ControllerInteraction.decisions:type_name -> dolgorae.public.v1.InteractionDecision
-	50,  // 273: dolgorae.public.v1.ListPendingInteractionsRequest.context:type_name -> dolgorae.public.v1.RequestContext
-	53,  // 274: dolgorae.public.v1.ListPendingInteractionsRequest.run:type_name -> dolgorae.public.v1.RunRef
-	51,  // 275: dolgorae.public.v1.ListPendingInteractionsResponse.context:type_name -> dolgorae.public.v1.ResponseContext
-	157, // 276: dolgorae.public.v1.ListPendingInteractionsResponse.items:type_name -> dolgorae.public.v1.InteractionSummary
-	66,  // 277: dolgorae.public.v1.ListPendingInteractionsResponse.stamp:type_name -> dolgorae.public.v1.ProjectionStamp
-	50,  // 278: dolgorae.public.v1.GetControllerInteractionRequest.context:type_name -> dolgorae.public.v1.RequestContext
-	53,  // 279: dolgorae.public.v1.GetControllerInteractionRequest.run:type_name -> dolgorae.public.v1.RunRef
-	54,  // 280: dolgorae.public.v1.GetControllerInteractionRequest.controller:type_name -> dolgorae.public.v1.ControllerCarrierRef
-	51,  // 281: dolgorae.public.v1.GetControllerInteractionResponse.context:type_name -> dolgorae.public.v1.ResponseContext
-	158, // 282: dolgorae.public.v1.GetControllerInteractionResponse.interaction:type_name -> dolgorae.public.v1.ControllerInteraction
-	50,  // 283: dolgorae.public.v1.ResolveInteractionRequest.context:type_name -> dolgorae.public.v1.RequestContext
-	53,  // 284: dolgorae.public.v1.ResolveInteractionRequest.run:type_name -> dolgorae.public.v1.RunRef
-	54,  // 285: dolgorae.public.v1.ResolveInteractionRequest.controller:type_name -> dolgorae.public.v1.ControllerCarrierRef
-	51,  // 286: dolgorae.public.v1.ResolveInteractionResponse.context:type_name -> dolgorae.public.v1.ResponseContext
-	37,  // 287: dolgorae.public.v1.ResolveInteractionResponse.status:type_name -> dolgorae.public.v1.InteractionStatus
-	50,  // 288: dolgorae.public.v1.GetWorkspaceWriterStatusRequest.context:type_name -> dolgorae.public.v1.RequestContext
-	52,  // 289: dolgorae.public.v1.GetWorkspaceWriterStatusRequest.workspace:type_name -> dolgorae.public.v1.WorkspaceRef
-	67,  // 290: dolgorae.public.v1.GetWorkspaceWriterStatusResponse.writer:type_name -> dolgorae.public.v1.WriterState
-	50,  // 291: dolgorae.public.v1.AcquireWriterRequest.context:type_name -> dolgorae.public.v1.RequestContext
-	53,  // 292: dolgorae.public.v1.AcquireWriterRequest.run:type_name -> dolgorae.public.v1.RunRef
-	54,  // 293: dolgorae.public.v1.AcquireWriterRequest.controller:type_name -> dolgorae.public.v1.ControllerCarrierRef
-	50,  // 294: dolgorae.public.v1.ReleaseWriterRequest.context:type_name -> dolgorae.public.v1.RequestContext
-	53,  // 295: dolgorae.public.v1.ReleaseWriterRequest.run:type_name -> dolgorae.public.v1.RunRef
-	54,  // 296: dolgorae.public.v1.ReleaseWriterRequest.controller:type_name -> dolgorae.public.v1.ControllerCarrierRef
-	50,  // 297: dolgorae.public.v1.PrepareWriterHandoffRequest.context:type_name -> dolgorae.public.v1.RequestContext
-	52,  // 298: dolgorae.public.v1.PrepareWriterHandoffRequest.workspace:type_name -> dolgorae.public.v1.WorkspaceRef
-	54,  // 299: dolgorae.public.v1.PrepareWriterHandoffRequest.controller:type_name -> dolgorae.public.v1.ControllerCarrierRef
-	50,  // 300: dolgorae.public.v1.CommitWriterHandoffRequest.context:type_name -> dolgorae.public.v1.RequestContext
-	52,  // 301: dolgorae.public.v1.CommitWriterHandoffRequest.workspace:type_name -> dolgorae.public.v1.WorkspaceRef
-	54,  // 302: dolgorae.public.v1.CommitWriterHandoffRequest.controller:type_name -> dolgorae.public.v1.ControllerCarrierRef
-	50,  // 303: dolgorae.public.v1.CancelWriterHandoffRequest.context:type_name -> dolgorae.public.v1.RequestContext
-	52,  // 304: dolgorae.public.v1.CancelWriterHandoffRequest.workspace:type_name -> dolgorae.public.v1.WorkspaceRef
-	54,  // 305: dolgorae.public.v1.CancelWriterHandoffRequest.controller:type_name -> dolgorae.public.v1.ControllerCarrierRef
-	67,  // 306: dolgorae.public.v1.WriterHandoffResponse.writer:type_name -> dolgorae.public.v1.WriterState
-	22,  // 307: dolgorae.public.v1.WriterHandoffResponse.status:type_name -> dolgorae.public.v1.WriterAuthorityState
-	50,  // 308: dolgorae.public.v1.VerifyControllerRequest.context:type_name -> dolgorae.public.v1.RequestContext
-	53,  // 309: dolgorae.public.v1.VerifyControllerRequest.run:type_name -> dolgorae.public.v1.RunRef
-	54,  // 310: dolgorae.public.v1.VerifyControllerRequest.controller:type_name -> dolgorae.public.v1.ControllerCarrierRef
-	51,  // 311: dolgorae.public.v1.VerifyControllerResponse.context:type_name -> dolgorae.public.v1.ResponseContext
-	55,  // 312: dolgorae.public.v1.VerifyControllerResponse.controller:type_name -> dolgorae.public.v1.ControllerProjection
-	181, // 313: dolgorae.public.v1.VerifyControllerResponse.verified_at:type_name -> google.protobuf.Timestamp
-	45,  // 314: dolgorae.public.v1.ArtifactRef.kind:type_name -> dolgorae.public.v1.ArtifactKind
-	46,  // 315: dolgorae.public.v1.ArtifactRef.visibility:type_name -> dolgorae.public.v1.ArtifactVisibility
-	50,  // 316: dolgorae.public.v1.GetArtifactRequest.context:type_name -> dolgorae.public.v1.RequestContext
-	53,  // 317: dolgorae.public.v1.GetArtifactRequest.run:type_name -> dolgorae.public.v1.RunRef
-	54,  // 318: dolgorae.public.v1.GetArtifactRequest.controller:type_name -> dolgorae.public.v1.ControllerCarrierRef
-	51,  // 319: dolgorae.public.v1.GetArtifactResponse.context:type_name -> dolgorae.public.v1.ResponseContext
-	175, // 320: dolgorae.public.v1.GetArtifactResponse.artifact:type_name -> dolgorae.public.v1.ArtifactRef
-	50,  // 321: dolgorae.public.v1.ReadArtifactChunkRequest.context:type_name -> dolgorae.public.v1.RequestContext
-	53,  // 322: dolgorae.public.v1.ReadArtifactChunkRequest.run:type_name -> dolgorae.public.v1.RunRef
-	54,  // 323: dolgorae.public.v1.ReadArtifactChunkRequest.controller:type_name -> dolgorae.public.v1.ControllerCarrierRef
-	51,  // 324: dolgorae.public.v1.ReadArtifactChunkResponse.context:type_name -> dolgorae.public.v1.ResponseContext
-	49,  // 325: dolgorae.public.v1.DolgoraeErrorDetail.action:type_name -> dolgorae.public.v1.RequiredClientAction
-	47,  // 326: dolgorae.public.v1.DolgoraeErrorDetail.retry_classification:type_name -> dolgorae.public.v1.RetryClassification
-	48,  // 327: dolgorae.public.v1.DolgoraeErrorDetail.recovery_classification:type_name -> dolgorae.public.v1.RecoveryClassification
-	72,  // 328: dolgorae.public.v1.RuntimeService.GetCapabilities:input_type -> dolgorae.public.v1.GetCapabilitiesRequest
-	86,  // 329: dolgorae.public.v1.RuntimeService.InspectWorkspace:input_type -> dolgorae.public.v1.InspectWorkspaceRequest
-	89,  // 330: dolgorae.public.v1.RuntimeService.ListProfiles:input_type -> dolgorae.public.v1.ListProfilesRequest
-	93,  // 331: dolgorae.public.v1.RuntimeService.GetProfile:input_type -> dolgorae.public.v1.GetProfileRequest
-	95,  // 332: dolgorae.public.v1.RuntimeService.ListProfileDiagnostics:input_type -> dolgorae.public.v1.ListProfileDiagnosticsRequest
-	98,  // 333: dolgorae.public.v1.RunService.StartRun:input_type -> dolgorae.public.v1.StartRunRequest
-	100, // 334: dolgorae.public.v1.RunService.ListRuns:input_type -> dolgorae.public.v1.ListRunsRequest
-	102, // 335: dolgorae.public.v1.RunService.GetRun:input_type -> dolgorae.public.v1.GetRunRequest
-	105, // 336: dolgorae.public.v1.RunService.SubmitTurn:input_type -> dolgorae.public.v1.SubmitTurnRequest
-	107, // 337: dolgorae.public.v1.RunService.InterruptTurn:input_type -> dolgorae.public.v1.InterruptTurnRequest
-	108, // 338: dolgorae.public.v1.RunService.SetDefaultEffort:input_type -> dolgorae.public.v1.SetDefaultEffortRequest
-	109, // 339: dolgorae.public.v1.RunService.PauseRun:input_type -> dolgorae.public.v1.PauseRunRequest
-	110, // 340: dolgorae.public.v1.RunService.ResumeRun:input_type -> dolgorae.public.v1.ResumeRunRequest
-	111, // 341: dolgorae.public.v1.RunService.CloseRun:input_type -> dolgorae.public.v1.CloseRunRequest
-	112, // 342: dolgorae.public.v1.RunService.DeleteRun:input_type -> dolgorae.public.v1.DeleteRunRequest
-	114, // 343: dolgorae.public.v1.RunService.RecoverRun:input_type -> dolgorae.public.v1.RecoverRunRequest
-	115, // 344: dolgorae.public.v1.RunService.ReconcileRun:input_type -> dolgorae.public.v1.ReconcileRunRequest
-	117, // 345: dolgorae.public.v1.RunService.ForkRun:input_type -> dolgorae.public.v1.ForkRunRequest
-	118, // 346: dolgorae.public.v1.RunService.VerifyRun:input_type -> dolgorae.public.v1.VerifyRunRequest
-	120, // 347: dolgorae.public.v1.RunService.CreateWriteContinuation:input_type -> dolgorae.public.v1.CreateWriteContinuationRequest
-	123, // 348: dolgorae.public.v1.ObservationService.WatchRunEvents:input_type -> dolgorae.public.v1.WatchRunEventsRequest
-	155, // 349: dolgorae.public.v1.ObservationService.ListRunTimelineItems:input_type -> dolgorae.public.v1.ListRunTimelineItemsRequest
-	159, // 350: dolgorae.public.v1.InteractionService.ListPendingInteractions:input_type -> dolgorae.public.v1.ListPendingInteractionsRequest
-	161, // 351: dolgorae.public.v1.InteractionService.GetControllerInteraction:input_type -> dolgorae.public.v1.GetControllerInteractionRequest
-	163, // 352: dolgorae.public.v1.InteractionService.ResolveInteraction:input_type -> dolgorae.public.v1.ResolveInteractionRequest
-	165, // 353: dolgorae.public.v1.WriterService.GetWorkspaceWriterStatus:input_type -> dolgorae.public.v1.GetWorkspaceWriterStatusRequest
-	167, // 354: dolgorae.public.v1.WriterService.AcquireWriter:input_type -> dolgorae.public.v1.AcquireWriterRequest
-	168, // 355: dolgorae.public.v1.WriterService.ReleaseWriter:input_type -> dolgorae.public.v1.ReleaseWriterRequest
-	169, // 356: dolgorae.public.v1.WriterService.PrepareWriterHandoff:input_type -> dolgorae.public.v1.PrepareWriterHandoffRequest
-	170, // 357: dolgorae.public.v1.WriterService.CommitWriterHandoff:input_type -> dolgorae.public.v1.CommitWriterHandoffRequest
-	171, // 358: dolgorae.public.v1.WriterService.CancelWriterHandoff:input_type -> dolgorae.public.v1.CancelWriterHandoffRequest
-	173, // 359: dolgorae.public.v1.ControllerService.VerifyController:input_type -> dolgorae.public.v1.VerifyControllerRequest
-	176, // 360: dolgorae.public.v1.ArtifactService.GetArtifact:input_type -> dolgorae.public.v1.GetArtifactRequest
-	178, // 361: dolgorae.public.v1.ArtifactService.ReadArtifactChunk:input_type -> dolgorae.public.v1.ReadArtifactChunkRequest
-	85,  // 362: dolgorae.public.v1.RuntimeService.GetCapabilities:output_type -> dolgorae.public.v1.GetCapabilitiesResponse
-	88,  // 363: dolgorae.public.v1.RuntimeService.InspectWorkspace:output_type -> dolgorae.public.v1.InspectWorkspaceResponse
-	92,  // 364: dolgorae.public.v1.RuntimeService.ListProfiles:output_type -> dolgorae.public.v1.ListProfilesResponse
-	94,  // 365: dolgorae.public.v1.RuntimeService.GetProfile:output_type -> dolgorae.public.v1.GetProfileResponse
-	97,  // 366: dolgorae.public.v1.RuntimeService.ListProfileDiagnostics:output_type -> dolgorae.public.v1.ListProfileDiagnosticsResponse
-	99,  // 367: dolgorae.public.v1.RunService.StartRun:output_type -> dolgorae.public.v1.StartRunResponse
-	101, // 368: dolgorae.public.v1.RunService.ListRuns:output_type -> dolgorae.public.v1.ListRunsResponse
-	103, // 369: dolgorae.public.v1.RunService.GetRun:output_type -> dolgorae.public.v1.GetRunResponse
-	106, // 370: dolgorae.public.v1.RunService.SubmitTurn:output_type -> dolgorae.public.v1.SubmitTurnAccepted
-	116, // 371: dolgorae.public.v1.RunService.InterruptTurn:output_type -> dolgorae.public.v1.RunMutationResponse
-	116, // 372: dolgorae.public.v1.RunService.SetDefaultEffort:output_type -> dolgorae.public.v1.RunMutationResponse
-	116, // 373: dolgorae.public.v1.RunService.PauseRun:output_type -> dolgorae.public.v1.RunMutationResponse
-	116, // 374: dolgorae.public.v1.RunService.ResumeRun:output_type -> dolgorae.public.v1.RunMutationResponse
-	116, // 375: dolgorae.public.v1.RunService.CloseRun:output_type -> dolgorae.public.v1.RunMutationResponse
-	113, // 376: dolgorae.public.v1.RunService.DeleteRun:output_type -> dolgorae.public.v1.DeleteRunResponse
-	116, // 377: dolgorae.public.v1.RunService.RecoverRun:output_type -> dolgorae.public.v1.RunMutationResponse
-	116, // 378: dolgorae.public.v1.RunService.ReconcileRun:output_type -> dolgorae.public.v1.RunMutationResponse
-	99,  // 379: dolgorae.public.v1.RunService.ForkRun:output_type -> dolgorae.public.v1.StartRunResponse
-	119, // 380: dolgorae.public.v1.RunService.VerifyRun:output_type -> dolgorae.public.v1.VerifyRunResponse
-	122, // 381: dolgorae.public.v1.RunService.CreateWriteContinuation:output_type -> dolgorae.public.v1.CreateWriteContinuationResponse
-	152, // 382: dolgorae.public.v1.ObservationService.WatchRunEvents:output_type -> dolgorae.public.v1.RunEventEnvelope
-	156, // 383: dolgorae.public.v1.ObservationService.ListRunTimelineItems:output_type -> dolgorae.public.v1.ListRunTimelineItemsResponse
-	160, // 384: dolgorae.public.v1.InteractionService.ListPendingInteractions:output_type -> dolgorae.public.v1.ListPendingInteractionsResponse
-	162, // 385: dolgorae.public.v1.InteractionService.GetControllerInteraction:output_type -> dolgorae.public.v1.GetControllerInteractionResponse
-	164, // 386: dolgorae.public.v1.InteractionService.ResolveInteraction:output_type -> dolgorae.public.v1.ResolveInteractionResponse
-	166, // 387: dolgorae.public.v1.WriterService.GetWorkspaceWriterStatus:output_type -> dolgorae.public.v1.GetWorkspaceWriterStatusResponse
-	67,  // 388: dolgorae.public.v1.WriterService.AcquireWriter:output_type -> dolgorae.public.v1.WriterState
-	67,  // 389: dolgorae.public.v1.WriterService.ReleaseWriter:output_type -> dolgorae.public.v1.WriterState
-	172, // 390: dolgorae.public.v1.WriterService.PrepareWriterHandoff:output_type -> dolgorae.public.v1.WriterHandoffResponse
-	172, // 391: dolgorae.public.v1.WriterService.CommitWriterHandoff:output_type -> dolgorae.public.v1.WriterHandoffResponse
-	172, // 392: dolgorae.public.v1.WriterService.CancelWriterHandoff:output_type -> dolgorae.public.v1.WriterHandoffResponse
-	174, // 393: dolgorae.public.v1.ControllerService.VerifyController:output_type -> dolgorae.public.v1.VerifyControllerResponse
-	177, // 394: dolgorae.public.v1.ArtifactService.GetArtifact:output_type -> dolgorae.public.v1.GetArtifactResponse
-	179, // 395: dolgorae.public.v1.ArtifactService.ReadArtifactChunk:output_type -> dolgorae.public.v1.ReadArtifactChunkResponse
-	362, // [362:396] is the sub-list for method output_type
-	328, // [328:362] is the sub-list for method input_type
-	328, // [328:328] is the sub-list for extension type_name
-	328, // [328:328] is the sub-list for extension extendee
-	0,   // [0:328] is the sub-list for field type_name
+	94,  // 100: dolgorae.public.v1.InspectWorkspaceResponse.blockers:type_name -> dolgorae.public.v1.CapabilityBlocker
+	57,  // 101: dolgorae.public.v1.ListProfilesRequest.context:type_name -> dolgorae.public.v1.RequestContext
+	18,  // 102: dolgorae.public.v1.ProfileProjection.compatibility:type_name -> dolgorae.public.v1.ProfileCompatibility
+	97,  // 103: dolgorae.public.v1.ProfileProjection.models:type_name -> dolgorae.public.v1.ModelCapability
+	6,   // 104: dolgorae.public.v1.ProfileProjection.supported_execution_lanes:type_name -> dolgorae.public.v1.ExecutionLane
+	17,  // 105: dolgorae.public.v1.ProfileProjection.maximum_assurance:type_name -> dolgorae.public.v1.AssuranceLevel
+	12,  // 106: dolgorae.public.v1.ProfileProjection.access_policy_transition:type_name -> dolgorae.public.v1.SupportState
+	88,  // 107: dolgorae.public.v1.ProfileProjection.background_execution:type_name -> dolgorae.public.v1.BackgroundExecutionCapabilities
+	36,  // 108: dolgorae.public.v1.ProfileProjection.supported_interaction_kinds:type_name -> dolgorae.public.v1.InteractionKind
+	89,  // 109: dolgorae.public.v1.ProfileProjection.native_subagents:type_name -> dolgorae.public.v1.NativeSubagentCapabilities
+	94,  // 110: dolgorae.public.v1.ProfileProjection.blockers:type_name -> dolgorae.public.v1.CapabilityBlocker
+	58,  // 111: dolgorae.public.v1.ListProfilesResponse.context:type_name -> dolgorae.public.v1.ResponseContext
+	98,  // 112: dolgorae.public.v1.ListProfilesResponse.items:type_name -> dolgorae.public.v1.ProfileProjection
+	57,  // 113: dolgorae.public.v1.GetProfileRequest.context:type_name -> dolgorae.public.v1.RequestContext
+	58,  // 114: dolgorae.public.v1.GetProfileResponse.context:type_name -> dolgorae.public.v1.ResponseContext
+	98,  // 115: dolgorae.public.v1.GetProfileResponse.profile:type_name -> dolgorae.public.v1.ProfileProjection
+	57,  // 116: dolgorae.public.v1.ListProfileDiagnosticsRequest.context:type_name -> dolgorae.public.v1.RequestContext
+	0,   // 117: dolgorae.public.v1.ListProfileDiagnosticsRequest.projection:type_name -> dolgorae.public.v1.ProjectionProfile
+	194, // 118: dolgorae.public.v1.ProfileDiagnostic.occurred_at:type_name -> google.protobuf.Timestamp
+	58,  // 119: dolgorae.public.v1.ListProfileDiagnosticsResponse.context:type_name -> dolgorae.public.v1.ResponseContext
+	103, // 120: dolgorae.public.v1.ListProfileDiagnosticsResponse.items:type_name -> dolgorae.public.v1.ProfileDiagnostic
+	57,  // 121: dolgorae.public.v1.StartRunRequest.context:type_name -> dolgorae.public.v1.RequestContext
+	59,  // 122: dolgorae.public.v1.StartRunRequest.workspace:type_name -> dolgorae.public.v1.WorkspaceRef
+	61,  // 123: dolgorae.public.v1.StartRunRequest.controller:type_name -> dolgorae.public.v1.ControllerCarrierRef
+	5,   // 124: dolgorae.public.v1.StartRunRequest.control_mode:type_name -> dolgorae.public.v1.ControlMode
+	6,   // 125: dolgorae.public.v1.StartRunRequest.execution_lane:type_name -> dolgorae.public.v1.ExecutionLane
+	10,  // 126: dolgorae.public.v1.StartRunRequest.purpose:type_name -> dolgorae.public.v1.PurposeKind
+	17,  // 127: dolgorae.public.v1.StartRunRequest.required_assurance:type_name -> dolgorae.public.v1.AssuranceLevel
+	68,  // 128: dolgorae.public.v1.StartRunRequest.parent:type_name -> dolgorae.public.v1.ParentRefProjection
+	58,  // 129: dolgorae.public.v1.StartRunResponse.context:type_name -> dolgorae.public.v1.ResponseContext
+	77,  // 130: dolgorae.public.v1.StartRunResponse.run:type_name -> dolgorae.public.v1.RunProjection
+	57,  // 131: dolgorae.public.v1.ListRunsRequest.context:type_name -> dolgorae.public.v1.RequestContext
+	59,  // 132: dolgorae.public.v1.ListRunsRequest.workspace:type_name -> dolgorae.public.v1.WorkspaceRef
+	58,  // 133: dolgorae.public.v1.ListRunsResponse.context:type_name -> dolgorae.public.v1.ResponseContext
+	77,  // 134: dolgorae.public.v1.ListRunsResponse.items:type_name -> dolgorae.public.v1.RunProjection
+	57,  // 135: dolgorae.public.v1.GetRunRequest.context:type_name -> dolgorae.public.v1.RequestContext
+	60,  // 136: dolgorae.public.v1.GetRunRequest.run:type_name -> dolgorae.public.v1.RunRef
+	58,  // 137: dolgorae.public.v1.GetRunResponse.context:type_name -> dolgorae.public.v1.ResponseContext
+	77,  // 138: dolgorae.public.v1.GetRunResponse.run:type_name -> dolgorae.public.v1.RunProjection
+	8,   // 139: dolgorae.public.v1.ImageInput.detail:type_name -> dolgorae.public.v1.ImageDetail
+	57,  // 140: dolgorae.public.v1.SubmitTurnRequest.context:type_name -> dolgorae.public.v1.RequestContext
+	60,  // 141: dolgorae.public.v1.SubmitTurnRequest.run:type_name -> dolgorae.public.v1.RunRef
+	61,  // 142: dolgorae.public.v1.SubmitTurnRequest.controller:type_name -> dolgorae.public.v1.ControllerCarrierRef
+	7,   // 143: dolgorae.public.v1.SubmitTurnRequest.write_intent:type_name -> dolgorae.public.v1.WriteIntent
+	111, // 144: dolgorae.public.v1.SubmitTurnRequest.images:type_name -> dolgorae.public.v1.ImageInput
+	58,  // 145: dolgorae.public.v1.SubmitTurnAccepted.context:type_name -> dolgorae.public.v1.ResponseContext
+	78,  // 146: dolgorae.public.v1.SubmitTurnAccepted.accepted_turn:type_name -> dolgorae.public.v1.TurnProjection
+	77,  // 147: dolgorae.public.v1.SubmitTurnAccepted.run:type_name -> dolgorae.public.v1.RunProjection
+	74,  // 148: dolgorae.public.v1.SubmitTurnAccepted.writer:type_name -> dolgorae.public.v1.WriterState
+	57,  // 149: dolgorae.public.v1.InterruptTurnRequest.context:type_name -> dolgorae.public.v1.RequestContext
+	60,  // 150: dolgorae.public.v1.InterruptTurnRequest.run:type_name -> dolgorae.public.v1.RunRef
+	61,  // 151: dolgorae.public.v1.InterruptTurnRequest.controller:type_name -> dolgorae.public.v1.ControllerCarrierRef
+	57,  // 152: dolgorae.public.v1.SetDefaultEffortRequest.context:type_name -> dolgorae.public.v1.RequestContext
+	60,  // 153: dolgorae.public.v1.SetDefaultEffortRequest.run:type_name -> dolgorae.public.v1.RunRef
+	61,  // 154: dolgorae.public.v1.SetDefaultEffortRequest.controller:type_name -> dolgorae.public.v1.ControllerCarrierRef
+	57,  // 155: dolgorae.public.v1.PauseRunRequest.context:type_name -> dolgorae.public.v1.RequestContext
+	60,  // 156: dolgorae.public.v1.PauseRunRequest.run:type_name -> dolgorae.public.v1.RunRef
+	61,  // 157: dolgorae.public.v1.PauseRunRequest.controller:type_name -> dolgorae.public.v1.ControllerCarrierRef
+	57,  // 158: dolgorae.public.v1.ResumeRunRequest.context:type_name -> dolgorae.public.v1.RequestContext
+	60,  // 159: dolgorae.public.v1.ResumeRunRequest.run:type_name -> dolgorae.public.v1.RunRef
+	61,  // 160: dolgorae.public.v1.ResumeRunRequest.controller:type_name -> dolgorae.public.v1.ControllerCarrierRef
+	57,  // 161: dolgorae.public.v1.CloseRunRequest.context:type_name -> dolgorae.public.v1.RequestContext
+	60,  // 162: dolgorae.public.v1.CloseRunRequest.run:type_name -> dolgorae.public.v1.RunRef
+	61,  // 163: dolgorae.public.v1.CloseRunRequest.controller:type_name -> dolgorae.public.v1.ControllerCarrierRef
+	57,  // 164: dolgorae.public.v1.DeleteRunRequest.context:type_name -> dolgorae.public.v1.RequestContext
+	60,  // 165: dolgorae.public.v1.DeleteRunRequest.run:type_name -> dolgorae.public.v1.RunRef
+	61,  // 166: dolgorae.public.v1.DeleteRunRequest.controller:type_name -> dolgorae.public.v1.ControllerCarrierRef
+	58,  // 167: dolgorae.public.v1.DeleteRunResponse.context:type_name -> dolgorae.public.v1.ResponseContext
+	57,  // 168: dolgorae.public.v1.RecoverRunRequest.context:type_name -> dolgorae.public.v1.RequestContext
+	60,  // 169: dolgorae.public.v1.RecoverRunRequest.run:type_name -> dolgorae.public.v1.RunRef
+	61,  // 170: dolgorae.public.v1.RecoverRunRequest.controller:type_name -> dolgorae.public.v1.ControllerCarrierRef
+	57,  // 171: dolgorae.public.v1.ReconcileRunRequest.context:type_name -> dolgorae.public.v1.RequestContext
+	60,  // 172: dolgorae.public.v1.ReconcileRunRequest.run:type_name -> dolgorae.public.v1.RunRef
+	61,  // 173: dolgorae.public.v1.ReconcileRunRequest.controller:type_name -> dolgorae.public.v1.ControllerCarrierRef
+	58,  // 174: dolgorae.public.v1.RunMutationResponse.context:type_name -> dolgorae.public.v1.ResponseContext
+	77,  // 175: dolgorae.public.v1.RunMutationResponse.run:type_name -> dolgorae.public.v1.RunProjection
+	57,  // 176: dolgorae.public.v1.ForkRunRequest.context:type_name -> dolgorae.public.v1.RequestContext
+	60,  // 177: dolgorae.public.v1.ForkRunRequest.source:type_name -> dolgorae.public.v1.RunRef
+	61,  // 178: dolgorae.public.v1.ForkRunRequest.controller:type_name -> dolgorae.public.v1.ControllerCarrierRef
+	57,  // 179: dolgorae.public.v1.VerifyRunRequest.context:type_name -> dolgorae.public.v1.RequestContext
+	60,  // 180: dolgorae.public.v1.VerifyRunRequest.run:type_name -> dolgorae.public.v1.RunRef
+	58,  // 181: dolgorae.public.v1.VerifyRunResponse.context:type_name -> dolgorae.public.v1.ResponseContext
+	57,  // 182: dolgorae.public.v1.CreateWriteContinuationRequest.context:type_name -> dolgorae.public.v1.RequestContext
+	60,  // 183: dolgorae.public.v1.CreateWriteContinuationRequest.source:type_name -> dolgorae.public.v1.RunRef
+	61,  // 184: dolgorae.public.v1.CreateWriteContinuationRequest.source_controller:type_name -> dolgorae.public.v1.ControllerCarrierRef
+	61,  // 185: dolgorae.public.v1.CreateWriteContinuationRequest.destination_controller:type_name -> dolgorae.public.v1.ControllerCarrierRef
+	9,   // 186: dolgorae.public.v1.CreateWriteContinuationRequest.reason:type_name -> dolgorae.public.v1.WriteContinuationReason
+	10,  // 187: dolgorae.public.v1.CreateWriteContinuationRequest.purpose:type_name -> dolgorae.public.v1.PurposeKind
+	17,  // 188: dolgorae.public.v1.CreateWriteContinuationRequest.required_assurance:type_name -> dolgorae.public.v1.AssuranceLevel
+	58,  // 189: dolgorae.public.v1.CreateWriteContinuationResponse.context:type_name -> dolgorae.public.v1.ResponseContext
+	77,  // 190: dolgorae.public.v1.CreateWriteContinuationResponse.destination_run:type_name -> dolgorae.public.v1.RunProjection
+	71,  // 191: dolgorae.public.v1.CreateWriteContinuationResponse.lineage:type_name -> dolgorae.public.v1.LineageProjection
+	62,  // 192: dolgorae.public.v1.CreateWriteContinuationResponse.destination_controller:type_name -> dolgorae.public.v1.ControllerProjection
+	128, // 193: dolgorae.public.v1.CreateWriteContinuationResponse.source_receipt:type_name -> dolgorae.public.v1.SourceRunReceipt
+	57,  // 194: dolgorae.public.v1.WatchRunEventsRequest.context:type_name -> dolgorae.public.v1.RequestContext
+	60,  // 195: dolgorae.public.v1.WatchRunEventsRequest.run:type_name -> dolgorae.public.v1.RunRef
+	0,   // 196: dolgorae.public.v1.WatchRunEventsRequest.projection:type_name -> dolgorae.public.v1.ProjectionProfile
+	4,   // 197: dolgorae.public.v1.RunStateChanged.previous:type_name -> dolgorae.public.v1.RunLifecycle
+	4,   // 198: dolgorae.public.v1.RunStateChanged.current:type_name -> dolgorae.public.v1.RunLifecycle
+	29,  // 199: dolgorae.public.v1.TurnStateChanged.previous:type_name -> dolgorae.public.v1.TurnStatus
+	29,  // 200: dolgorae.public.v1.TurnStateChanged.current:type_name -> dolgorae.public.v1.TurnStatus
+	75,  // 201: dolgorae.public.v1.FinalResponseAvailable.response:type_name -> dolgorae.public.v1.FinalResponse
+	134, // 202: dolgorae.public.v1.CommandApprovalInteraction.cwd:type_name -> dolgorae.public.v1.PathProjection
+	134, // 203: dolgorae.public.v1.FileChangeProjection.path:type_name -> dolgorae.public.v1.PathProjection
+	40,  // 204: dolgorae.public.v1.FileChangeProjection.kind:type_name -> dolgorae.public.v1.FileChangeKind
+	134, // 205: dolgorae.public.v1.FileChangeProjection.move_path:type_name -> dolgorae.public.v1.PathProjection
+	136, // 206: dolgorae.public.v1.InlineFileChanges.items:type_name -> dolgorae.public.v1.FileChangeProjection
+	137, // 207: dolgorae.public.v1.FileChangeApprovalInteraction.inline_changes:type_name -> dolgorae.public.v1.InlineFileChanges
+	182, // 208: dolgorae.public.v1.FileChangeApprovalInteraction.change_artifact:type_name -> dolgorae.public.v1.ArtifactRef
+	139, // 209: dolgorae.public.v1.InteractionOptions.items:type_name -> dolgorae.public.v1.InteractionOption
+	140, // 210: dolgorae.public.v1.InteractionQuestion.options:type_name -> dolgorae.public.v1.InteractionOptions
+	141, // 211: dolgorae.public.v1.UserInputInteraction.questions:type_name -> dolgorae.public.v1.InteractionQuestion
+	36,  // 212: dolgorae.public.v1.UnsupportedInteraction.original_kind:type_name -> dolgorae.public.v1.InteractionKind
+	41,  // 213: dolgorae.public.v1.UnsupportedInteraction.reason:type_name -> dolgorae.public.v1.UnsupportedInteractionReason
+	36,  // 214: dolgorae.public.v1.InteractionOpenedEvent.kind:type_name -> dolgorae.public.v1.InteractionKind
+	38,  // 215: dolgorae.public.v1.InteractionResolvedEvent.outcome:type_name -> dolgorae.public.v1.InteractionOutcome
+	22,  // 216: dolgorae.public.v1.WriterStateChangedEvent.previous:type_name -> dolgorae.public.v1.WriterAuthorityState
+	22,  // 217: dolgorae.public.v1.WriterStateChangedEvent.current:type_name -> dolgorae.public.v1.WriterAuthorityState
+	134, // 218: dolgorae.public.v1.WorkspaceChanges.paths:type_name -> dolgorae.public.v1.PathProjection
+	194, // 219: dolgorae.public.v1.DurableRunEvent.occurred_at:type_name -> google.protobuf.Timestamp
+	0,   // 220: dolgorae.public.v1.DurableRunEvent.projection:type_name -> dolgorae.public.v1.ProjectionProfile
+	73,  // 221: dolgorae.public.v1.DurableRunEvent.stamp:type_name -> dolgorae.public.v1.ProjectionStamp
+	131, // 222: dolgorae.public.v1.DurableRunEvent.run_state_changed:type_name -> dolgorae.public.v1.RunStateChanged
+	132, // 223: dolgorae.public.v1.DurableRunEvent.turn_state_changed:type_name -> dolgorae.public.v1.TurnStateChanged
+	133, // 224: dolgorae.public.v1.DurableRunEvent.final_response_available:type_name -> dolgorae.public.v1.FinalResponseAvailable
+	144, // 225: dolgorae.public.v1.DurableRunEvent.interaction_opened:type_name -> dolgorae.public.v1.InteractionOpenedEvent
+	145, // 226: dolgorae.public.v1.DurableRunEvent.interaction_resolved:type_name -> dolgorae.public.v1.InteractionResolvedEvent
+	148, // 227: dolgorae.public.v1.DurableRunEvent.runtime_error_occurred:type_name -> dolgorae.public.v1.RuntimeErrorOccurred
+	149, // 228: dolgorae.public.v1.DurableRunEvent.usage_reported:type_name -> dolgorae.public.v1.UsageReported
+	150, // 229: dolgorae.public.v1.DurableRunEvent.workspace_changes:type_name -> dolgorae.public.v1.WorkspaceChanges
+	146, // 230: dolgorae.public.v1.DurableRunEvent.writer_state_changed:type_name -> dolgorae.public.v1.WriterStateChangedEvent
+	147, // 231: dolgorae.public.v1.DurableRunEvent.recovery_required:type_name -> dolgorae.public.v1.RecoveryRequiredEvent
+	151, // 232: dolgorae.public.v1.DurableRunEvent.command_started:type_name -> dolgorae.public.v1.CommandStarted
+	152, // 233: dolgorae.public.v1.DurableRunEvent.command_completed:type_name -> dolgorae.public.v1.CommandCompleted
+	153, // 234: dolgorae.public.v1.DurableRunEvent.diagnostic_reported:type_name -> dolgorae.public.v1.DiagnosticReported
+	154, // 235: dolgorae.public.v1.DurableRunEvent.generation_changed:type_name -> dolgorae.public.v1.GenerationChanged
+	155, // 236: dolgorae.public.v1.DurableRunEvent.reasoning_suppressed:type_name -> dolgorae.public.v1.ReasoningSuppressed
+	4,   // 237: dolgorae.public.v1.RunEventHeartbeat.lifecycle:type_name -> dolgorae.public.v1.RunLifecycle
+	194, // 238: dolgorae.public.v1.RunEventHeartbeat.emitted_at:type_name -> google.protobuf.Timestamp
+	42,  // 239: dolgorae.public.v1.RunEventStreamEnd.reason:type_name -> dolgorae.public.v1.StreamEndReason
+	156, // 240: dolgorae.public.v1.RunEventEnvelope.durable_event:type_name -> dolgorae.public.v1.DurableRunEvent
+	157, // 241: dolgorae.public.v1.RunEventEnvelope.heartbeat:type_name -> dolgorae.public.v1.RunEventHeartbeat
+	158, // 242: dolgorae.public.v1.RunEventEnvelope.stream_end:type_name -> dolgorae.public.v1.RunEventStreamEnd
+	8,   // 243: dolgorae.public.v1.ImageInputMetadata.detail:type_name -> dolgorae.public.v1.ImageDetail
+	43,  // 244: dolgorae.public.v1.TimelineItem.type:type_name -> dolgorae.public.v1.TimelineItemType
+	194, // 245: dolgorae.public.v1.TimelineItem.occurred_at:type_name -> google.protobuf.Timestamp
+	182, // 246: dolgorae.public.v1.TimelineItem.artifact:type_name -> dolgorae.public.v1.ArtifactRef
+	160, // 247: dolgorae.public.v1.TimelineItem.images:type_name -> dolgorae.public.v1.ImageInputMetadata
+	44,  // 248: dolgorae.public.v1.TimelineItem.status:type_name -> dolgorae.public.v1.TimelineItemStatus
+	36,  // 249: dolgorae.public.v1.TimelineItem.interaction_kind:type_name -> dolgorae.public.v1.InteractionKind
+	37,  // 250: dolgorae.public.v1.TimelineItem.interaction_status:type_name -> dolgorae.public.v1.InteractionStatus
+	57,  // 251: dolgorae.public.v1.ListRunTimelineItemsRequest.context:type_name -> dolgorae.public.v1.RequestContext
+	60,  // 252: dolgorae.public.v1.ListRunTimelineItemsRequest.run:type_name -> dolgorae.public.v1.RunRef
+	61,  // 253: dolgorae.public.v1.ListRunTimelineItemsRequest.controller:type_name -> dolgorae.public.v1.ControllerCarrierRef
+	58,  // 254: dolgorae.public.v1.ListRunTimelineItemsResponse.context:type_name -> dolgorae.public.v1.ResponseContext
+	161, // 255: dolgorae.public.v1.ListRunTimelineItemsResponse.items:type_name -> dolgorae.public.v1.TimelineItem
+	73,  // 256: dolgorae.public.v1.ListRunTimelineItemsResponse.stamp:type_name -> dolgorae.public.v1.ProjectionStamp
+	36,  // 257: dolgorae.public.v1.InteractionSummary.kind:type_name -> dolgorae.public.v1.InteractionKind
+	37,  // 258: dolgorae.public.v1.InteractionSummary.status:type_name -> dolgorae.public.v1.InteractionStatus
+	11,  // 259: dolgorae.public.v1.InteractionSummary.controller_kind:type_name -> dolgorae.public.v1.ControllerKind
+	194, // 260: dolgorae.public.v1.InteractionSummary.created_at:type_name -> google.protobuf.Timestamp
+	194, // 261: dolgorae.public.v1.InteractionSummary.expires_at:type_name -> google.protobuf.Timestamp
+	194, // 262: dolgorae.public.v1.InteractionSummary.resolved_at:type_name -> google.protobuf.Timestamp
+	164, // 263: dolgorae.public.v1.ControllerInteraction.summary:type_name -> dolgorae.public.v1.InteractionSummary
+	73,  // 264: dolgorae.public.v1.ControllerInteraction.stamp:type_name -> dolgorae.public.v1.ProjectionStamp
+	135, // 265: dolgorae.public.v1.ControllerInteraction.command_approval:type_name -> dolgorae.public.v1.CommandApprovalInteraction
+	138, // 266: dolgorae.public.v1.ControllerInteraction.file_change_approval:type_name -> dolgorae.public.v1.FileChangeApprovalInteraction
+	142, // 267: dolgorae.public.v1.ControllerInteraction.user_input:type_name -> dolgorae.public.v1.UserInputInteraction
+	143, // 268: dolgorae.public.v1.ControllerInteraction.unsupported:type_name -> dolgorae.public.v1.UnsupportedInteraction
+	39,  // 269: dolgorae.public.v1.ControllerInteraction.decisions:type_name -> dolgorae.public.v1.InteractionDecision
+	57,  // 270: dolgorae.public.v1.ListPendingInteractionsRequest.context:type_name -> dolgorae.public.v1.RequestContext
+	60,  // 271: dolgorae.public.v1.ListPendingInteractionsRequest.run:type_name -> dolgorae.public.v1.RunRef
+	58,  // 272: dolgorae.public.v1.ListPendingInteractionsResponse.context:type_name -> dolgorae.public.v1.ResponseContext
+	164, // 273: dolgorae.public.v1.ListPendingInteractionsResponse.items:type_name -> dolgorae.public.v1.InteractionSummary
+	73,  // 274: dolgorae.public.v1.ListPendingInteractionsResponse.stamp:type_name -> dolgorae.public.v1.ProjectionStamp
+	57,  // 275: dolgorae.public.v1.GetControllerInteractionRequest.context:type_name -> dolgorae.public.v1.RequestContext
+	60,  // 276: dolgorae.public.v1.GetControllerInteractionRequest.run:type_name -> dolgorae.public.v1.RunRef
+	61,  // 277: dolgorae.public.v1.GetControllerInteractionRequest.controller:type_name -> dolgorae.public.v1.ControllerCarrierRef
+	58,  // 278: dolgorae.public.v1.GetControllerInteractionResponse.context:type_name -> dolgorae.public.v1.ResponseContext
+	165, // 279: dolgorae.public.v1.GetControllerInteractionResponse.interaction:type_name -> dolgorae.public.v1.ControllerInteraction
+	57,  // 280: dolgorae.public.v1.ResolveInteractionRequest.context:type_name -> dolgorae.public.v1.RequestContext
+	60,  // 281: dolgorae.public.v1.ResolveInteractionRequest.run:type_name -> dolgorae.public.v1.RunRef
+	61,  // 282: dolgorae.public.v1.ResolveInteractionRequest.controller:type_name -> dolgorae.public.v1.ControllerCarrierRef
+	58,  // 283: dolgorae.public.v1.ResolveInteractionResponse.context:type_name -> dolgorae.public.v1.ResponseContext
+	37,  // 284: dolgorae.public.v1.ResolveInteractionResponse.status:type_name -> dolgorae.public.v1.InteractionStatus
+	57,  // 285: dolgorae.public.v1.GetWorkspaceWriterStatusRequest.context:type_name -> dolgorae.public.v1.RequestContext
+	59,  // 286: dolgorae.public.v1.GetWorkspaceWriterStatusRequest.workspace:type_name -> dolgorae.public.v1.WorkspaceRef
+	74,  // 287: dolgorae.public.v1.GetWorkspaceWriterStatusResponse.writer:type_name -> dolgorae.public.v1.WriterState
+	57,  // 288: dolgorae.public.v1.AcquireWriterRequest.context:type_name -> dolgorae.public.v1.RequestContext
+	60,  // 289: dolgorae.public.v1.AcquireWriterRequest.run:type_name -> dolgorae.public.v1.RunRef
+	61,  // 290: dolgorae.public.v1.AcquireWriterRequest.controller:type_name -> dolgorae.public.v1.ControllerCarrierRef
+	57,  // 291: dolgorae.public.v1.ReleaseWriterRequest.context:type_name -> dolgorae.public.v1.RequestContext
+	60,  // 292: dolgorae.public.v1.ReleaseWriterRequest.run:type_name -> dolgorae.public.v1.RunRef
+	61,  // 293: dolgorae.public.v1.ReleaseWriterRequest.controller:type_name -> dolgorae.public.v1.ControllerCarrierRef
+	57,  // 294: dolgorae.public.v1.PrepareWriterHandoffRequest.context:type_name -> dolgorae.public.v1.RequestContext
+	59,  // 295: dolgorae.public.v1.PrepareWriterHandoffRequest.workspace:type_name -> dolgorae.public.v1.WorkspaceRef
+	61,  // 296: dolgorae.public.v1.PrepareWriterHandoffRequest.controller:type_name -> dolgorae.public.v1.ControllerCarrierRef
+	57,  // 297: dolgorae.public.v1.CommitWriterHandoffRequest.context:type_name -> dolgorae.public.v1.RequestContext
+	59,  // 298: dolgorae.public.v1.CommitWriterHandoffRequest.workspace:type_name -> dolgorae.public.v1.WorkspaceRef
+	61,  // 299: dolgorae.public.v1.CommitWriterHandoffRequest.controller:type_name -> dolgorae.public.v1.ControllerCarrierRef
+	57,  // 300: dolgorae.public.v1.CancelWriterHandoffRequest.context:type_name -> dolgorae.public.v1.RequestContext
+	59,  // 301: dolgorae.public.v1.CancelWriterHandoffRequest.workspace:type_name -> dolgorae.public.v1.WorkspaceRef
+	61,  // 302: dolgorae.public.v1.CancelWriterHandoffRequest.controller:type_name -> dolgorae.public.v1.ControllerCarrierRef
+	74,  // 303: dolgorae.public.v1.WriterHandoffResponse.writer:type_name -> dolgorae.public.v1.WriterState
+	22,  // 304: dolgorae.public.v1.WriterHandoffResponse.status:type_name -> dolgorae.public.v1.WriterAuthorityState
+	57,  // 305: dolgorae.public.v1.VerifyControllerRequest.context:type_name -> dolgorae.public.v1.RequestContext
+	60,  // 306: dolgorae.public.v1.VerifyControllerRequest.run:type_name -> dolgorae.public.v1.RunRef
+	61,  // 307: dolgorae.public.v1.VerifyControllerRequest.controller:type_name -> dolgorae.public.v1.ControllerCarrierRef
+	58,  // 308: dolgorae.public.v1.VerifyControllerResponse.context:type_name -> dolgorae.public.v1.ResponseContext
+	62,  // 309: dolgorae.public.v1.VerifyControllerResponse.controller:type_name -> dolgorae.public.v1.ControllerProjection
+	194, // 310: dolgorae.public.v1.VerifyControllerResponse.verified_at:type_name -> google.protobuf.Timestamp
+	45,  // 311: dolgorae.public.v1.ArtifactRef.kind:type_name -> dolgorae.public.v1.ArtifactKind
+	46,  // 312: dolgorae.public.v1.ArtifactRef.visibility:type_name -> dolgorae.public.v1.ArtifactVisibility
+	57,  // 313: dolgorae.public.v1.GetArtifactRequest.context:type_name -> dolgorae.public.v1.RequestContext
+	60,  // 314: dolgorae.public.v1.GetArtifactRequest.run:type_name -> dolgorae.public.v1.RunRef
+	61,  // 315: dolgorae.public.v1.GetArtifactRequest.controller:type_name -> dolgorae.public.v1.ControllerCarrierRef
+	58,  // 316: dolgorae.public.v1.GetArtifactResponse.context:type_name -> dolgorae.public.v1.ResponseContext
+	182, // 317: dolgorae.public.v1.GetArtifactResponse.artifact:type_name -> dolgorae.public.v1.ArtifactRef
+	57,  // 318: dolgorae.public.v1.ReadArtifactChunkRequest.context:type_name -> dolgorae.public.v1.RequestContext
+	60,  // 319: dolgorae.public.v1.ReadArtifactChunkRequest.run:type_name -> dolgorae.public.v1.RunRef
+	61,  // 320: dolgorae.public.v1.ReadArtifactChunkRequest.controller:type_name -> dolgorae.public.v1.ControllerCarrierRef
+	58,  // 321: dolgorae.public.v1.ReadArtifactChunkResponse.context:type_name -> dolgorae.public.v1.ResponseContext
+	60,  // 322: dolgorae.public.v1.OrchestratedSessionProjection.primary_run:type_name -> dolgorae.public.v1.RunRef
+	47,  // 323: dolgorae.public.v1.OrchestratedSessionProjection.lifecycle:type_name -> dolgorae.public.v1.OrchestratedSessionLifecycle
+	48,  // 324: dolgorae.public.v1.OrchestratedSessionProjection.composition:type_name -> dolgorae.public.v1.OrchestratedSessionComposition
+	49,  // 325: dolgorae.public.v1.OrchestratedSessionProjection.approval_policy:type_name -> dolgorae.public.v1.OrchestratedSessionApprovalPolicy
+	51,  // 326: dolgorae.public.v1.OrchestratedSessionProjection.close_intent:type_name -> dolgorae.public.v1.SessionCloseIntent
+	52,  // 327: dolgorae.public.v1.OrchestratedSessionProjection.close_progress:type_name -> dolgorae.public.v1.SessionCloseProgress
+	55,  // 328: dolgorae.public.v1.OrchestratedSessionProjection.recovery_classification:type_name -> dolgorae.public.v1.RecoveryClassification
+	56,  // 329: dolgorae.public.v1.OrchestratedSessionProjection.required_action:type_name -> dolgorae.public.v1.RequiredClientAction
+	194, // 330: dolgorae.public.v1.OrchestratedSessionProjection.captured_at:type_name -> google.protobuf.Timestamp
+	50,  // 331: dolgorae.public.v1.OrchestratedSessionProjection.availability:type_name -> dolgorae.public.v1.OrchestratedSessionAvailability
+	57,  // 332: dolgorae.public.v1.GetOrchestratedSessionRequest.context:type_name -> dolgorae.public.v1.RequestContext
+	60,  // 333: dolgorae.public.v1.GetOrchestratedSessionRequest.root_run:type_name -> dolgorae.public.v1.RunRef
+	61,  // 334: dolgorae.public.v1.GetOrchestratedSessionRequest.controller:type_name -> dolgorae.public.v1.ControllerCarrierRef
+	58,  // 335: dolgorae.public.v1.GetOrchestratedSessionResponse.context:type_name -> dolgorae.public.v1.ResponseContext
+	187, // 336: dolgorae.public.v1.GetOrchestratedSessionResponse.session:type_name -> dolgorae.public.v1.OrchestratedSessionProjection
+	60,  // 337: dolgorae.public.v1.OrchestratedSessionResult.specialist_run:type_name -> dolgorae.public.v1.RunRef
+	194, // 338: dolgorae.public.v1.OrchestratedSessionResult.published_at:type_name -> google.protobuf.Timestamp
+	53,  // 339: dolgorae.public.v1.OrchestratedSessionResult.format:type_name -> dolgorae.public.v1.OrchestratedResultFormat
+	182, // 340: dolgorae.public.v1.OrchestratedSessionResult.artifact:type_name -> dolgorae.public.v1.ArtifactRef
+	60,  // 341: dolgorae.public.v1.OrchestratedSessionResult.artifact_owner:type_name -> dolgorae.public.v1.RunRef
+	57,  // 342: dolgorae.public.v1.ListOrchestratedSessionResultsRequest.context:type_name -> dolgorae.public.v1.RequestContext
+	60,  // 343: dolgorae.public.v1.ListOrchestratedSessionResultsRequest.root_run:type_name -> dolgorae.public.v1.RunRef
+	61,  // 344: dolgorae.public.v1.ListOrchestratedSessionResultsRequest.controller:type_name -> dolgorae.public.v1.ControllerCarrierRef
+	58,  // 345: dolgorae.public.v1.ListOrchestratedSessionResultsResponse.context:type_name -> dolgorae.public.v1.ResponseContext
+	194, // 346: dolgorae.public.v1.ListOrchestratedSessionResultsResponse.captured_at:type_name -> google.protobuf.Timestamp
+	190, // 347: dolgorae.public.v1.ListOrchestratedSessionResultsResponse.items:type_name -> dolgorae.public.v1.OrchestratedSessionResult
+	56,  // 348: dolgorae.public.v1.DolgoraeErrorDetail.action:type_name -> dolgorae.public.v1.RequiredClientAction
+	54,  // 349: dolgorae.public.v1.DolgoraeErrorDetail.retry_classification:type_name -> dolgorae.public.v1.RetryClassification
+	55,  // 350: dolgorae.public.v1.DolgoraeErrorDetail.recovery_classification:type_name -> dolgorae.public.v1.RecoveryClassification
+	79,  // 351: dolgorae.public.v1.RuntimeService.GetCapabilities:input_type -> dolgorae.public.v1.GetCapabilitiesRequest
+	93,  // 352: dolgorae.public.v1.RuntimeService.InspectWorkspace:input_type -> dolgorae.public.v1.InspectWorkspaceRequest
+	96,  // 353: dolgorae.public.v1.RuntimeService.ListProfiles:input_type -> dolgorae.public.v1.ListProfilesRequest
+	100, // 354: dolgorae.public.v1.RuntimeService.GetProfile:input_type -> dolgorae.public.v1.GetProfileRequest
+	102, // 355: dolgorae.public.v1.RuntimeService.ListProfileDiagnostics:input_type -> dolgorae.public.v1.ListProfileDiagnosticsRequest
+	105, // 356: dolgorae.public.v1.RunService.StartRun:input_type -> dolgorae.public.v1.StartRunRequest
+	107, // 357: dolgorae.public.v1.RunService.ListRuns:input_type -> dolgorae.public.v1.ListRunsRequest
+	109, // 358: dolgorae.public.v1.RunService.GetRun:input_type -> dolgorae.public.v1.GetRunRequest
+	112, // 359: dolgorae.public.v1.RunService.SubmitTurn:input_type -> dolgorae.public.v1.SubmitTurnRequest
+	114, // 360: dolgorae.public.v1.RunService.InterruptTurn:input_type -> dolgorae.public.v1.InterruptTurnRequest
+	115, // 361: dolgorae.public.v1.RunService.SetDefaultEffort:input_type -> dolgorae.public.v1.SetDefaultEffortRequest
+	116, // 362: dolgorae.public.v1.RunService.PauseRun:input_type -> dolgorae.public.v1.PauseRunRequest
+	117, // 363: dolgorae.public.v1.RunService.ResumeRun:input_type -> dolgorae.public.v1.ResumeRunRequest
+	118, // 364: dolgorae.public.v1.RunService.CloseRun:input_type -> dolgorae.public.v1.CloseRunRequest
+	119, // 365: dolgorae.public.v1.RunService.DeleteRun:input_type -> dolgorae.public.v1.DeleteRunRequest
+	121, // 366: dolgorae.public.v1.RunService.RecoverRun:input_type -> dolgorae.public.v1.RecoverRunRequest
+	122, // 367: dolgorae.public.v1.RunService.ReconcileRun:input_type -> dolgorae.public.v1.ReconcileRunRequest
+	124, // 368: dolgorae.public.v1.RunService.ForkRun:input_type -> dolgorae.public.v1.ForkRunRequest
+	125, // 369: dolgorae.public.v1.RunService.VerifyRun:input_type -> dolgorae.public.v1.VerifyRunRequest
+	127, // 370: dolgorae.public.v1.RunService.CreateWriteContinuation:input_type -> dolgorae.public.v1.CreateWriteContinuationRequest
+	130, // 371: dolgorae.public.v1.ObservationService.WatchRunEvents:input_type -> dolgorae.public.v1.WatchRunEventsRequest
+	162, // 372: dolgorae.public.v1.ObservationService.ListRunTimelineItems:input_type -> dolgorae.public.v1.ListRunTimelineItemsRequest
+	166, // 373: dolgorae.public.v1.InteractionService.ListPendingInteractions:input_type -> dolgorae.public.v1.ListPendingInteractionsRequest
+	168, // 374: dolgorae.public.v1.InteractionService.GetControllerInteraction:input_type -> dolgorae.public.v1.GetControllerInteractionRequest
+	170, // 375: dolgorae.public.v1.InteractionService.ResolveInteraction:input_type -> dolgorae.public.v1.ResolveInteractionRequest
+	172, // 376: dolgorae.public.v1.WriterService.GetWorkspaceWriterStatus:input_type -> dolgorae.public.v1.GetWorkspaceWriterStatusRequest
+	174, // 377: dolgorae.public.v1.WriterService.AcquireWriter:input_type -> dolgorae.public.v1.AcquireWriterRequest
+	175, // 378: dolgorae.public.v1.WriterService.ReleaseWriter:input_type -> dolgorae.public.v1.ReleaseWriterRequest
+	176, // 379: dolgorae.public.v1.WriterService.PrepareWriterHandoff:input_type -> dolgorae.public.v1.PrepareWriterHandoffRequest
+	177, // 380: dolgorae.public.v1.WriterService.CommitWriterHandoff:input_type -> dolgorae.public.v1.CommitWriterHandoffRequest
+	178, // 381: dolgorae.public.v1.WriterService.CancelWriterHandoff:input_type -> dolgorae.public.v1.CancelWriterHandoffRequest
+	180, // 382: dolgorae.public.v1.ControllerService.VerifyController:input_type -> dolgorae.public.v1.VerifyControllerRequest
+	183, // 383: dolgorae.public.v1.ArtifactService.GetArtifact:input_type -> dolgorae.public.v1.GetArtifactRequest
+	185, // 384: dolgorae.public.v1.ArtifactService.ReadArtifactChunk:input_type -> dolgorae.public.v1.ReadArtifactChunkRequest
+	188, // 385: dolgorae.public.v1.OrchestrationService.GetOrchestratedSession:input_type -> dolgorae.public.v1.GetOrchestratedSessionRequest
+	191, // 386: dolgorae.public.v1.OrchestrationService.ListOrchestratedSessionResults:input_type -> dolgorae.public.v1.ListOrchestratedSessionResultsRequest
+	92,  // 387: dolgorae.public.v1.RuntimeService.GetCapabilities:output_type -> dolgorae.public.v1.GetCapabilitiesResponse
+	95,  // 388: dolgorae.public.v1.RuntimeService.InspectWorkspace:output_type -> dolgorae.public.v1.InspectWorkspaceResponse
+	99,  // 389: dolgorae.public.v1.RuntimeService.ListProfiles:output_type -> dolgorae.public.v1.ListProfilesResponse
+	101, // 390: dolgorae.public.v1.RuntimeService.GetProfile:output_type -> dolgorae.public.v1.GetProfileResponse
+	104, // 391: dolgorae.public.v1.RuntimeService.ListProfileDiagnostics:output_type -> dolgorae.public.v1.ListProfileDiagnosticsResponse
+	106, // 392: dolgorae.public.v1.RunService.StartRun:output_type -> dolgorae.public.v1.StartRunResponse
+	108, // 393: dolgorae.public.v1.RunService.ListRuns:output_type -> dolgorae.public.v1.ListRunsResponse
+	110, // 394: dolgorae.public.v1.RunService.GetRun:output_type -> dolgorae.public.v1.GetRunResponse
+	113, // 395: dolgorae.public.v1.RunService.SubmitTurn:output_type -> dolgorae.public.v1.SubmitTurnAccepted
+	123, // 396: dolgorae.public.v1.RunService.InterruptTurn:output_type -> dolgorae.public.v1.RunMutationResponse
+	123, // 397: dolgorae.public.v1.RunService.SetDefaultEffort:output_type -> dolgorae.public.v1.RunMutationResponse
+	123, // 398: dolgorae.public.v1.RunService.PauseRun:output_type -> dolgorae.public.v1.RunMutationResponse
+	123, // 399: dolgorae.public.v1.RunService.ResumeRun:output_type -> dolgorae.public.v1.RunMutationResponse
+	123, // 400: dolgorae.public.v1.RunService.CloseRun:output_type -> dolgorae.public.v1.RunMutationResponse
+	120, // 401: dolgorae.public.v1.RunService.DeleteRun:output_type -> dolgorae.public.v1.DeleteRunResponse
+	123, // 402: dolgorae.public.v1.RunService.RecoverRun:output_type -> dolgorae.public.v1.RunMutationResponse
+	123, // 403: dolgorae.public.v1.RunService.ReconcileRun:output_type -> dolgorae.public.v1.RunMutationResponse
+	106, // 404: dolgorae.public.v1.RunService.ForkRun:output_type -> dolgorae.public.v1.StartRunResponse
+	126, // 405: dolgorae.public.v1.RunService.VerifyRun:output_type -> dolgorae.public.v1.VerifyRunResponse
+	129, // 406: dolgorae.public.v1.RunService.CreateWriteContinuation:output_type -> dolgorae.public.v1.CreateWriteContinuationResponse
+	159, // 407: dolgorae.public.v1.ObservationService.WatchRunEvents:output_type -> dolgorae.public.v1.RunEventEnvelope
+	163, // 408: dolgorae.public.v1.ObservationService.ListRunTimelineItems:output_type -> dolgorae.public.v1.ListRunTimelineItemsResponse
+	167, // 409: dolgorae.public.v1.InteractionService.ListPendingInteractions:output_type -> dolgorae.public.v1.ListPendingInteractionsResponse
+	169, // 410: dolgorae.public.v1.InteractionService.GetControllerInteraction:output_type -> dolgorae.public.v1.GetControllerInteractionResponse
+	171, // 411: dolgorae.public.v1.InteractionService.ResolveInteraction:output_type -> dolgorae.public.v1.ResolveInteractionResponse
+	173, // 412: dolgorae.public.v1.WriterService.GetWorkspaceWriterStatus:output_type -> dolgorae.public.v1.GetWorkspaceWriterStatusResponse
+	74,  // 413: dolgorae.public.v1.WriterService.AcquireWriter:output_type -> dolgorae.public.v1.WriterState
+	74,  // 414: dolgorae.public.v1.WriterService.ReleaseWriter:output_type -> dolgorae.public.v1.WriterState
+	179, // 415: dolgorae.public.v1.WriterService.PrepareWriterHandoff:output_type -> dolgorae.public.v1.WriterHandoffResponse
+	179, // 416: dolgorae.public.v1.WriterService.CommitWriterHandoff:output_type -> dolgorae.public.v1.WriterHandoffResponse
+	179, // 417: dolgorae.public.v1.WriterService.CancelWriterHandoff:output_type -> dolgorae.public.v1.WriterHandoffResponse
+	181, // 418: dolgorae.public.v1.ControllerService.VerifyController:output_type -> dolgorae.public.v1.VerifyControllerResponse
+	184, // 419: dolgorae.public.v1.ArtifactService.GetArtifact:output_type -> dolgorae.public.v1.GetArtifactResponse
+	186, // 420: dolgorae.public.v1.ArtifactService.ReadArtifactChunk:output_type -> dolgorae.public.v1.ReadArtifactChunkResponse
+	189, // 421: dolgorae.public.v1.OrchestrationService.GetOrchestratedSession:output_type -> dolgorae.public.v1.GetOrchestratedSessionResponse
+	192, // 422: dolgorae.public.v1.OrchestrationService.ListOrchestratedSessionResults:output_type -> dolgorae.public.v1.ListOrchestratedSessionResultsResponse
+	387, // [387:423] is the sub-list for method output_type
+	351, // [351:387] is the sub-list for method input_type
+	351, // [351:351] is the sub-list for extension type_name
+	351, // [351:351] is the sub-list for extension extendee
+	0,   // [0:351] is the sub-list for field type_name
 }
 
 func init() { file_dolgorae_public_v1_dolgorae_proto_init() }
@@ -15321,15 +16453,18 @@ func file_dolgorae_public_v1_dolgorae_proto_init() {
 	file_dolgorae_public_v1_dolgorae_proto_msgTypes[126].OneofWrappers = []any{}
 	file_dolgorae_public_v1_dolgorae_proto_msgTypes[128].OneofWrappers = []any{}
 	file_dolgorae_public_v1_dolgorae_proto_msgTypes[130].OneofWrappers = []any{}
+	file_dolgorae_public_v1_dolgorae_proto_msgTypes[134].OneofWrappers = []any{}
+	file_dolgorae_public_v1_dolgorae_proto_msgTypes[135].OneofWrappers = []any{}
+	file_dolgorae_public_v1_dolgorae_proto_msgTypes[136].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_dolgorae_public_v1_dolgorae_proto_rawDesc), len(file_dolgorae_public_v1_dolgorae_proto_rawDesc)),
-			NumEnums:      50,
-			NumMessages:   131,
+			NumEnums:      57,
+			NumMessages:   137,
 			NumExtensions: 0,
-			NumServices:   7,
+			NumServices:   8,
 		},
 		GoTypes:           file_dolgorae_public_v1_dolgorae_proto_goTypes,
 		DependencyIndexes: file_dolgorae_public_v1_dolgorae_proto_depIdxs,

@@ -1,6 +1,16 @@
 {
   "contract_id": "dolgorae.grpc-error-mapping/v1",
   "schema_version": 1,
+  "private_machine_error_codes": [
+    "REVIEW_PROFILE_UNAVAILABLE",
+    "REVIEWER_START_FAILED",
+    "REVIEW_TASK_FAILED",
+    "REVIEW_INTERRUPTED_UNKNOWN",
+    "REVIEW_TIMEOUT",
+    "REVIEW_CANCELLED",
+    "REVIEW_WORKSPACE_MUTATION_DETECTED",
+    "REVIEW_EXECUTABLE_DRIFT"
+  ],
   "error_detail_type": "dolgorae.public.v1.DolgoraeErrorDetail",
   "error_detail_version": 1,
   "required_action_type": "dolgorae.public.v1.RequiredClientAction",
@@ -31,6 +41,27 @@
         "required_action": "REQUIRED_CLIENT_ACTION_REFRESH_SNAPSHOT",
         "retry_classification": "RETRY_CLASSIFICATION_TOKENLESS_AFTER_SNAPSHOT",
         "recovery_classification": "RECOVERY_CLASSIFICATION_SNAPSHOT_REQUIRED"
+      }
+    },
+    "RunService.CloseRun": {
+      "SESSION_CLOSE_IN_PROGRESS": {
+        "status": "FAILED_PRECONDITION",
+        "required_action": "REQUIRED_CLIENT_ACTION_REFRESH_SNAPSHOT",
+        "retry_classification": "RETRY_CLASSIFICATION_FORBIDDEN",
+        "recovery_classification": "RECOVERY_CLASSIFICATION_SNAPSHOT_REQUIRED",
+        "required_fields": ["run_id", "operation_id"]
+      },
+      "OUTCOME_UNKNOWN": {
+        "required_action": "REQUIRED_CLIENT_ACTION_RECONCILE_RUN",
+        "retry_classification": "RETRY_CLASSIFICATION_FORBIDDEN",
+        "recovery_classification": "RECOVERY_CLASSIFICATION_OUTCOME_UNKNOWN",
+        "operation_id": "required_when_authorized_and_known"
+      },
+      "RECOVERY_REQUIRED": {
+        "required_action": "REQUIRED_CLIENT_ACTION_RECOVER_RUN",
+        "retry_classification": "RETRY_CLASSIFICATION_FORBIDDEN",
+        "recovery_classification": "RECOVERY_CLASSIFICATION_RECONCILE_REQUIRED",
+        "operation_id": "required_when_authorized_and_known"
       }
     },
     "RunService.SubmitTurn": {

@@ -21,7 +21,7 @@ fi
 # shellcheck disable=SC1090
 . "$manifest"
 
-required_keys='GUL_GO_VERSION GUL_WAILS_VERSION GUL_NODE_VERSION GUL_BUN_VERSION GUL_TYPESCRIPT_VERSION GUL_REACT_VERSION GUL_REACT_DOM_VERSION GUL_BUF_MIN_VERSION GUL_BUF_MAX_EXCLUSIVE_VERSION GUL_PROTOC_VERSION GUL_PROTOC_GEN_GO_VERSION GUL_PROTOC_GEN_CONNECT_GO_VERSION GUL_PROTOBUF_GO_VERSION GUL_CONNECT_GO_VERSION GUL_CONNECT_ES_VERSION GUL_CONNECT_WEB_VERSION GUL_PROTOBUF_ES_VERSION GUL_PROTOC_GEN_ES_VERSION GUL_PROTOC_GEN_CONNECT_ES_VERSION GUL_MODERNC_SQLITE_VERSION GUL_GIT_MIN_VERSION GUL_GIT_MAX_EXCLUSIVE_VERSION GUL_MACOS_MIN_VERSION GUL_TARGET_ARCH'
+required_keys='GUL_GO_VERSION GUL_WAILS_VERSION GUL_NODE_VERSION GUL_BUN_MIN_VERSION GUL_TYPESCRIPT_VERSION GUL_REACT_VERSION GUL_REACT_DOM_VERSION GUL_BUF_MIN_VERSION GUL_BUF_MAX_EXCLUSIVE_VERSION GUL_PROTOC_VERSION GUL_PROTOC_GEN_GO_VERSION GUL_PROTOC_GEN_CONNECT_GO_VERSION GUL_PROTOBUF_GO_VERSION GUL_CONNECT_GO_VERSION GUL_CONNECT_ES_VERSION GUL_CONNECT_WEB_VERSION GUL_PROTOBUF_ES_VERSION GUL_PROTOC_GEN_ES_VERSION GUL_PROTOC_GEN_CONNECT_ES_VERSION GUL_MODERNC_SQLITE_VERSION GUL_GIT_MIN_VERSION GUL_GIT_MAX_EXCLUSIVE_VERSION GUL_MACOS_MIN_VERSION GUL_TARGET_ARCH'
 for key in $required_keys; do
   eval "value=\${$key-}"
   if [ -z "$value" ]; then
@@ -34,8 +34,8 @@ if [ "${1-}" = "--manifest-only" ]; then
   printf 'OK manifest: %s\n' "$manifest"
   exit 0
 fi
-if [ "${1-}" != "" ]; then
-  printf 'usage: %s [--manifest-only]\n' "$0" >&2
+if [ "${1-}" != "" ] && [ "${1-}" != "--bun-only" ]; then
+  printf 'usage: %s [--manifest-only|--bun-only]\n' "$0" >&2
   exit 2
 fi
 
@@ -135,6 +135,37 @@ check_range() {
   fi
 }
 
+check_minimum() {
+  local label=$1
+  local minimum=$2
+  local command_name=$3
+  local output
+  local gul_minimum_rc
+  local actual
+  shift 3
+  output=$(command_output "$command_name" "$@")
+  gul_minimum_rc=$?
+  if [ "$gul_minimum_rc" -ne 0 ]; then
+    fail "$label: missing command '$command_name'"
+    return
+  fi
+  actual=$(printf '%s\n' "$output" | sed -E 's/^v//; s/^[^0-9]*//; s/[[:space:]].*$//')
+  if version_cmp "$actual" ge "$minimum"; then
+    pass "$label $actual (>= $minimum)"
+  else
+    fail "$label: expected >= $minimum, found $actual ($command_name)"
+  fi
+}
+
+if [ "${1-}" = "--bun-only" ]; then
+  check_minimum Bun "$GUL_BUN_MIN_VERSION" bun --version
+  if [ "$failures" -ne 0 ]; then
+    printf 'toolchain check failed: %s issue(s)\n' "$failures" >&2
+    exit 1
+  fi
+  exit 0
+fi
+
 os_name=$(command_output uname -s)
 if [ "$os_name" = "Darwin" ]; then
   pass "host OS Darwin"
@@ -161,7 +192,7 @@ fi
 check_exact Go "$GUL_GO_VERSION" go version
 check_exact Wails "$GUL_WAILS_VERSION" wails3 version
 check_exact Node "$GUL_NODE_VERSION" node --version
-check_exact Bun "$GUL_BUN_VERSION" bun --version
+check_minimum Bun "$GUL_BUN_MIN_VERSION" bun --version
 check_range Buf "$GUL_BUF_MIN_VERSION" "$GUL_BUF_MAX_EXCLUSIVE_VERSION" buf --version
 check_exact protoc "$GUL_PROTOC_VERSION" protoc --version
 check_exact protoc-gen-go "$GUL_PROTOC_GEN_GO_VERSION" protoc-gen-go --version

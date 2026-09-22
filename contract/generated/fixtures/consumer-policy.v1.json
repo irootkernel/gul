@@ -34,280 +34,8 @@
   },
   "replay_material": {
     "StartRun": "protected_durable_exact_request",
-    "CreateWriteContinuation": "protected_durable_exact_request",
     "SubmitTurn": "process_memory_only",
-    "ResolveInteraction": "never_persist_or_replay",
-    "policies": {
-      "RunService.StartRun": {
-        "rpc": "RunService.StartRun",
-        "cli": "run.start",
-        "idempotency": "required",
-        "identity": [
-          "canonical_workspace_identity",
-          "controller_id_generation",
-          "control_mode",
-          "accepted_profile_snapshot",
-          "purpose_kind_label",
-          "effective_model",
-          "current_default_effort",
-          "execution_lane",
-          "required_assurance",
-          "sorted_unique_required_capabilities",
-          "parent_reference",
-          "controller_instructions_byte_length_sha256"
-        ],
-        "same_key_replay": "return_original_run",
-        "lost_response": "repeat_exact_key",
-        "different_controller": "idempotency_conflict",
-        "different_normalized_request": "idempotency_conflict",
-        "retention": "workspace_lifetime_no_ttl_with_deleted_run_tombstone",
-        "deleted_run_replay": "run_not_found_with_original_run_id_never_allocate",
-        "secondary_reconciliation": "list_runs_by_unique_controller_id",
-        "automatic_retry": "forbidden"
-      },
-      "RunService.ForkRun": {
-        "rpc": "RunService.ForkRun",
-        "cli": "run.fork",
-        "idempotency": "required",
-        "identity": [
-          "source_run",
-          "controller_identity_generation",
-          "fork_mode",
-          "model",
-          "history_or_provenance_boundary"
-        ],
-        "same_key_replay": "return_original_run",
-        "lost_response": "repeat_exact_key",
-        "automatic_retry": "forbidden"
-      },
-      "RunService.SubmitTurn": {
-        "rpc": "RunService.SubmitTurn",
-        "cli": "run.submit",
-        "idempotency": "required",
-        "identity": [
-          "run",
-          "controller_identity_generation",
-          "message_bytes",
-          "ordered_image_metadata_digests",
-          "model_effort",
-          "write_intent_turn_options"
-        ],
-        "same_key_replay": "return_original_accepted_turn",
-        "lost_response": "get_run_then_repeat_exact_key_or_reconcile",
-        "automatic_retry": "forbidden"
-      },
-      "InteractionService.ResolveInteraction": {
-        "rpc": "InteractionService.ResolveInteraction",
-        "cli": "run.respond",
-        "idempotency": "required",
-        "identity": [
-          "run",
-          "interaction",
-          "controller_identity_generation",
-          "normalized_nonsecret_response_or_secret_first_success"
-        ],
-        "same_key_replay": "return_original_resolution_receipt",
-        "lost_response": "refetch summary and authorized interaction; resolved means complete; pending protected input requires explicit user re-entry; indeterminate state is interaction_outcome_unknown",
-        "protected_input_replay": "forbidden",
-        "protected_input_persistence": "forbidden",
-        "winning_secret_key_replay": "return_receipt_without_comparing_or_replaying_body",
-        "automatic_retry": "forbidden"
-      },
-      "RunService.CreateWriteContinuation": {
-        "rpc": "RunService.CreateWriteContinuation",
-        "cli": "run.create_write_continuation",
-        "idempotency": "required",
-        "identity": [
-          "source_run_turn",
-          "creation_reason",
-          "purpose",
-          "model_effort",
-          "assurance_capabilities",
-          "handoff_instruction_digests",
-          "ordered_artifact_refs",
-          "destination_controller_identity_generation"
-        ],
-        "same_key_replay": "return_original_destination_run",
-        "lost_response": "repeat_exact_key",
-        "automatic_retry": "forbidden"
-      },
-      "RunService.InterruptTurn": {
-        "rpc": "RunService.InterruptTurn",
-        "cli": "run.interrupt",
-        "idempotency": "tokenless",
-        "identity": [
-          "run",
-          "controller_identity_generation",
-          "expected_state_revision"
-        ],
-        "same_key_replay": "not_applicable",
-        "lost_response": "get_run_and_reconcile_if_outcome_unknown",
-        "automatic_retry": "forbidden"
-      },
-      "RunService.SetDefaultEffort": {
-        "rpc": "RunService.SetDefaultEffort",
-        "cli": "run.set_effort",
-        "idempotency": "tokenless",
-        "identity": [
-          "run",
-          "controller_identity_generation",
-          "effort",
-          "expected_state_revision"
-        ],
-        "same_key_replay": "not_applicable",
-        "lost_response": "get_run",
-        "automatic_retry": "forbidden"
-      },
-      "RunService.PauseRun": {
-        "rpc": "RunService.PauseRun",
-        "cli": "run.pause",
-        "idempotency": "tokenless",
-        "identity": [
-          "run",
-          "controller_identity_generation",
-          "interrupt",
-          "expected_state_revision"
-        ],
-        "same_key_replay": "not_applicable",
-        "lost_response": "get_run_and_reconcile_if_required",
-        "automatic_retry": "forbidden"
-      },
-      "RunService.ResumeRun": {
-        "rpc": "RunService.ResumeRun",
-        "cli": "run.resume",
-        "idempotency": "tokenless",
-        "identity": [
-          "run",
-          "controller_identity_generation",
-          "expected_state_revision"
-        ],
-        "same_key_replay": "not_applicable",
-        "lost_response": "get_run_and_reconcile_if_required",
-        "automatic_retry": "forbidden"
-      },
-      "RunService.CloseRun": {
-        "rpc": "RunService.CloseRun",
-        "cli": "run.close",
-        "idempotency": "tokenless",
-        "identity": [
-          "run",
-          "controller_identity_generation",
-          "interrupt",
-          "expected_state_revision"
-        ],
-        "same_key_replay": "not_applicable",
-        "lost_response": "get_run_and_reconcile_if_required",
-        "automatic_retry": "forbidden"
-      },
-      "RunService.DeleteRun": {
-        "rpc": "RunService.DeleteRun",
-        "cli": "run.delete",
-        "idempotency": "tokenless",
-        "identity": [
-          "run",
-          "controller_identity_generation",
-          "confirmation",
-          "expected_state_revision"
-        ],
-        "same_key_replay": "not_applicable",
-        "lost_response": "inspect_workspace_run_absence_and_prior_confirmation",
-        "automatic_retry": "forbidden"
-      },
-      "RunService.RecoverRun": {
-        "rpc": "RunService.RecoverRun",
-        "cli": "run.recover",
-        "idempotency": "tokenless",
-        "identity": [
-          "run",
-          "controller_identity_generation",
-          "expected_state_revision"
-        ],
-        "same_key_replay": "not_applicable",
-        "lost_response": "get_run_then_reconcile",
-        "automatic_retry": "forbidden"
-      },
-      "RunService.ReconcileRun": {
-        "rpc": "RunService.ReconcileRun",
-        "cli": "run.reconcile",
-        "idempotency": "tokenless",
-        "identity": [
-          "run",
-          "controller_identity_generation",
-          "expected_state_revision"
-        ],
-        "same_key_replay": "not_applicable",
-        "lost_response": "get_run_before_new_reconcile",
-        "automatic_retry": "forbidden"
-      },
-      "WriterService.AcquireWriter": {
-        "rpc": "WriterService.AcquireWriter",
-        "cli": "run.acquire_write",
-        "idempotency": "tokenless",
-        "identity": [
-          "run",
-          "controller_identity_generation",
-          "expected_state_revision"
-        ],
-        "same_key_replay": "not_applicable",
-        "lost_response": "get_workspace_writer_status_and_get_run",
-        "automatic_retry": "forbidden"
-      },
-      "WriterService.ReleaseWriter": {
-        "rpc": "WriterService.ReleaseWriter",
-        "cli": "run.release_write",
-        "idempotency": "tokenless",
-        "identity": [
-          "run",
-          "controller_identity_generation",
-          "expected_state_revision"
-        ],
-        "same_key_replay": "not_applicable",
-        "lost_response": "get_workspace_writer_status_and_get_run",
-        "automatic_retry": "forbidden"
-      },
-      "WriterService.PrepareWriterHandoff": {
-        "rpc": "WriterService.PrepareWriterHandoff",
-        "cli": "workspace.writer.handoff_prepare",
-        "idempotency": "tokenless",
-        "identity": [
-          "workspace",
-          "source_run",
-          "destination_run",
-          "controller_identity_generation",
-          "expected_writer_generation"
-        ],
-        "same_key_replay": "not_applicable",
-        "lost_response": "get_workspace_writer_status",
-        "automatic_retry": "forbidden"
-      },
-      "WriterService.CommitWriterHandoff": {
-        "rpc": "WriterService.CommitWriterHandoff",
-        "cli": "workspace.writer.handoff_commit",
-        "idempotency": "tokenless",
-        "identity": [
-          "workspace",
-          "handoff_id",
-          "controller_identity_generation",
-          "expected_writer_generation"
-        ],
-        "same_key_replay": "not_applicable",
-        "lost_response": "get_workspace_writer_status",
-        "automatic_retry": "forbidden"
-      },
-      "WriterService.CancelWriterHandoff": {
-        "rpc": "WriterService.CancelWriterHandoff",
-        "cli": "workspace.writer.handoff_cancel",
-        "idempotency": "tokenless",
-        "identity": [
-          "workspace",
-          "handoff_id",
-          "controller_identity_generation"
-        ],
-        "same_key_replay": "not_applicable",
-        "lost_response": "get_workspace_writer_status",
-        "automatic_retry": "forbidden"
-      }
-    }
+    "ResolveInteraction": "never_persist_or_replay"
   },
   "projection_convergence": [
     {
@@ -372,15 +100,380 @@
     "typed gRPC SLOW_CONSUMER",
     "other transport failure"
   ],
-  "unsupported_rpcs": [
-    "RuntimeService.ListProfileDiagnostics",
-    "RunService.SetDefaultEffort",
-    "RunService.ForkRun",
-    "RunService.VerifyRun",
-    "WriterService.PrepareWriterHandoff",
-    "WriterService.CommitWriterHandoff",
-    "WriterService.CancelWriterHandoff"
+  "required_rpcs": [
+    "ArtifactService.GetArtifact",
+    "ArtifactService.ReadArtifactChunk",
+    "ControllerService.VerifyController",
+    "InteractionService.GetControllerInteraction",
+    "InteractionService.ListPendingInteractions",
+    "InteractionService.ResolveInteraction",
+    "ObservationService.ListRunTimelineItems",
+    "ObservationService.WatchRunEvents",
+    "OrchestrationService.GetOrchestratedSession",
+    "OrchestrationService.ListOrchestratedSessionResults",
+    "RunService.CloseRun",
+    "RunService.GetRun",
+    "RunService.InterruptTurn",
+    "RunService.ListRuns",
+    "RunService.PauseRun",
+    "RunService.ReconcileRun",
+    "RunService.RecoverRun",
+    "RunService.ResumeRun",
+    "RunService.StartRun",
+    "RunService.SubmitTurn",
+    "RuntimeService.GetCapabilities",
+    "RuntimeService.GetProfile",
+    "RuntimeService.InspectWorkspace",
+    "RuntimeService.ListProfiles",
+    "WriterService.AcquireWriter",
+    "WriterService.GetWorkspaceWriterStatus",
+    "WriterService.ReleaseWriter"
   ],
+  "unavailable_rpcs": [
+    "RunService.CreateWriteContinuation",
+    "RunService.DeleteRun",
+    "RunService.ForkRun",
+    "RunService.SetDefaultEffort",
+    "RunService.VerifyRun",
+    "RuntimeService.ListProfileDiagnostics",
+    "WriterService.CancelWriterHandoff",
+    "WriterService.CommitWriterHandoff",
+    "WriterService.PrepareWriterHandoff"
+  ],
+  "provider_profile_fixtures": {
+    "contract_id": "dolgorae.gul-consumer-fixtures/v1",
+    "schema_version": 1,
+    "method_coverage": [
+      {
+        "method": "ArtifactService.GetArtifact",
+        "positive": "artifact_projection",
+        "negative": "artifact_authorization_or_integrity"
+      },
+      {
+        "method": "ArtifactService.ReadArtifactChunk",
+        "positive": "artifact_projection",
+        "negative": "artifact_range_or_integrity"
+      },
+      {
+        "method": "ControllerService.VerifyController",
+        "positive": "controller_verification_projection",
+        "negative": "controller_mismatch"
+      },
+      {
+        "method": "InteractionService.GetControllerInteraction",
+        "positive": "controller_interaction_projection",
+        "negative": "interaction_authorization"
+      },
+      {
+        "method": "InteractionService.ListPendingInteractions",
+        "positive": "interaction_summary_projection",
+        "negative": "foreign_run"
+      },
+      {
+        "method": "InteractionService.ResolveInteraction",
+        "positive": "controller_interaction_projection",
+        "negative": "protected_interaction_lost_response"
+      },
+      {
+        "method": "ObservationService.ListRunTimelineItems",
+        "positive": "timeline_interaction_projection",
+        "negative": "timeline_cursor_or_authorization"
+      },
+      {
+        "method": "ObservationService.WatchRunEvents",
+        "positive": "run_event_projection",
+        "negative": "slow_consumer_or_cursor"
+      },
+      {
+        "method": "OrchestrationService.GetOrchestratedSession",
+        "positive": "session_active",
+        "negative": "low_level_run_is_not_session"
+      },
+      {
+        "method": "OrchestrationService.ListOrchestratedSessionResults",
+        "positive": "results_page_one",
+        "negative": "result_cursor_foreign_session"
+      },
+      {
+        "method": "RunService.CloseRun",
+        "positive": "close_outcome_matrix",
+        "negative": "bounded_wait_expired"
+      },
+      {
+        "method": "RunService.GetRun",
+        "positive": "run_projection",
+        "negative": "foreign_run"
+      },
+      {
+        "method": "RunService.InterruptTurn",
+        "positive": "transition_error_projection",
+        "negative": "stale_aggregate_action"
+      },
+      {
+        "method": "RunService.ListRuns",
+        "positive": "run_projection",
+        "negative": "workspace_identity_mismatch"
+      },
+      {
+        "method": "RunService.PauseRun",
+        "positive": "transition_error_projection",
+        "negative": "stale_aggregate_action"
+      },
+      {
+        "method": "RunService.ReconcileRun",
+        "positive": "run_projection",
+        "negative": "controller_mismatch"
+      },
+      {
+        "method": "RunService.RecoverRun",
+        "positive": "run_projection",
+        "negative": "controller_mismatch"
+      },
+      {
+        "method": "RunService.ResumeRun",
+        "positive": "transition_error_projection",
+        "negative": "dedicated_server_start_failed"
+      },
+      {
+        "method": "RunService.StartRun",
+        "positive": "start_run_replay_projection",
+        "negative": "start_run_idempotency_conflict"
+      },
+      {
+        "method": "RunService.SubmitTurn",
+        "positive": "submit_turn_accepted",
+        "negative": "busy_or_exact_replay"
+      },
+      {
+        "method": "RuntimeService.GetCapabilities",
+        "positive": "credential_carrier_projection",
+        "negative": "unsupported_required_profile"
+      },
+      {
+        "method": "RuntimeService.GetProfile",
+        "positive": "profile_projection",
+        "negative": "profile_unavailable"
+      },
+      {
+        "method": "RuntimeService.InspectWorkspace",
+        "positive": "workspace_projection",
+        "negative": "workspace_identity_mismatch"
+      },
+      {
+        "method": "RuntimeService.ListProfiles",
+        "positive": "profile_projection",
+        "negative": "profile_contract_corrupt"
+      },
+      {
+        "method": "WriterService.AcquireWriter",
+        "positive": "writer_projection",
+        "negative": "writer_conflict"
+      },
+      {
+        "method": "WriterService.GetWorkspaceWriterStatus",
+        "positive": "writer_projection",
+        "negative": "workspace_identity_mismatch"
+      },
+      {
+        "method": "WriterService.ReleaseWriter",
+        "positive": "writer_projection",
+        "negative": "stale_writer_generation"
+      }
+    ],
+    "fixture_groups": {
+      "session_lifecycle_matrix": [
+        "session_active",
+        "intent_before_response_loss",
+        "unknown_child_effect",
+        "already_settled_session"
+      ],
+      "session_count_matrix": [
+        "session_active",
+        "session_source_corrupt_is_not_zero"
+      ],
+      "session_unavailable": [
+        "low_level_run_is_not_session",
+        "session_source_corrupt_is_not_zero"
+      ],
+      "close_outcome_matrix": [
+        "intent_before_response_loss",
+        "concurrent_compatible_close",
+        "concurrent_mismatched_interrupt",
+        "unknown_child_effect",
+        "already_settled_session",
+        "bounded_wait_expired"
+      ]
+    },
+    "positive": [
+      {
+        "id": "session_active",
+        "grpc_message": "dolgorae.public.v1.GetOrchestratedSessionResponse",
+        "grpc_json": {
+          "context": {
+            "protocolVersion": 1,
+            "serverInstanceId": "gateway-a"
+          },
+          "session": {
+            "sessionId": "018f47b2-6f4a-7cc1-9a2b-123456789abc",
+            "primaryRun": {
+              "workspace": {
+                "absolutePath": "/workspace",
+                "expectedWorkspaceId": "workspace-1"
+              },
+              "runId": "018f47b2-6f4a-7cc1-9a2b-123456789abc"
+            },
+            "aggregateRevision": "42",
+            "lifecycle": "ORCHESTRATED_SESSION_LIFECYCLE_ACTIVE",
+            "composition": "ORCHESTRATED_SESSION_COMPOSITION_BROKERED_HIERARCHY",
+            "approvalPolicy": "ORCHESTRATED_SESSION_APPROVAL_POLICY_USER_APPROVAL_REQUIRED",
+            "specialistPolicyName": "engineering",
+            "specialistPolicyRevision": "3",
+            "specialistPolicySha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "nonretiredMemberCount": "2",
+            "nonterminalSpawnCount": "1",
+            "pendingApprovalCount": "1",
+            "acceptedUnfinishedTaskCount": "1",
+            "unknownOutcomeTaskCount": "0",
+            "publishedResultCount": "1",
+            "closeIntent": "SESSION_CLOSE_INTENT_NONE",
+            "closeProgress": "SESSION_CLOSE_PROGRESS_NONE",
+            "recoveryClassification": "RECOVERY_CLASSIFICATION_NONE",
+            "requiredAction": "REQUIRED_CLIENT_ACTION_NONE",
+            "capturedAt": "2026-09-21T00:00:00Z",
+            "sourceRevision": "42",
+            "availability": "ORCHESTRATED_SESSION_AVAILABILITY_AVAILABLE"
+          }
+        }
+      },
+      {
+        "id": "results_page_one",
+        "grpc_message": "dolgorae.public.v1.ListOrchestratedSessionResultsResponse",
+        "grpc_json": {
+          "context": {
+            "protocolVersion": 1,
+            "serverInstanceId": "gateway-a"
+          },
+          "capturedPublicationHead": "7",
+          "sourceRevision": "43",
+          "capturedAt": "2026-09-21T00:00:01Z",
+          "items": [
+            {
+              "resultId": "result-7",
+              "taskId": "task-7",
+              "specialistRun": {
+                "workspace": {
+                  "absolutePath": "/workspace",
+                  "expectedWorkspaceId": "workspace-1"
+                },
+                "runId": "specialist-1"
+              },
+              "specialistRole": "implementation",
+              "publicationOrder": "7",
+              "publishedAt": "2026-09-21T00:00:00Z",
+              "format": "ORCHESTRATED_RESULT_FORMAT_UTF8_TEXT",
+              "byteLength": "4",
+              "sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+              "artifact": {
+                "artifactId": "artifact-7",
+                "kind": "ARTIFACT_KIND_FINAL_RESPONSE",
+                "visibility": "ARTIFACT_VISIBILITY_CONTROLLER_ONLY",
+                "mediaType": "text/plain; charset=utf-8",
+                "byteLength": "4",
+                "sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+              },
+              "artifactOwner": {
+                "workspace": {
+                  "absolutePath": "/workspace",
+                  "expectedWorkspaceId": "workspace-1"
+                },
+                "runId": "018f47b2-6f4a-7cc1-9a2b-123456789abc"
+              }
+            }
+          ],
+          "nextPageCursor": "opaque-head-7-after-7"
+        }
+      }
+    ],
+    "negative": [
+      {
+        "id": "low_level_run_is_not_session",
+        "method": "OrchestrationService.GetOrchestratedSession",
+        "outcome": "typed_invalid_target"
+      },
+      {
+        "id": "foreign_controller_hides_existence",
+        "method": "OrchestrationService.GetOrchestratedSession",
+        "outcome": "typed_authorization_failure_without_private_detail"
+      },
+      {
+        "id": "session_source_corrupt_is_not_zero",
+        "method": "OrchestrationService.GetOrchestratedSession",
+        "outcome": "typed_integrity_or_recovery_error"
+      },
+      {
+        "id": "result_cursor_malformed",
+        "method": "OrchestrationService.ListOrchestratedSessionResults",
+        "outcome": "typed_invalid_cursor"
+      },
+      {
+        "id": "result_cursor_foreign_session",
+        "method": "OrchestrationService.ListOrchestratedSessionResults",
+        "outcome": "typed_invalid_cursor"
+      },
+      {
+        "id": "result_limit_above_500",
+        "method": "OrchestrationService.ListOrchestratedSessionResults",
+        "outcome": "typed_invalid_request"
+      },
+      {
+        "id": "result_artifact_not_primary_owned",
+        "method": "OrchestrationService.ListOrchestratedSessionResults",
+        "outcome": "typed_integrity_error"
+      },
+      {
+        "id": "unimplemented_required_method",
+        "outcome": "not_advertised_and_unavailable"
+      },
+      {
+        "id": "unknown_decisive_enum",
+        "outcome": "refresh_and_fail_closed"
+      }
+    ],
+    "close_outcomes": [
+      {
+        "id": "intent_before_response_loss",
+        "operation_id": "close-1",
+        "query_progress": "SESSION_CLOSE_PROGRESS_SETTLING",
+        "client_action": "observe_without_resubmit"
+      },
+      {
+        "id": "concurrent_compatible_close",
+        "operation_id": "close-1",
+        "outcome": "same_operation"
+      },
+      {
+        "id": "concurrent_mismatched_interrupt",
+        "operation_id": "close-1",
+        "outcome": "typed_conflict_no_new_operation"
+      },
+      {
+        "id": "unknown_child_effect",
+        "operation_id": "close-1",
+        "outcome": "OUTCOME_UNKNOWN",
+        "retry": "RETRY_CLASSIFICATION_FORBIDDEN"
+      },
+      {
+        "id": "already_settled_session",
+        "outcome": "authoritative_closed_response_without_new_retirement_operation"
+      },
+      {
+        "id": "bounded_wait_expired",
+        "operation_id": "close-1",
+        "outcome": "SESSION_CLOSE_IN_PROGRESS",
+        "retry": "RETRY_CLASSIFICATION_FORBIDDEN"
+      }
+    ]
+  },
   "production_cli_fallback": false,
   "unknown_required_enum": "reject",
   "unknown_optional_field": "preserve_only_when_allowlisted"

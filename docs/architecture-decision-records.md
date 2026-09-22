@@ -425,6 +425,8 @@ The Machine CLI remains available through an explicit diagnostic/conformance ada
 
 The accepted contract at Dolgorae revision `85a8862f784cc57701751d81a9e03bf7c5722818` provides the concrete Runtime, Run, Observation, Interaction, Writer, Controller, and Artifact method inventory, including unary artifact chunks and typed Run streams. Gate A closes publication and deterministic descriptor reproduction. Gate B pins that source and checked generated fixtures through dependency-lock SHA-256 `c4f91aa3e2add1093880684e5c96fdbb6239aef6a85261a0adf6b585e2db8863` and generated-lock SHA-256 `8a6a614a3a08c585f9a62f74095a0237d47feefba802e2dfa3ce13be5fbe0bf6`. E2-T0 remains blocked until an executable, API version, capability set, typed-error contract, and live smoke evidence are pinned; this ADR is not evidence that runtime software is accepted or implemented.
 
+E12-T1 supersedes that historical consumer pin for new implementation with immutable TASK-053 commit `21aefe5b2a8dc6fb18a58338090348b23d2f0a4a`, dependency-lock SHA-256 `8f52ae66e126f37013d7842b2113fc509d21af4e4fc465cecdbeef7e21619f01`, and generated-lock SHA-256 `43fecc3b63ca47b8a4330d1509047a2b3a8be4735c0bee5e6f5b43edca81c3d5`. The checked profile distinguishes 27 required methods from nine unavailable descriptor methods and retains the Machine CLI as diagnostic-only. This decision accepts reproducible contract tooling, not runtime implementation, executable qualification, or live compatibility.
+
 ### ADR-0044: Derive a closed Gul action set and activate threadless writing through the first write Turn
 
 **Scope amendment, ADR-0050:** the first-release closed set is REQ-WRITER-008,
@@ -469,7 +471,7 @@ same-principal successor creation below belongs only to deferred E4-T4.
 
 The public Dolgorae API verifies Controller carriers but does not create them for Gul. Gul therefore owns `DolgoraeControllerCredentialStore` with `Create`, `Validate`, `ResolveCarrierReference`, `RemoveUnused`, and a same-principal successor operation. Dolgorae remains authoritative for credential meaning, binding, and authorization and verifies the supplied carrier before StartRun, CreateWriteContinuation, or another authorized call.
 
-The store writes schema version 1 beneath `~/.dolgorae/controller-carriers/gul/<gul-installation-id>/`. A credential contains a UUIDv7 Controller ID, `interactive_client` kind, stable trusted-local installation ID, stable trusted-local account subject ID, and 32 cryptographically random bytes encoded as unpadded base64url. Files are exclusive-create `0600`, parents are `0700`, no overwrite or symlink is permitted, file and parent are fsynced, and secret buffers are cleared where practical. Ordinary SQLite stores only a logical relative key; every authorized call derives and revalidates the absolute carrier for containment, owner, type, mode, and symlink absence.
+The store writes schema version 1 beneath `~/.dolgorae/controller-carriers/gul/<installation-id>/`. A credential contains a UUIDv7 Controller ID, `interactive_client` kind, stable trusted-local installation ID, stable trusted-local account subject ID, and 32 cryptographically random bytes encoded as unpadded base64url. Files are exclusive-create `0600`, parents are `0700`, no overwrite or symlink is permitted, file and parent are fsynced, and secret buffers are cleared where practical. Ordinary SQLite stores only a logical relative key; every authorized call derives and revalidates the absolute carrier for containment, owner, type, mode, and symlink absence.
 
 A continuation receives a distinct Controller ID and capability at generation 1 while preserving the source `kind`, `subject_id`, and stable Gul `instance_id` individually. It also preserves the normalized principal `(kind, subject_id)` when subject ID exists, otherwise `(kind, instance_id)`; a matching subject never permits a different installation identity. Its credential identity and idempotency key are persisted before the first call and retained across ambiguous responses. One credential per Direct Session/Run remains a Gul security policy rather than a universal Dolgorae invariant. Operator capabilities remain prohibited. External Controller adoption is a Gul application workflow, not a credential-store capability. It requires host-controlled selection, local carrier validation/resolution, side-effect-free provider `VerifyController`, atomic binding replacement, and fresh Run including recovery/configuration, Writer, Interaction, and timeline reads as needed.
 
@@ -645,17 +647,18 @@ Epics; changing only the summary order; deleting or reusing old Task IDs;
 combining the entire application into one oversized Epic; or weakening security
 and actual-provider acceptance to make an earlier Epic appear complete.
 
-### ADR-0053: Use a compatible system Buf for contract linting
+### ADR-0053: Use a compatible system Buf for contract checks
 
 **Status:** Accepted, 2026-09-21
 
 Resolve Buf from the system `PATH` and accept versions `>=1.66.1,<2.0.0`. Buf is
-used only for `buf lint`; `protoc` and every checked-artifact generator retain
-their exact pins. Contract generation therefore remains byte-reproducible while
-compatible Buf v1 patch and minor releases do not block the command facade.
+used for linting, descriptor-set construction, and additive breaking checks.
+The checked descriptor was reproduced with Buf 1.69.0 and is compared byte for
+byte; an in-range release that emits different bytes fails closed. `protoc` and
+the language-client generators retain their exact pins.
 
 Both the host checker and contract-generation boundary fail closed below the
-minimum or at the next major version, and lint itself remains mandatory. The
+minimum or at the next major version, and every Buf check remains mandatory. The
 historical Gate A record that Buf 1.66.1 passed is unchanged evidence of that
 completed run, not a current exact-host requirement.
 

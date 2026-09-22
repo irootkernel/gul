@@ -28,7 +28,7 @@ async function collectFiles(root) {
 }
 
 const supportedSchemaKeywords = new Set([
-  "$defs", "$id", "$ref", "$schema", "additionalProperties", "allOf", "anyOf",
+  "$comment", "$defs", "$id", "$ref", "$schema", "additionalProperties", "allOf", "anyOf",
   "const", "contentEncoding", "description", "else", "enum", "format", "if",
   "items", "maxItems", "maximum", "maxLength", "minItems", "minimum", "minLength",
   "minProperties", "not", "oneOf", "pattern", "properties", "required", "then",
@@ -135,6 +135,7 @@ const errorActionMap = JSON.parse(await readFile(join(generatedRoot, "policy/err
 const mutationMap = JSON.parse(await readFile(join(generatedRoot, "policy/mutation-map.v1.json"), "utf8"));
 const identifierEnumMap = JSON.parse(await readFile(join(generatedRoot, "policy/identifier-enum-map.v1.json"), "utf8"));
 const projectionReplayMap = JSON.parse(await readFile(join(generatedRoot, "policy/projection-replay-map.v1.json"), "utf8"));
+const credentialBoundary = JSON.parse(await readFile(join(generatedRoot, "policy/credential-boundary.v1.json"), "utf8"));
 const machineSchemaBytes = await readFile(join(contractRoot, "upstream/dolgorae-machine-v1.schema.json"));
 const machineSchema = JSON.parse(machineSchemaBytes);
 assertSupportedSchema(machineSchema);
@@ -145,7 +146,11 @@ const errorActions = JSON.parse(await readFile(join(contractRoot, "upstream/dolg
 const descriptorMetadata = JSON.parse(await readFile(join(contractRoot, "upstream/dolgorae-public-v1.descriptor.json"), "utf8"));
 const conformance = JSON.parse(await readFile(join(contractRoot, "upstream/dolgorae-grpc-conformance-v1.json"), "utf8"));
 const verificationIndex = JSON.parse(await readFile(join(contractRoot, "upstream/verification-index-v1.json"), "utf8"));
-const credentialSchema = JSON.parse(await readFile(join(contractRoot, "upstream/dolgorae-controller-credential-v1.schema.json"), "utf8"));
+const credentialSchemaBytes = await readFile(join(contractRoot, "upstream/dolgorae-controller-credential-v1.schema.json"));
+const credentialSchema = JSON.parse(credentialSchemaBytes);
+const consumerProfile = JSON.parse(await readFile(join(contractRoot, "upstream/dolgorae-gul-consumer-v1.json"), "utf8"));
+const providerFixtures = JSON.parse(await readFile(join(contractRoot, "upstream/dolgorae-gul-consumer-v1.fixtures.json"), "utf8"));
+const producerLock = JSON.parse(await readFile(join(contractRoot, "upstream/dolgorae-gul-consumer-v1.lock.json"), "utf8"));
 const dependencyLockBytes = await readFile(join(contractRoot, "dependency-lock.json"));
 const dependencyLock = JSON.parse(dependencyLockBytes);
 const generatedLockBytes = await readFile(join(generatedRoot, "generated-lock.json"));
@@ -157,7 +162,7 @@ const versionManifest = Object.fromEntries((await readFile(join(contractRoot, ".
   .filter((line) => /^GUL_[A-Z0-9_]+=/.test(line))
   .map((line) => line.split("=", 2)));
 
-if (inventory.service_count !== 7 || inventory.method_count !== 34) throw new Error("public inventory must contain 7 services and 34 methods");
+if (inventory.service_count !== 8 || inventory.method_count !== 36) throw new Error("public inventory must contain 8 services and 36 methods");
 const expectedPackages = {
   "@bufbuild/protobuf": versionManifest.GUL_PROTOBUF_ES_VERSION,
   "@connectrpc/connect": versionManifest.GUL_CONNECT_ES_VERSION,
@@ -176,11 +181,18 @@ for (const [module, expected] of [["connectrpc.com/connect", versionManifest.GUL
 const descriptorMethods = inventory.services.flatMap((service) => service.methods.map((method) => `${service.name}.${method.name}`)).sort();
 const capabilityMethods = [...capabilities.properties.grpc_methods.items.enum].sort();
 if (!equal(descriptorMethods, capabilityMethods)) throw new Error("descriptor and capability method inventories differ");
-if (!equal([...capabilityMap.supported_methods].sort(), descriptorMethods)) throw new Error("generated capability map and descriptor inventories differ");
+const requiredMethods = [...consumerProfile.required_methods].sort();
+const unavailableMethods = [...consumerProfile.unavailable_until_later_tasks].sort();
+if (consumerProfile.descriptor_method_count !== 36 || consumerProfile.required_method_count !== 27 || requiredMethods.length !== 27 || unavailableMethods.length !== 9) throw new Error("consumer profile method counts drifted");
+if (requiredMethods.some((method) => unavailableMethods.includes(method)) || !equal([...requiredMethods, ...unavailableMethods].sort(), descriptorMethods)) throw new Error("consumer required and unavailable methods must partition the descriptor inventory");
+if (!equal([...capabilityMap.known_methods].sort(), descriptorMethods)) throw new Error("generated capability known-method inventory differs from the descriptor");
+if (!equal([...capabilityMap.required_methods].sort(), requiredMethods) || !equal([...capabilityMap.unavailable_methods].sort(), unavailableMethods)) throw new Error("generated capability consumer profile drifted");
 if (!equal(capabilityMap.stage_requirements, capabilities.properties.grpc_methods["x-stageRequirements"])) throw new Error("generated capability stage requirements drifted");
 
-if (operations.operations.length !== 36) throw new Error(`expected 36 Gul semantic operations, found ${operations.operations.length}`);
+if (operations.operations.length !== 31) throw new Error(`expected 31 Gul semantic operations, found ${operations.operations.length}`);
 if (new Set(operations.operations.map((entry) => entry.operation)).size !== operations.operations.length) throw new Error("duplicate Gul semantic operation");
+const operationMethods = [...new Set(operations.operations.filter((entry) => entry.owner.includes("Service.")).map((entry) => entry.owner))].sort();
+if (!equal(operationMethods, requiredMethods)) throw new Error("operation-map RPC owners must exactly match the required consumer methods");
 if (events.events.length !== 20) throw new Error(`expected 20 event invalidation rows, found ${events.events.length}`);
 if (new Set(events.events.map((entry) => entry.variant)).size !== events.events.length) throw new Error("duplicate event invalidation variant");
 const durableEvent = inventory.messages.find((message) => message.name.endsWith(".DurableRunEvent"));
@@ -216,15 +228,53 @@ const expectedOperationIdempotency = operations.operations.map((entry) => ({
 if (!equal(mutationMap.gul_operation_idempotency, expectedOperationIdempotency)) throw new Error("generated operation idempotency policy drifted");
 if (errorActionMap.fail_closed_on_unknown_detail !== true || !equal(errorActionMap.mapping, errorActions)) throw new Error("generated error action policy drifted");
 if (fixtures.production_cli_fallback !== false || machineFixture.production_fallback !== false) throw new Error("production CLI fallback must remain false");
+if (!equal([...fixtures.required_rpcs].sort(), requiredMethods) || !equal([...fixtures.unavailable_rpcs].sort(), unavailableMethods) || !equal(fixtures.provider_profile_fixtures, providerFixtures)) throw new Error("generated consumer-profile fixtures drifted");
 if (fixtures.protocol_handshake.minimum !== descriptorMetadata.minimum_client_protocol_version || fixtures.protocol_handshake.maximum !== descriptorMetadata.maximum_client_protocol_version) throw new Error("protocol handshake bounds drifted from descriptor metadata");
 if (fixtures.protocol_handshake.cases.find((entry) => entry.outcome === "compatible")?.server !== descriptorMetadata.protocol_version) throw new Error("protocol handshake accepted version drifted");
 if (fixtures.interaction_limits.effective_response_bytes !== Math.min(fixtures.interaction_limits.provider_response_bytes, fixtures.interaction_limits.gul_response_bytes)) throw new Error("effective Interaction response limit drifted");
 if (fixtures.interaction_limits.effective_safe_payload_bytes !== Math.min(fixtures.interaction_limits.provider_safe_payload_bytes, fixtures.interaction_limits.gul_safe_payload_bytes)) throw new Error("effective Interaction payload limit drifted");
 
-if (conformance.schema_version !== 1 || conformance.contract_cases.length !== 24 || conformance.contract_negative_fixtures.length !== 12 || conformance.negative_fixtures.length !== 6) throw new Error("gRPC conformance inventory drifted");
+if (conformance.schema_version !== 1 || conformance.contract_cases.length !== 25 || conformance.contract_negative_fixtures.length !== 12 || conformance.negative_fixtures.length !== 6) throw new Error("gRPC conformance inventory drifted");
 const verificationSections = Object.values(verificationIndex.sections);
 if (verificationIndex.schema_version !== 1 || verificationSections.length !== 15 || verificationSections.some((section) => !Array.isArray(section.tasks) || !Array.isArray(section.catches))) throw new Error("verification index structure drifted");
-if (credentialSchema.properties.schema_version.const !== 1 || credentialSchema.additionalProperties !== false || !credentialSchema.required.includes("capability")) throw new Error("controller credential schema structure drifted");
+const credentialCapability = credentialSchema.properties.capability;
+const credentialKinds = credentialSchema.properties.kind.enum;
+if (credentialSchema.properties.schema_version.const !== 1 || credentialSchema.additionalProperties !== false || !credentialSchema.required.includes("capability") || credentialCapability.contentEncoding !== "base64url" || credentialCapability.pattern !== "^[A-Za-z0-9_-]{43}$" || credentialCapability["x-canonicalDecodedBytes"] !== 32 || credentialKinds.some((kind) => /operator|admin/i.test(kind))) throw new Error("controller credential schema structure drifted");
+
+const profileRequestNames = ["ListProfilesRequest", "GetProfileRequest"];
+for (const name of profileRequestNames) {
+  const message = inventory.messages.find((entry) => entry.name.endsWith(`.${name}`));
+  if (!message || message.fields.some((field) => field.name === "workspace" || field.type_name.endsWith(".WorkspaceRef"))) throw new Error(`${name} must not carry WorkspaceRef`);
+}
+if (consumerProfile.close_run.transparent_retry !== "forbidden" || consumerProfile.close_run.transport_loss_follow_up !== "OrchestrationService.GetOrchestratedSession") throw new Error("CloseRun retry and reconciliation policy drifted");
+const closeFixtures = new Map(providerFixtures.close_outcomes.map((entry) => [entry.id, entry]));
+if (closeFixtures.get("intent_before_response_loss")?.client_action !== "observe_without_resubmit" || closeFixtures.get("concurrent_compatible_close")?.outcome !== "same_operation" || closeFixtures.get("concurrent_mismatched_interrupt")?.outcome !== "typed_conflict_no_new_operation" || closeFixtures.get("unknown_child_effect")?.retry !== "RETRY_CLASSIFICATION_FORBIDDEN") throw new Error("CloseRun operation-correlation fixtures drifted");
+if (providerFixtures.method_coverage.length !== 27 || !equal(providerFixtures.method_coverage.map((entry) => entry.method).sort(), requiredMethods)) throw new Error("provider fixture coverage does not match the required consumer profile");
+if (!Array.isArray(consumerProfile.field_sources) || consumerProfile.field_sources.length === 0 || consumerProfile.field_sources.some((entry) => !entry.field || !entry.source || !entry.fixture || !entry.owner)) throw new Error("consumer field-sourceability inventory is incomplete");
+if (mutations.mutations.length !== 18) throw new Error(`expected 18 mutation policies, found ${mutations.mutations.length}`);
+
+if (dependencyLock.source.revision !== "21aefe5b2a8dc6fb18a58338090348b23d2f0a4a" || inventory.source_revision !== dependencyLock.source.revision || generatedLock.source_revision !== dependencyLock.source.revision) throw new Error("TASK-053 completion revision is not pinned consistently");
+const expectedProducerTaskInputRevision = "a963f3601b1e7036432501b6d8946c8c62c1466d";
+if (dependencyLock.source.producer_task_input_revision !== expectedProducerTaskInputRevision || producerLock.source_revision.task_input_commit !== expectedProducerTaskInputRevision || consumerProfile.baseline_commit !== expectedProducerTaskInputRevision || expectedProducerTaskInputRevision === dependencyLock.source.revision) throw new Error("producer task-input identity is not pinned distinctly from the completion revision");
+const dependencyByPath = new Map(dependencyLock.files.map((entry) => [entry.path, entry.sha256]));
+for (const artifact of producerLock.artifacts.filter((entry) => !entry.path.startsWith("generated/"))) {
+  const relativePath = artifact.path.startsWith("baselines/") ? `upstream/${artifact.path}` : `upstream/${artifact.path}`;
+  const bytes = await readFile(join(contractRoot, relativePath));
+  if (sha256(bytes) !== artifact.sha256 || dependencyByPath.get(relativePath) !== artifact.sha256) throw new Error(`producer lock correlation failed for ${artifact.path}`);
+}
+if (descriptorMetadata.buf_breaking?.result !== "compatible_additive" || descriptorMetadata.buf_breaking?.baseline_sha256 !== dependencyByPath.get("upstream/baselines/dolgorae-public-v1-pre-task-053.descriptor.pb")) throw new Error("additive descriptor baseline evidence drifted");
+const credentialArtifact = producerLock.artifacts.find((entry) => entry.path === "dolgorae-controller-credential-v1.schema.json");
+const credentialProperties = capabilities.properties.controller_credential.properties;
+if (!credentialArtifact || credentialArtifact.sha256 !== sha256(credentialSchemaBytes) || credentialProperties.schema_sha256.const !== credentialArtifact.sha256) throw new Error("credential schema digest drifted from producer lock or capabilities");
+const credentialProjection = conformance.adapter_parity_fixtures.find((entry) => entry.id === "credential_carrier_projection")?.grpc_json?.controllerCarrier;
+if (!credentialProjection || credentialProjection.capabilityByteLength !== credentialProperties.capability_byte_length.const || credentialProjection.parentDirectoryMode !== Number.parseInt(credentialProperties.parent_directory_mode.const, 8) || credentialProjection.credentialFileMode !== Number.parseInt(credentialProperties.file_mode.const, 8) || credentialProjection.symlinksForbidden !== true || credentialProjection.createExclusiveRequired !== true) throw new Error("credential carrier conformance projection drifted");
+const architectureText = await readFile(join(contractRoot, "../docs/architecture.md"), "utf8");
+if (!architectureText.includes("~/.dolgorae/controller-carriers/gul/<installation-id>") || !architectureText.includes("no production fake/CLI fallback") || !architectureText.includes("never stores or uses an Operator capability")) throw new Error("carrier-root or production authority boundary is missing from architecture");
+if (operations.operations.some((entry) => entry.verification !== "E12 pinned contract; not runtime/live evidence")) throw new Error("every E12 operation must retain the contract-only verification boundary");
+const roadmapText = await readFile(join(contractRoot, "../docs/roadmap.md"), "utf8");
+if (!roadmapText.includes("| Active Task | None |") || !roadmapText.includes("| E12 | In Review |") || !roadmapText.includes("| E12-T1 | Pre-release | Completed |")) throw new Error("E12-T1 completion lifecycle drifted");
+const requiredSpecsText = await readFile(join(contractRoot, "../docs/required-specs.md"), "utf8");
+if (!requiredSpecsText.includes("No Gul product runtime behavior exists.") || !requiredSpecsText.includes("| REQ-CONSUMER-001 | Immutable TASK-053 consumer source")) throw new Error("REQ-CONSUMER-001 contract-only Current State drifted");
 
 if (machineFixture.schema_sha256 !== sha256(machineSchemaBytes)) throw new Error("Machine CLI fixture schema digest drifted");
 if (!schemaValid(machineSchema, machineFixture.valid, machineSchema)) throw new Error("valid Machine CLI comparison fixture failed exact schema validation");
@@ -257,6 +307,34 @@ if (!equal(identifierEnumMap.enums, inventory.enums)) throw new Error("generated
 if (!equal(projectionReplayMap.event_invalidation, events.events)) throw new Error("generated projection invalidation policy drifted");
 if (!equal(projectionReplayMap.convergence, fixtures.projection_convergence)) throw new Error("generated projection convergence policy drifted");
 if (!equal(projectionReplayMap.replay_material, fixtures.replay_material) || !equal(projectionReplayMap.stream_end, fixtures.stream_end)) throw new Error("generated replay policy drifted");
+const replayOperations = Object.keys(projectionReplayMap.replay_material);
+if (!equal([...replayOperations].sort(), ["ResolveInteraction", "StartRun", "SubmitTurn"]) || replayOperations.some((operation) => unavailableMethods.some((rpc) => rpc.endsWith(`.${operation}`))) || replayOperations.some((operation) => !operations.operations.some((entry) => entry.operation === operation))) throw new Error("Gul replay policy contains an unavailable or unknown operation");
+const credentialValue = (name) => credentialProperties[name].const;
+const carrierRoot = capabilities.properties.controller_carrier_root.const.replace(/^home\//, "~/");
+const clientDescendant = credentialValue("client_descendant_pattern").replace("<client>", "gul").replace(/\/$/, "");
+const expectedCredentialBoundary = {
+  schema_version: 1,
+  schema_id: credentialValue("schema_id"),
+  credential_schema_version: credentialValue("schema_version"),
+  credential_schema_sha256: credentialValue("schema_sha256"),
+  accepted_kinds: credentialValue("accepted_kinds"),
+  capability_byte_length: credentialValue("capability_byte_length"),
+  capability_encoding: credentialValue("capability_encoding"),
+  carrier_root: `${carrierRoot}/${clientDescendant}`,
+  parent_directory_mode: credentialValue("parent_directory_mode"),
+  file_mode: credentialValue("file_mode"),
+  same_uid: credentialValue("same_uid"),
+  regular_file: credentialValue("regular_file"),
+  symlinks: credentialValue("symlinks"),
+  create_exclusive: credentialValue("create_exclusive"),
+  maximum_file_bytes: credentialValue("maximum_file_bytes"),
+  client_descendant_pattern: clientDescendant,
+  normalized_principal: credentialValue("normalized_principal"),
+  initial_generation: credentialValue("initial_generation"),
+  operator_capability: "forbidden",
+  overwrite: false,
+};
+if (!equal(credentialBoundary, expectedCredentialBoundary)) throw new Error("generated credential boundary drifted");
 
 for (const entry of generatedLock.files) {
   const bytes = await readFile(join(generatedRoot, entry.path));
@@ -271,10 +349,12 @@ if (!equal(dependencyLock.files.map((entry) => entry.path).sort(), upstreamPaths
 const dependencyLockDigest = sha256(dependencyLockBytes);
 const generatedLockDigest = sha256(generatedLockBytes);
 // required-specs.md names promoted requirements but deliberately carries no
-// lock digest; these four documents are the Gate B lifecycle and design records.
+// lock digest; these four documents are the E12 lifecycle and design records.
 for (const document of ["architecture-decision-records.md", "architecture.md", "implementation-memo.md", "roadmap.md"]) {
   const text = await readFile(join(contractRoot, "../docs", document), "utf8");
-  if (!text.includes(dependencyLockDigest) || !text.includes(generatedLockDigest)) throw new Error(`${document} does not carry the current Gate B lock digests`);
+  if (!text.includes(dependencyLockDigest) || !text.includes(generatedLockDigest)) throw new Error(`${document} does not carry the current E12 lock digests`);
 }
+const implementationMemoText = await readFile(join(contractRoot, "../docs/implementation-memo.md"), "utf8");
+if (implementationMemoText.includes("E12-T1 must still reproduce") || implementationMemoText.includes("Existing checked/generated files are intentionally unchanged")) throw new Error("implementation memo still describes TASK-053 adoption as outstanding");
 
 console.log(`contract validation passed: ${inventory.method_count} RPCs, ${operations.operations.length} operations, ${events.events.length} event variants, ${generatedLock.files.length} generated files`);

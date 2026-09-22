@@ -3,7 +3,7 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import { AcquireWriterRequest, CancelWriterHandoffRequest, CloseRunRequest, CommitWriterHandoffRequest, CreateWriteContinuationRequest, CreateWriteContinuationResponse, DeleteRunRequest, DeleteRunResponse, ForkRunRequest, GetArtifactRequest, GetArtifactResponse, GetCapabilitiesRequest, GetCapabilitiesResponse, GetControllerInteractionRequest, GetControllerInteractionResponse, GetProfileRequest, GetProfileResponse, GetRunRequest, GetRunResponse, GetWorkspaceWriterStatusRequest, GetWorkspaceWriterStatusResponse, InspectWorkspaceRequest, InspectWorkspaceResponse, InterruptTurnRequest, ListPendingInteractionsRequest, ListPendingInteractionsResponse, ListProfileDiagnosticsRequest, ListProfileDiagnosticsResponse, ListProfilesRequest, ListProfilesResponse, ListRunsRequest, ListRunsResponse, ListRunTimelineItemsRequest, ListRunTimelineItemsResponse, PauseRunRequest, PrepareWriterHandoffRequest, ReadArtifactChunkRequest, ReadArtifactChunkResponse, ReconcileRunRequest, RecoverRunRequest, ReleaseWriterRequest, ResolveInteractionRequest, ResolveInteractionResponse, ResumeRunRequest, RunEventEnvelope, RunMutationResponse, SetDefaultEffortRequest, StartRunRequest, StartRunResponse, SubmitTurnAccepted, SubmitTurnRequest, VerifyControllerRequest, VerifyControllerResponse, VerifyRunRequest, VerifyRunResponse, WatchRunEventsRequest, WriterHandoffResponse, WriterState } from "./dolgorae_pb";
+import { AcquireWriterRequest, CancelWriterHandoffRequest, CloseRunRequest, CommitWriterHandoffRequest, CreateWriteContinuationRequest, CreateWriteContinuationResponse, DeleteRunRequest, DeleteRunResponse, ForkRunRequest, GetArtifactRequest, GetArtifactResponse, GetCapabilitiesRequest, GetCapabilitiesResponse, GetControllerInteractionRequest, GetControllerInteractionResponse, GetOrchestratedSessionRequest, GetOrchestratedSessionResponse, GetProfileRequest, GetProfileResponse, GetRunRequest, GetRunResponse, GetWorkspaceWriterStatusRequest, GetWorkspaceWriterStatusResponse, InspectWorkspaceRequest, InspectWorkspaceResponse, InterruptTurnRequest, ListOrchestratedSessionResultsRequest, ListOrchestratedSessionResultsResponse, ListPendingInteractionsRequest, ListPendingInteractionsResponse, ListProfileDiagnosticsRequest, ListProfileDiagnosticsResponse, ListProfilesRequest, ListProfilesResponse, ListRunsRequest, ListRunsResponse, ListRunTimelineItemsRequest, ListRunTimelineItemsResponse, PauseRunRequest, PrepareWriterHandoffRequest, ReadArtifactChunkRequest, ReadArtifactChunkResponse, ReconcileRunRequest, RecoverRunRequest, ReleaseWriterRequest, ResolveInteractionRequest, ResolveInteractionResponse, ResumeRunRequest, RunEventEnvelope, RunMutationResponse, SetDefaultEffortRequest, StartRunRequest, StartRunResponse, SubmitTurnAccepted, SubmitTurnRequest, VerifyControllerRequest, VerifyControllerResponse, VerifyRunRequest, VerifyRunResponse, WatchRunEventsRequest, WriterHandoffResponse, WriterState } from "./dolgorae_pb";
 import { MethodKind } from "@bufbuild/protobuf";
 
 /**
@@ -370,6 +370,33 @@ export const ArtifactService = {
       name: "ReadArtifactChunk",
       I: ReadArtifactChunkRequest,
       O: ReadArtifactChunkResponse,
+      kind: MethodKind.Unary,
+    },
+  }
+} as const;
+
+/**
+ * @generated from service dolgorae.public.v1.OrchestrationService
+ */
+export const OrchestrationService = {
+  typeName: "dolgorae.public.v1.OrchestrationService",
+  methods: {
+    /**
+     * @generated from rpc dolgorae.public.v1.OrchestrationService.GetOrchestratedSession
+     */
+    getOrchestratedSession: {
+      name: "GetOrchestratedSession",
+      I: GetOrchestratedSessionRequest,
+      O: GetOrchestratedSessionResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * @generated from rpc dolgorae.public.v1.OrchestrationService.ListOrchestratedSessionResults
+     */
+    listOrchestratedSessionResults: {
+      name: "ListOrchestratedSessionResults",
+      I: ListOrchestratedSessionResultsRequest,
+      O: ListOrchestratedSessionResultsResponse,
       kind: MethodKind.Unary,
     },
   }

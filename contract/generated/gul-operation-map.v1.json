@@ -13,7 +13,7 @@
       "reconciliation": "Repeat with protocol zero and the same client range",
       "projection": "Replace protocol/capability projection",
       "capability": "Method is handshake authority",
-      "verification": "gate_b_pinned"
+      "verification": "E12 pinned contract; not runtime/live evidence"
     },
     {
       "operation": "InspectWorkspace",
@@ -27,35 +27,35 @@
       "reconciliation": "Repeat same path/expected-ID mode",
       "projection": "Replace workspace identity/inspection; no profile projection",
       "capability": "Supported method",
-      "verification": "gate_b_pinned"
+      "verification": "E12 pinned contract; not runtime/live evidence"
     },
     {
       "operation": "ListProfiles",
       "owner": "RuntimeService.ListProfiles",
       "wire": "ListProfilesRequest → ListProfilesResponse",
       "controller": "None",
-      "workspace": "Required WorkspaceRef",
+      "workspace": "None; user-global Profile registry",
       "idempotency": "Read",
       "timeout": "Bounded read",
       "retry": "Bounded repeat",
       "reconciliation": "Repeat read",
       "projection": "Replace profile summaries",
       "capability": "Supported method",
-      "verification": "gate_b_pinned"
+      "verification": "E12 pinned contract; not runtime/live evidence"
     },
     {
       "operation": "GetProfile",
       "owner": "RuntimeService.GetProfile",
       "wire": "GetProfileRequest → GetProfileResponse",
       "controller": "None",
-      "workspace": "Required WorkspaceRef and profile name",
+      "workspace": "Global profile name; no WorkspaceRef",
       "idempotency": "Read",
       "timeout": "Bounded read",
       "retry": "Bounded repeat",
       "reconciliation": "Repeat read",
       "projection": "Replace selected profile projection",
       "capability": "Supported method",
-      "verification": "gate_b_pinned"
+      "verification": "E12 pinned contract; not runtime/live evidence"
     },
     {
       "operation": "StartRun",
@@ -69,7 +69,7 @@
       "reconciliation": "Exact replay first; Controller-matched ListRuns second; GetRun/ReconcileRun after ID",
       "projection": "Replace Run, binding, and configuration",
       "capability": "persistent_runs, controller_binding",
-      "verification": "gate_b_pinned"
+      "verification": "E12 pinned contract; not runtime/live evidence"
     },
     {
       "operation": "ListRuns",
@@ -83,7 +83,7 @@
       "reconciliation": "Repeat read",
       "projection": "Replace Run summaries",
       "capability": "persistent_runs",
-      "verification": "gate_b_pinned"
+      "verification": "E12 pinned contract; not runtime/live evidence"
     },
     {
       "operation": "GetRun",
@@ -97,7 +97,7 @@
       "reconciliation": "Repeat read",
       "projection": "Replace authoritative Run snapshot and configuration",
       "capability": "persistent_runs",
-      "verification": "gate_b_pinned"
+      "verification": "E12 pinned contract; not runtime/live evidence"
     },
     {
       "operation": "RefreshRunSnapshot",
@@ -111,7 +111,7 @@
       "reconciliation": "Repeat read; repair cursor uncertainty",
       "projection": "Same as GetRun",
       "capability": "persistent_runs",
-      "verification": "gate_b_pinned"
+      "verification": "E12 pinned contract; not runtime/live evidence"
     },
     {
       "operation": "SubmitTurn",
@@ -125,7 +125,7 @@
       "reconciliation": "GetRun and timeline; after restart preserve OutcomeUnknown unless acceptance/non-acceptance is proved",
       "projection": "Replace accepted Turn, Run, and Writer projections",
       "capability": "persistent_runs; write uses writer features",
-      "verification": "gate_b_pinned"
+      "verification": "E12 pinned contract; not runtime/live evidence"
     },
     {
       "operation": "InterruptTurn",
@@ -139,7 +139,7 @@
       "reconciliation": "GetRun; reconcile if outcome unknown",
       "projection": "Replace Run projection",
       "capability": "Supported method",
-      "verification": "gate_b_pinned"
+      "verification": "E12 pinned contract; not runtime/live evidence"
     },
     {
       "operation": "PauseRun",
@@ -153,7 +153,7 @@
       "reconciliation": "GetRun; reconcile if required",
       "projection": "Replace Run projection",
       "capability": "Supported method",
-      "verification": "gate_b_pinned"
+      "verification": "E12 pinned contract; not runtime/live evidence"
     },
     {
       "operation": "ResumeRun",
@@ -167,77 +167,49 @@
       "reconciliation": "GetRun; reconcile if required",
       "projection": "Replace Run projection",
       "capability": "Supported method",
-      "verification": "gate_b_pinned"
+      "verification": "E12 pinned contract; not runtime/live evidence"
     },
     {
       "operation": "CloseRun",
       "owner": "RunService.CloseRun",
       "wire": "CloseRunRequest → RunMutationResponse",
-      "controller": "Session Controller",
-      "workspace": "Required RunRef/WorkspaceRef",
-      "idempotency": "Tokenless expected revision",
-      "timeout": "10s",
+      "controller": "Primary Session Controller",
+      "workspace": "Primary RunRef/WorkspaceRef",
+      "idempotency": "Tokenless expected revision; explicit interrupt consent",
+      "timeout": "10s bounded call",
       "retry": "No automatic replay",
-      "reconciliation": "GetRun; reconcile if required",
-      "projection": "Replace closed Run projection",
-      "capability": "Supported method",
-      "verification": "gate_b_pinned"
-    },
-    {
-      "operation": "DeleteRun",
-      "owner": "RunService.DeleteRun",
-      "wire": "DeleteRunRequest → DeleteRunResponse",
-      "controller": "Session Controller",
-      "workspace": "Required RunRef/WorkspaceRef",
-      "idempotency": "Tokenless confirmation + expected revision",
-      "timeout": "30s",
-      "retry": "No automatic replay",
-      "reconciliation": "Confirm absence through ListRuns and prior confirmation",
-      "projection": "Apply deletion receipt; invalidate/remove Run projection",
-      "capability": "Supported method",
-      "verification": "gate_b_pinned"
-    },
-    {
-      "operation": "CreateWriteContinuation",
-      "owner": "RunService.CreateWriteContinuation",
-      "wire": "CreateWriteContinuationRequest → CreateWriteContinuationResponse",
-      "controller": "Source + distinct same-principal destination carriers",
-      "workspace": "Source RunRef/WorkspaceRef",
-      "idempotency": "Required key + exact source/destination/request",
-      "timeout": "30s",
-      "retry": "No transparent retry; exact replay",
-      "reconciliation": "Exact replay first; destination-Controller ListRuns second; reconcile after ID",
-      "projection": "Add destination Run, lineage, Controller, source receipt",
-      "capability": "write_continuation",
-      "verification": "gate_b_pinned"
+      "reconciliation": "GetOrchestratedSession plus fresh Run/Writer/Interaction; unknown blocks success",
+      "projection": "Closing intent then confirmed whole-aggregate closure",
+      "capability": "Required consumer method",
+      "verification": "E12 pinned contract; not runtime/live evidence"
     },
     {
       "operation": "RecoverRun",
       "owner": "RunService.RecoverRun",
       "wire": "RecoverRunRequest → RunMutationResponse",
       "controller": "Session Controller",
-      "workspace": "Required RunRef/WorkspaceRef",
+      "workspace": "Required root RunRef/WorkspaceRef",
       "idempotency": "Tokenless expected revision",
       "timeout": "60s",
       "retry": "No automatic replay",
-      "reconciliation": "GetRun, then reconcile",
-      "projection": "Replace returned Run; explicitly refresh other aggregates",
+      "reconciliation": "Fresh Run/Session/Writer/Interaction as required",
+      "projection": "Root recovery accounts for retained close intent; other projections remain separate",
       "capability": "Supported method",
-      "verification": "gate_b_pinned"
+      "verification": "E12 pinned contract; not runtime/live evidence"
     },
     {
       "operation": "ReconcileRun",
       "owner": "RunService.ReconcileRun",
       "wire": "ReconcileRunRequest → RunMutationResponse",
       "controller": "Session Controller",
-      "workspace": "Required RunRef/WorkspaceRef",
+      "workspace": "Required root RunRef/WorkspaceRef",
       "idempotency": "Tokenless expected revision",
       "timeout": "60s",
       "retry": "No automatic replay",
-      "reconciliation": "GetRun before another reconcile",
-      "projection": "Replace returned Run; explicitly refresh other aggregates",
+      "reconciliation": "Fresh Run/Session before another reconcile",
+      "projection": "Resolve supported aggregate-close uncertainty without semantic replay",
       "capability": "Supported method",
-      "verification": "gate_b_pinned"
+      "verification": "E12 pinned contract; not runtime/live evidence"
     },
     {
       "operation": "WatchRunEvents",
@@ -251,7 +223,7 @@
       "reconciliation": "Snapshot repair, then last committed cursor",
       "projection": "Variant-specific update/invalidate rules below",
       "capability": "event_replay",
-      "verification": "gate_b_pinned"
+      "verification": "E12 pinned contract; not runtime/live evidence"
     },
     {
       "operation": "ListRunTimelineItems",
@@ -265,7 +237,7 @@
       "reconciliation": "Repeat from committed timeline cursor",
       "projection": "Merge validated timeline page",
       "capability": "controller_timeline",
-      "verification": "gate_b_pinned"
+      "verification": "E12 pinned contract; not runtime/live evidence"
     },
     {
       "operation": "ListPendingInteractions",
@@ -279,7 +251,7 @@
       "reconciliation": "Repeat read",
       "projection": "Replace safe summaries",
       "capability": "Advertised Interaction support",
-      "verification": "gate_b_pinned"
+      "verification": "E12 pinned contract; not runtime/live evidence"
     },
     {
       "operation": "GetControllerInteraction",
@@ -293,7 +265,7 @@
       "reconciliation": "Refresh summary, then repeat",
       "projection": "Replace typed Controller-only detail",
       "capability": "Advertised Interaction support",
-      "verification": "gate_b_pinned"
+      "verification": "E12 pinned contract; not runtime/live evidence"
     },
     {
       "operation": "ResolveInteraction",
@@ -307,7 +279,7 @@
       "reconciliation": "Refresh summary/detail; finish if resolved, otherwise ask again",
       "projection": "Apply receipt/status; invalidate summary/Run as needed",
       "capability": "Advertised Interaction support and response limit",
-      "verification": "gate_b_pinned"
+      "verification": "E12 pinned contract; not runtime/live evidence"
     },
     {
       "operation": "GetWorkspaceWriterStatus",
@@ -321,7 +293,7 @@
       "reconciliation": "Repeat read",
       "projection": "Replace Writer projection",
       "capability": "reader_writer_access, durable_writer_authority",
-      "verification": "gate_b_pinned"
+      "verification": "E12 pinned contract; not runtime/live evidence"
     },
     {
       "operation": "AcquireWriter",
@@ -335,7 +307,7 @@
       "reconciliation": "Writer status + GetRun",
       "projection": "Replace Writer; invalidate Run-derived actions until fresh",
       "capability": "Writer features; transition supported",
-      "verification": "gate_b_pinned"
+      "verification": "E12 pinned contract; not runtime/live evidence"
     },
     {
       "operation": "ReleaseWriter",
@@ -349,7 +321,7 @@
       "reconciliation": "Writer status + GetRun",
       "projection": "Replace Writer; invalidate Run-derived actions until fresh",
       "capability": "Writer features",
-      "verification": "gate_b_pinned"
+      "verification": "E12 pinned contract; not runtime/live evidence"
     },
     {
       "operation": "VerifyController",
@@ -363,7 +335,35 @@
       "reconciliation": "Revalidate carrier and repeat",
       "projection": "Replace verification result only",
       "capability": "controller_binding",
-      "verification": "gate_b_pinned"
+      "verification": "E12 pinned contract; not runtime/live evidence"
+    },
+    {
+      "operation": "GetOrchestratedSession",
+      "owner": "OrchestrationService.GetOrchestratedSession",
+      "wire": "GetOrchestratedSessionRequest → GetOrchestratedSessionResponse",
+      "controller": "Primary Controller",
+      "workspace": "Primary RunRef/WorkspaceRef",
+      "idempotency": "Read",
+      "timeout": "Bounded read",
+      "retry": "Bounded repeat",
+      "reconciliation": "Repeat authorized read; no repair",
+      "projection": "Replace typed aggregate revision/status/policy/counts/recovery",
+      "capability": "Required consumer method",
+      "verification": "E12 pinned contract; not runtime/live evidence"
+    },
+    {
+      "operation": "ListOrchestratedSessionResults",
+      "owner": "OrchestrationService.ListOrchestratedSessionResults",
+      "wire": "ListOrchestratedSessionResultsRequest → ListOrchestratedSessionResultsResponse",
+      "controller": "Primary Controller",
+      "workspace": "Primary RunRef/WorkspaceRef",
+      "idempotency": "Opaque session/head-bound cursor",
+      "timeout": "Bounded read",
+      "retry": "Same cursor repeat",
+      "reconciliation": "Resume captured-head traversal, new traversal for new results",
+      "projection": "Merge published results; ArtifactRef owner is Primary RunRef",
+      "capability": "Required consumer method",
+      "verification": "E12 pinned contract; not runtime/live evidence"
     },
     {
       "operation": "GetArtifact",
@@ -377,7 +377,7 @@
       "reconciliation": "Refetch metadata",
       "projection": "Replace artifact metadata/chunk bound",
       "capability": "artifact_retrieval",
-      "verification": "gate_b_pinned"
+      "verification": "E12 pinned contract; not runtime/live evidence"
     },
     {
       "operation": "ReadArtifactChunk",
@@ -391,77 +391,7 @@
       "reconciliation": "Refetch metadata; resume after length/digest validation",
       "projection": "Append verified inert bytes; no authoritative aggregate",
       "capability": "artifact_retrieval",
-      "verification": "gate_b_pinned"
-    },
-    {
-      "operation": "Credential Create",
-      "owner": "DolgoraeControllerCredentialStore",
-      "wire": "Local filesystem",
-      "controller": "None",
-      "workspace": "Outside every Workspace",
-      "idempotency": "Persisted logical store key and preselected credential identity",
-      "timeout": "Bounded local filesystem",
-      "retry": "Reconcile existing exact logical key; never overwrite",
-      "reconciliation": "Validate exact intended carrier",
-      "projection": "New protected carrier reference",
-      "capability": "N/A",
-      "verification": "Defined"
-    },
-    {
-      "operation": "Credential Validate",
-      "owner": "DolgoraeControllerCredentialStore",
-      "wire": "Local filesystem",
-      "controller": "Candidate carrier",
-      "workspace": "Outside every Workspace",
-      "idempotency": "N/A, validation read",
-      "timeout": "Bounded local filesystem",
-      "retry": "Safe repeat",
-      "reconciliation": "Repeat full containment/owner/type/mode/symlink validation",
-      "projection": "Carrier health metadata",
-      "capability": "N/A",
-      "verification": "Defined"
-    },
-    {
-      "operation": "Credential ResolveCarrierReference",
-      "owner": "DolgoraeControllerCredentialStore",
-      "wire": "Local filesystem",
-      "controller": "Stored logical reference",
-      "workspace": "Outside every Workspace",
-      "idempotency": "N/A, validation read",
-      "timeout": "Bounded local filesystem",
-      "retry": "Safe repeat",
-      "reconciliation": "Re-derive and revalidate",
-      "projection": "Ephemeral validated carrier handle",
-      "capability": "N/A",
-      "verification": "Defined"
-    },
-    {
-      "operation": "Credential RemoveUnused",
-      "owner": "DolgoraeControllerCredentialStore",
-      "wire": "Local filesystem",
-      "controller": "Proven unbound carrier only",
-      "workspace": "Outside every Workspace",
-      "idempotency": "Logical store key",
-      "timeout": "Bounded local filesystem",
-      "retry": "Retry only after proving it remains unbound",
-      "reconciliation": "Revalidate binding absence and carrier state",
-      "projection": "Removed/absent carrier state",
-      "capability": "N/A",
-      "verification": "Defined"
-    },
-    {
-      "operation": "Credential CreateSamePrincipalSuccessor",
-      "owner": "DolgoraeControllerCredentialStore",
-      "wire": "Local filesystem",
-      "controller": "Valid source metadata; no source secret reuse",
-      "workspace": "Outside every Workspace",
-      "idempotency": "Persisted destination logical key, Controller ID, and capability identity",
-      "timeout": "Bounded local filesystem",
-      "retry": "Reconcile exact destination key; never generate a replacement identity",
-      "reconciliation": "Validate exact destination carrier",
-      "projection": "Distinct generation-1 same-principal carrier reference",
-      "capability": "N/A",
-      "verification": "Defined"
+      "verification": "E12 pinned contract; not runtime/live evidence"
     },
     {
       "operation": "AdoptController workflow",
@@ -475,7 +405,7 @@
       "reconciliation": "Restart from carrier validation and fresh reads",
       "projection": "Atomically replace binding; refresh Run/Interaction/Writer",
       "capability": "Controller plus local store",
-      "verification": "Defined"
+      "verification": "E12 pinned contract; not runtime/live evidence"
     },
     {
       "operation": "EvaluateActions",
@@ -489,7 +419,7 @@
       "reconciliation": "Refresh required inputs",
       "projection": "Closed Gul action/blocker set",
       "capability": "N/A",
-      "verification": "Defined"
+      "verification": "E12 pinned contract; not runtime/live evidence"
     },
     {
       "operation": "AllocateDeliveryEvent",
@@ -503,7 +433,7 @@
       "reconciliation": "Replay journal or coalesced snapshot",
       "projection": "Browser-safe delivery event",
       "capability": "N/A",
-      "verification": "Defined"
+      "verification": "E12 pinned contract; not runtime/live evidence"
     }
   ]
 }

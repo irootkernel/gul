@@ -10,7 +10,7 @@ import (
 	connectv1 "github.com/rootkernel/gul/contract/generated/go/dolgorae/public/v1/dolgoraev1connect"
 )
 
-// Server returns typed empty success messages for every accepted public RPC,
+// Server returns typed empty success messages for every known descriptor RPC,
 // or Error when a test needs to exercise typed failure transport.
 type Server struct {
 	Error *connect.Error
@@ -37,6 +37,8 @@ func NewHandlerWithServer(server *Server) http.Handler {
 	pattern, handler = connectv1.NewControllerServiceHandler(server)
 	mux.Handle(pattern, handler)
 	pattern, handler = connectv1.NewArtifactServiceHandler(server)
+	mux.Handle(pattern, handler)
+	pattern, handler = connectv1.NewOrchestrationServiceHandler(server)
 	mux.Handle(pattern, handler)
 	return mux
 }
@@ -277,4 +279,18 @@ func (s *Server) ReadArtifactChunk(context.Context, *connect.Request[v1.ReadArti
 		return nil, s.Error
 	}
 	return connect.NewResponse(&v1.ReadArtifactChunkResponse{}), nil
+}
+
+func (s *Server) GetOrchestratedSession(context.Context, *connect.Request[v1.GetOrchestratedSessionRequest]) (*connect.Response[v1.GetOrchestratedSessionResponse], error) {
+	if s.Error != nil {
+		return nil, s.Error
+	}
+	return connect.NewResponse(&v1.GetOrchestratedSessionResponse{}), nil
+}
+
+func (s *Server) ListOrchestratedSessionResults(context.Context, *connect.Request[v1.ListOrchestratedSessionResultsRequest]) (*connect.Response[v1.ListOrchestratedSessionResultsResponse], error) {
+	if s.Error != nil {
+		return nil, s.Error
+	}
+	return connect.NewResponse(&v1.ListOrchestratedSessionResultsResponse{}), nil
 }

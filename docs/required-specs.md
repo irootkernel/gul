@@ -7,8 +7,8 @@
 | Product | Gul (굴) |
 | Subtitle | Remote operator interface for local development runtimes |
 | Version | 0.1-dolgorae-consumer-v1 |
-| Status | Approved Required State; historical E0 completed; whole-Epic consumer implementation not started |
-| Last updated | 2026-09-21 |
+| Status | Approved Required State; E12 consumer contract pin completed; product runtime absent |
+| Last updated | 2026-09-22 |
 | Target | macOS host; modern desktop, iPad, and iPhone browsers |
 
 ## 1. Purpose, authority, and lifecycle
@@ -33,7 +33,7 @@ Gul is a single-user, LLM-free remote operator interface that runs on a macOS ho
 
 For v0.1, the sole execution provider is the **Dolgorae Runtime Provider** implementing `dolgorae.gul-consumer/v1` in released Dolgorae v0.1.3. A Gul Orchestrated Session has one Primary Run and provider-owned optional Specialist Runs. The retained internal term Direct Session denotes its one-to-one Primary Run binding, not the whole hierarchy. Explicit Orchestration Launch Intent creates the aggregate; control_mode alone does not. Dolgorae owns Codex App Server, execution, Broker membership, policy, writer, recovery, accepted history, and whole-session closure.
 
-Dolgorae `docs/specs/gul-consumer-v1.md` is the shared consumer authority. E12-T1 pins its TASK-053 immutable checked revision before implementation; Gul never edits a second copy independently. Pre-release Tasks use explicit contract-derived fakes. E2/E9 alone qualify the real adapter against the released artifact. Actual Gul does not gate the provider release.
+Dolgorae `docs/specs/gul-consumer-v1.md` is the shared consumer authority. E12-T1 pins its TASK-053 immutable checked revision before implementation; Gul never edits a second copy independently. That pin is accepted contract/tooling Current State, not product runtime or live-provider evidence. Pre-release Tasks use explicit contract-derived fakes. E2/E9 alone qualify the real adapter against the released artifact. Actual Gul does not gate the provider release.
 
 Gul owns remote UI, authentication, Runtime Provider integration, presentation metadata, browser event delivery, and a runtime-independent read-only FileService. Gul does not contain an LLM and never starts, connects to, supervises, or interprets Codex App Server directly.
 
@@ -291,7 +291,7 @@ scope. E2/E9 still own actual-provider proof.
 | ID | Requirement | Acceptance | Owner |
 |---|---|---|---|
 | REQ-CTRL-001 | Every Direct Session MUST reference exactly one backend-only Controller Binding to its Run; its capability material MAY be in a typed unhealthy state. | Browser contracts contain health and references, never capability bytes. | E2-T2 |
-| REQ-CTRL-002 | Gul-owned Controller capabilities MUST be stored as create-exclusive owner-only files below the capability-advertised `~/.dolgorae/controller-carriers/gul/<gul-installation-id>/`, outside ordinary plaintext SQLite and every Workspace/FileService path. Parent directories MUST be `0700`, files `0600`, and every relevant component non-symlinked and current-user-owned. | Exclusive-create, wrong-mode/owner/type, symlink, containment, fsync, and replacement-race fixtures fail closed; loss produces a typed blocker and reset remains provider-external. | E2-T2 |
+| REQ-CTRL-002 | Gul-owned Controller capabilities MUST be stored as create-exclusive owner-only files below the capability-advertised `~/.dolgorae/controller-carriers/gul/<installation-id>/`, outside ordinary plaintext SQLite and every Workspace/FileService path. Parent directories MUST be `0700`, files `0600`, and every relevant component non-symlinked and current-user-owned. | Exclusive-create, wrong-mode/owner/type, symlink, containment, fsync, and replacement-race fixtures fail closed; loss produces a typed blocker and reset remains provider-external. | E2-T2 |
 | REQ-CTRL-003 | Controller capability bytes MUST reach Dolgorae only through the accepted protected capability file carrier in an authorized RPC request. Credentials MUST NOT appear in gRPC metadata; the carrier path is backend-only and revalidated immediately before every authorized call. | Bytes and carrier paths never appear in browser payloads, metadata, argv, environment, or stdin; owner, mode, type, symlink, and containment checks precede each call. | E2-T2 |
 | REQ-CTRL-004 | Logs, errors, diagnostics, events, prompts, workspaces, cookies, URLs, and browser storage MUST exclude capability bytes and digests. | Redaction and canary-secret tests pass. | E9-T2 |
 | REQ-CTRL-005 | Before StartRun, Gul MUST locally create and validate a new credential carrier through `DolgoraeControllerCredentialStore`, then supply its derived carrier reference for Dolgorae verification and binding. `CreateControllerCredential` MUST NOT exist in the Runtime Provider port. | Provider inventory contains only `VerifyController`; local-store and provider fakes prove that Dolgorae neither creates nor implicitly invents a Gul credential and the source credential cannot authorize the destination. | E2-T2 |
@@ -473,13 +473,14 @@ REQ-WRITER-004 retains its original ID and meaning and is deferred, not supersed
 
 ## 7. Current State ledger
 
-No Gul product runtime behavior exists. The 2026-09-20 consumer amendment and 2026-09-21 whole-Epic reorganization are approved planning only. E12-T1, E13-T1, E14-T1 and all new requirements remain Required State. Former E12-T2/T3 are Retired without implementation evidence. The following completed authorities refer only to the historical E0 toolchain/old contract:
+No Gul product runtime behavior exists. E12-T1 has accepted the immutable consumer contract and generated tooling boundary; E13-T1, E14-T1 and all product behavior requirements remain Required State. Former E12-T2/T3 are Retired without implementation evidence.
 
 | Requirement | Accepted Current State | Evidence |
 |---|---|---|
 | REQ-HOST-005 | Bootstrap toolchain exact pins and compatibility ranges with read-only host reporting | E0-T8; `toolchain/versions.env`; checker fixtures; serial `make test` |
-| REQ-RUNTIME-011 | Versioned public gRPC inventory, exact semantic-operation ownership, generated clients, descriptor-derived fake server, exhaustive maps, and separate Machine CLI fixture | E0-T7; dependency/generated locks; contract validator; fake-server tests |
-| REQ-RUNTIME-022 | Independently typed projection inputs, public enum/event inventory, convergence and fail-closed compatibility fixtures | E0-T7; conformance pin; capability/error/mutation/projection policy maps |
+| REQ-RUNTIME-011 | Versioned public gRPC inventory, exact semantic-operation ownership, generated clients, descriptor-derived fake server, exhaustive maps, and separate Machine CLI fixture | E0-T7 historical digests recorded in the implementation memo; current live lock paths are E12-T1 evidence; contract validator; fake-server tests |
+| REQ-RUNTIME-022 | Independently typed projection inputs, public enum/event inventory, convergence and fail-closed compatibility fixtures | E0-T7 historical digests recorded in the implementation memo; current live policy maps are E12-T1 evidence; conformance pin |
+| REQ-CONSUMER-001 | Immutable TASK-053 consumer source, 36-method descriptor inventory, explicit 27-required/9-unavailable profile, generated clients/maps/fake transport, and close/sourceability fixtures; no runtime-support claim | E12-T1; dependency/generated locks; additive descriptor check; contract validator |
 
 ## 8. Explicit v0.1 non-goals and limitations
 

@@ -160,7 +160,9 @@
         "expected_state_revision"
       ],
       "same_key_replay": "not_applicable",
-      "lost_response": "get_run_and_reconcile_if_required",
+      "lost_response": "for a registered Orchestrated root, get_orchestrated_session and do not resubmit; otherwise get_run_and_reconcile_if_required",
+      "accepted_session_intent_retry": "forbidden",
+      "operation_correlation": "durable close operation_id across typed detail, completed response context and session query",
       "automatic_retry": "forbidden"
     },
     {
@@ -360,37 +362,23 @@
     {
       "operation": "CloseRun",
       "owner": "RunService.CloseRun",
-      "idempotency": "Tokenless expected revision",
+      "idempotency": "Tokenless expected revision; explicit interrupt consent",
       "retry": "No automatic replay",
-      "reconciliation": "GetRun; reconcile if required"
-    },
-    {
-      "operation": "DeleteRun",
-      "owner": "RunService.DeleteRun",
-      "idempotency": "Tokenless confirmation + expected revision",
-      "retry": "No automatic replay",
-      "reconciliation": "Confirm absence through ListRuns and prior confirmation"
-    },
-    {
-      "operation": "CreateWriteContinuation",
-      "owner": "RunService.CreateWriteContinuation",
-      "idempotency": "Required key + exact source/destination/request",
-      "retry": "No transparent retry; exact replay",
-      "reconciliation": "Exact replay first; destination-Controller ListRuns second; reconcile after ID"
+      "reconciliation": "GetOrchestratedSession plus fresh Run/Writer/Interaction; unknown blocks success"
     },
     {
       "operation": "RecoverRun",
       "owner": "RunService.RecoverRun",
       "idempotency": "Tokenless expected revision",
       "retry": "No automatic replay",
-      "reconciliation": "GetRun, then reconcile"
+      "reconciliation": "Fresh Run/Session/Writer/Interaction as required"
     },
     {
       "operation": "ReconcileRun",
       "owner": "RunService.ReconcileRun",
       "idempotency": "Tokenless expected revision",
       "retry": "No automatic replay",
-      "reconciliation": "GetRun before another reconcile"
+      "reconciliation": "Fresh Run/Session before another reconcile"
     },
     {
       "operation": "WatchRunEvents",
@@ -456,6 +444,20 @@
       "reconciliation": "Revalidate carrier and repeat"
     },
     {
+      "operation": "GetOrchestratedSession",
+      "owner": "OrchestrationService.GetOrchestratedSession",
+      "idempotency": "Read",
+      "retry": "Bounded repeat",
+      "reconciliation": "Repeat authorized read; no repair"
+    },
+    {
+      "operation": "ListOrchestratedSessionResults",
+      "owner": "OrchestrationService.ListOrchestratedSessionResults",
+      "idempotency": "Opaque session/head-bound cursor",
+      "retry": "Same cursor repeat",
+      "reconciliation": "Resume captured-head traversal, new traversal for new results"
+    },
+    {
       "operation": "GetArtifact",
       "owner": "ArtifactService.GetArtifact",
       "idempotency": "Read",
@@ -468,41 +470,6 @@
       "idempotency": "Artifact ID + offset + length",
       "retry": "Repeat same chunk after metadata/carrier validation",
       "reconciliation": "Refetch metadata; resume after length/digest validation"
-    },
-    {
-      "operation": "Credential Create",
-      "owner": "DolgoraeControllerCredentialStore",
-      "idempotency": "Persisted logical store key and preselected credential identity",
-      "retry": "Reconcile existing exact logical key; never overwrite",
-      "reconciliation": "Validate exact intended carrier"
-    },
-    {
-      "operation": "Credential Validate",
-      "owner": "DolgoraeControllerCredentialStore",
-      "idempotency": "N/A, validation read",
-      "retry": "Safe repeat",
-      "reconciliation": "Repeat full containment/owner/type/mode/symlink validation"
-    },
-    {
-      "operation": "Credential ResolveCarrierReference",
-      "owner": "DolgoraeControllerCredentialStore",
-      "idempotency": "N/A, validation read",
-      "retry": "Safe repeat",
-      "reconciliation": "Re-derive and revalidate"
-    },
-    {
-      "operation": "Credential RemoveUnused",
-      "owner": "DolgoraeControllerCredentialStore",
-      "idempotency": "Logical store key",
-      "retry": "Retry only after proving it remains unbound",
-      "reconciliation": "Revalidate binding absence and carrier state"
-    },
-    {
-      "operation": "Credential CreateSamePrincipalSuccessor",
-      "owner": "DolgoraeControllerCredentialStore",
-      "idempotency": "Persisted destination logical key, Controller ID, and capability identity",
-      "retry": "Reconcile exact destination key; never generate a replacement identity",
-      "reconciliation": "Validate exact destination carrier"
     },
     {
       "operation": "AdoptController workflow",

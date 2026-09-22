@@ -2,26 +2,26 @@
   "schema_version": 1,
   "source": {
     "repository": "git@github-irootkernel:irootkernel/dolgorae.git",
-    "revision": "85a8862f784cc57701751d81a9e03bf7c5722818"
-  },
-  "protobuf_wkt": {
-    "repository": "https://github.com/protocolbuffers/protobuf.git",
-    "tag": "v32.1",
-    "commit": "7fcfd66022455635fa29af92987cdc0967efd4f3"
+    "revision": "21aefe5b2a8dc6fb18a58338090348b23d2f0a4a",
+    "producer_task_input_revision": "a963f3601b1e7036432501b6d8946c8c62c1466d",
+    "identity": "TASK-053 completion commit containing the producer lock; imported artifact identity remains its Git blobs plus SHA-256 digests"
   },
   "files": [
     {"path": "upstream/buf.yaml", "sha256": "a32eac9dd30b3fd48850c5001946ff7bb60f6fac951824e6be0b6c70e4785275"},
-    {"path": "upstream/dolgorae/public/v1/dolgorae.proto", "sha256": "bdb9916026f82725c1f0592a4d00a280dca43ef8fc968e3503cbf61059d09163"},
-    {"path": "upstream/dolgorae-public-v1.descriptor.json", "sha256": "b468bdaf28666d1328b72823c5fe93e14cd2e29d3ec42b45bf98474364ed233e"},
-    {"path": "upstream/dolgorae-public-v1.descriptor.pb", "sha256": "22e605dddc26c145ab6c682955fa4bfcf078b8356d38e94982e118b948965318"},
-    {"path": "upstream/dolgorae-capabilities-v1.schema.json", "sha256": "99393b430f014eec861cdba57258594f21cb65d2f3b1c9dfc23a3c0051e067e7"},
+    {"path": "upstream/baselines/dolgorae-public-v1-pre-task-053.descriptor.pb", "sha256": "c29b70f6d1bfca5447ddfc396cb62a9ff4f3bbd10532518af78e4726b7de1252"},
+    {"path": "upstream/dolgorae/public/v1/dolgorae.proto", "sha256": "561ccf51658b50703f9fb1a37c4de7c52188b34ab4db2ac9885ef3ccabdf0e48"},
+    {"path": "upstream/dolgorae-public-v1.descriptor.json", "sha256": "9b983ef25d67c7306b35b3f78823efe8dde16d1049a919e898f172515a888137"},
+    {"path": "upstream/dolgorae-public-v1.descriptor.pb", "sha256": "28b132842bbeb48123c2b7cc529de689e6e6286b0783cbde8551d17ba4921ed5"},
+    {"path": "upstream/dolgorae-capabilities-v1.schema.json", "sha256": "bdcb76265d6508f73b791e5f289e09f28fda9a6dcc67a5ca03c2a425e8ea9b79"},
     {"path": "upstream/dolgorae-controller-credential-v1.schema.json", "sha256": "6e888023fa6f12964afbd2867832944307dc626cad3fe6c6bc517768ab98b84f"},
-    {"path": "upstream/dolgorae-grpc-client-policy-v1.json", "sha256": "8f8563bd6265c2940805c107b756d198e3d168379f291e4a74202db557c4333e"},
-    {"path": "upstream/dolgorae-grpc-conformance-v1.json", "sha256": "c81e34927e37254f98400f2aa678aac912ec28e131c669829ab2ab2c50ac5cd6"},
-    {"path": "upstream/dolgorae-grpc-error-mapping-v1.json", "sha256": "854a101e279950777b8989b0c314d745300fffa3ae499608a15ada236a62f256"},
-    {"path": "upstream/dolgorae-rpc-mutation-policy-v1.json", "sha256": "d734044d2e1d8c814e36e803717d5f022e9497c87d2a8cf73285ee750d483a9b"},
-    {"path": "upstream/dolgorae-machine-v1.schema.json", "sha256": "4f6570fae7485a410d203503f4694de0ab400bb360aeaa336c9aa7dbb618f838"},
-    {"path": "upstream/verification-index-v1.json", "sha256": "dca027e165b95010ab96b771ac6f957120a68316a7b7867dab71cbfb86123948"},
-    {"path": "upstream/google/protobuf/timestamp.proto", "sha256": "14052c6042c1dd2d0b50245f2812eaab6eaf82db0b6e8ce483eae527f73b6ee8"}
+    {"path": "upstream/dolgorae-grpc-client-policy-v1.json", "sha256": "01237c8f8f7c43934fee457b587c46f288a4ec9bf68081ef7719d1ce31edf3fd"},
+    {"path": "upstream/dolgorae-grpc-conformance-v1.json", "sha256": "5abffb57914829399bde0c2fc9b7852e143cab847e8ad40b7beee077bfa1fb72"},
+    {"path": "upstream/dolgorae-grpc-error-mapping-v1.json", "sha256": "ccb8f43430f98d434b0fd37640357b1bb36ff84767f9ad6ded92e624f1421437"},
+    {"path": "upstream/dolgorae-gul-consumer-v1.fixtures.json", "sha256": "18a5a48b3240eb684225f5f1d7f41538dc874c724268c7794e481119907a5274"},
+    {"path": "upstream/dolgorae-gul-consumer-v1.json", "sha256": "8211b403960edc114ac9f874d4c739e2a23674504d8dbb304284b5ef31eaa71b"},
+    {"path": "upstream/dolgorae-gul-consumer-v1.lock.json", "sha256": "90c23c0ba6ba98b2f4790bd733298908998fcb51430748151c888508678b03b3"},
+    {"path": "upstream/dolgorae-rpc-mutation-policy-v1.json", "sha256": "2c2e62ef464c4fa587f9023a404cd83de0622bffda5bd05eca852f70eba73e06"},
+    {"path": "upstream/dolgorae-machine-v1.schema.json", "sha256": "19b97f95a5ea1d5e25d10662d476fb9cefb5c98358c0de5f51b583d7a7a6a630"},
+    {"path": "upstream/verification-index-v1.json", "sha256": "21d9ac63da8aa4ae15dedd38cd5debd180b4aa30dca823c58d978167d73d9cfc"}
   ]
 }

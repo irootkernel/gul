@@ -33,7 +33,7 @@ write_command sw_vers 14.7.5
 write_command go "go version go$GUL_GO_VERSION darwin/arm64"
 write_command wails3 "v$GUL_WAILS_VERSION"
 write_command node "v$GUL_NODE_VERSION"
-write_command bun "$GUL_BUN_VERSION"
+write_command bun "$GUL_BUN_MIN_VERSION"
 write_command buf 1.69.0
 write_command protoc "libprotoc $GUL_PROTOC_VERSION"
 write_command protoc-gen-go "protoc-gen-go v$GUL_PROTOC_GEN_GO_VERSION"
@@ -67,6 +67,45 @@ if ! grep -q "Buf: expected >= $GUL_BUF_MIN_VERSION and < $GUL_BUF_MAX_EXCLUSIVE
 fi
 
 write_command buf 1.69.0
+
+write_command bun 99.0.0
+PATH="$fixture_dir:/usr/bin:/bin" "$checker" >/dev/null
+PATH="$fixture_dir:/usr/bin:/bin" "$checker" --bun-only >/dev/null
+
+write_command bun 1.3.13
+if PATH="$fixture_dir:/usr/bin:/bin" "$checker" >"$fixture_dir/out" 2>"$fixture_dir/err"; then
+  printf 'ERROR unsupported old Bun unexpectedly passed\n' >&2
+  exit 1
+fi
+if ! grep -q "Bun: expected >= $GUL_BUN_MIN_VERSION, found 1.3.13" "$fixture_dir/err"; then
+  printf 'ERROR old Bun mismatch was not reported precisely\n' >&2
+  cat "$fixture_dir/err" >&2
+  exit 1
+fi
+if PATH="$fixture_dir:/usr/bin:/bin" "$checker" --bun-only >"$fixture_dir/out" 2>"$fixture_dir/err"; then
+  printf 'ERROR unsupported old Bun unexpectedly passed --bun-only\n' >&2
+  exit 1
+fi
+if ! grep -q "Bun: expected >= $GUL_BUN_MIN_VERSION, found 1.3.13" "$fixture_dir/err"; then
+  printf 'ERROR old Bun --bun-only mismatch was not reported precisely\n' >&2
+  cat "$fixture_dir/err" >&2
+  exit 1
+fi
+
+write_command bun "$GUL_BUN_MIN_VERSION"
+PATH="$fixture_dir:/usr/bin:/bin" "$checker" --bun-only >/dev/null
+
+rm "$fixture_dir/bun"
+if PATH="$fixture_dir:/usr/bin:/bin" "$checker" --bun-only >"$fixture_dir/out" 2>"$fixture_dir/err"; then
+  printf 'ERROR missing Bun unexpectedly passed\n' >&2
+  exit 1
+fi
+if ! grep -q "missing command 'bun'" "$fixture_dir/err"; then
+  printf 'ERROR missing Bun was not reported precisely\n' >&2
+  cat "$fixture_dir/err" >&2
+  exit 1
+fi
+write_command bun "$GUL_BUN_MIN_VERSION"
 
 write_command wails3 v2.11.0
 if PATH="$fixture_dir:/usr/bin:/bin" "$checker" >"$fixture_dir/out" 2>"$fixture_dir/err"; then

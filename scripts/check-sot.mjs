@@ -171,20 +171,23 @@ export function validateRepository(root, options = {}) {
     errors,
     'current checked operation map',
   );
-  const requiredOperationMap = uniqueMarkerSection(
-    architecture,
-    '<!-- contract-required-operation-map:start -->',
-    '<!-- contract-required-operation-map:end -->',
-    errors,
-    'required consumer operation map',
-  );
   for (const operation of ['GetOrchestratedSession', 'ListOrchestratedSessionResults']) {
-    if (currentOperationMap.includes(`OrchestrationService.${operation}`)) {
-      errors.push(`Current checked operation map contains unpinned RPC OrchestrationService.${operation}`);
+    if (!currentOperationMap.includes(`OrchestrationService.${operation}`)) {
+      errors.push(`Checked consumer operation map is missing OrchestrationService.${operation}`);
     }
-    if (!requiredOperationMap.includes(`OrchestrationService.${operation}`)) {
-      errors.push(`Required consumer operation map is missing OrchestrationService.${operation}`);
-    }
+  }
+  for (const rpc of [
+    'RunService.CreateWriteContinuation',
+    'RunService.DeleteRun',
+    'RunService.ForkRun',
+    'RunService.SetDefaultEffort',
+    'RunService.VerifyRun',
+    'RuntimeService.ListProfileDiagnostics',
+    'WriterService.CancelWriterHandoff',
+    'WriterService.CommitWriterHandoff',
+    'WriterService.PrepareWriterHandoff',
+  ]) {
+    if (currentOperationMap.includes(rpc)) errors.push(`Checked consumer operation map contains unavailable RPC ${rpc}`);
   }
   const tasks = new Map();
   for (const line of roadmap.split('\n')) {

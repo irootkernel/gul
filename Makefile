@@ -11,6 +11,7 @@ contract-check:
 
 test-prepare:
 	@./scripts/toolchain-check.sh --manifest-only
+	@./scripts/toolchain-check.sh --bun-only
 	@bash -n scripts/*.sh
 	@bash -n contract/*.sh
 	@cd contract && go mod download
@@ -18,6 +19,7 @@ test-prepare:
 
 test-unit:
 	@cd contract && go test ./...
+	@./contract/test-breaking-check.sh
 	@./scripts/test-contract-command.sh
 
 test-int:

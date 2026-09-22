@@ -35,6 +35,8 @@ const (
 	ControllerServiceName = "dolgorae.public.v1.ControllerService"
 	// ArtifactServiceName is the fully-qualified name of the ArtifactService service.
 	ArtifactServiceName = "dolgorae.public.v1.ArtifactService"
+	// OrchestrationServiceName is the fully-qualified name of the OrchestrationService service.
+	OrchestrationServiceName = "dolgorae.public.v1.OrchestrationService"
 )
 
 // These constants are the fully-qualified names of the RPCs defined in this package. They're
@@ -135,6 +137,12 @@ const (
 	// ArtifactServiceReadArtifactChunkProcedure is the fully-qualified name of the ArtifactService's
 	// ReadArtifactChunk RPC.
 	ArtifactServiceReadArtifactChunkProcedure = "/dolgorae.public.v1.ArtifactService/ReadArtifactChunk"
+	// OrchestrationServiceGetOrchestratedSessionProcedure is the fully-qualified name of the
+	// OrchestrationService's GetOrchestratedSession RPC.
+	OrchestrationServiceGetOrchestratedSessionProcedure = "/dolgorae.public.v1.OrchestrationService/GetOrchestratedSession"
+	// OrchestrationServiceListOrchestratedSessionResultsProcedure is the fully-qualified name of the
+	// OrchestrationService's ListOrchestratedSessionResults RPC.
+	OrchestrationServiceListOrchestratedSessionResultsProcedure = "/dolgorae.public.v1.OrchestrationService/ListOrchestratedSessionResults"
 )
 
 // RuntimeServiceClient is a client for the dolgorae.public.v1.RuntimeService service.
@@ -1330,4 +1338,102 @@ func (UnimplementedArtifactServiceHandler) GetArtifact(context.Context, *connect
 
 func (UnimplementedArtifactServiceHandler) ReadArtifactChunk(context.Context, *connect.Request[v1.ReadArtifactChunkRequest]) (*connect.Response[v1.ReadArtifactChunkResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("dolgorae.public.v1.ArtifactService.ReadArtifactChunk is not implemented"))
+}
+
+// OrchestrationServiceClient is a client for the dolgorae.public.v1.OrchestrationService service.
+type OrchestrationServiceClient interface {
+	GetOrchestratedSession(context.Context, *connect.Request[v1.GetOrchestratedSessionRequest]) (*connect.Response[v1.GetOrchestratedSessionResponse], error)
+	ListOrchestratedSessionResults(context.Context, *connect.Request[v1.ListOrchestratedSessionResultsRequest]) (*connect.Response[v1.ListOrchestratedSessionResultsResponse], error)
+}
+
+// NewOrchestrationServiceClient constructs a client for the dolgorae.public.v1.OrchestrationService
+// service. By default, it uses the Connect protocol with the binary Protobuf Codec, asks for
+// gzipped responses, and sends uncompressed requests. To use the gRPC or gRPC-Web protocols, supply
+// the connect.WithGRPC() or connect.WithGRPCWeb() options.
+//
+// The URL supplied here should be the base URL for the Connect or gRPC server (for example,
+// http://api.acme.com or https://acme.com/grpc).
+func NewOrchestrationServiceClient(httpClient connect.HTTPClient, baseURL string, opts ...connect.ClientOption) OrchestrationServiceClient {
+	baseURL = strings.TrimRight(baseURL, "/")
+	orchestrationServiceMethods := v1.File_dolgorae_public_v1_dolgorae_proto.Services().ByName("OrchestrationService").Methods()
+	return &orchestrationServiceClient{
+		getOrchestratedSession: connect.NewClient[v1.GetOrchestratedSessionRequest, v1.GetOrchestratedSessionResponse](
+			httpClient,
+			baseURL+OrchestrationServiceGetOrchestratedSessionProcedure,
+			connect.WithSchema(orchestrationServiceMethods.ByName("GetOrchestratedSession")),
+			connect.WithClientOptions(opts...),
+		),
+		listOrchestratedSessionResults: connect.NewClient[v1.ListOrchestratedSessionResultsRequest, v1.ListOrchestratedSessionResultsResponse](
+			httpClient,
+			baseURL+OrchestrationServiceListOrchestratedSessionResultsProcedure,
+			connect.WithSchema(orchestrationServiceMethods.ByName("ListOrchestratedSessionResults")),
+			connect.WithClientOptions(opts...),
+		),
+	}
+}
+
+// orchestrationServiceClient implements OrchestrationServiceClient.
+type orchestrationServiceClient struct {
+	getOrchestratedSession         *connect.Client[v1.GetOrchestratedSessionRequest, v1.GetOrchestratedSessionResponse]
+	listOrchestratedSessionResults *connect.Client[v1.ListOrchestratedSessionResultsRequest, v1.ListOrchestratedSessionResultsResponse]
+}
+
+// GetOrchestratedSession calls dolgorae.public.v1.OrchestrationService.GetOrchestratedSession.
+func (c *orchestrationServiceClient) GetOrchestratedSession(ctx context.Context, req *connect.Request[v1.GetOrchestratedSessionRequest]) (*connect.Response[v1.GetOrchestratedSessionResponse], error) {
+	return c.getOrchestratedSession.CallUnary(ctx, req)
+}
+
+// ListOrchestratedSessionResults calls
+// dolgorae.public.v1.OrchestrationService.ListOrchestratedSessionResults.
+func (c *orchestrationServiceClient) ListOrchestratedSessionResults(ctx context.Context, req *connect.Request[v1.ListOrchestratedSessionResultsRequest]) (*connect.Response[v1.ListOrchestratedSessionResultsResponse], error) {
+	return c.listOrchestratedSessionResults.CallUnary(ctx, req)
+}
+
+// OrchestrationServiceHandler is an implementation of the dolgorae.public.v1.OrchestrationService
+// service.
+type OrchestrationServiceHandler interface {
+	GetOrchestratedSession(context.Context, *connect.Request[v1.GetOrchestratedSessionRequest]) (*connect.Response[v1.GetOrchestratedSessionResponse], error)
+	ListOrchestratedSessionResults(context.Context, *connect.Request[v1.ListOrchestratedSessionResultsRequest]) (*connect.Response[v1.ListOrchestratedSessionResultsResponse], error)
+}
+
+// NewOrchestrationServiceHandler builds an HTTP handler from the service implementation. It returns
+// the path on which to mount the handler and the handler itself.
+//
+// By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf
+// and JSON codecs. They also support gzip compression.
+func NewOrchestrationServiceHandler(svc OrchestrationServiceHandler, opts ...connect.HandlerOption) (string, http.Handler) {
+	orchestrationServiceMethods := v1.File_dolgorae_public_v1_dolgorae_proto.Services().ByName("OrchestrationService").Methods()
+	orchestrationServiceGetOrchestratedSessionHandler := connect.NewUnaryHandler(
+		OrchestrationServiceGetOrchestratedSessionProcedure,
+		svc.GetOrchestratedSession,
+		connect.WithSchema(orchestrationServiceMethods.ByName("GetOrchestratedSession")),
+		connect.WithHandlerOptions(opts...),
+	)
+	orchestrationServiceListOrchestratedSessionResultsHandler := connect.NewUnaryHandler(
+		OrchestrationServiceListOrchestratedSessionResultsProcedure,
+		svc.ListOrchestratedSessionResults,
+		connect.WithSchema(orchestrationServiceMethods.ByName("ListOrchestratedSessionResults")),
+		connect.WithHandlerOptions(opts...),
+	)
+	return "/dolgorae.public.v1.OrchestrationService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case OrchestrationServiceGetOrchestratedSessionProcedure:
+			orchestrationServiceGetOrchestratedSessionHandler.ServeHTTP(w, r)
+		case OrchestrationServiceListOrchestratedSessionResultsProcedure:
+			orchestrationServiceListOrchestratedSessionResultsHandler.ServeHTTP(w, r)
+		default:
+			http.NotFound(w, r)
+		}
+	})
+}
+
+// UnimplementedOrchestrationServiceHandler returns CodeUnimplemented from all methods.
+type UnimplementedOrchestrationServiceHandler struct{}
+
+func (UnimplementedOrchestrationServiceHandler) GetOrchestratedSession(context.Context, *connect.Request[v1.GetOrchestratedSessionRequest]) (*connect.Response[v1.GetOrchestratedSessionResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("dolgorae.public.v1.OrchestrationService.GetOrchestratedSession is not implemented"))
+}
+
+func (UnimplementedOrchestrationServiceHandler) ListOrchestratedSessionResults(context.Context, *connect.Request[v1.ListOrchestratedSessionResultsRequest]) (*connect.Response[v1.ListOrchestratedSessionResultsResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("dolgorae.public.v1.OrchestrationService.ListOrchestratedSessionResults is not implemented"))
 }

@@ -3,9 +3,9 @@
 | Field | Value |
 | --- | --- |
 | Role | Sole authority for task identity, order, status, dependencies, and phase |
-| Revision | 2026-09-21 whole-Epic execution order |
+| Revision | 2026-09-22 E12-T1 completion |
 | Active Task | None |
-| Next | E12, starting at E12-T1; the contract-ready gate is satisfied by Dolgorae TASK-053 commit `21aefe5b2a8dc6fb18a58338090348b23d2f0a4a`; not activated by this plan |
+| Next | E12 completion audit and closeout; then E1 starting at E1-T1 |
 | Required provider | Released Dolgorae v0.1.3 implementing `dolgorae.gul-consumer/v1` |
 
 ## 1. Status and execution rules
@@ -125,7 +125,7 @@ second owner of membership, order or status.
 | Epic | Status | Scope | Dossier |
 | --- | --- | --- | --- |
 | E0 | Completed | Historical rebaseline, bootstrap toolchain, and old generated contract fixtures | None |
-| E12 | Planned | Immutable consumer contract pin only; E12-T1 | [Shared](todo/GUL-CONSUMER-REBASELINE.md) |
+| E12 | In Review | Immutable consumer contract pin only; E12-T1 | [Shared](todo/GUL-CONSUMER-REBASELINE.md) |
 | E1 | Planned | Core, typed APIs, persistence, one frontend and desktop-shell foundation | [Shared](todo/GUL-CONSUMER-REBASELINE.md) |
 | E13 | Planned | Stateful consumer fake provider and reusable scenario harness; E13-T1 | [Shared](todo/GUL-CONSUMER-REBASELINE.md) |
 | E3 | Planned | Workspace/session presentation and global Profile selection | [Shared](todo/GUL-CONSUMER-REBASELINE.md) |
@@ -170,7 +170,7 @@ stateful domain fake or assembled browser flow is required to finish E12.
 
 | Task | Phase | Status | Predecessors | Owned result and verification |
 | --- | --- | --- | --- | --- |
-| E12-T1 | Pre-release | Planned | E0-T7; Contract ready | Pin new immutable consumer lock, update sources/generator/clients/maps; exact reproducibility and schema/hash checks |
+| E12-T1 | Pre-release | Completed | E0-T7; Contract ready | Pinned immutable TASK-053 lock, regenerated sources/clients/maps, and passed reproducibility plus schema/hash checks |
 
 ### E1: Build the application foundation
 
@@ -396,6 +396,13 @@ Current State for its original scope. It does not prove the new 27-method
 consumer profile, two new observer methods, fixed-home credential semantics,
 Prompt History UI, or any product runtime. E12-T1 owns replacement consumer
 artifacts; do not reset E0 to incomplete or count old success as new pinning.
+The accepted E12 consumer boundary pins TASK-053 commit
+`21aefe5b2a8dc6fb18a58338090348b23d2f0a4a` with dependency-lock SHA-256
+`8f52ae66e126f37013d7842b2113fc509d21af4e4fc465cecdbeef7e21619f01` and
+generated-lock SHA-256
+`43fecc3b63ca47b8a4330d1509047a2b3a8be4735c0bee5e6f5b43edca81c3d5`.
+It is contract/tooling Current State only; product runtime and live-provider
+evidence remain with their later owners.
 The historical pin remains bound to dependency-lock SHA-256
 `c4f91aa3e2add1093880684e5c96fdbb6239aef6a85261a0adf6b585e2db8863` and
 generated-lock SHA-256
