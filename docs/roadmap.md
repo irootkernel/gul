@@ -400,7 +400,7 @@ The accepted E12 consumer boundary pins TASK-053 commit
 `21aefe5b2a8dc6fb18a58338090348b23d2f0a4a` with dependency-lock SHA-256
 `8f52ae66e126f37013d7842b2113fc509d21af4e4fc465cecdbeef7e21619f01` and
 generated-lock SHA-256
-`43fecc3b63ca47b8a4330d1509047a2b3a8be4735c0bee5e6f5b43edca81c3d5`.
+`6284064e720e2220d6960c42faef6a4c13292ce1327f44e00388dc52b2e17d4a`.
 It is contract/tooling Current State only; product runtime and live-provider
 evidence remain with their later owners.
 The historical pin remains bound to dependency-lock SHA-256

@@ -39,7 +39,6 @@ write_command protoc "libprotoc $GUL_PROTOC_VERSION"
 write_command protoc-gen-go "protoc-gen-go v$GUL_PROTOC_GEN_GO_VERSION"
 write_command protoc-gen-connect-go "$GUL_PROTOC_GEN_CONNECT_GO_VERSION"
 write_command protoc-gen-es "v$GUL_PROTOC_GEN_ES_VERSION"
-write_command protoc-gen-connect-es "v$GUL_PROTOC_GEN_CONNECT_ES_VERSION"
 write_command git "git version $GUL_GIT_MIN_VERSION"
 
 PATH="$fixture_dir:/usr/bin:/bin" "$checker" >/dev/null
@@ -94,6 +93,38 @@ fi
 
 write_command bun "$GUL_BUN_MIN_VERSION"
 PATH="$fixture_dir:/usr/bin:/bin" "$checker" --bun-only >/dev/null
+
+bun_only_dir="$fixture_dir/bun-only"
+mkdir "$bun_only_dir"
+cat > "$bun_only_dir/bun" <<EOF
+#!/bin/sh
+printf '%s\\n' '$GUL_BUN_MIN_VERSION'
+EOF
+chmod +x "$bun_only_dir/bun"
+PATH="$bun_only_dir:/usr/bin:/bin" "$checker" --bun-only >/dev/null
+if PATH="$bun_only_dir:/usr/bin:/bin" "$checker" >"$fixture_dir/out" 2>"$fixture_dir/err"; then
+  printf 'ERROR --bun-only fixture did not isolate Bun from the full toolchain\n' >&2
+  exit 1
+fi
+
+write_command bun 1.3.13
+if PATH="$fixture_dir:$PATH" make -C "$script_dir/.." test-prepare >"$fixture_dir/out" 2>"$fixture_dir/err"; then
+  printf 'ERROR test-prepare accepted an old system Bun\n' >&2
+  exit 1
+fi
+if ! grep -q "Bun: expected >= $GUL_BUN_MIN_VERSION, found 1.3.13" "$fixture_dir/err"; then
+  printf 'ERROR test-prepare did not stop at the Bun minimum gate\n' >&2
+  exit 1
+fi
+if PATH="$fixture_dir:$PATH" "$script_dir/../contract/generate.sh" "$fixture_dir/generated" >"$fixture_dir/out" 2>"$fixture_dir/err"; then
+  printf 'ERROR contract generation accepted an old system Bun\n' >&2
+  exit 1
+fi
+if ! grep -q "Bun: expected >= $GUL_BUN_MIN_VERSION, found 1.3.13" "$fixture_dir/err"; then
+  printf 'ERROR contract generation did not stop at the Bun minimum gate\n' >&2
+  exit 1
+fi
+write_command bun "$GUL_BUN_MIN_VERSION"
 
 rm "$fixture_dir/bun"
 if PATH="$fixture_dir:/usr/bin:/bin" "$checker" --bun-only >"$fixture_dir/out" 2>"$fixture_dir/err"; then

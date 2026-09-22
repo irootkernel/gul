@@ -1,6 +1,11 @@
 import { createHash } from "node:crypto";
 import { readFile, readdir, stat } from "node:fs/promises";
 import { join, relative, resolve } from "node:path";
+import { fromJson } from "@bufbuild/protobuf";
+import {
+  GetOrchestratedSessionResponseSchema,
+  ListOrchestratedSessionResultsResponseSchema,
+} from "../generated/ts/dolgorae/public/v1/dolgorae_pb";
 
 const contractRoot = resolve(import.meta.dir, "..");
 const generatedRoot = join(contractRoot, "generated");
@@ -168,13 +173,13 @@ const expectedPackages = {
   "@connectrpc/connect": versionManifest.GUL_CONNECT_ES_VERSION,
   "@connectrpc/connect-web": versionManifest.GUL_CONNECT_WEB_VERSION,
   "@bufbuild/protoc-gen-es": versionManifest.GUL_PROTOC_GEN_ES_VERSION,
-  "@connectrpc/protoc-gen-connect-es": versionManifest.GUL_PROTOC_GEN_CONNECT_ES_VERSION,
   typescript: versionManifest.GUL_TYPESCRIPT_VERSION,
 };
 for (const [name, expected] of Object.entries(expectedPackages)) {
   const actual = packageManifest.dependencies?.[name] ?? packageManifest.devDependencies?.[name];
   if (actual !== expected) throw new Error(`${name} must match toolchain authority ${expected}, found ${actual}`);
 }
+if (packageManifest.dependencies?.["@connectrpc/protoc-gen-connect-es"] || packageManifest.devDependencies?.["@connectrpc/protoc-gen-connect-es"] || generatedLock.files.some((entry) => entry.path.endsWith("_connect.ts"))) throw new Error("Connect-ES v1 generator artifacts must not coexist with Protobuf-ES v2 service descriptors");
 for (const [module, expected] of [["connectrpc.com/connect", versionManifest.GUL_CONNECT_GO_VERSION], ["google.golang.org/protobuf", versionManifest.GUL_PROTOBUF_GO_VERSION]]) {
   if (!goManifest.includes(`${module} v${expected}`)) throw new Error(`${module} must match toolchain authority ${expected}`);
 }
@@ -228,7 +233,7 @@ const expectedOperationIdempotency = operations.operations.map((entry) => ({
 if (!equal(mutationMap.gul_operation_idempotency, expectedOperationIdempotency)) throw new Error("generated operation idempotency policy drifted");
 if (errorActionMap.fail_closed_on_unknown_detail !== true || !equal(errorActionMap.mapping, errorActions)) throw new Error("generated error action policy drifted");
 if (fixtures.production_cli_fallback !== false || machineFixture.production_fallback !== false) throw new Error("production CLI fallback must remain false");
-if (!equal([...fixtures.required_rpcs].sort(), requiredMethods) || !equal([...fixtures.unavailable_rpcs].sort(), unavailableMethods) || !equal(fixtures.provider_profile_fixtures, providerFixtures)) throw new Error("generated consumer-profile fixtures drifted");
+if (!equal([...fixtures.required_rpcs].sort(), requiredMethods) || !equal([...fixtures.unavailable_rpcs].sort(), unavailableMethods) || !equal(fixtures.producer_case_catalog, providerFixtures)) throw new Error("generated consumer-profile catalog drifted");
 if (fixtures.protocol_handshake.minimum !== descriptorMetadata.minimum_client_protocol_version || fixtures.protocol_handshake.maximum !== descriptorMetadata.maximum_client_protocol_version) throw new Error("protocol handshake bounds drifted from descriptor metadata");
 if (fixtures.protocol_handshake.cases.find((entry) => entry.outcome === "compatible")?.server !== descriptorMetadata.protocol_version) throw new Error("protocol handshake accepted version drifted");
 if (fixtures.interaction_limits.effective_response_bytes !== Math.min(fixtures.interaction_limits.provider_response_bytes, fixtures.interaction_limits.gul_response_bytes)) throw new Error("effective Interaction response limit drifted");
@@ -249,8 +254,34 @@ for (const name of profileRequestNames) {
 if (consumerProfile.close_run.transparent_retry !== "forbidden" || consumerProfile.close_run.transport_loss_follow_up !== "OrchestrationService.GetOrchestratedSession") throw new Error("CloseRun retry and reconciliation policy drifted");
 const closeFixtures = new Map(providerFixtures.close_outcomes.map((entry) => [entry.id, entry]));
 if (closeFixtures.get("intent_before_response_loss")?.client_action !== "observe_without_resubmit" || closeFixtures.get("concurrent_compatible_close")?.outcome !== "same_operation" || closeFixtures.get("concurrent_mismatched_interrupt")?.outcome !== "typed_conflict_no_new_operation" || closeFixtures.get("unknown_child_effect")?.retry !== "RETRY_CLASSIFICATION_FORBIDDEN") throw new Error("CloseRun operation-correlation fixtures drifted");
-if (providerFixtures.method_coverage.length !== 27 || !equal(providerFixtures.method_coverage.map((entry) => entry.method).sort(), requiredMethods)) throw new Error("provider fixture coverage does not match the required consumer profile");
-if (!Array.isArray(consumerProfile.field_sources) || consumerProfile.field_sources.length === 0 || consumerProfile.field_sources.some((entry) => !entry.field || !entry.source || !entry.fixture || !entry.owner)) throw new Error("consumer field-sourceability inventory is incomplete");
+if (providerFixtures.method_coverage.length !== 27 || !equal(providerFixtures.method_coverage.map((entry) => entry.method).sort(), requiredMethods) || providerFixtures.method_coverage.some((entry) => !entry.positive || !entry.negative || entry.positive === entry.negative)) throw new Error("producer case labels do not match the required consumer profile");
+
+const fixtureIds = new Set([
+  ...providerFixtures.positive.map((entry) => entry.id),
+  ...providerFixtures.negative.map((entry) => entry.id),
+  ...providerFixtures.close_outcomes.map((entry) => entry.id),
+  ...Object.keys(providerFixtures.fixture_groups),
+]);
+const sessionResponse = inventory.messages.find((entry) => entry.name === "dolgorae.public.v1.GetOrchestratedSessionResponse");
+const sessionProjection = inventory.messages.find((entry) => entry.name === "dolgorae.public.v1.OrchestratedSessionProjection");
+const resultsResponse = inventory.messages.find((entry) => entry.name === "dolgorae.public.v1.ListOrchestratedSessionResultsResponse");
+const resultProjection = inventory.messages.find((entry) => entry.name === "dolgorae.public.v1.OrchestratedSessionResult");
+if (!sessionResponse || !sessionProjection || !resultsResponse || !resultProjection || sessionResponse.fields.find((field) => field.name === "session")?.type_name !== sessionProjection.name || resultsResponse.fields.find((field) => field.name === "items")?.type_name !== resultProjection.name) throw new Error("aggregate response or projection messages are missing from the descriptor inventory");
+const expectedFieldSources = [
+  ...sessionResponse.fields.filter((field) => field.name !== "session").map((field) => `session.${field.name}`),
+  ...sessionProjection.fields.map((field) => `session.${field.name}`),
+  ...resultsResponse.fields.filter((field) => field.name !== "items").map((field) => `results.${field.name}`),
+  ...resultProjection.fields.map((field) => `results.items.${field.name}`),
+].sort();
+const actualFieldSources = consumerProfile.field_sources.map((entry) => entry.field).sort();
+if (!equal(actualFieldSources, expectedFieldSources) || new Set(actualFieldSources).size !== actualFieldSources.length || consumerProfile.field_sources.some((entry) => !entry.source || !fixtureIds.has(entry.fixture) || !entry.owner)) throw new Error("consumer field-sourceability inventory is incomplete or does not resolve to pinned fixtures");
+
+const sessionFixture = providerFixtures.positive.find((entry) => entry.id === "session_active");
+const resultsFixture = providerFixtures.positive.find((entry) => entry.id === "results_page_one");
+if (sessionFixture?.grpc_message !== "dolgorae.public.v1.GetOrchestratedSessionResponse" || resultsFixture?.grpc_message !== "dolgorae.public.v1.ListOrchestratedSessionResultsResponse") throw new Error("aggregate fixture message identities drifted");
+fromJson(GetOrchestratedSessionResponseSchema, sessionFixture.grpc_json, { ignoreUnknownFields: false });
+fromJson(ListOrchestratedSessionResultsResponseSchema, resultsFixture.grpc_json, { ignoreUnknownFields: false });
+if (conformance.freeze_policy?.status !== "blocked_runtime_evidence" || !Array.isArray(conformance.freeze_policy.runtime_evidence) || conformance.freeze_policy.runtime_evidence.length !== 0) throw new Error("producer runtime-evidence freeze boundary drifted");
 if (mutations.mutations.length !== 18) throw new Error(`expected 18 mutation policies, found ${mutations.mutations.length}`);
 
 if (dependencyLock.source.revision !== "21aefe5b2a8dc6fb18a58338090348b23d2f0a4a" || inventory.source_revision !== dependencyLock.source.revision || generatedLock.source_revision !== dependencyLock.source.revision) throw new Error("TASK-053 completion revision is not pinned consistently");
@@ -271,8 +302,6 @@ if (!credentialProjection || credentialProjection.capabilityByteLength !== crede
 const architectureText = await readFile(join(contractRoot, "../docs/architecture.md"), "utf8");
 if (!architectureText.includes("~/.dolgorae/controller-carriers/gul/<installation-id>") || !architectureText.includes("no production fake/CLI fallback") || !architectureText.includes("never stores or uses an Operator capability")) throw new Error("carrier-root or production authority boundary is missing from architecture");
 if (operations.operations.some((entry) => entry.verification !== "E12 pinned contract; not runtime/live evidence")) throw new Error("every E12 operation must retain the contract-only verification boundary");
-const roadmapText = await readFile(join(contractRoot, "../docs/roadmap.md"), "utf8");
-if (!roadmapText.includes("| Active Task | None |") || !roadmapText.includes("| E12 | In Review |") || !roadmapText.includes("| E12-T1 | Pre-release | Completed |")) throw new Error("E12-T1 completion lifecycle drifted");
 const requiredSpecsText = await readFile(join(contractRoot, "../docs/required-specs.md"), "utf8");
 if (!requiredSpecsText.includes("No Gul product runtime behavior exists.") || !requiredSpecsText.includes("| REQ-CONSUMER-001 | Immutable TASK-053 consumer source")) throw new Error("REQ-CONSUMER-001 contract-only Current State drifted");
 
@@ -355,6 +384,7 @@ for (const document of ["architecture-decision-records.md", "architecture.md", "
   if (!text.includes(dependencyLockDigest) || !text.includes(generatedLockDigest)) throw new Error(`${document} does not carry the current E12 lock digests`);
 }
 const implementationMemoText = await readFile(join(contractRoot, "../docs/implementation-memo.md"), "utf8");
+if (!implementationMemoText.includes("system Bun `>=1.3.14`") || !implementationMemoText.includes("except Bun's minimum-only system policy") || !implementationMemoText.includes("Historical E0-T8 manifest; Buf lint")) throw new Error("implementation memo toolchain ledger drifted from the current Bun minimum and historical generator boundary");
 if (implementationMemoText.includes("E12-T1 must still reproduce") || implementationMemoText.includes("Existing checked/generated files are intentionally unchanged")) throw new Error("implementation memo still describes TASK-053 adoption as outstanding");
 
 console.log(`contract validation passed: ${inventory.method_count} RPCs, ${operations.operations.length} operations, ${events.events.length} event variants, ${generatedLock.files.length} generated files`);

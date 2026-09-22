@@ -20,6 +20,14 @@ fixtures. `check.sh` regenerates into a temporary directory and rejects drift.
 The nested Go and Bun dependency graphs exist only to compile and test these
 contract fixtures; they are not a Gul application scaffold.
 
+Protobuf-ES v2 generates TypeScript message schemas and Connect service
+descriptors in the same checked module. The incompatible Connect-ES v1 plugin
+and its unchecked `_connect.ts` output are deliberately absent. The imported
+`method_coverage` rows are immutable producer case labels, not a claim that Gul
+executed one request body per label. Gul strictly decodes the two supplied
+aggregate JSON bodies, proves descriptor-complete field sourceability, and
+keeps runtime-pending cases outside contract evidence.
+
 The Machine CLI schema remains a separate diagnostic/comparison oracle.
 Production dependency injection must use the public local-gRPC adapter only and
 must never fall back to CLI after a gRPC failure.

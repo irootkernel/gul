@@ -12,7 +12,6 @@
   },
   "devDependencies": {
     "@bufbuild/protoc-gen-es": "2.14.0",
-    "@connectrpc/protoc-gen-connect-es": "1.7.0",
     "typescript": "7.0.2"
   }
 }

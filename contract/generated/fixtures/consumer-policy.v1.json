@@ -140,7 +140,7 @@
     "WriterService.CommitWriterHandoff",
     "WriterService.PrepareWriterHandoff"
   ],
-  "provider_profile_fixtures": {
+  "producer_case_catalog": {
     "contract_id": "dolgorae.gul-consumer-fixtures/v1",
     "schema_version": 1,
     "method_coverage": [

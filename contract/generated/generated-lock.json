@@ -12,7 +12,7 @@
     },
     {
       "path": "fixtures/consumer-policy.v1.json",
-      "sha256": "9440bb877860e75f23a805cbaeb9a9437c2e6fd6609c9ed8adf026103fcda37f"
+      "sha256": "f212aeb5e4ae69df7e5474813edfc035651e42eda182326dc0ac0fcf1cde7cd9"
     },
     {
       "path": "fixtures/machine-cli-comparison.v1.json",
@@ -61,10 +61,6 @@
     {
       "path": "policy/projection-replay-map.v1.json",
       "sha256": "12038c586ad72398a8ff2f8ac49a4fd942eadfa8033097120089b381cdd1cc5d"
-    },
-    {
-      "path": "ts/dolgorae/public/v1/dolgorae_connect.ts",
-      "sha256": "0c5082cc286f9da27df6bc52f629a444e91a0c95dfcfa9bb86fe8b398c98b90a"
     },
     {
       "path": "ts/dolgorae/public/v1/dolgorae_pb.ts",

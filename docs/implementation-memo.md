@@ -111,7 +111,7 @@ E12-T1 imports immutable TASK-053 commit
 `21aefe5b2a8dc6fb18a58338090348b23d2f0a4a` and records dependency-lock SHA-256
 `8f52ae66e126f37013d7842b2113fc509d21af4e4fc465cecdbeef7e21619f01` plus
 generated-lock SHA-256
-`43fecc3b63ca47b8a4330d1509047a2b3a8be4735c0bee5e6f5b43edca81c3d5`.
+`6284064e720e2220d6960c42faef6a4c13292ce1327f44e00388dc52b2e17d4a`.
 The generator reproduces the 8-service, 36-method descriptor with Buf 1.69,
 checks additive compatibility against the pre-TASK-053 descriptor, and emits
 typed Go/TypeScript clients, an all-method transport fake, 31 semantic operations,
@@ -257,8 +257,8 @@ Gate A's earlier source and checked-artifact digests are recorded below. E0-T7 r
 | Public transport | Accepted target: supervised local gRPC over private UDS | Pinned release/descriptor/lifecycle evidence; private, TCP, REST, and operator interfaces excluded | E0-T7/E2-T0 |
 | Gul adapter version | Unset | Versioned adapter contract | E2-T1 |
 | Last successful compatibility probe | None | Timestamp, environment, result, redacted evidence | E2-T1 |
-| Go/Wails/Node/Bun/TypeScript/React | Go `1.26.6`; Wails `3.0.0-beta.8` (`wails3`); Node `26.7.0`; system Bun `>=1.3.14`; TypeScript `7.0.2`; React/DOM `19.2.7` | `toolchain/versions.env`; exact checks except Bun's minimum-only system policy; clean-host fixtures | E0-T8/E12-T1 |
-| Protobuf/Buf/ConnectRPC | System Buf `>=1.66.1,<2.0.0`; protoc `35.1`; protoc-gen-go/protobuf-go `1.36.12`; connect-go/protoc-gen-connect-go `1.20.0`; Connect-ES/Web `2.1.2`; Protobuf-ES/protoc-gen-es `2.14.0`; protoc-gen-connect-es `1.7.0` | Same manifest; Buf lint must pass and generated dependency manifests must match before use | E0-T8 |
+| Go/Wails/Node/Bun/TypeScript/React | Go `1.26.6`; Wails `3.0.0-beta.8` (`wails3`); Node `26.7.0`; system Bun `>=1.3.14`; TypeScript `7.0.2`; React/DOM `19.2.7` | `toolchain/versions.env`; exact checks except Bun's minimum-only system policy; clean-host fixtures | E0-T8 |
+| Protobuf/Buf/ConnectRPC | System Buf `>=1.66.1,<2.0.0`; protoc `35.1`; protoc-gen-go/protobuf-go `1.36.12`; connect-go/protoc-gen-connect-go `1.20.0`; Connect-ES/Web `2.1.2`; Protobuf-ES/protoc-gen-es `2.14.0`; historical protoc-gen-connect-es `1.7.0` | Historical E0-T8 manifest; Buf lint must pass and generated dependency manifests must match before use | E0-T8 |
 | Host platform | macOS `>=14.0.0`, `arm64`; Git `>=2.39.0,<3.0.0` | Range checks; no installation or mutation | E0-T8 |
 | SQLite driver/settings | modernc.org/sqlite `1.57.0`; WAL; foreign keys; `synchronous=FULL`; 5-second busy timeout; one writer and at most four read-only connections; immediate transactional sequence allocation; checkpoint plus `VACUUM INTO` backup | Accepted ADR-0017 and future E1-T4 fault/race/backup tests | E0-T8 |
 
@@ -579,8 +579,8 @@ These cases are normative future acceptance owned by the Roadmap tasks named in 
 The root Makefile provides the non-rewriting serial facade `toolchain-check`, `generate-contract`, `contract-check`, `test-prepare`, `test-unit`, `test-int`, `test-e2e`, and `test`. `test` invokes the four test phases serially. E0-T7's checked delegates require exact generator versions, verify imported source hashes, reproduce the descriptor and all tracked outputs, run the all-RPC fake-server tests and TypeScript checker, and validate generated policies plus the separate Machine CLI fixture. Later Tasks extend these stable targets for frontend/browser E2E and opt-in pinned-runtime smoke tests. Real provider tests remain opt-in and must never reveal Controller capabilities, carrier/socket paths, or protected input.
 
 The current host check is honest evidence, not an installation workflow: it
-matches Go, Node, Buf, protoc, protoc-gen-connect-es, Git, macOS and architecture,
-and reports missing Wails v3 and three older PATH generators. System Bun 1.4.2
+matches Go, Node, Bun, Buf, protoc, protoc-gen-es, Git, macOS and architecture,
+and reports missing Wails v3 and two older PATH generators. System Bun 1.4.2
 satisfies the `>=1.3.14` minimum and is used directly. The clean-host fixture proves the exact pins and supported ranges; mismatch and
 missing-command fixtures prove fail-closed diagnostics. E0-T8 does not install
 or silently substitute those tools.

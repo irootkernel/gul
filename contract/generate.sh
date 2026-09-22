@@ -51,7 +51,7 @@ if ! version_cmp "$buf_version" ge "$GUL_BUF_MIN_VERSION" || ! version_cmp "$buf
     "$GUL_BUF_MIN_VERSION" "$GUL_BUF_MAX_EXCLUSIVE_VERSION" "$buf_version" >&2
   exit 2
 fi
-for executable in node_modules/.bin/protoc-gen-es node_modules/.bin/protoc-gen-connect-es; do
+for executable in node_modules/.bin/protoc-gen-es; do
   if [ ! -x "$executable" ]; then
     printf 'ERROR missing pinned contract dependency; run make test-prepare\n' >&2
     exit 2
@@ -69,11 +69,6 @@ if [ "$(node_modules/.bin/protoc-gen-es --version)" != "protoc-gen-es v$GUL_PROT
   printf 'ERROR contract generation requires protoc-gen-es %s\n' "$GUL_PROTOC_GEN_ES_VERSION" >&2
   exit 2
 fi
-if [ "$(node_modules/.bin/protoc-gen-connect-es --version)" != "protoc-gen-connect-es v$GUL_PROTOC_GEN_CONNECT_ES_VERSION" ]; then
-  printf 'ERROR contract generation requires protoc-gen-connect-es %s\n' "$GUL_PROTOC_GEN_CONNECT_ES_VERSION" >&2
-  exit 2
-fi
-
 bun scripts/build-contract.mjs "$output_root"
 (cd upstream && buf lint dolgorae/public/v1/dolgorae.proto)
 
@@ -105,8 +100,6 @@ NODE_NO_WARNINGS=1 PATH="$wrapper_dir/bin:$contract_root/node_modules/.bin:$PATH
   --connect-go_opt=Mdolgorae/public/v1/dolgorae.proto=github.com/rootkernel/gul/contract/generated/go/dolgorae/public/v1 \
   --es_out="$output_root/ts" \
   --es_opt=target=ts,import_extension=none \
-  --connect-es_out="$output_root/ts" \
-  --connect-es_opt=target=ts,import_extension=none \
   upstream/dolgorae/public/v1/dolgorae.proto
 
 find "$output_root/ts" -type f -name '*.ts' -exec perl -0pi -e 's/\n+\z/\n/' {} +

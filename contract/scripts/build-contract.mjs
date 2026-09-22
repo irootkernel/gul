@@ -228,7 +228,7 @@ function consumerFixtures(operations, events, clientPolicy, mutations, descripto
     event_invalidation_variants: events.events.map((entry) => entry.variant),
     required_rpcs: consumerProfile.required_methods,
     unavailable_rpcs: consumerProfile.unavailable_until_later_tasks,
-    provider_profile_fixtures: providerFixtures,
+    producer_case_catalog: providerFixtures,
     production_cli_fallback: false,
     unknown_required_enum: "reject",
     unknown_optional_field: "preserve_only_when_allowlisted"
