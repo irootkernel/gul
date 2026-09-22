@@ -8,8 +8,8 @@ manifest="$script_dir/../toolchain/versions.env"
 # shellcheck disable=SC1090
 . "$manifest"
 
-if [ "$GUL_BUN_MIN_VERSION" != "0.3.14" ]; then
-  printf 'ERROR Bun minimum must remain 0.3.14, found %s\n' "$GUL_BUN_MIN_VERSION" >&2
+if [ "$GUL_BUN_MIN_VERSION" != "1.4.2" ]; then
+  printf 'ERROR Bun minimum must remain 1.4.2, found %s\n' "$GUL_BUN_MIN_VERSION" >&2
   exit 1
 fi
 
@@ -76,16 +76,16 @@ write_command bun 99.0.0
 PATH="$fixture_dir:/usr/bin:/bin" "$checker" >/dev/null
 PATH="$fixture_dir:/usr/bin:/bin" "$checker" --bun-only >/dev/null
 
-write_command bun 1.3.13
+write_command bun 1.4.3
 PATH="$fixture_dir:/usr/bin:/bin" "$checker" >/dev/null
 PATH="$fixture_dir:/usr/bin:/bin" "$checker" --bun-only >/dev/null
 
-write_command bun 0.3.13
+write_command bun 1.4.1
 if PATH="$fixture_dir:/usr/bin:/bin" "$checker" >"$fixture_dir/out" 2>"$fixture_dir/err"; then
   printf 'ERROR unsupported old Bun unexpectedly passed\n' >&2
   exit 1
 fi
-if ! grep -q "Bun: expected >= $GUL_BUN_MIN_VERSION, found 0.3.13" "$fixture_dir/err"; then
+if ! grep -q "Bun: expected >= $GUL_BUN_MIN_VERSION, found 1.4.1" "$fixture_dir/err"; then
   printf 'ERROR old Bun mismatch was not reported precisely\n' >&2
   cat "$fixture_dir/err" >&2
   exit 1
@@ -94,7 +94,7 @@ if PATH="$fixture_dir:/usr/bin:/bin" "$checker" --bun-only >"$fixture_dir/out" 2
   printf 'ERROR unsupported old Bun unexpectedly passed --bun-only\n' >&2
   exit 1
 fi
-if ! grep -q "Bun: expected >= $GUL_BUN_MIN_VERSION, found 0.3.13" "$fixture_dir/err"; then
+if ! grep -q "Bun: expected >= $GUL_BUN_MIN_VERSION, found 1.4.1" "$fixture_dir/err"; then
   printf 'ERROR old Bun --bun-only mismatch was not reported precisely\n' >&2
   cat "$fixture_dir/err" >&2
   exit 1
@@ -116,12 +116,12 @@ if PATH="$bun_only_dir:/usr/bin:/bin" "$checker" >"$fixture_dir/out" 2>"$fixture
   exit 1
 fi
 
-write_command bun 0.3.13
+write_command bun 1.4.1
 if PATH="$fixture_dir:$PATH" make -C "$script_dir/.." test-prepare >"$fixture_dir/out" 2>"$fixture_dir/err"; then
   printf 'ERROR test-prepare accepted an old system Bun\n' >&2
   exit 1
 fi
-if ! grep -q "Bun: expected >= $GUL_BUN_MIN_VERSION, found 0.3.13" "$fixture_dir/err"; then
+if ! grep -q "Bun: expected >= $GUL_BUN_MIN_VERSION, found 1.4.1" "$fixture_dir/err"; then
   printf 'ERROR test-prepare did not stop at the Bun minimum gate\n' >&2
   exit 1
 fi
@@ -129,7 +129,7 @@ if PATH="$fixture_dir:$PATH" "$script_dir/../contract/generate.sh" "$fixture_dir
   printf 'ERROR contract generation accepted an old system Bun\n' >&2
   exit 1
 fi
-if ! grep -q "Bun: expected >= $GUL_BUN_MIN_VERSION, found 0.3.13" "$fixture_dir/err"; then
+if ! grep -q "Bun: expected >= $GUL_BUN_MIN_VERSION, found 1.4.1" "$fixture_dir/err"; then
   printf 'ERROR contract generation did not stop at the Bun minimum gate\n' >&2
   exit 1
 fi

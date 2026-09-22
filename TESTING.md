@@ -21,8 +21,10 @@ newer on arm64, Git `>=2.39.0,<3.0.0`, and the system `buf` from `PATH` at
 `>=1.66.1,<2.0.0`. Buf lints, builds the descriptor used for byte comparison,
 and checks the additive baseline. A different in-range Buf that emits different
 descriptor bytes fails closed. Language-client generators remain exactly pinned.
-The system `bun` resolved from `PATH` must be at least `0.3.14`; newer versions
+The system `bun` resolved from `PATH` must be at least `1.4.2`; newer versions
 are accepted and are used directly for contract generation and dependency work.
+This floor is the version verified against the tracked text `bun.lock` and the
+complete frozen contract pipeline.
 
 `make test-prepare` checks the Bun minimum before dependency materialization.
 The nested contract Go/Bun graphs match the version manifest and exist only to
