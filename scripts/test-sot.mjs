@@ -163,6 +163,27 @@ expectFailure('active row mismatch', root => {
   ));
 }, /Active Task header must be exactly E1-T1/);
 
+expectFailure('next header misses first eligible task', root => {
+  write(root, 'docs/roadmap.md', text => text.replace(
+    '| Next | E1 starting at E1-T1 |',
+    '| Next | E13 starting at E13-T1 |',
+  ));
+}, /Next header must identify first eligible Task E1-T1/);
+
+expectFailure('pending Epic loses shared dossier', root => {
+  write(root, 'docs/roadmap.md', text => text.replace(
+    /^(\| E1 \| Planned \|[^\n]+\|) \[Shared\]\(todo\/GUL-CONSUMER-REBASELINE\.md\) \|$/m,
+    '$1 None |',
+  ));
+}, /Pending Epic E1 must retain the shared implementation dossier link/);
+
+expectFailure('architecture retains stale E12 lifecycle', root => {
+  write(root, 'docs/architecture.md', text => text.replace(
+    'E12 is `Completed`',
+    'E12 is in completion review',
+  ));
+}, /Architecture current snapshot must identify E12 as Completed/);
+
 expectFailure('missing retired row', root => {
   write(root, 'docs/roadmap.md', text => text.replace(/^\| E0-T5 \|.*\n/m, ''));
 }, /Required permanent Task row is missing: E0-T5/);

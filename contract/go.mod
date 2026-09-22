@@ -3,8 +3,8 @@ module github.com/rootkernel/gul/contract
 go 1.26.0
 
 require (
-	connectrpc.com/connect v1.20.0 // indirect
-	google.golang.org/protobuf v1.36.12 // indirect
+	connectrpc.com/connect v1.20.0
+	google.golang.org/protobuf v1.36.12
 )
 
 tool (

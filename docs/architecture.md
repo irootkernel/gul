@@ -987,7 +987,7 @@ The serial command facade is `toolchain-check`, `generate-contract`, `contract-c
 
 **Snapshot date:** 2026-09-22 (TASK-053 consumer contract pinned by E12-T1)
 
-**Roadmap point:** E0 remains `Completed` for its historical pin. E12-T1 has completed the new consumer pin and E12 is in completion review; E1 follows only after E12 closeout. E13 owns the stateful fake harness and E14 owns pre-release application acceptance; former E12-T2/T3 are Retired. No product runtime or live acceptance is implied.
+**Roadmap point:** E0 remains `Completed` for its historical pin. E12 is `Completed`; its sole first-release member, E12-T1, completed the new consumer pin, while former E12-T2/T3 remain Retired. E1-T1 is the next eligible Task but is not active. E13 owns the stateful fake harness, and E14 owns pre-release application acceptance. No product runtime or live acceptance is implied.
 
 **Maturity:** documentation rebaseline, bootstrap toolchain, and provider-contract fixture boundary accepted; product implementation not started
 

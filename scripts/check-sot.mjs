@@ -212,12 +212,16 @@ export function validateRepository(root, options = {}) {
     if (epicBlocks.includes(epic)) errors.push(`First-release Epic ${epic} is interleaved across Task blocks`);
     epicBlocks.push(epic);
   }
-  const epicSummaries = [...roadmap.matchAll(/^\| (E\d+) \| ([^|]+) \|/gm)];
+  const epicSummaries = [...roadmap.matchAll(/^\| (E\d+) \| ([^|]+) \| ([^|]+) \| ([^|]+) \|$/gm)];
   const summaryIds = epicSummaries.map(match => match[1]);
   if (summaryIds.length !== new Set(summaryIds).size) errors.push('Duplicate Epic summary row');
-  for (const [, epic, state] of epicSummaries) {
+  for (const [, epic, state, , dossier] of epicSummaries) {
     if (!states.has(state.trim())) errors.push(`Invalid Epic summary status: ${epic}: ${state.trim()}`);
     if (![...tasks.keys()].some(id => id.startsWith(`${epic}-`))) errors.push(`Epic summary ${epic} has no Task rows`);
+    if (['Planned', 'In Progress', 'In Review'].includes(state.trim())
+        && dossier.trim() !== '[Shared](todo/GUL-CONSUMER-REBASELINE.md)') {
+      errors.push(`Pending Epic ${epic} must retain the shared implementation dossier link`);
+    }
   }
   const releaseSummaryOrder = summaryIds.filter(epic => epicBlocks.includes(epic));
   if (releaseSummaryOrder.join(',') !== epicBlocks.join(',')) {
@@ -230,6 +234,21 @@ export function validateRepository(root, options = {}) {
   const expectedActive = active.length === 1 ? active[0][0] : 'None';
   if (activeHeaders.length !== 1 || activeHeaders[0] !== expectedActive) {
     errors.push(`Active Task header must be exactly ${expectedActive}; found ${activeHeaders.length === 1 ? activeHeaders[0] : `${activeHeaders.length} headers`}`);
+  }
+
+  if (!active.length) {
+    const nextEligible = [...tasks].find(([, task]) => task.state === 'Planned'
+      && task.deps.every(dependency => tasks.get(dependency)?.state === 'Completed'))?.[0];
+    const nextHeaders = [...roadmap.matchAll(/^\| Next \| ([^|]+) \|$/gm)].map(match => match[1].trim());
+    if (nextEligible && (nextHeaders.length !== 1 || !new RegExp(`\\b${nextEligible}\\b`).test(nextHeaders[0]))) {
+      errors.push(`Next header must identify first eligible Task ${nextEligible}`);
+    }
+  }
+
+  const e12State = epicSummaries.find(match => match[1] === 'E12')?.[2].trim();
+  const currentSnapshot = section(architecture, '## 19. Current snapshot', '### 19.1 ', errors);
+  if (e12State === 'Completed' && !currentSnapshot.includes('E12 is `Completed`')) {
+    errors.push('Architecture current snapshot must identify E12 as Completed');
   }
 
   const registry = parseRegistry(registryRaw, errors, 'Task identity registry');
