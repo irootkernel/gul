@@ -202,6 +202,20 @@ export function validateRepository(root, options = {}) {
   }
   if (!tasks.size) errors.push('No canonical Task DAG rows found');
 
+  const currentE12Members = [...tasks]
+    .filter(([id, task]) => id.startsWith('E12-') && !['Deferred', 'Retired'].includes(task.state))
+    .map(([id]) => id);
+  if (currentE12Members.length !== 1 || currentE12Members[0] !== 'E12-T1'
+      || tasks.get('E12-T1')?.phase !== 'Pre-release' || tasks.get('E12-T1')?.state !== 'Completed') {
+    errors.push('E12 must have exactly one current member: completed Pre-release Task E12-T1');
+  }
+  for (const id of ['E12-T2', 'E12-T3']) {
+    const task = tasks.get(id);
+    if (task?.phase !== 'Historical' || task?.state !== 'Retired') {
+      errors.push(`${id} must remain Historical and Retired`);
+    }
+  }
+
   // A topological Task order can still require leaving and re-entering an Epic.
   // Retired and deferred identities are not members of first-release execution.
   const epicBlocks = [];

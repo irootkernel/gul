@@ -19,6 +19,7 @@ test-prepare:
 
 test-unit:
 	@cd contract && go test ./...
+	@node contract/scripts/test-validate-go-manifest.mjs
 	@./contract/test-breaking-check.sh
 	@./scripts/test-contract-command.sh
 

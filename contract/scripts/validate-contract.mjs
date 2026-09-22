@@ -6,6 +6,7 @@ import {
   GetOrchestratedSessionResponseSchema,
   ListOrchestratedSessionResultsResponseSchema,
 } from "../generated/ts/dolgorae/public/v1/dolgorae_pb";
+import { validateGoManifest } from "./validate-go-manifest.mjs";
 
 const contractRoot = resolve(import.meta.dir, "..");
 const generatedRoot = join(contractRoot, "generated");
@@ -180,9 +181,7 @@ for (const [name, expected] of Object.entries(expectedPackages)) {
   if (actual !== expected) throw new Error(`${name} must match toolchain authority ${expected}, found ${actual}`);
 }
 if (packageManifest.dependencies?.["@connectrpc/protoc-gen-connect-es"] || packageManifest.devDependencies?.["@connectrpc/protoc-gen-connect-es"] || generatedLock.files.some((entry) => entry.path.endsWith("_connect.ts"))) throw new Error("Connect-ES v1 generator artifacts must not coexist with Protobuf-ES v2 service descriptors");
-for (const [module, expected] of [["connectrpc.com/connect", versionManifest.GUL_CONNECT_GO_VERSION], ["google.golang.org/protobuf", versionManifest.GUL_PROTOBUF_GO_VERSION]]) {
-  if (!goManifest.includes(`${module} v${expected}`)) throw new Error(`${module} must match toolchain authority ${expected}`);
-}
+validateGoManifest(goManifest, versionManifest);
 const descriptorMethods = inventory.services.flatMap((service) => service.methods.map((method) => `${service.name}.${method.name}`)).sort();
 const capabilityMethods = [...capabilities.properties.grpc_methods.items.enum].sort();
 if (!equal(descriptorMethods, capabilityMethods)) throw new Error("descriptor and capability method inventories differ");

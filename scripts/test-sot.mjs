@@ -184,6 +184,23 @@ expectFailure('architecture retains stale E12 lifecycle', root => {
   ));
 }, /Architecture current snapshot must identify E12 as Completed/);
 
+expectFailure('retired E12 member becomes deferred', root => {
+  write(root, 'docs/roadmap.md', text => text.replace(
+    '| E12-T2 | Historical | Retired |',
+    '| E12-T2 | Deferred | Deferred |',
+  ));
+}, /E12-T2 must remain Historical and Retired/);
+
+expectFailure('E12 gains a second current member', root => {
+  write(root, 'docs/roadmap.md', text => {
+    const secondMember = text.match(/^\| E12-T2 \|.*$/m)[0]
+      .replace('| Historical | Retired |', '| Pre-release | Completed |');
+    return text
+      .replace(/^\| E12-T2 \|.*\n/m, '')
+      .replace(/^\| E12-T1 \|.*$/m, row => `${row}\n${secondMember}`);
+  });
+}, /E12 must have exactly one current member/);
+
 expectFailure('missing retired row', root => {
   write(root, 'docs/roadmap.md', text => text.replace(/^\| E0-T5 \|.*\n/m, ''));
 }, /Required permanent Task row is missing: E0-T5/);
