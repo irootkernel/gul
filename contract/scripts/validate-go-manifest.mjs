@@ -10,6 +10,14 @@ const toolModules = [
 
 export function validateGoManifest(goManifest, versionManifest) {
   const lines = goManifest.split("\n").map((line) => line.trim());
+  const goParts = versionManifest.GUL_GO_VERSION?.split(".") ?? [];
+  if (goParts.length !== 3) throw new Error("GUL_GO_VERSION must contain major.minor.patch");
+  if (lines.filter((line) => line === `go ${goParts[0]}.${goParts[1]}.0`).length !== 1) {
+    throw new Error("contract Go language version must match the pinned toolchain series");
+  }
+  if (lines.filter((line) => line === `toolchain go${versionManifest.GUL_GO_VERSION}`).length !== 1) {
+    throw new Error("contract Go toolchain must match GUL_GO_VERSION exactly");
+  }
   if (lines.some((line) => /^(replace|exclude)\b/.test(line))) {
     throw new Error("contract Go manifest must not contain replace or exclude directives");
   }

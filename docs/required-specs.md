@@ -7,8 +7,8 @@
 | Product | Gul (굴) |
 | Subtitle | Remote operator interface for local development runtimes |
 | Version | 0.1-dolgorae-consumer-v1 |
-| Status | Approved Required State; E12 consumer contract pin completed; product runtime absent |
-| Last updated | 2026-09-22 |
+| Status | Approved Required State; E1-T1 core foundation completed without assembled product acceptance |
+| Last updated | 2026-09-23 |
 | Target | macOS host; modern desktop, iPad, and iPhone browsers |
 
 ## 1. Purpose, authority, and lifecycle
@@ -473,7 +473,13 @@ REQ-WRITER-004 retains its original ID and meaning and is deferred, not supersed
 
 ## 7. Current State ledger
 
-No Gul product runtime behavior exists. E12-T1 has accepted the immutable consumer contract and generated tooling boundary; E13-T1, E14-T1 and all product behavior requirements remain Required State. Former E12-T2/T3 are Retired without implementation evidence.
+E1-T1 task evidence records the delivery-independent Go core foundation and its
+fail-closed composition boundary. It does not promote E14-owned REQ-HOST-001 or
+implement a listener, persistence repository, provider adapter, product route,
+or production authentication.
+E12-T1 has accepted the immutable consumer contract and generated tooling
+boundary; later Tasks still own the remaining product behavior. Former
+E12-T2/T3 are Retired without implementation evidence.
 
 | Requirement | Accepted Current State | Evidence |
 |---|---|---|

@@ -5,7 +5,7 @@
 | Role | Non-normative implementation observations, dependencies, risks, and handoff |
 | Product | Gul |
 | Version | 0.1-dolgorae-consumer-v1 |
-| Last updated | 2026-09-22 |
+| Last updated | 2026-09-23 |
 
 ## 1. Boundary
 
@@ -160,23 +160,41 @@ compatibility, live credentials, or actual-provider acceptance. E1-T1 is the
 next eligible Task but is not activated by this record. The shared consumer
 rebaseline dossier remains because later Epics still reference it.
 
+## 1.6 E1-T1 core foundation, 2026-09-23
+
+E1-T1 adds the root Go product module and a delivery-independent core under
+`internal/app`. The core owns a small lifecycle state machine and explicit
+lifecycle, provider-readiness, persistence-readiness and authorization ports.
+Missing dependencies receive fail-closed defaults: headless bootstrap performs
+no external provider startup, product access is denied, and provider or storage
+availability is never inferred.
+
+Tests inject task-local ports to verify startup/shutdown, authorization-before-
+availability ordering, typed unavailable results, failed startup, and rejection
+before startup. This is foundation evidence only. It does not claim a listener,
+Wails host, browser API, database repository, typed provider capability adapter,
+production authentication, or real-provider behavior.
+
 ## 2. Current development snapshot
 
 | Area | State |
 |---|---|
 | Five Gul SOT documents | E0-T4 completed the consumer alignment and Gate A reproduction; E0-T8 completed toolchain/ADR alignment; E0-T7 completed Gate B |
-| Toolchain and developer-command artifacts | E0-T8 accepted one pin manifest and read-only host checks; E0-T7 adds checked contract generation/drift delegates; no installer or application scaffold |
+| Toolchain and developer-command artifacts | E0-T8 accepted one pin manifest and read-only host checks; E0-T7 adds checked contract generation/drift delegates; E1-T1 adds the root Go module and core-test path; no installer |
 | Contract boundary | E12-T1 pins TASK-053 and regenerates checked clients/maps/fake transport for 36 known, 27 required, and 9 unavailable methods |
-| Production source | None |
+| Production source | E1-T1 shared Go core lifecycle and injected port contracts under `internal/app` |
 | Wails host/frontend | Not implemented |
 | ConnectRPC schema/services | Not implemented |
 | Gul SQLite schema | Not implemented |
 | Dolgorae RPC supervisor/provider | Not implemented |
 | Controller credential store | Caller-owned mechanism selected by ADR-0047; not implemented |
 | FileService/auth/PWA/Tailscale integration | Not implemented |
-| Current State promotions | REQ-HOST-005, REQ-RUNTIME-011, REQ-RUNTIME-022, and REQ-CONSUMER-001; no product runtime behavior |
+| Current State promotions | REQ-HOST-005, REQ-RUNTIME-011, REQ-RUNTIME-022, and REQ-CONSUMER-001; E1-T1 is task evidence, not partial promotion of E14-owned REQ-HOST-001 |
 
-The repository contains documentation, pre-implementation bootstrap validation, and a checked provider-contract boundary candidate. No application source or live runtime behavior has completed review.
+The repository contains the reviewed shared-core foundation, bootstrap
+validation, and checked provider-contract boundary. Delivery processes,
+persistence implementations, provider adapters and live runtime behavior remain
+unimplemented.
 
 ## 3. Historical E0 assumption snapshot
 
@@ -454,8 +472,8 @@ The current boundary pack must verify unique permanent requirement IDs and valid
 | 16 | Guarded read-only FileService remains in scope. | Pass |
 | 18 | The 107-row requirement appendix and ADR migration matrix explicitly supersede obsolete artifacts. | Pass |
 | 19 | Exactly one task, E0-T4, occupies the Active Task slot. | Pass |
-| 20 | All E1-E9 implementation tasks remain `Planned`; no production source exists. | Pass |
-| 21 | Current State says implementation and verified runtime behavior are absent. | Pass |
+| 20 | E1-T1 is `Completed`; E1 remains `In Progress`, while later implementation tasks retain their roadmap state. | Pass |
+| 21 | Current State records the reviewed core task evidence without promoting incomplete assembled-product requirements. | Pass |
 | 22 | Cross-document IDs, owners, decisions, DAG, authority, and security gates agree. | Pass |
 
 These twenty-two criteria come from the originating brief. The local-gRPC revision is additionally governed by the following acceptance map.
@@ -599,7 +617,7 @@ These cases are normative future acceptance owned by the Roadmap tasks named in 
 
 ## 10. Standard command contract
 
-The root Makefile provides the serial facade `toolchain-check`, `generate-contract`, `contract-check`, `test-prepare`, `test-unit`, `test-int`, `test-e2e`, and `test`. `generate-contract` rewrites checked contract output, `test-prepare` downloads locked contract dependencies, and the checking targets do not rewrite tracked files. `test` invokes the four test phases serially. E0-T7's checked delegates require exact generator versions, verify imported source hashes, reproduce the descriptor and all tracked outputs, run the all-RPC fake-server tests and TypeScript checker, and validate generated policies plus the separate Machine CLI fixture. Later Tasks extend these stable targets for frontend/browser E2E and opt-in pinned-runtime smoke tests. Real provider tests remain opt-in and must never reveal Controller capabilities, carrier/socket paths, or protected input.
+The root Makefile provides the serial facade `toolchain-check`, `generate-contract`, `contract-check`, `test-prepare`, `test-unit`, `test-int`, `test-e2e`, and `test`. `generate-contract` rewrites checked contract output. `test-prepare` validates both Go manifests and the exact Go toolchain before downloading the root and contract module graphs, then installs locked Bun dependencies with lifecycle scripts disabled. `test-unit` repeats those checks before running the root core tests, contract Go tests, and existing contract fixtures. `test-int` checks the exact Go toolchain again before module tidiness, SOT validation, contract drift checks, and whitespace checks. The checking targets do not rewrite tracked files, and `test` invokes the four test phases serially. E0-T7's checked delegates require exact generator versions, verify imported source hashes, reproduce the descriptor and all tracked outputs, run the all-RPC fake-server tests and TypeScript checker, and validate generated policies plus the separate Machine CLI fixture. Later Tasks extend these stable targets for frontend/browser E2E and opt-in pinned-runtime smoke tests. Real provider tests remain opt-in and must never reveal Controller capabilities, carrier/socket paths, or protected input.
 
 The current host check requires Go exactly `1.26.6`, requires architecture to
 match `arm64` exactly, and reports Wails, Node, Bun, Buf, protoc, Git, and macOS
@@ -623,4 +641,4 @@ The initial documentation assumed Gul would manage one Codex App Server, map Ses
 
 ## 12. Handoff
 
-E12 is complete. The TASK-053 consumer lock and generated contract tooling are authoritative for new implementation, while historical E0 evidence remains scoped to its original pin. E1-T1 is the next eligible Task; E2-T0 remains blocked on an accepted compatible Dolgorae executable and live smoke evidence. No product runtime or next Task is activated automatically.
+E12 is complete. The TASK-053 consumer lock and generated contract tooling are authoritative for new implementation, while historical E0 evidence remains scoped to its original pin. E1-T1 completed the shared fail-closed core foundation; E1-T2 is the next eligible Task. E2-T0 remains blocked on an accepted compatible Dolgorae executable and live smoke evidence. No later Task or live-provider behavior is activated automatically.

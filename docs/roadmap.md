@@ -3,9 +3,9 @@
 | Field | Value |
 | --- | --- |
 | Role | Sole authority for task identity, order, status, dependencies, and phase |
-| Revision | 2026-09-22 E12 completion |
+| Revision | 2026-09-23 E1-T1 completion |
 | Active Task | None |
-| Next | E1 starting at E1-T1 |
+| Next | E1 continuing at E1-T2 |
 | Required provider | Released Dolgorae v0.1.3 implementing `dolgorae.gul-consumer/v1` |
 
 ## 1. Status and execution rules
@@ -126,7 +126,7 @@ second owner of membership, order or status.
 | --- | --- | --- | --- |
 | E0 | Completed | Historical rebaseline, bootstrap toolchain, and old generated contract fixtures | None |
 | E12 | Completed | Immutable consumer contract pin only; E12-T1 | [Roadmap](#e12-pin-the-immutable-consumer-contract); [Memo](implementation-memo.md#15-e12-epic-closeout-2026-09-22) |
-| E1 | Planned | Core, typed APIs, persistence, one frontend and desktop-shell foundation | [Shared](todo/GUL-CONSUMER-REBASELINE.md) |
+| E1 | In Progress | Core, typed APIs, persistence, one frontend and desktop-shell foundation | [Shared](todo/GUL-CONSUMER-REBASELINE.md) |
 | E13 | Planned | Stateful consumer fake provider and reusable scenario harness; E13-T1 | [Shared](todo/GUL-CONSUMER-REBASELINE.md) |
 | E3 | Planned | Workspace/session presentation and global Profile selection | [Shared](todo/GUL-CONSUMER-REBASELINE.md) |
 | E4 | Planned | Events, interactions, writer evaluator, complete timeline and artifacts; excludes E4-T4 | [Shared](todo/GUL-CONSUMER-REBASELINE.md) |
@@ -184,7 +184,7 @@ assembly is owned by E14; actual headless provider integration is owned by E2.
 
 | Task | Phase | Status | Predecessors | Owned result and verification |
 | --- | --- | --- | --- | --- |
-| E1-T1 | Pre-release | Planned | E12-T1 | Shared headless-capable core, lifecycle/provider/persistence/authorization ports and deny-by-default composition; isolated bootstrap tests without real provider startup |
+| E1-T1 | Pre-release | Completed | E12-T1 | Shared headless-capable core, lifecycle/provider/persistence/authorization ports and deny-by-default composition; isolated bootstrap tests without real provider startup |
 | E1-T2 | Pre-release | Planned | E1-T1 | One React bundle and delivery path for shell/browser; foundation build and delivery tests, not completed feature flows |
 | E1-T3 | Pre-release | Planned | E1-T1, E12-T1 | Typed ConnectRPC/domain ports, explicit browser history/item/state/result reads and CloseOutcome, Gul-owned pagination/references, operation/error fixtures; no generic passthrough or premature coordinator |
 | E1-T4 | Pre-release | Planned | E1-T1 | Gul-only SQLite, auth/presentation/cache/attempt repositories; migration and transaction tests |

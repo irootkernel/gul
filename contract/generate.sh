@@ -11,6 +11,29 @@ trap cleanup EXIT HUP INT TERM
 
 cd "$contract_root"
 . "$version_manifest"
+export GOTOOLCHAIN=local
+
+require_manifest_line() {
+  local expected=$1
+  if ! awk -v expected="$expected" '
+    { line = $0; gsub(/^[[:space:]]+|[[:space:]]+$/, "", line); if (line == expected) count++ }
+    END { exit count == 1 ? 0 : 1 }
+  ' go.mod; then
+    printf 'ERROR contract Go manifest must contain exactly one: %s\n' "$expected" >&2
+    exit 2
+  fi
+}
+
+if grep -Eq '^[[:space:]]*(replace|exclude)([[:space:]]|$)' go.mod; then
+  printf 'ERROR contract Go manifest must not contain replace or exclude directives\n' >&2
+  exit 2
+fi
+require_manifest_line "go ${GUL_GO_VERSION%.*}.0"
+require_manifest_line "toolchain go$GUL_GO_VERSION"
+require_manifest_line "connectrpc.com/connect v$GUL_CONNECT_GO_VERSION"
+require_manifest_line "google.golang.org/protobuf v$GUL_PROTOBUF_GO_VERSION"
+require_manifest_line 'connectrpc.com/connect/cmd/protoc-gen-connect-go'
+require_manifest_line 'google.golang.org/protobuf/cmd/protoc-gen-go'
 
 if ! go_line=$(go version 2>/dev/null); then
   printf 'ERROR contract generation requires Go exactly %s on darwin/%s; found unavailable\n' \

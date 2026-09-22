@@ -34,8 +34,8 @@ if [ "${1-}" = "--manifest-only" ]; then
   printf 'OK manifest: %s\n' "$manifest"
   exit 0
 fi
-if [ "${1-}" != "" ] && [ "${1-}" != "--bun-only" ] && [ "${1-}" != "--version-at-least" ]; then
-  printf 'usage: %s [--manifest-only|--bun-only|--version-at-least <actual> <minimum>]\n' "$0" >&2
+if [ "${1-}" != "" ] && [ "${1-}" != "--go-only" ] && [ "${1-}" != "--bun-only" ] && [ "${1-}" != "--version-at-least" ]; then
+  printf 'usage: %s [--manifest-only|--go-only|--bun-only|--version-at-least <actual> <minimum>]\n' "$0" >&2
   exit 2
 fi
 
@@ -182,6 +182,15 @@ check_exact() {
     fail "$label: expected exactly $expected, found $actual ($command_name)"
   fi
 }
+
+if [ "${1-}" = "--go-only" ]; then
+  check_exact Go "$GUL_GO_VERSION" go version
+  if [ "$failures" -ne 0 ]; then
+    printf 'toolchain check failed: %s issue(s)\n' "$failures" >&2
+    exit 1
+  fi
+  exit 0
+fi
 
 if [ "${1-}" = "--bun-only" ]; then
   check_minimum Bun "$GUL_BUN_MIN_VERSION" bun --version

@@ -131,8 +131,8 @@ function gitValidationFixture(runGit) {
   const root = fixture();
   try {
     write(root, 'docs/roadmap.md', text => text
-      .replace('| Active Task | None |', '| Active Task | E1-T1 |')
-      .replace('| E1-T1 | Pre-release | Planned |', '| E1-T1 | Pre-release | In Review |'));
+      .replace('| Active Task | None |', '| Active Task | E1-T2 |')
+      .replace('| E1-T2 | Pre-release | Planned |', '| E1-T2 | Pre-release | In Review |'));
     assert.deepEqual(run(root).errors, []);
   } finally {
     fs.rmSync(root, {recursive: true, force: true});
@@ -147,9 +147,9 @@ expectFailure('duplicate requirement is not normalized away', root => {
 
 expectFailure('multiple active rows', root => {
   write(root, 'docs/roadmap.md', text => text
-    .replace('| Active Task | None |', '| Active Task | E1-T1 |')
-    .replace('| E1-T1 | Pre-release | Planned |', '| E1-T1 | Pre-release | In Progress |')
-    .replace('| E1-T2 | Pre-release | Planned |', '| E1-T2 | Pre-release | In Review |'));
+    .replace('| Active Task | None |', '| Active Task | E1-T2 |')
+    .replace('| E1-T2 | Pre-release | Planned |', '| E1-T2 | Pre-release | In Progress |')
+    .replace('| E1-T3 | Pre-release | Planned |', '| E1-T3 | Pre-release | In Review |'));
 }, /Multiple active Tasks/);
 
 expectFailure('active header mismatch', root => {
@@ -158,21 +158,21 @@ expectFailure('active header mismatch', root => {
 
 expectFailure('active row mismatch', root => {
   write(root, 'docs/roadmap.md', text => text.replace(
-    '| E1-T1 | Pre-release | Planned |',
-    '| E1-T1 | Pre-release | In Progress |',
+    '| E1-T2 | Pre-release | Planned |',
+    '| E1-T2 | Pre-release | In Progress |',
   ));
-}, /Active Task header must be exactly E1-T1/);
+}, /Active Task header must be exactly E1-T2/);
 
 expectFailure('next header misses first eligible task', root => {
   write(root, 'docs/roadmap.md', text => text.replace(
-    '| Next | E1 starting at E1-T1 |',
+    '| Next | E1 continuing at E1-T2 |',
     '| Next | E13 starting at E13-T1 |',
   ));
-}, /Next header must identify first eligible Task E1-T1/);
+}, /Next header must identify first eligible Task E1-T2/);
 
 expectFailure('pending Epic loses shared dossier', root => {
   write(root, 'docs/roadmap.md', text => text.replace(
-    /^(\| E1 \| Planned \|[^\n]+\|) \[Shared\]\(todo\/GUL-CONSUMER-REBASELINE\.md\) \|$/m,
+    /^(\| E1 \| In Progress \|[^\n]+\|) \[Shared\]\(todo\/GUL-CONSUMER-REBASELINE\.md\) \|$/m,
     '$1 None |',
   ));
 }, /Pending Epic E1 must retain the shared implementation dossier link/);
@@ -183,6 +183,27 @@ expectFailure('architecture retains stale E12 lifecycle', root => {
     'E12 is in completion review',
   ));
 }, /Architecture current snapshot must identify E12 as Completed/);
+
+expectFailure('architecture retains stale E1-T1 lifecycle', root => {
+  write(root, 'docs/architecture.md', text => text.replace(
+    'E1-T1 is `Completed`',
+    'E1-T1 is in completion review',
+  ));
+}, /Architecture current snapshot must identify E1-T1 as Completed/);
+
+expectFailure('current state promotes a requirement before its owner completes', root => {
+  write(root, 'docs/required-specs.md', text => text.replace(
+    '| REQ-HOST-005 | Exact Go toolchain',
+    '| REQ-HOST-001 | Premature foundation promotion | E1-T1 |\n| REQ-HOST-005 | Exact Go toolchain',
+  ));
+}, /Accepted Current State requirement REQ-HOST-001 has incomplete owner E14-T1/);
+
+expectFailure('architecture drops an E1-T1 delivery boundary', root => {
+  write(root, 'docs/architecture.md', text => text.replace(
+    'No ConnectRPC service exists.',
+    'ConnectRPC delivery state is unspecified.',
+  ));
+}, /Architecture must retain the E1-T1 boundary: No ConnectRPC service exists/);
 
 expectFailure('retired E12 member becomes deferred', root => {
   write(root, 'docs/roadmap.md', text => text.replace(
@@ -229,22 +250,22 @@ expectFailure('missing registered ID', root => {
 
 expectFailure('dependency cycle', root => {
   write(root, 'docs/roadmap.md', text => text.replace(
-    '| E1-T1 | Pre-release | Planned | E12-T1 |',
-    '| E1-T1 | Pre-release | Planned | E1-T2 |',
+    '| E1-T1 | Pre-release | Completed | E12-T1 |',
+    '| E1-T1 | Pre-release | Completed | E1-T2 |',
   ));
 }, /Task dependency cycle at E1-T1|Task dependency cycle at E1-T2/);
 
 expectFailure('retired dependency', root => {
   write(root, 'docs/roadmap.md', text => text.replace(
-    '| E1-T1 | Pre-release | Planned | E12-T1 |',
-    '| E1-T1 | Pre-release | Planned | E0-T5 |',
+    '| E1-T1 | Pre-release | Completed | E12-T1 |',
+    '| E1-T1 | Pre-release | Completed | E0-T5 |',
   ));
 }, /E1-T1 depends on retired E0-T5/);
 
 expectFailure('reserved dependency', root => {
   write(root, 'docs/roadmap.md', text => text.replace(
-    '| E1-T1 | Pre-release | Planned | E12-T1 |',
-    '| E1-T1 | Pre-release | Planned | E10-T1 |',
+    '| E1-T1 | Pre-release | Completed | E12-T1 |',
+    '| E1-T1 | Pre-release | Completed | E10-T1 |',
   ));
 }, /E1-T1 depends on reserved E10-T1/);
 

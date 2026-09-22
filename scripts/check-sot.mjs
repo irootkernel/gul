@@ -264,6 +264,20 @@ export function validateRepository(root, options = {}) {
   if (e12State === 'Completed' && !currentSnapshot.includes('E12 is `Completed`')) {
     errors.push('Architecture current snapshot must identify E12 as Completed');
   }
+  if (tasks.get('E1-T1')?.state === 'Completed' && !currentSnapshot.includes('E1-T1 is `Completed`')) {
+    errors.push('Architecture current snapshot must identify E1-T1 as Completed');
+  }
+  if (tasks.get('E1-T1')?.state === 'Completed') {
+    for (const boundary of [
+      'No Wails host or frontend exists.',
+      'No ConnectRPC service exists.',
+      'No Gul SQLite schema exists.',
+      'No Runtime Provider adapter',
+      'Production authentication,',
+    ]) {
+      if (!architecture.includes(boundary)) errors.push(`Architecture must retain the E1-T1 boundary: ${boundary}`);
+    }
+  }
 
   const registry = parseRegistry(registryRaw, errors, 'Task identity registry');
   const evidence = options.gitEvidence || readGitEvidence(root, options.gitRunner);
@@ -329,6 +343,7 @@ export function validateRepository(root, options = {}) {
   const requirementPattern = /^\| (REQ-[A-Z0-9-]+) \|/gm;
   const currentIds = [...current.matchAll(requirementPattern)].map(match => match[1]);
   const deferredIds = [...deferred.matchAll(requirementPattern)].map(match => match[1]);
+	const requirementOwners = new Map();
   for (const [label, ids] of [['active', currentIds], ['deferred', deferredIds]]) {
     if (!ids.length || ids.length !== new Set(ids).size) errors.push(`Missing or duplicate ${label} requirement definitions`);
   }
@@ -339,11 +354,21 @@ export function validateRepository(root, options = {}) {
       const cells = line.split('|').map(cell => cell.trim());
       if (cells.length < 4 || !/^REQ-[A-Z0-9-]+$/.test(cells[1])) continue;
       const owner = cells[cells.length - 2];
+	  requirementOwners.set(cells[1], owner);
       const task = tasks.get(owner);
       if (!task && !(isDeferred && deferredOwners.has(owner))) errors.push(`${cells[1]} has unknown owner ${owner}`);
       if (task && !isDeferred && ['Deferred', 'Retired'].includes(task.state)) errors.push(`Active requirement ${cells[1]} has non-release owner ${owner}`);
     }
   }
+	const acceptedState = section(spec, '## 7. Current State ledger', '## 8.', errors);
+	for (const id of [...acceptedState.matchAll(requirementPattern)].map(match => match[1])) {
+	  const owner = requirementOwners.get(id);
+	  if (!owner) {
+	    errors.push(`Accepted Current State requirement ${id} has no active requirement owner`);
+	  } else if (tasks.get(owner)?.state !== 'Completed') {
+	    errors.push(`Accepted Current State requirement ${id} has incomplete owner ${owner}`);
+	  }
+	}
 
   const adrs = documents.get('architecture-decision-records.md');
   const index = new Set([...adrs.matchAll(/^\| (ADR-\d{4}) \|/gm)].map(match => match[1]));

@@ -124,8 +124,18 @@ if ! grep -q "Go: expected exactly $GUL_GO_VERSION, found 1.27.0" "$fixture_dir/
   cat "$fixture_dir/err" >&2
   exit 1
 fi
+if PATH="$fixture_dir:/usr/bin:/bin" "$checker" --go-only >"$fixture_dir/out" 2>"$fixture_dir/err"; then
+  printf 'ERROR newer non-pinned Go unexpectedly passed --go-only\n' >&2
+  exit 1
+fi
+if ! grep -q "Go: expected exactly $GUL_GO_VERSION, found 1.27.0" "$fixture_dir/err"; then
+  printf 'ERROR exact Go --go-only mismatch was not reported precisely\n' >&2
+  cat "$fixture_dir/err" >&2
+  exit 1
+fi
 
 write_command go "go version go$GUL_GO_VERSION darwin/arm64"
+PATH="$fixture_dir:/usr/bin:/bin" "$checker" --go-only >/dev/null
 write_command wails3 "v$GUL_WAILS_MIN_VERSION"
 write_command node "v$GUL_NODE_MIN_VERSION"
 write_command buf 1.69.0
@@ -306,6 +316,7 @@ hermetic_bin="$hermetic_root/bin"
 mkdir -p "$hermetic_contract/node_modules/.bin" "$hermetic_contract/upstream/dolgorae/public/v1" \
   "$hermetic_contract/scripts" "$hermetic_root/scripts" "$hermetic_root/toolchain" "$hermetic_bin"
 cp "$script_dir/../contract/generate.sh" "$hermetic_contract/generate.sh"
+cp "$script_dir/../contract/go.mod" "$hermetic_contract/go.mod"
 cp "$checker" "$hermetic_root/scripts/toolchain-check.sh"
 cp "$manifest" "$hermetic_root/toolchain/versions.env"
 printf 'pinned descriptor\n' > "$hermetic_contract/upstream/dolgorae-public-v1.descriptor.pb"
@@ -410,6 +421,20 @@ done
 chmod +x "$hermetic_contract/generate.sh" "$hermetic_root/scripts/toolchain-check.sh" \
   "$hermetic_contract/breaking-check.sh" "$hermetic_contract/node_modules/.bin/protoc-gen-es" \
   "$hermetic_bin"/*
+
+cp "$hermetic_contract/go.mod" "$hermetic_contract/go.mod.clean"
+printf '\nreplace connectrpc.com/connect => ../untrusted-connect\n' >> "$hermetic_contract/go.mod"
+if PATH="$hermetic_bin:/usr/bin:/bin" "$hermetic_contract/generate.sh" \
+    "$hermetic_root/generated" >"$fixture_dir/out" 2>"$fixture_dir/err"; then
+  printf 'ERROR contract generation accepted a replace directive\n' >&2
+  exit 1
+fi
+if ! grep -q 'must not contain replace or exclude directives' "$fixture_dir/err"; then
+  printf 'ERROR contract generation did not reject replace before Go execution\n' >&2
+  cat "$fixture_dir/err" >&2
+  exit 1
+fi
+mv "$hermetic_contract/go.mod.clean" "$hermetic_contract/go.mod"
 
 expect_generator_rejection() {
   local variable=$1

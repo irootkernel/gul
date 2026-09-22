@@ -11,20 +11,29 @@ contract-check:
 
 test-prepare:
 	@./scripts/toolchain-check.sh --manifest-only
+	@./scripts/toolchain-check.sh --go-only
 	@./scripts/toolchain-check.sh --bun-only
 	@bash -n scripts/*.sh
 	@bash -n contract/*.sh
-	@cd contract && go mod download
+	@node scripts/test-validate-product-go-manifest.mjs
+	@node contract/scripts/test-validate-go-manifest.mjs
+	@GOTOOLCHAIN=local go mod download
+	@cd contract && GOTOOLCHAIN=local go mod download
 	@cd contract && bun install --frozen-lockfile --ignore-scripts
 
 test-unit:
-	@cd contract && go test ./...
+	@./scripts/toolchain-check.sh --go-only
+	@node scripts/test-validate-product-go-manifest.mjs
 	@node contract/scripts/test-validate-go-manifest.mjs
+	@GOTOOLCHAIN=local go test ./...
+	@cd contract && GOTOOLCHAIN=local go test ./...
 	@./contract/test-breaking-check.sh
 	@./scripts/test-contract-command.sh
 
 test-int:
 	@./scripts/toolchain-check.sh --manifest-only
+	@./scripts/toolchain-check.sh --go-only
+	@GOTOOLCHAIN=local go mod tidy -diff
 	@node scripts/test-sot.mjs
 	@./scripts/check-sot.sh
 	@./scripts/contract-command.sh check

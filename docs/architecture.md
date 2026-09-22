@@ -5,8 +5,8 @@
 | Role | Target and Current Architecture source of truth |
 | Product | Gul |
 | Version | 0.1-dolgorae-consumer-v1 |
-| Status | Approved target rebaseline; E12 contract pin current; product implementation absent |
-| Last updated | 2026-09-22 |
+| Status | Approved target rebaseline; E1 core foundation current |
+| Last updated | 2026-09-23 |
 
 ## 1. Purpose and change control
 
@@ -985,28 +985,42 @@ The serial command facade is `toolchain-check`, `generate-contract`, `contract-c
 
 ## 19. Current snapshot
 
-**Snapshot date:** 2026-09-22 (TASK-053 consumer contract pinned by E12-T1)
+**Snapshot date:** 2026-09-23 (E1-T1 core foundation completed)
 
-**Roadmap point:** E0 remains `Completed` for its historical pin. E12 is `Completed`; its sole first-release member, E12-T1, completed the new consumer pin, while former E12-T2/T3 remain Retired. E1-T1 is the next eligible Task but is not active. E13 owns the stateful fake harness, and E14 owns pre-release application acceptance. No product runtime or live acceptance is implied.
+**Roadmap point:** E0 is `Completed`, E12 is `Completed`, and E1 is `In Progress`; E1-T1 is `Completed`. E1-T2 is the next eligible Task. Former E12-T2/T3 remain Retired. E13 owns the stateful fake harness, and E14 owns pre-release application acceptance. No live-provider or assembled-application acceptance is implied.
 
-**Maturity:** documentation rebaseline, bootstrap toolchain, and provider-contract fixture boundary accepted; product implementation not started
+**Maturity:** delivery-independent Go core foundation plus accepted bootstrap and provider-contract tooling; delivery, storage and provider implementations remain pending
 
 ### 19.1 Implemented components
 
-No Gul product component exists. Accepted pre-implementation tooling consists of the read-only bootstrap checks and the pinned contract generation, validation, generated clients, policy fixtures, and fake-server harness.
+`internal/app` implements the shared delivery-independent core lifecycle and
+explicit lifecycle, provider, persistence and authorization ports. Missing
+dependencies are composed with fail-closed defaults: startup performs no
+external provider work, product access is denied, and provider/persistence
+availability is not implied. The same core can be hosted later by headless and
+desktop delivery without importing Wails.
 
 ### 19.2 Verified runtime behavior
 
-None. Local Dolgorae design artifacts are dependency-discovery evidence, not Gul implementation evidence or an accepted pinned release.
+Isolated tests verify headless core startup/shutdown, injected lifecycle and
+access ordering, denial before availability probes, typed unavailable states,
+and failed-start behavior. They start no real provider and do not establish a
+listener, authenticated client, persistence repository, or live compatibility.
 
 ### 19.3 Existing artifacts
 
-The five SOT documents, E0-T8 toolchain authority, and E12-T1 TASK-053 dependency manifest, generated Go/TypeScript clients, descriptor-derived fake transport, maps, fixtures, generation/drift checks, serial Make facade, and testing guide exist. Historical E0-T7 facts remain recorded with their original digests, not as the contents of the overwritten current lock paths. These are pre-implementation contract and governance evidence; no Gul application component or live-provider behavior exists.
+The root Go module and `internal/app` core now accompany the five SOT documents,
+E0-T8 toolchain authority, and E12-T1 TASK-053 contract artifacts. The serial
+Make facade validates both Go manifests and the exact Go 1.26.6 compiler before
+running core and contract tests, followed by the existing SOT and contract
+gates. Historical E0-T7 facts remain scoped to their
+original digests. No Wails, browser API, database, provider adapter, or live
+provider behavior exists.
 
 ### 19.4 Current topology and data
 
 ```text
-No Gul application process exists.
+Shared Go core composition and lifecycle exist without a delivery process.
 No Wails host or frontend exists.
 No ConnectRPC service exists.
 No Gul SQLite schema exists.
@@ -1015,7 +1029,9 @@ No Runtime Provider adapter, RPC supervisor, Controller credential store, timeli
 
 ### 19.5 Security posture
 
-No Gul service is running or exposed. All security behavior remains Required State.
+No Gul service is running or exposed. Default composition denies product access
+before probing provider or persistence availability. Production authentication,
+transport protection and durable security behavior remain Required State.
 
 ## 20. Promotion format
 
