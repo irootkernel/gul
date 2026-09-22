@@ -3,9 +3,9 @@
 | Field | Value |
 | --- | --- |
 | Role | Sole authority for task identity, order, status, dependencies, and phase |
-| Revision | 2026-09-22 E12-T1 completion |
+| Revision | 2026-09-22 E12 completion |
 | Active Task | None |
-| Next | E12 completion audit and closeout; then E1 starting at E1-T1 |
+| Next | E1 starting at E1-T1 |
 | Required provider | Released Dolgorae v0.1.3 implementing `dolgorae.gul-consumer/v1` |
 
 ## 1. Status and execution rules
@@ -125,7 +125,7 @@ second owner of membership, order or status.
 | Epic | Status | Scope | Dossier |
 | --- | --- | --- | --- |
 | E0 | Completed | Historical rebaseline, bootstrap toolchain, and old generated contract fixtures | None |
-| E12 | In Review | Immutable consumer contract pin only; E12-T1 | [Shared](todo/GUL-CONSUMER-REBASELINE.md) |
+| E12 | Completed | Immutable consumer contract pin only; E12-T1 | [Roadmap](#e12-pin-the-immutable-consumer-contract); [Memo](implementation-memo.md#15-e12-epic-closeout-2026-09-22) |
 | E1 | Planned | Core, typed APIs, persistence, one frontend and desktop-shell foundation | [Shared](todo/GUL-CONSUMER-REBASELINE.md) |
 | E13 | Planned | Stateful consumer fake provider and reusable scenario harness; E13-T1 | [Shared](todo/GUL-CONSUMER-REBASELINE.md) |
 | E3 | Planned | Workspace/session presentation and global Profile selection | [Shared](todo/GUL-CONSUMER-REBASELINE.md) |

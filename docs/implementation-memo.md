@@ -137,6 +137,29 @@ negative fixtures, toolchain fixtures, whitespace checks, and the serial
 Product implementation and live integration remain absent. TASK-053 completion
 is immutable producer evidence, not an inference from Gul's local tests.
 
+## 1.5 E12 Epic closeout, 2026-09-22
+
+E12 is Completed. Its sole first-release member, E12-T1, pins immutable TASK-053
+commit `21aefe5b2a8dc6fb18a58338090348b23d2f0a4a` and reproduces the checked
+descriptor, generated clients, 36-RPC inventory, 27-required/9-unavailable
+consumer partition, operation and field-source maps, policy registries, and
+contract fixtures. Retired E12-T2/T3 remain historical identities and are not
+unfinished members.
+
+The completion audit corrected the E0-T8 Bun floor in commit `bcfb543` to the
+verified system minimum `>=1.4.2`. On that committed candidate, `make test-e2e`
+and `make test` passed with frozen dependency materialization, contract
+generation and drift checks, Go and TypeScript checks, SOT validation, breaking
+fixtures, and toolchain boundary fixtures. A fresh six-role whole-Epic review
+completed with full coverage, passing CI, and no Low-or-higher findings. No
+completion criterion remains unmet or unverified.
+
+This closeout establishes only the immutable consumer contract and checked
+contract tooling. It does not claim a Gul product runtime, released-provider
+compatibility, live credentials, or actual-provider acceptance. E1-T1 is the
+next eligible Task but is not activated by this record. The shared consumer
+rebaseline dossier remains because later Epics still reference it.
+
 ## 2. Current development snapshot
 
 | Area | State |
@@ -600,4 +623,4 @@ The initial documentation assumed Gul would manage one Codex App Server, map Ses
 
 ## 12. Handoff
 
-E12-T1 is complete and E12 is in completion review. The TASK-053 consumer lock and generated contract tooling are authoritative for new implementation, while historical E0 evidence remains scoped to its original pin. E1-T1 becomes eligible only after E12 closeout; E2-T0 remains blocked on an accepted compatible Dolgorae executable and live smoke evidence. No product runtime or next Task is activated automatically.
+E12 is complete. The TASK-053 consumer lock and generated contract tooling are authoritative for new implementation, while historical E0 evidence remains scoped to its original pin. E1-T1 is the next eligible Task; E2-T0 remains blocked on an accepted compatible Dolgorae executable and live smoke evidence. No product runtime or next Task is activated automatically.
