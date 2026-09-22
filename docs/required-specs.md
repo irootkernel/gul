@@ -7,7 +7,7 @@
 | Product | Gul (굴) |
 | Subtitle | Remote operator interface for local development runtimes |
 | Version | 0.1-dolgorae-consumer-v1 |
-| Status | Approved Required State; E1-T1 core foundation completed without assembled product acceptance |
+| Status | Approved Required State; E1-T1/T2 core and shared-bundle foundations completed without assembled product acceptance |
 | Last updated | 2026-09-23 |
 | Target | macOS host; modern desktop, iPad, and iPhone browsers |
 
@@ -182,6 +182,8 @@ Foundation Tasks prove their named ports, schemas, repositories, bundle and shel
 against isolated test dependencies. They do not promote a requirement whose
 acceptance needs the assembled application. The complete requirements retain
 these explicit acceptance owners:
+
+E1-T1/T2 are task evidence, not partial promotion of E14-owned REQ-HOST-001/002.
 
 | Required outcome | Foundation or feature contribution | Complete requirement owner |
 | --- | --- | --- |
@@ -473,10 +475,11 @@ REQ-WRITER-004 retains its original ID and meaning and is deferred, not supersed
 
 ## 7. Current State ledger
 
-E1-T1 task evidence records the delivery-independent Go core foundation and its
-fail-closed composition boundary. It does not promote E14-owned REQ-HOST-001 or
-implement a listener, persistence repository, provider adapter, product route,
-or production authentication.
+E1-T1/T2 task evidence records the delivery-independent Go core, one checked
+React bundle, and the shared browser/shell asset-delivery boundary. It does not
+promote E14-owned REQ-HOST-001/002 or implement a listener, Wails host, browser
+API, persistence repository, provider adapter, product route, or production
+authentication.
 E12-T1 has accepted the immutable consumer contract and generated tooling
 boundary; later Tasks still own the remaining product behavior. Former
 E12-T2/T3 are Retired without implementation evidence.

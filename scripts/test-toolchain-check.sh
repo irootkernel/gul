@@ -18,6 +18,16 @@ if [ "$GUL_BUN_MIN_VERSION" != "1.4.2" ]; then
   exit 1
 fi
 
+if [ "$GUL_TYPESCRIPT_VERSION" != "7.0.2" ] ||
+  [ "$GUL_REACT_VERSION" != "19.2.7" ] ||
+  [ "$GUL_REACT_DOM_VERSION" != "19.2.7" ] ||
+  [ "$GUL_REACT_TYPES_VERSION" != "19.3.0" ] ||
+  [ "$GUL_REACT_DOM_TYPES_VERSION" != "19.3.0" ] ||
+  [ "$GUL_BUN_TYPES_VERSION" != "1.4.2" ]; then
+  printf 'ERROR frontend dependency authority drifted from the accepted E1-T2 pins\n' >&2
+  exit 1
+fi
+
 fixture_dir=$(mktemp -d "${TMPDIR:-/tmp}/gul-toolchain.XXXXXX")
 cleanup() { rm -rf "$fixture_dir"; }
 trap cleanup EXIT HUP INT TERM

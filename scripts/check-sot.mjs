@@ -269,7 +269,6 @@ export function validateRepository(root, options = {}) {
   }
   if (tasks.get('E1-T1')?.state === 'Completed') {
     for (const boundary of [
-      'No Wails host or frontend exists.',
       'No ConnectRPC service exists.',
       'No Gul SQLite schema exists.',
       'No Runtime Provider adapter',
@@ -277,6 +276,29 @@ export function validateRepository(root, options = {}) {
     ]) {
       if (!architecture.includes(boundary)) errors.push(`Architecture must retain the E1-T1 boundary: ${boundary}`);
     }
+  }
+  if (tasks.get('E1-T2')?.state === 'Completed') {
+    const architectureCommands = section(architecture, '### 17.1 ', '## 18.', errors);
+    const memoCommands = section(documents.get('implementation-memo.md'), '## 10.', '## 11.', errors);
+    for (const boundary of [
+      'One checked React bundle and shared browser/shell asset delivery exist.',
+      'No Wails host exists.',
+    ]) {
+      if (!architecture.includes(boundary)) {
+        errors.push(`E1-T2 shared-bundle boundary is missing: ${boundary}`);
+      }
+    }
+    if (!documents.get('required-specs.md').includes('not partial promotion of E14-owned REQ-HOST-001/002')) {
+      errors.push('E1-T2 requirement non-promotion boundary is missing from Required Specifications');
+    }
+    const frontendCommandSequence = '`generate-frontend`, `frontend-check`, `test-prepare`';
+    if (!architectureCommands.includes(frontendCommandSequence)) errors.push('Architecture command facade is missing generate-frontend/frontend-check');
+    if (!memoCommands.includes(frontendCommandSequence)) errors.push('Implementation memo command contract is missing generate-frontend/frontend-check');
+    if (!memoCommands.includes('frontend bundle drift')) {
+      errors.push('Implementation memo test-int contract is missing frontend bundle drift');
+    }
+  } else if (!architecture.includes('No Wails host or frontend exists.')) {
+    errors.push('Architecture must retain the pre-E1-T2 frontend absence boundary');
   }
 
   const registry = parseRegistry(registryRaw, errors, 'Task identity registry');

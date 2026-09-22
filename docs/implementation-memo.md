@@ -175,26 +175,44 @@ before startup. This is foundation evidence only. It does not claim a listener,
 Wails host, browser API, database repository, typed provider capability adapter,
 production authentication, or real-provider behavior.
 
+## 1.7 E1-T2 shared frontend bundle, 2026-09-23
+
+E1-T2 adds one root Bun package with exact React `19.2.7`, React DOM `19.2.7`,
+React/React DOM types `19.3.0`, Bun types `1.4.2`, and TypeScript `7.0.2` pins. A Bun build produces one checked React bundle under
+`internal/delivery/web/dist`; its manifest records the exact file sizes and
+SHA-256 digests. The drift check rebuilds into a temporary directory and
+compares the sorted output inventory and bytes. Generation builds into staging
+and preserves the prior checked bundle if compilation fails.
+
+`internal/delivery/web` embeds that bundle once and exposes the same filesystem
+to the future Wails shell and the browser static handler. Tests compare the
+bytes returned through both paths and verify SPA fallback, missing-asset 404s,
+non-read method rejection, response headers, manifest and embedded-tree integrity,
+exact package pins, type safety, and fail-closed delivered content. Browser source
+typechecking excludes Bun globals. This task does not add a Wails host, listener,
+ConnectRPC browser API, authentication bypass, product feature flow, or live
+runtime assembly.
+
 ## 2. Current development snapshot
 
 | Area | State |
 |---|---|
 | Five Gul SOT documents | E0-T4 completed the consumer alignment and Gate A reproduction; E0-T8 completed toolchain/ADR alignment; E0-T7 completed Gate B |
-| Toolchain and developer-command artifacts | E0-T8 accepted one pin manifest and read-only host checks; E0-T7 adds checked contract generation/drift delegates; E1-T1 adds the root Go module and core-test path; no installer |
+| Toolchain and developer-command artifacts | E0-T8 accepted one pin manifest and read-only host checks; E0-T7 adds checked contract generation/drift delegates; E1-T1 adds the root Go module; E1-T2 adds root Bun pin validation and checked frontend generation/drift commands; no installer |
 | Contract boundary | E12-T1 pins TASK-053 and regenerates checked clients/maps/fake transport for 36 known, 27 required, and 9 unavailable methods |
-| Production source | E1-T1 shared Go core lifecycle and injected port contracts under `internal/app` |
-| Wails host/frontend | Not implemented |
+| Production source | E1-T1 shared Go core under `internal/app`; E1-T2 shared embedded bundle delivery under `internal/delivery/web` |
+| Wails host/frontend | One React foundation bundle implemented; Wails host and feature UI not implemented |
 | ConnectRPC schema/services | Not implemented |
 | Gul SQLite schema | Not implemented |
 | Dolgorae RPC supervisor/provider | Not implemented |
 | Controller credential store | Caller-owned mechanism selected by ADR-0047; not implemented |
 | FileService/auth/PWA/Tailscale integration | Not implemented |
-| Current State promotions | REQ-HOST-005, REQ-RUNTIME-011, REQ-RUNTIME-022, and REQ-CONSUMER-001; E1-T1 is task evidence, not partial promotion of E14-owned REQ-HOST-001 |
+| Current State promotions | REQ-HOST-005, REQ-RUNTIME-011, REQ-RUNTIME-022, and REQ-CONSUMER-001; E1-T1/T2 remain foundation evidence and do not promote REQ-HOST-001/002 |
 
-The repository contains the reviewed shared-core foundation, bootstrap
-validation, and checked provider-contract boundary. Delivery processes,
-persistence implementations, provider adapters and live runtime behavior remain
-unimplemented.
+The repository contains the shared-core and single-bundle delivery foundations,
+bootstrap validation, and checked provider-contract boundary. Delivery
+processes, product APIs, persistence implementations, provider adapters and live
+runtime behavior remain unimplemented.
 
 ## 3. Historical E0 assumption snapshot
 
@@ -617,7 +635,7 @@ These cases are normative future acceptance owned by the Roadmap tasks named in 
 
 ## 10. Standard command contract
 
-The root Makefile provides the serial facade `toolchain-check`, `generate-contract`, `contract-check`, `test-prepare`, `test-unit`, `test-int`, `test-e2e`, and `test`. `generate-contract` rewrites checked contract output. `test-prepare` validates both Go manifests and the exact Go toolchain before downloading the root and contract module graphs, then installs locked Bun dependencies with lifecycle scripts disabled. `test-unit` repeats those checks before running the root core tests, contract Go tests, and existing contract fixtures. `test-int` checks the exact Go toolchain again before module tidiness, SOT validation, contract drift checks, and whitespace checks. The checking targets do not rewrite tracked files, and `test` invokes the four test phases serially. E0-T7's checked delegates require exact generator versions, verify imported source hashes, reproduce the descriptor and all tracked outputs, run the all-RPC fake-server tests and TypeScript checker, and validate generated policies plus the separate Machine CLI fixture. Later Tasks extend these stable targets for frontend/browser E2E and opt-in pinned-runtime smoke tests. Real provider tests remain opt-in and must never reveal Controller capabilities, carrier/socket paths, or protected input.
+The root Makefile provides the serial facade `toolchain-check`, `generate-contract`, `contract-check`, `generate-frontend`, `frontend-check`, `test-prepare`, `test-unit`, `test-int`, `test-e2e`, and `test`. The two generation targets rewrite their checked outputs; `contract-check` and `frontend-check` reject drift without rewriting them. `test-prepare` validates the Go and product manifests, the Make recipes, shell syntax, exact Go, and Bun minimum. It then downloads the root Go graph, installs the root locked Bun graph, downloads the contract Go graph, and installs the contract locked Bun graph; both Bun installs disable lifecycle scripts. `test-unit` repeats the manifest and Make-recipe checks, typechecks and tests the frontend, runs both Go suites, and executes the contract fixtures. `test-int` checks the exact Go toolchain again before module tidiness, frontend bundle drift, SOT validation, contract drift, and whitespace checks. The checking targets do not rewrite tracked files, and `test` invokes the four test phases serially. E0-T7's checked delegates require exact generator versions, verify imported source hashes, reproduce the descriptor and all tracked outputs, run the all-RPC fake-server tests and TypeScript checker, and validate generated policies plus the separate Machine CLI fixture. Later Tasks extend these stable targets for frontend/browser E2E and opt-in pinned-runtime smoke tests. Real provider tests remain opt-in and must never reveal Controller capabilities, carrier/socket paths, or protected input.
 
 The current host check requires Go exactly `1.26.6`, requires architecture to
 match `arm64` exactly, and reports Wails, Node, Bun, Buf, protoc, Git, and macOS
@@ -641,4 +659,4 @@ The initial documentation assumed Gul would manage one Codex App Server, map Ses
 
 ## 12. Handoff
 
-E12 is complete. The TASK-053 consumer lock and generated contract tooling are authoritative for new implementation, while historical E0 evidence remains scoped to its original pin. E1-T1 completed the shared fail-closed core foundation; E1-T2 is the next eligible Task. E2-T0 remains blocked on an accepted compatible Dolgorae executable and live smoke evidence. No later Task or live-provider behavior is activated automatically.
+E12 is complete. The TASK-053 consumer lock and generated contract tooling are authoritative for new implementation, while historical E0 evidence remains scoped to its original pin. E1-T1 completed the shared fail-closed core and E1-T2 completed the single React bundle plus shared delivery foundation; E1-T3 is the next eligible Task. E2-T0 remains blocked on an accepted compatible Dolgorae executable and live smoke evidence. No later Task or live-provider behavior is activated automatically.

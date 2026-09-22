@@ -1,4 +1,4 @@
-.PHONY: toolchain-check generate-contract contract-check test-prepare test-unit test-int test-e2e test
+.PHONY: toolchain-check generate-contract contract-check generate-frontend frontend-check test-prepare test-unit test-int test-e2e test
 
 toolchain-check:
 	@./scripts/toolchain-check.sh
@@ -9,6 +9,18 @@ generate-contract:
 contract-check:
 	@./scripts/contract-command.sh check
 
+generate-frontend:
+	@./scripts/toolchain-check.sh --bun-only
+	@bun install --frozen-lockfile --ignore-scripts
+	@node scripts/validate-product-package.mjs
+	@bun frontend/scripts/build.mjs
+
+frontend-check:
+	@./scripts/toolchain-check.sh --bun-only
+	@bun install --frozen-lockfile --ignore-scripts
+	@node scripts/validate-product-package.mjs
+	@bun frontend/scripts/check-bundle.mjs
+
 test-prepare:
 	@./scripts/toolchain-check.sh --manifest-only
 	@./scripts/toolchain-check.sh --go-only
@@ -16,15 +28,26 @@ test-prepare:
 	@bash -n scripts/*.sh
 	@bash -n contract/*.sh
 	@node scripts/test-validate-product-go-manifest.mjs
+	@node scripts/test-validate-product-package.mjs
+	@node scripts/test-validate-product-makefile.mjs
+	@node scripts/test-validate-frontend-config.mjs
+	@node scripts/test-foundation-boundaries.mjs
 	@node contract/scripts/test-validate-go-manifest.mjs
 	@GOTOOLCHAIN=local go mod download
+	@bun install --frozen-lockfile --ignore-scripts
 	@cd contract && GOTOOLCHAIN=local go mod download
 	@cd contract && bun install --frozen-lockfile --ignore-scripts
 
 test-unit:
 	@./scripts/toolchain-check.sh --go-only
 	@node scripts/test-validate-product-go-manifest.mjs
+	@node scripts/test-validate-product-package.mjs
+	@node scripts/test-validate-product-makefile.mjs
+	@node scripts/test-validate-frontend-config.mjs
+	@node scripts/test-foundation-boundaries.mjs
 	@node contract/scripts/test-validate-go-manifest.mjs
+	@bun run typecheck
+	@bun run test
 	@GOTOOLCHAIN=local go test ./...
 	@cd contract && GOTOOLCHAIN=local go test ./...
 	@./contract/test-breaking-check.sh
@@ -34,6 +57,7 @@ test-int:
 	@./scripts/toolchain-check.sh --manifest-only
 	@./scripts/toolchain-check.sh --go-only
 	@GOTOOLCHAIN=local go mod tidy -diff
+	@$(MAKE) --no-print-directory frontend-check
 	@node scripts/test-sot.mjs
 	@./scripts/check-sot.sh
 	@./scripts/contract-command.sh check

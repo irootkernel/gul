@@ -1,18 +1,21 @@
 # Testing and developer commands
 
-E0-T8 defines a serial command facade, and E1-T1 extends it with the root Go
-product module. It does not install host tools or claim assembled runtime
-readiness. `make test-prepare` downloads only declared Go and locked contract
-dependencies, and `make generate-contract` rewrites only checked contract output.
+E0-T8 defines a serial command facade, E1-T1 extends it with the root Go product
+module, and E1-T2 adds the exact-pinned React bundle. It does not install host
+tools or claim assembled runtime readiness. `make test-prepare` downloads only
+declared Go and locked Bun dependencies. Generation targets rewrite only their
+named checked outputs.
 
 | Command | Contract |
 |---|---|
 | `make toolchain-check` | Compare the host with `toolchain/versions.env`; report an exact Go mismatch and every missing or below-minimum non-Go executable, then exit nonzero. |
 | `make generate-contract` | Reproduce the pinned descriptor and deterministically rewrite only checked contract outputs. |
 | `make contract-check` | Regenerate into a temporary directory; reject source/generated drift; compile and test Go/TypeScript clients, fake gRPC server, maps, and fixtures. |
-| `make test-prepare` | Validate both Go manifests, the exact Go toolchain, Bun, and shell syntax, then materialize the root and locked contract dependencies with Bun lifecycle scripts disabled. |
-| `make test-unit` | Validate both Go manifests and the exact Go toolchain, run the headless core lifecycle/fail-closed tests, compile generated Go clients, run descriptor-derived fake gRPC success/error tests, exercise the additive-breaking positive/negative regression, and exercise facade usage/fail-closed branches. |
-| `make test-int` | Recheck exact Go 1.26.6, product-module tidiness, and SOT integrity, then run contract drift/schema/policy fixtures and TypeScript clients through the public command facade before whitespace checks. |
+| `make generate-frontend` | Install the frozen root Bun graph without lifecycle scripts, then build the exact-pinned React source into the checked shared browser/shell bundle. |
+| `make frontend-check` | Install the frozen root Bun graph without lifecycle scripts, rebuild the frontend in a temporary directory, and reject any checked bundle drift. |
+| `make test-prepare` | Validate both Go manifests, the root Bun manifest, exact Go, Bun, and shell syntax, then materialize the root and locked contract dependencies with Bun lifecycle scripts disabled. |
+| `make test-unit` | Validate product manifests, typecheck and test the React foundation, test shared bundle delivery, run the headless core tests, compile generated Go clients, and run contract/facade fixtures. |
+| `make test-int` | Recheck exact Go 1.26.6, product-module tidiness, frontend bundle reproducibility, and SOT integrity, then run contract drift/schema/policy fixtures and whitespace checks. |
 | `make test-e2e` | Run the complete checker fixture through its public command boundary. |
 | `make test` | Run `test-prepare`, `test-unit`, `test-int`, and `test-e2e` serially. |
 
@@ -28,6 +31,8 @@ Bun manifests. PATH copies of those generators are not part of the host check.
 `make test-prepare` checks the Bun minimum before dependency materialization.
 The root Go module hosts the shared core; both Go modules use
 `toolchain go1.26.6`, and Go commands run with `GOTOOLCHAIN=local` after the
-live manifests and host compiler are checked. The nested contract Go/Bun graphs match the version manifest
-and compile contract fixtures. Later Tasks may extend the tests but must keep the
-serial facade, deterministic generation, and fail-closed prerequisites.
+live manifests and host compiler are checked. The root Bun manifest owns the
+React bundle and uses only exact dependency versions; the nested contract Bun
+graph remains separate. Later Tasks may extend the tests but must keep the
+serial facade, deterministic generation, one-bundle delivery, and fail-closed
+prerequisites.

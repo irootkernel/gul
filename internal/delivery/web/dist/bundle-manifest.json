@@ -1,0 +1,21 @@
+{
+  "schema": "gul.frontend-bundle/v1",
+  "entrypoint": "index.html",
+  "files": [
+    {
+      "path": "assets/gul.css",
+      "sha256": "6d03db3a2c6739d1e8f5b980e47b5840bfd63e1dde7d1b2b396e4e0a5034bf2a",
+      "size": 815
+    },
+    {
+      "path": "assets/gul.js",
+      "sha256": "afcead6a0a46ba747de9c4bc5e1640c42a87da385c094557d18a7eda953e3f90",
+      "size": 183333
+    },
+    {
+      "path": "index.html",
+      "sha256": "749872216ca8b8524d29d76e5087267f4f638953474989c37b42bd9c8a9b3946",
+      "size": 430
+    }
+  ]
+}

@@ -131,8 +131,8 @@ function gitValidationFixture(runGit) {
   const root = fixture();
   try {
     write(root, 'docs/roadmap.md', text => text
-      .replace('| Active Task | None |', '| Active Task | E1-T2 |')
-      .replace('| E1-T2 | Pre-release | Planned |', '| E1-T2 | Pre-release | In Review |'));
+      .replace('| Active Task | None |', '| Active Task | E1-T3 |')
+      .replace('| E1-T3 | Pre-release | Planned |', '| E1-T3 | Pre-release | In Review |'));
     assert.deepEqual(run(root).errors, []);
   } finally {
     fs.rmSync(root, {recursive: true, force: true});
@@ -145,11 +145,17 @@ expectFailure('duplicate requirement is not normalized away', root => {
   ));
 }, /Missing or duplicate active requirement definitions/);
 
-expectFailure('multiple active rows', root => {
+expectFailure('pre-E1-T2 state requires the frontend absence boundary', root => {
   write(root, 'docs/roadmap.md', text => text
     .replace('| Active Task | None |', '| Active Task | E1-T2 |')
-    .replace('| E1-T2 | Pre-release | Planned |', '| E1-T2 | Pre-release | In Progress |')
-    .replace('| E1-T3 | Pre-release | Planned |', '| E1-T3 | Pre-release | In Review |'));
+    .replace('| E1-T2 | Pre-release | Completed |', '| E1-T2 | Pre-release | In Review |'));
+}, /pre-E1-T2 frontend absence boundary/);
+
+expectFailure('multiple active rows', root => {
+  write(root, 'docs/roadmap.md', text => text
+    .replace('| Active Task | None |', '| Active Task | E1-T3 |')
+    .replace('| E1-T3 | Pre-release | Planned |', '| E1-T3 | Pre-release | In Progress |')
+    .replace('| E1-T4 | Pre-release | Planned |', '| E1-T4 | Pre-release | In Review |'));
 }, /Multiple active Tasks/);
 
 expectFailure('active header mismatch', root => {
@@ -158,17 +164,17 @@ expectFailure('active header mismatch', root => {
 
 expectFailure('active row mismatch', root => {
   write(root, 'docs/roadmap.md', text => text.replace(
-    '| E1-T2 | Pre-release | Planned |',
-    '| E1-T2 | Pre-release | In Progress |',
+    '| E1-T3 | Pre-release | Planned |',
+    '| E1-T3 | Pre-release | In Progress |',
   ));
-}, /Active Task header must be exactly E1-T2/);
+}, /Active Task header must be exactly E1-T3/);
 
 expectFailure('next header misses first eligible task', root => {
   write(root, 'docs/roadmap.md', text => text.replace(
-    '| Next | E1 continuing at E1-T2 |',
+    '| Next | E1 continuing at E1-T3 |',
     '| Next | E13 starting at E13-T1 |',
   ));
-}, /Next header must identify first eligible Task E1-T2/);
+}, /Next header must identify first eligible Task E1-T3/);
 
 expectFailure('pending Epic loses shared dossier', root => {
   write(root, 'docs/roadmap.md', text => text.replace(
@@ -190,6 +196,35 @@ expectFailure('architecture retains stale E1-T1 lifecycle', root => {
     'E1-T1 is in completion review',
   ));
 }, /Architecture current snapshot must identify E1-T1 as Completed/);
+
+expectFailure('architecture drops the completed E1-T2 shared bundle', root => {
+  write(root, 'docs/architecture.md', text => text.replace(
+    'One checked React bundle and shared browser/shell asset delivery exist.',
+    'Frontend delivery state is unspecified.',
+  ));
+}, /E1-T2 shared-bundle boundary is missing/);
+
+expectFailure('required specs promote E14-owned bundle requirement early', root => {
+  write(root, 'docs/required-specs.md', text => text.replace(
+    'not partial promotion of E14-owned REQ-HOST-001/002',
+    'promotes E14-owned REQ-HOST-001/002',
+  ));
+}, /E1-T2 requirement non-promotion boundary is missing/);
+
+expectFailure('architecture drops the frontend generation command', root => {
+  write(root, 'docs/architecture.md', text => text.replace('`generate-frontend`, ', ''));
+}, /Architecture command facade is missing generate-frontend\/frontend-check/);
+
+expectFailure('implementation memo drops the frontend drift command', root => {
+  write(root, 'docs/implementation-memo.md', text => text.replace(
+    '`generate-frontend`, `frontend-check`, `test-prepare`',
+    '`generate-frontend`, `test-prepare`',
+  ));
+}, /Implementation memo command contract is missing generate-frontend\/frontend-check/);
+
+expectFailure('implementation memo drops frontend drift from test-int', root => {
+  write(root, 'docs/implementation-memo.md', text => text.replace('frontend bundle drift, ', ''));
+}, /Implementation memo test-int contract is missing frontend bundle drift/);
 
 expectFailure('current state promotes a requirement before its owner completes', root => {
   write(root, 'docs/required-specs.md', text => text.replace(
