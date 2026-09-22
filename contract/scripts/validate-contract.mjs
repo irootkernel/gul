@@ -384,7 +384,12 @@ for (const document of ["architecture-decision-records.md", "architecture.md", "
   if (!text.includes(dependencyLockDigest) || !text.includes(generatedLockDigest)) throw new Error(`${document} does not carry the current E12 lock digests`);
 }
 const implementationMemoText = await readFile(join(contractRoot, "../docs/implementation-memo.md"), "utf8");
-if (!implementationMemoText.includes("system Bun `>=1.3.14`") || !implementationMemoText.includes("except Bun's minimum-only system policy") || !implementationMemoText.includes("Historical E0-T8 manifest; Buf lint")) throw new Error("implementation memo toolchain ledger drifted from the current Bun minimum and historical generator boundary");
+const testingText = await readFile(join(contractRoot, "../TESTING.md"), "utf8");
+const bunMinimum = versionManifest.GUL_BUN_MIN_VERSION;
+const markdownCode = (value) => `\`${value}\``;
+const bunMinimumCode = markdownCode(`>=${bunMinimum}`);
+if (!implementationMemoText.includes(`system Bun ${bunMinimumCode}`) || !implementationMemoText.includes(`satisfies the ${bunMinimumCode} minimum`) || !implementationMemoText.includes("except Bun's minimum-only system policy") || !implementationMemoText.includes("Historical E0-T8 manifest; Buf lint")) throw new Error("implementation memo toolchain ledger drifted from the current Bun minimum and historical generator boundary");
+if (!architectureText.includes(`system Bun from ${markdownCode("PATH")} must be ${bunMinimumCode}`) || !testingText.includes(`system ${markdownCode("bun")} resolved from ${markdownCode("PATH")} must be at least ${markdownCode(bunMinimum)}`)) throw new Error("documented Bun minimum drifted from the toolchain authority");
 if (implementationMemoText.includes("E12-T1 must still reproduce") || implementationMemoText.includes("Existing checked/generated files are intentionally unchanged")) throw new Error("implementation memo still describes TASK-053 adoption as outstanding");
 
 console.log(`contract validation passed: ${inventory.method_count} RPCs, ${operations.operations.length} operations, ${events.events.length} event variants, ${generatedLock.files.length} generated files`);
