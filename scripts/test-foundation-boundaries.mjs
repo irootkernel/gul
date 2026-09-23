@@ -11,6 +11,9 @@ const html = fs.readFileSync(path.join(sourceRoot, "frontend/index.html"), "utf8
 const delivery = goSourceFiles(path.join(sourceRoot, "internal/delivery")).map(name => fs.readFileSync(name, "utf8")).join("\n");
 const desktop = goSourceFiles(path.join(sourceRoot, "internal/desktop")).map(name => fs.readFileSync(name, "utf8")).join("\n");
 const command = goSourceFiles(path.join(sourceRoot, "cmd")).map(name => fs.readFileSync(name, "utf8")).join("\n");
+const app = goSourceFiles(path.join(sourceRoot, "internal/app")).map(name => fs.readFileSync(name, "utf8")).join("\n");
+const domain = goSourceFiles(path.join(sourceRoot, "internal/domain")).map(name => fs.readFileSync(name, "utf8")).join("\n");
+const storage = goSourceFiles(path.join(sourceRoot, "internal/storage")).map(name => fs.readFileSync(name, "utf8")).join("\n");
 
 function sourceFiles(directory) {
   return fs.readdirSync(directory, {withFileTypes: true}).flatMap(entry => {
@@ -36,6 +39,9 @@ const boundaries = [
   ["delivery", delivery, [/\bListenAndServe\b/, /"database\/sql"/, /"github\.com\/wailsapp/]],
   ["desktop", desktop, [/\bListenAndServe\b/, /"database\/sql"/, /"github\.com\/rootkernel\/gul\/contract\//, /"github\.com\/rootkernel\/gul\/internal\/storage"/, /\bNewService\s*\(/]],
   ["command", command, [/\bListenAndServe\b/, /"database\/sql"/, /"github\.com\/rootkernel\/gul\/contract\//, /"github\.com\/rootkernel\/gul\/internal\/storage"/, /\bNewService\s*\(/]],
+  ["app", app, [/"github\.com\/rootkernel\/gul\/internal\/(?:delivery|desktop|storage)(?:\/|")/, /"github\.com\/wailsapp/, /\bListenAndServe\b/]],
+  ["domain", domain, [/"github\.com\/rootkernel\/gul\/internal\//, /"github\.com\/wailsapp/, /"database\/sql"/, /\bListenAndServe\b/]],
+  ["storage", storage, [/"github\.com\/rootkernel\/gul\/internal\/(?:app|delivery|desktop)(?:\/|")/, /"github\.com\/wailsapp/, /\bListenAndServe\b/]],
 ];
 
 for (const [label, source, forbidden] of boundaries) {
@@ -57,6 +63,9 @@ try {
     ["delivery", '"database/sql"', boundaries[2][2]],
     ["desktop", '"github.com/rootkernel/gul/internal/storage"', boundaries[3][2]],
     ["command", '"github.com/rootkernel/gul/contract/generated"', boundaries[4][2]],
+    ["app", '"github.com/rootkernel/gul/internal/desktop"', boundaries[5][2]],
+    ["domain", '"github.com/rootkernel/gul/internal/app"', boundaries[6][2]],
+    ["storage", '"github.com/rootkernel/gul/internal/delivery/web"', boundaries[7][2]],
   ]) {
     assert(forbidden.some(pattern => pattern.test(source)), `${label} negative fixture must match a forbidden pattern`);
   }
@@ -64,4 +73,4 @@ try {
   fs.rmSync(fixture, {recursive: true, force: true});
 }
 
-console.log("frontend, delivery, desktop, and command foundation boundaries passed");
+console.log("frontend, delivery, desktop, command, app, domain, and storage foundation boundaries passed");

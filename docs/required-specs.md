@@ -7,7 +7,7 @@
 | Product | Gul (굴) |
 | Subtitle | Remote operator interface for local development runtimes |
 | Version | 0.1-dolgorae-consumer-v1 |
-| Status | Approved Required State; E1-T1/T2 core and shared-bundle foundations completed without assembled product acceptance |
+| Status | Approved Required State; E1-T1 through E1-T5 foundations completed without assembled product acceptance |
 | Last updated | 2026-09-23 |
 | Target | macOS host; modern desktop, iPad, and iPhone browsers |
 
