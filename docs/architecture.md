@@ -826,6 +826,7 @@ workspace_entries
 direct_session_presentations
 controller_binding_references
 navigation_state
+client_delivery_counter
 client_event_journal
 file_explorer_state
 runtime_projection_cache
@@ -839,11 +840,11 @@ Prohibited authoritative tables/aggregates include Codex threads, Turns, workspa
 
 Database transactions cover Gul-owned presentation, auth, delivery, non-authoritative projection/timeline cache, projection-stamp and invalidation metadata, and mutation-attempt coordination only. Provider calls never occur while a SQLite transaction is held. `provider_operation_attempts` contains operation identity, normalized-request digest, replay availability, logical replay-material reference, role-tagged logical Controller references, and reconciliation state, not authoritative provider outcome, prompt, protected input, credential bytes, carrier path, socket path, or canonical request bytes.
 
-ADR-0017 pins modernc SQLite `1.57.0` with WAL, foreign keys, `synchronous=FULL`, and a 5-second busy timeout on every connection. One writer connection serializes short write transactions; a separate read-only pool is capped at four connections. Delivery sequence allocation uses `UPDATE ... RETURNING` inside the same `BEGIN IMMEDIATE` transaction as the journal insert. Backup checkpoints WAL, uses `VACUUM INTO` on the destination filesystem, fsyncs the new file and parent, and publishes by atomic rename; direct copying of the live database is prohibited.
+ADR-0017 pins modernc SQLite `1.57.0`. Every connection enables foreign keys, sets `synchronous=FULL`, and uses a 5-second busy timeout; the database uses WAL mode. One writer connection serializes short write transactions; a separate read-only pool is capped at four connections. Delivery sequence allocation uses `UPDATE ... RETURNING` inside the same `BEGIN IMMEDIATE` transaction as the journal insert. Backup checkpoints WAL, uses `VACUUM INTO` on the destination filesystem, fsyncs the new file and parent, and publishes by atomic no-replace rename; direct copying of the live database is prohibited.
 
 First-release crash-safe canonical request material for unresolved `StartRun` attempts lives in a separate protected `ProviderReplayStore` below `~/Library/Application Support/Gul/provider-replay/`. Its parent is `0700`, files are exclusive `0600`, all path components are non-symlinked and current-user-owned, material is bounded and versioned, file and parent are fsynced, and files are deleted on terminal resolution or after the fixed 72-hour v0.1 maximum retention, configurable only downward. `PurgeExpired` runs at startup and at least every six hours. Expiry removes replay availability but does not convert an unresolved operation into success or failure. The store never accepts `SubmitTurn` prompts/images or `ResolveInteraction` response bytes, and it never stores an absolute credential path or capability; exact carrier resolution uses the role-tagged logical Controller references.
 
-`runtime_projection_cache` stores each aggregate's complete `ProjectionStamp`, freshness, and invalidation floor; `runtime_timeline_cache` stores its `captured_head_cursor`. These remain non-authoritative caches and are marked stale at startup before mutation enablement.
+`runtime_projection_cache` stores each aggregate's complete `ProjectionStamp`, freshness, and invalidation floor; its rows are marked stale at startup before mutation enablement. `runtime_timeline_cache` stores `captured_head_cursor` as non-authoritative metadata; timeline freshness is checked separately through that cursor.
 
 `client_event_journal` stores interaction-card change notifications, never protected interaction input and never a `ControllerInteraction` payload. A protected interaction is re-presented from a fresh provider snapshot on reconnect rather than replayed from the journal.
 
@@ -985,11 +986,11 @@ The serial command facade is `toolchain-check`, `generate-contract`, `contract-c
 
 ## 19. Current snapshot
 
-**Snapshot date:** 2026-09-23 (E1-T3 browser contract review)
+**Snapshot date:** 2026-09-23 (E1-T4 storage completion)
 
-**Roadmap point:** E0 is `Completed`, E12 is `Completed`, and E1 is `In Progress`; E1-T1 is `Completed`, E1-T2 is `Completed`, and E1-T3 is `In Review`. Former E12-T2/T3 remain Retired. E13 owns the stateful fake harness, and E14 owns pre-release application acceptance. No live-provider or assembled-application acceptance is implied.
+**Roadmap point:** E0 is `Completed`, E12 is `Completed`, and E1 is `In Progress`; E1-T1 is `Completed`, E1-T2/T3/T4 are `Completed`, and E1-T5 is `Planned`. Former E12-T2/T3 remain Retired. E13 owns the stateful fake harness, and E14 owns pre-release application acceptance. No live-provider or assembled-application acceptance is implied.
 
-**Maturity:** delivery-independent Go core, shared React bundle, declared but disabled Gul API, and typed provider ports plus accepted bootstrap and provider-contract tooling; storage, shell and provider implementations remain pending
+**Maturity:** delivery-independent Go core, shared React bundle, declared but disabled Gul API, typed provider ports, and an isolated SQLite repository foundation; shell, provider, and assembled storage lifecycle remain pending
 
 ### 19.1 Implemented components
 
@@ -1017,6 +1018,18 @@ Gul path-encoding error, not a label for an unsafe provider socket.
 embedded filesystem to browser delivery and the later Wails shell, preventing a
 second frontend build or delivery-specific domain surface.
 
+`internal/storage` requires an owner-only database directory and file, then
+opens the pinned SQLite driver with one writer and at most four read-only
+connections. Versioned migration creates only Gul-owned records;
+auth sessions retain token digests, Controller bindings retain logical keys,
+and operation attempts retain non-secret references. A credential-path helper
+revalidates those keys under a selected owner-only root immediately before its
+caller uses them; no provider RPC is wired yet. Cache stamps become stale
+on reopen. Delivery sequence allocation and journal insertion share one
+immediate transaction. Backup checkpoints WAL and publishes an owner-only
+`VACUUM INTO` image without copying the live file. This repository remains
+unwired to production startup after E1-T4 completion.
+
 ### 19.2 Verified runtime behavior
 
 Isolated tests verify headless core startup/shutdown, injected lifecycle and
@@ -1028,7 +1041,9 @@ browser/shell bytes. Gul schema and port fixtures verify generated client drift,
 the 27-method inventory, provider error/action coverage, page-token scope,
 bounded metadata, and CloseOutcome distinctions. These checks start no real
 provider and do not establish a listener, authenticated client, Wails host, enabled browser API,
-persistence repository, or live compatibility.
+assembled persistence lifecycle, or live compatibility. Isolated SQLite tests
+exercise migration, schema drift, connection settings, typed records, rollback,
+sequence allocation, cache staleness, and backup publication.
 
 ### 19.3 Existing artifacts
 
@@ -1038,7 +1053,7 @@ toolchain authority, and E12-T1 TASK-053 contract artifacts. The serial Make
 facade validates both Go manifests, the root package pins, exact Go 1.26.6, and
 the Bun minimum before running frontend, core, contract, SOT and drift gates.
 Historical E0-T7 facts remain scoped to their original digests. No Wails host,
-enabled browser route, database, provider adapter, or live provider behavior exists.
+enabled browser route, assembled database service, provider adapter, or live provider behavior exists.
 
 ### 19.4 Current topology and data
 
@@ -1047,7 +1062,7 @@ Shared Go core composition and lifecycle exist without a delivery process.
 One checked React bundle and shared browser/shell asset delivery exist.
 No Wails host exists.
 ConnectRPC services are declared and generated but not registered.
-No Gul SQLite schema exists.
+Gul-only SQLite schema and repositories exist in isolated tests; no production database lifecycle is enabled.
 No Runtime Provider adapter, RPC supervisor, Controller credential store, timeline adapter, or Artifact adapter exists.
 ```
 

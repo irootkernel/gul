@@ -146,30 +146,28 @@ expectFailure('pre-E1-T2 state requires the frontend absence boundary', root => 
   write(root, 'docs/roadmap.md', text => text
     .replace('| Active Task | None |', '| Active Task | E1-T2 |')
     .replace('| E1-T2 | Pre-release | Completed |', '| E1-T2 | Pre-release | In Review |')
-    .replace('| E1-T3 | Pre-release | Completed |', '| E1-T3 | Pre-release | Planned |'));
+    .replace('| E1-T3 | Pre-release | Completed |', '| E1-T3 | Pre-release | Planned |')
+    .replace('| E1-T4 | Pre-release | Completed |', '| E1-T4 | Pre-release | Planned |'));
 }, /pre-E1-T2 frontend absence boundary/);
 
 expectFailure('multiple active rows', root => {
   write(root, 'docs/roadmap.md', text => text
     .replace('| E1-T3 | Pre-release | Completed |', '| E1-T3 | Pre-release | In Progress |')
-    .replace('| E1-T4 | Pre-release | Planned |', '| E1-T4 | Pre-release | In Review |'));
+    .replace('| E1-T4 | Pre-release | Completed |', '| E1-T4 | Pre-release | In Progress |'));
 }, /Multiple active Tasks/);
 
 expectFailure('active header mismatch', root => {
-  write(root, 'docs/roadmap.md', text => text.replace('| Active Task | None |', '| Active Task | E12-T1 |'));
-}, /Active Task header must be exactly None/);
+  write(root, 'docs/roadmap.md', text => text.replace('| E1-T4 | Pre-release | Completed |', '| E1-T4 | Pre-release | In Progress |'));
+}, /Active Task header must be exactly E1-T4/);
 
 expectFailure('active row mismatch', root => {
-  write(root, 'docs/roadmap.md', text => text.replace(
-    '| E1-T3 | Pre-release | Completed |',
-    '| E1-T3 | Pre-release | In Review |',
-  ));
-}, /Active Task header must be exactly E1-T3/);
+  write(root, 'docs/roadmap.md', text => text.replace('| Active Task | None |', '| Active Task | E1-T4 |'));
+}, /Active Task header must be exactly None/);
 
 expectFailure('next header misses first eligible task', root => {
   write(root, 'docs/roadmap.md', text => text
-    .replace('| Next | E1 continuing at E1-T4 |', '| Next | E13 starting at E13-T1 |'));
-}, /Next header must identify first eligible Task E1-T4/);
+    .replace('| Next | E1-T5 |', '| Next | E13 starting at E13-T1 |'));
+}, /Next header must identify first eligible Task E1-T5/);
 
 expectFailure('pending Epic loses shared dossier', root => {
   write(root, 'docs/roadmap.md', text => text.replace(
@@ -246,8 +244,17 @@ expectFailure('architecture drops an E1-T1 delivery boundary', root => {
 expectFailure('pre-E1-T3 state requires ConnectRPC absence', root => {
   write(root, 'docs/roadmap.md', text => text
     .replace('| E1-T3 | Pre-release | Completed |', '| E1-T3 | Pre-release | Planned |')
-    .replace('| Next | E1 continuing at E1-T4 |', '| Next | E1 continuing at E1-T3 |'));
+    .replace('| E1-T4 | Pre-release | In Progress |', '| E1-T4 | Pre-release | Planned |')
+    .replace('| Active Task | E1-T4 |', '| Active Task | None |')
+    .replace('| Next | E1-T4 completion, then E1-T5 |', '| Next | E1 continuing at E1-T3 |'));
 }, /pre-E1-T3 ConnectRPC absence boundary/);
+
+expectFailure('E1-T4 storage is not a production database lifecycle', root => {
+  write(root, 'docs/architecture.md', text => text.replace(
+    'Gul-only SQLite schema and repositories exist in isolated tests; no production database lifecycle is enabled.',
+    'Gul database is ready.',
+  ));
+}, /Architecture must distinguish isolated SQLite repositories from production database lifecycle/);
 
 expectFailure('retired E12 member becomes deferred', root => {
   write(root, 'docs/roadmap.md', text => text.replace(

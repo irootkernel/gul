@@ -269,12 +269,16 @@ export function validateRepository(root, options = {}) {
   }
   if (tasks.get('E1-T1')?.state === 'Completed') {
     for (const boundary of [
-      'No Gul SQLite schema exists.',
       'No Runtime Provider adapter',
       'Production authentication,',
     ]) {
       if (!architecture.includes(boundary)) errors.push(`Architecture must retain the E1-T1 boundary: ${boundary}`);
     }
+  }
+  if (tasks.get('E1-T4')?.state === 'Planned') {
+    if (!architecture.includes('No Gul SQLite schema exists.')) errors.push('Architecture must retain the pre-E1-T4 SQLite absence boundary');
+  } else if (!architecture.includes('Gul-only SQLite schema and repositories exist in isolated tests; no production database lifecycle is enabled.')) {
+    errors.push('Architecture must distinguish isolated SQLite repositories from production database lifecycle');
   }
   if (tasks.get('E1-T3')?.state === 'Planned') {
     if (!architecture.includes('No ConnectRPC service exists.')) errors.push('Architecture must retain the pre-E1-T3 ConnectRPC absence boundary');

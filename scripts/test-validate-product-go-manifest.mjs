@@ -8,6 +8,7 @@ const versions = {
   GUL_GO_VERSION: "1.26.6",
   GUL_CONNECT_GO_VERSION: "1.20.0",
   GUL_PROTOBUF_GO_VERSION: "1.36.12",
+  GUL_MODERNC_SQLITE_VERSION: "1.57.0",
 };
 const valid = `module github.com/rootkernel/gul
 
@@ -19,6 +20,7 @@ require (
   connectrpc.com/connect v1.20.0
   github.com/rootkernel/gul/contract v0.0.0
   google.golang.org/protobuf v1.36.12
+  modernc.org/sqlite v1.57.0
 )
 replace github.com/rootkernel/gul/contract => ./contract
 `;
@@ -45,6 +47,7 @@ for (const [name, manifest, pattern] of [
   ["missing local contract", valid.replace("github.com/rootkernel/gul/contract v0.0.0\n", ""), /checked local contract module/],
   ["wrong local contract path", valid.replace("=> ./contract", "=> ../contract"), /checked local contract replacement/],
   ["wrong Protobuf pin", valid.replace("protobuf v1.36.12", "protobuf v1.36.11"), /Protobuf Go pin/],
+  ["wrong SQLite pin", valid.replace("sqlite v1.57.0", "sqlite v1.57.1"), /SQLite pin/],
   ["replace directive", `${valid}replace example.test/a => ../a\n`, /unapproved replace or exclude/],
   ["exclude directive", `${valid}exclude example.test/a v1.0.0\n`, /unapproved replace or exclude/],
 ]) {

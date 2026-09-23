@@ -9,6 +9,7 @@ export function validateProductGoManifest(goManifest, versionManifest) {
   requireExactly(lines, `connectrpc.com/connect v${versionManifest.GUL_CONNECT_GO_VERSION}`, "product Connect Go pin");
   requireExactly(lines, "github.com/rootkernel/gul/contract v0.0.0", "checked local contract module");
   requireExactly(lines, `google.golang.org/protobuf v${versionManifest.GUL_PROTOBUF_GO_VERSION}`, "product Protobuf Go pin");
+  requireExactly(lines, `modernc.org/sqlite v${versionManifest.GUL_MODERNC_SQLITE_VERSION}`, "product SQLite pin");
   requireExactly(lines, "replace github.com/rootkernel/gul/contract => ./contract", "checked local contract replacement");
 
   if (lines.some(line => /^exclude\b/.test(line) || (/^replace\b/.test(line) && line !== "replace github.com/rootkernel/gul/contract => ./contract"))) {

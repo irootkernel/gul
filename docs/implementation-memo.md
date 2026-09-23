@@ -231,6 +231,27 @@ those corrections; they are not represented as provider-reviewed bytes. No
 Medium-or-higher finding, deferred finding, enabled route, or live-provider
 claim remains in this task scope.
 
+## 1.9 E1-T4 Gul-owned SQLite foundation, completed
+
+The pinned `modernc.org/sqlite` `1.57.0` driver now backs an isolated storage
+package requiring an owner-only directory and database file, with one writer,
+up to four read-only connections, connection-local
+foreign keys, `synchronous=FULL`, a five-second busy timeout, and WAL. Its first
+transactional migration creates Gul-owned auth, presentation, cache, checkpoint,
+delivery, and non-secret attempt records and rejects schema drift. Auth sessions
+store only bearer-token digests; Controller bindings retain logical credential
+keys, never carrier paths or capability bytes. A path helper checks ownership,
+type, mode, and symlinks for each key component; the future provider adapter
+must invoke it immediately before each authorized RPC. Caches become stale on restart.
+The cache stores separate complete Run, Writer, and Interaction stamps; observation
+checkpoints distinguish validated and projection-committed provider cursors. Attempt
+records retain replay availability and role-tagged logical Controller references,
+while canonical replay material remains outside SQLite.
+Delivery sequence allocation uses `UPDATE ... RETURNING` in the same immediate
+transaction as its journal insert. Backup checkpoints WAL and publishes an
+owner-only `VACUUM INTO` image. Focused fixtures exercise these boundaries;
+the package is not yet wired into production startup.
+
 ## 2. Current development snapshot
 
 | Area | State |
@@ -238,19 +259,20 @@ claim remains in this task scope.
 | Five Gul SOT documents | E0-T4 completed the consumer alignment and Gate A reproduction; E0-T8 completed toolchain/ADR alignment; E0-T7 completed Gate B |
 | Toolchain and developer-command artifacts | E0-T8 accepted one pin manifest and read-only host checks; E0-T7 adds checked contract generation/drift delegates; E1-T1 adds the root Go module; E1-T2 adds root Bun pin validation and checked frontend generation/drift commands; E1-T3 adds checked Gul API/error-catalog generation; no installer |
 | Contract boundary | E12-T1 pins TASK-053 and regenerates checked clients/maps/fake transport for 36 known, 27 required, and 9 unavailable methods |
-| Production source | E1-T1 shared Go core under `internal/app`; E1-T2 shared embedded bundle delivery under `internal/delivery/web`; E1-T3 declared browser API, typed 27-method consumer port and page-token boundary |
+| Production source | E1-T1 shared Go core under `internal/app`; E1-T2 shared embedded bundle delivery under `internal/delivery/web`; E1-T3 declared browser API, typed 27-method consumer port and page-token boundary; E1-T4 isolated SQLite package under `internal/storage` is complete but unwired to startup |
 | Wails host/frontend | One React foundation bundle implemented; Wails host and feature UI not implemented |
 | ConnectRPC schema/services | Gul DirectSession and ArtifactPresentation declarations and generated clients exist; no handler or route enabled |
-| Gul SQLite schema | Not implemented |
+| Gul SQLite schema | Gul-owned version 1 schema and isolated repositories implemented; production startup integration pending |
 | Dolgorae RPC supervisor/provider | Not implemented |
 | Controller credential store | Caller-owned mechanism selected by ADR-0047; not implemented |
 | FileService/auth/PWA/Tailscale integration | Not implemented |
 | Current State promotions | REQ-HOST-005, REQ-RUNTIME-011, REQ-RUNTIME-022, and REQ-CONSUMER-001; E1-T1/T2 remain foundation evidence and do not promote REQ-HOST-001/002 |
 
 The repository contains the shared-core and single-bundle delivery foundations,
-declared but inactive Gul APIs, bootstrap validation, and checked provider-contract boundary. Delivery
-processes, API handlers, persistence implementations, provider adapters and live
-runtime behavior remain unimplemented.
+declared but inactive Gul APIs, isolated Gul-owned SQLite repositories, bootstrap
+validation, and the checked provider-contract boundary. Delivery processes, API
+handlers, production persistence lifecycle, provider adapters, and live runtime
+behavior remain unimplemented.
 
 ## 3. Historical E0 assumption snapshot
 
@@ -697,4 +719,4 @@ The initial documentation assumed Gul would manage one Codex App Server, map Ses
 
 ## 12. Handoff
 
-E12 is complete. The TASK-053 consumer lock and generated contract tooling are authoritative for new implementation, while historical E0 evidence remains scoped to its original pin. E1-T1/T2/T3 completed the shared core, bundle, and declared typed-contract foundations. E1-T4 remains the next planned foundation task. E2-T0 remains blocked on an accepted compatible Dolgorae executable and live smoke evidence. No later Task or live-provider behavior is activated automatically.
+E12 is complete. The TASK-053 consumer lock and generated contract tooling are authoritative for new implementation, while historical E0 evidence remains scoped to its original pin. E1-T1/T2/T3/T4 completed the shared core, bundle, declared typed-contract, and isolated SQLite foundations. E1-T5 is the next planned foundation task. E2-T0 remains blocked on an accepted compatible Dolgorae executable and live smoke evidence. No later Task or live-provider behavior is activated automatically.
