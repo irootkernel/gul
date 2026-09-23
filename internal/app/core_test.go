@@ -5,6 +5,8 @@ import (
 	"errors"
 	"reflect"
 	"runtime"
+	"strings"
+	"sync"
 	"testing"
 	"time"
 )
@@ -186,6 +188,61 @@ func TestStopWaitsForStartAndThenStops(t *testing.T) {
 	}
 	if core.Running() {
 		t.Fatal("core should be stopped")
+	}
+}
+
+func TestStopDeadlineWhileDrainingRestoresRunning(t *testing.T) {
+	authorized := make(chan struct{})
+	release := make(chan struct{})
+	var releaseOnce sync.Once
+	defer releaseOnce.Do(func() { close(release) })
+	var lifecycleCalls []string
+	core := NewCore(Dependencies{
+		Lifecycle:     &recordingLifecycle{calls: &lifecycleCalls},
+		Authorization: blockingAuthorization{started: authorized, release: release},
+	})
+	if err := core.Start(t.Context()); err != nil {
+		t.Fatal(err)
+	}
+	accessResult := make(chan error, 1)
+	go func() { accessResult <- core.RequireProductAccess(t.Context(), Principal{}) }()
+	<-authorized
+
+	stopCtx, cancel := context.WithTimeout(t.Context(), 100*time.Millisecond)
+	defer cancel()
+	stopResult := make(chan error, 1)
+	go func() { stopResult <- core.Stop(stopCtx) }()
+	waitUntilNotRunning(t, core)
+	core.mu.RLock()
+	transition := core.transition
+	core.mu.RUnlock()
+	startResult := make(chan error, 1)
+	go func() { startResult <- core.Start(t.Context()) }()
+
+	if err := <-stopResult; !errors.Is(err, context.DeadlineExceeded) || !strings.Contains(err.Error(), "wait for product access to finish") {
+		t.Fatalf("drain timeout = %v", err)
+	}
+	select {
+	case <-transition:
+	default:
+		t.Fatal("failed stop did not release transition waiters")
+	}
+	select {
+	case err := <-startResult:
+		if err != nil || !core.Running() || !reflect.DeepEqual(lifecycleCalls, []string{"start"}) {
+			t.Fatalf("start after failed stop = %v, running %t, lifecycle calls %v", err, core.Running(), lifecycleCalls)
+		}
+	case <-time.After(time.Second):
+		t.Fatal("start waiter did not return after failed stop")
+	}
+	releaseOnce.Do(func() { close(release) })
+	if err := <-accessResult; !errors.Is(err, ErrProviderUnavailable) {
+		t.Fatalf("access after failed stop = %v, want unavailable provider", err)
+	}
+	retryCtx, retryCancel := context.WithTimeout(t.Context(), time.Second)
+	defer retryCancel()
+	if err := core.Stop(retryCtx); err != nil || core.Running() {
+		t.Fatalf("retry stop = %v, running %t", err, core.Running())
 	}
 }
 

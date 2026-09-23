@@ -174,6 +174,9 @@ availability ordering, typed unavailable results, failed startup, and rejection
 before startup. This is foundation evidence only. It does not claim a listener,
 Wails host, browser API, database repository, typed provider capability adapter,
 production authentication, or real-provider behavior.
+Epic validation added a repeated race-enabled fixture for a stop deadline while
+product access is in flight. It verifies that failed drain restores the running
+state, releases transition waiters, and permits a later clean stop.
 
 ## 1.7 E1-T2 shared frontend bundle, 2026-09-23
 
