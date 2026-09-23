@@ -21,12 +21,6 @@ func Assets() fs.FS {
 	return assets
 }
 
-// ShellAssets is the desktop-shell delivery boundary. The later Wails task
-// consumes this exact filesystem rather than creating another frontend build.
-func ShellAssets() fs.FS {
-	return Assets()
-}
-
 // BrowserHandler serves the same bundle for browser delivery. Authentication
 // and the production listener remain owned by later tasks.
 func BrowserHandler() http.Handler {

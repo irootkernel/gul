@@ -187,14 +187,18 @@ SHA-256 digests. The drift check rebuilds into a temporary directory and
 compares the sorted output inventory and bytes. Generation builds into staging
 and preserves the prior checked bundle if compilation fails.
 
-`internal/delivery/web` embeds that bundle once and exposes the same filesystem
-to the future Wails shell and the browser static handler. Tests compare the
+`internal/delivery/web` embeds that bundle once; the Wails shell and browser
+delivery both use its static handler. Tests compare the
 bytes returned through both paths and verify SPA fallback, missing-asset 404s,
 non-read method rejection, response headers, manifest and embedded-tree integrity,
 exact package pins, type safety, and fail-closed delivered content. Browser source
 typechecking excludes Bun globals. This task does not add a Wails host, listener,
 ConnectRPC browser API, authentication bypass, product feature flow, or live
 runtime assembly.
+Epic validation added a double-rename failure fixture: if replacement and
+restoration both fail, the error retains both causes and names the preserved
+previous bundle. It also removed the unused `ShellAssets` export; tests compare
+the embedded assets directly with bytes delivered through the shared handler.
 
 ## 1.8 E1-T3 typed browser and provider contracts, 2026-09-23
 

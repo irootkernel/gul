@@ -18,7 +18,7 @@ func TestWailsHostUsesCheckedBundleWithoutServices(t *testing.T) {
 	request := httptest.NewRequest(http.MethodGet, "/", nil)
 	response := httptest.NewRecorder()
 	options.Assets.Handler.ServeHTTP(response, request)
-	want, err := fs.ReadFile(web.ShellAssets(), "index.html")
+	want, err := fs.ReadFile(web.Assets(), "index.html")
 	if err != nil {
 		t.Fatal(err)
 	}

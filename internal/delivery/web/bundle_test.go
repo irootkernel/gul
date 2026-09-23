@@ -49,10 +49,8 @@ func TestEmbeddedBundleMatchesManifest(t *testing.T) {
 	}
 	manifestPaths = append(manifestPaths, "bundle-manifest.json")
 	slices.Sort(manifestPaths)
-	for name, bundle := range map[string]fs.FS{"browser": Assets(), "shell": ShellAssets()} {
-		if paths := inventory(t, bundle); !slices.Equal(paths, manifestPaths) {
-			t.Fatalf("%s paths = %v, want manifest paths %v", name, paths, manifestPaths)
-		}
+	if paths := inventory(t, Assets()); !slices.Equal(paths, manifestPaths) {
+		t.Fatalf("bundle paths = %v, want manifest paths %v", paths, manifestPaths)
 	}
 	index, err := fs.ReadFile(Assets(), "index.html")
 	if err != nil {
@@ -70,8 +68,8 @@ func TestEmbeddedBundleMatchesManifest(t *testing.T) {
 }
 
 func TestBrowserAndShellDeliverTheSameBundle(t *testing.T) {
-	for _, name := range inventory(t, ShellAssets()) {
-		shellContent, err := fs.ReadFile(ShellAssets(), name)
+	for _, name := range inventory(t, Assets()) {
+		shellContent, err := fs.ReadFile(Assets(), name)
 		if err != nil {
 			t.Fatal(err)
 		}

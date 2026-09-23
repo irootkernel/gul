@@ -71,7 +71,14 @@ export function replaceOutput(staging, destination, rename = fs.renameSync) {
   try {
     rename(staging, destination);
   } catch (error) {
-    if (hadDestination) rename(backup, destination);
+    if (hadDestination) {
+      try {
+        rename(backup, destination);
+      } catch (restoreError) {
+        throw new AggregateError([error, restoreError],
+          `Frontend replacement and restore failed; previous bundle is at ${backup}`);
+      }
+    }
     throw error;
   }
   if (hadDestination) fs.rmSync(backup, {recursive: true, force: true});

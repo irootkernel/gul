@@ -182,3 +182,36 @@ test("a failed swap restores the previous output", () => {
     fs.rmSync(fixture, {recursive: true, force: true});
   }
 });
+
+test("a failed swap and restore reports the preserved backup", () => {
+  const fixture = fs.mkdtempSync(path.join(os.tmpdir(), "gul-build-double-failure-"));
+  const output = path.join(fixture, "output");
+  const staging = path.join(fixture, "staging");
+  fs.mkdirSync(output);
+  fs.mkdirSync(staging);
+  fs.writeFileSync(path.join(output, "previous.txt"), "keep\n");
+  let calls = 0;
+  const rename = (source, destination) => {
+    calls += 1;
+    if (calls > 1) throw new Error(`rename ${calls} failed`);
+    fs.renameSync(source, destination);
+  };
+  try {
+    let failure;
+    try {
+      replaceOutput(staging, output, rename);
+    } catch (error) {
+      failure = error;
+    }
+    expect(failure).toBeInstanceOf(AggregateError);
+    expect(failure.errors.map(error => error.message)).toEqual(["rename 2 failed", "rename 3 failed"]);
+    expect(calls).toBe(3);
+    const backup = fs.readdirSync(fixture).find(name => name.startsWith("output.previous-"));
+    expect(backup).toBeDefined();
+    expect(failure.message).toContain(path.join(fixture, backup));
+    expect(fs.readFileSync(path.join(fixture, backup, "previous.txt"), "utf8")).toBe("keep\n");
+    expect(fs.existsSync(staging)).toBe(true);
+  } finally {
+    fs.rmSync(fixture, {recursive: true, force: true});
+  }
+});
