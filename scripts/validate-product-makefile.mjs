@@ -39,6 +39,7 @@ export function validateProductMakefile(source) {
   const testUnit = readRecipe(source, "test-unit");
   if (!testUnit.includes("@bun run typecheck")) throw new Error("test-unit must retain frontend typechecking");
   if (!testUnit.includes("@bun run test")) throw new Error("test-unit must use the package-owned frontend test command");
+  if (!testUnit.includes("@GOTOOLCHAIN=local go test -race ./...")) throw new Error("test-unit must retain race-enabled product Go tests");
   const testIntegration = readRecipe(source, "test-int");
   if (!testIntegration.includes("@$(MAKE) --no-print-directory frontend-check")) {
     throw new Error("test-int must retain the frontend drift gate");

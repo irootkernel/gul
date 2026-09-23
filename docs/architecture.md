@@ -1016,7 +1016,7 @@ Gul path-encoding error, not a label for an unsafe provider socket.
 
 `frontend` builds one exact-pinned React/TypeScript source tree into the checked
 `internal/delivery/web/dist` bundle. `internal/delivery/web` exposes that one
-embedded filesystem to browser delivery and the later Wails shell, preventing a
+embedded filesystem to browser delivery and the Wails shell, preventing a
 second frontend build or delivery-specific domain surface.
 
 `internal/storage` requires an owner-only database directory and file, then
