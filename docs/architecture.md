@@ -1035,7 +1035,9 @@ unwired to production startup after E1-T4 completion.
 then runs a Wails v3 window over the checked bundle's existing asset handler.
 The shell registers no Wails services or product API bindings. Its injected
 window host permits isolated lifecycle and asset smoke tests without opening a
-real WebView. Authenticated singleton and verified attach remain E8-T3 work.
+real WebView. Window shutdown gives the shared core a five-second bounded stop
+context, including when the window caller's context is canceled. Authenticated
+singleton and verified attach remain E8-T3 work.
 
 ### 19.2 Verified runtime behavior
 

@@ -270,7 +270,9 @@ around the shared `internal/app` core. The desktop window uses the same checked
 bundle handler as browser delivery and registers no separate Wails product
 service. Isolated tests exercise start/stop ordering, failure cleanup, and
 byte-identical shell assets, canceled-caller cleanup, concurrent shutdown, and
-the macOS last-window termination setting. The Wails Go module is pinned
+the macOS last-window termination setting. Window shutdown gives the shared
+core a five-second stop budget independent of the window caller's context.
+The Wails Go module is pinned
 independently of the host CLI minimum. The serial `make test` facade, focused
 desktop race test, SOT and boundary negative fixtures, and full native review
 passed after correction; the final review-predating Low-only test delta passed
