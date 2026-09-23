@@ -62,6 +62,7 @@ This file is the local agent operating guidance for the Gul repository.
 - Use `$lore-commits` for non-trivial commit messages and `$lore-query` to inspect recorded decision context. Use the separately installed `$deslop` for task-owned cleanup when an Aquarium workflow requests it.
 - Use the separately installed `$humanizer` once as the final prose pass for English human-authored documentation. Preserve facts, code, identifiers, links, citations, quotations, and generated content; leave the draft unchanged if validation fails.
 - Keep `.mulgae/` local state other than tracked `config.yaml`, `.gaori/runs/`, and `.podway/runtime/` as runtime evidence. Do not cite their paths or identities as durable evidence in tracked documentation or commit messages. Use a reviewed tracked `aquarium.promoted-evidence/v1` package only when a downstream consumer requires retained evidence; absent a declared custom root, use `evidence/aquarium/`.
+- Use `$use-sorage` only when Master explicitly requests a broker operation. Check only the requested inbox or outbox; Project registration does not authorize discovery. Resolve Handoff, review, revision, retention, deletion, and Vault operations through that skill; never edit the managed Vault or derived `.sorage/INBOX.md` directly.
 
 ## Project Configuration
 
