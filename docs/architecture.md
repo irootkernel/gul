@@ -958,7 +958,7 @@ The package identity is `Gul.app`, bundle identifier `xyz.rootkernel.gul`, and h
 
 Future dependency manifests must match TypeScript `7.0.2`, React/React DOM `19.2.7`, React/React DOM types `19.3.0`, Bun types `1.4.2`, protobuf-go `1.36.12`, connect-go `1.20.0`, Connect-ES/Connect-Web `2.1.2`, Protobuf-ES `2.14.0`, and modernc SQLite `1.57.0`. The read-only `make toolchain-check` reports a Go pin mismatch and missing or below-minimum host tools; it never installs or substitutes a dependency. Project validation reports dependency or generator pin drift. Wails v2 does not satisfy the Wails v3 beta minimum.
 
-The serial command facade is `toolchain-check`, `generate-contract`, `contract-check`, `generate-frontend`, `frontend-check`, `test-prepare`, `test-unit`, `test-int`, `test-e2e`, and `test`. E0-T7 supplies checked contract generation and drift delegates. E1-T2 supplies checked frontend generation and bundle drift delegates. These commands fail closed on their source, version, generated-output, schema, or policy boundaries. No bootstrap command scaffolds the application or claims runtime behavior.
+The serial command facade is `toolchain-check`, `generate-contract`, `contract-check`, `generate-frontend`, `frontend-check`, `generate-api`, `api-check`, `test-prepare`, `test-unit`, `test-int`, `test-e2e`, and `test`. E0-T7 supplies checked contract generation and drift delegates. E1-T2 supplies checked frontend generation and bundle drift delegates. E1-T3 supplies checked Gul API generation, drift detection and provider-error catalog coverage. These commands fail closed on their source, version, generated-output, schema, or policy boundaries. No bootstrap command scaffolds the application or claims runtime behavior.
 
 ## 18. Artifact migration matrix
 
@@ -985,11 +985,11 @@ The serial command facade is `toolchain-check`, `generate-contract`, `contract-c
 
 ## 19. Current snapshot
 
-**Snapshot date:** 2026-09-23 (E1-T2 shared-bundle foundation completed)
+**Snapshot date:** 2026-09-23 (E1-T3 browser contract review)
 
-**Roadmap point:** E0 is `Completed`, E12 is `Completed`, and E1 is `In Progress`; E1-T1 is `Completed` and E1-T2 is `Completed`. E1-T3 is the next eligible Task. Former E12-T2/T3 remain Retired. E13 owns the stateful fake harness, and E14 owns pre-release application acceptance. No live-provider or assembled-application acceptance is implied.
+**Roadmap point:** E0 is `Completed`, E12 is `Completed`, and E1 is `In Progress`; E1-T1 is `Completed`, E1-T2 is `Completed`, and E1-T3 is `In Review`. Former E12-T2/T3 remain Retired. E13 owns the stateful fake harness, and E14 owns pre-release application acceptance. No live-provider or assembled-application acceptance is implied.
 
-**Maturity:** delivery-independent Go core and shared React bundle foundations plus accepted bootstrap and provider-contract tooling; application APIs, storage, shell and provider implementations remain pending
+**Maturity:** delivery-independent Go core, shared React bundle, declared but disabled Gul API, and typed provider ports plus accepted bootstrap and provider-contract tooling; storage, shell and provider implementations remain pending
 
 ### 19.1 Implemented components
 
@@ -999,6 +999,18 @@ dependencies are composed with fail-closed defaults: startup performs no
 external provider work, product access is denied, and provider/persistence
 availability is not implied. The same core can be hosted later by headless and
 desktop delivery without importing Wails.
+
+`api/proto` declares Gul-owned DirectSession and ArtifactPresentation browser
+contracts. Its `bounds.json` is the shared authority for generated Go and
+TypeScript page/content limits. Generated clients are checked for drift. The
+declarations are not registered as routes. `contract/port` defines the exact
+27-method typed consumer interface and a closed provider-error translation
+catalog; the root Go module consumes this checked local module through one
+explicit local replacement. `internal/domain` maps provider dispositions to
+browser enums and holds bounded account/session/query-bound opaque page tokens.
+Accepted runtime and socket path errors map to `RUNTIME_PATH_UNAVAILABLE` with
+their typed recovery action; `UNSUPPORTED_PATH_ENCODING` remains a distinct
+Gul path-encoding error, not a label for an unsafe provider socket.
 
 `frontend` builds one exact-pinned React/TypeScript source tree into the checked
 `internal/delivery/web/dist` bundle. `internal/delivery/web` exposes that one
@@ -1012,8 +1024,10 @@ access ordering, denial before availability probes, typed unavailable states,
 and failed-start behavior. Frontend tests, package checks, the bundle drift check,
 and Go delivery tests verify fail-closed markup, exact dependency pins,
 byte-reproducible checked output, manifest hashes, SPA fallback, and identical
-browser/shell bytes. These checks start no real provider and do not establish
-a listener, authenticated client, Wails host, browser API,
+browser/shell bytes. Gul schema and port fixtures verify generated client drift,
+the 27-method inventory, provider error/action coverage, page-token scope,
+bounded metadata, and CloseOutcome distinctions. These checks start no real
+provider and do not establish a listener, authenticated client, Wails host, enabled browser API,
 persistence repository, or live compatibility.
 
 ### 19.3 Existing artifacts
@@ -1024,7 +1038,7 @@ toolchain authority, and E12-T1 TASK-053 contract artifacts. The serial Make
 facade validates both Go manifests, the root package pins, exact Go 1.26.6, and
 the Bun minimum before running frontend, core, contract, SOT and drift gates.
 Historical E0-T7 facts remain scoped to their original digests. No Wails host,
-browser API, database, provider adapter, or live provider behavior exists.
+enabled browser route, database, provider adapter, or live provider behavior exists.
 
 ### 19.4 Current topology and data
 
@@ -1032,7 +1046,7 @@ browser API, database, provider adapter, or live provider behavior exists.
 Shared Go core composition and lifecycle exist without a delivery process.
 One checked React bundle and shared browser/shell asset delivery exist.
 No Wails host exists.
-No ConnectRPC service exists.
+ConnectRPC services are declared and generated but not registered.
 No Gul SQLite schema exists.
 No Runtime Provider adapter, RPC supervisor, Controller credential store, timeline adapter, or Artifact adapter exists.
 ```
@@ -1040,7 +1054,7 @@ No Runtime Provider adapter, RPC supervisor, Controller credential store, timeli
 ### 19.5 Security posture
 
 No Gul service is running or exposed. The static foundation contains no product
-controls or API, and default core composition denies product access before
+controls or enabled API, and default core composition denies product access before
 probing provider or persistence availability. Production authentication,
 transport protection and durable security behavior remain Required State.
 

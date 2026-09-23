@@ -5,10 +5,13 @@
   "scripts": {
     "build": "make generate-frontend",
     "check:bundle": "make frontend-check",
-    "test": "bun test frontend",
-    "typecheck": "tsc -p frontend/tsconfig.json --noEmit && tsc -p frontend/tsconfig.test.json --noEmit"
+    "test": "bun test frontend api",
+    "typecheck": "tsc -p frontend/tsconfig.json --noEmit && tsc -p frontend/tsconfig.test.json --noEmit && tsc -p api/tsconfig.json --noEmit"
   },
   "dependencies": {
+    "@bufbuild/protobuf": "2.14.0",
+    "@connectrpc/connect": "2.1.2",
+    "@connectrpc/connect-web": "2.1.2",
     "react": "19.2.7",
     "react-dom": "19.2.7"
   },

@@ -1,0 +1,10 @@
+{
+  "default_page_size": 50,
+  "maximum_page_size": 100,
+  "maximum_token_bytes": 4096,
+  "maximum_page_metadata_bytes": 262144,
+  "maximum_preview_bytes": 1024,
+  "maximum_inline_original_bytes": 262144,
+  "maximum_artifact_chunk_bytes": 262144,
+  "maximum_close_outcome_bytes": 16384
+}

@@ -1,7 +1,8 @@
 # Testing and developer commands
 
 E0-T8 defines a serial command facade, E1-T1 extends it with the root Go product
-module, and E1-T2 adds the exact-pinned React bundle. It does not install host
+module, E1-T2 adds the exact-pinned React bundle, and E1-T3 adds checked Gul
+ConnectRPC declarations and the typed consumer-port error catalog. It does not install host
 tools or claim assembled runtime readiness. `make test-prepare` downloads only
 declared Go and locked Bun dependencies. Generation targets rewrite only their
 named checked outputs.
@@ -13,9 +14,11 @@ named checked outputs.
 | `make contract-check` | Regenerate into a temporary directory; reject source/generated drift; compile and test Go/TypeScript clients, fake gRPC server, maps, and fixtures. |
 | `make generate-frontend` | Install the frozen root Bun graph without lifecycle scripts, then build the exact-pinned React source into the checked shared browser/shell bundle. |
 | `make frontend-check` | Install the frozen root Bun graph without lifecycle scripts, rebuild the frontend in a temporary directory, and reject any checked bundle drift. |
+| `make generate-api` | Check the exact Go toolchain and available `gofmt`, then generate checked Gul Protobuf/ConnectRPC Go and TypeScript clients and the accepted provider-error catalog from pinned authorities. |
+| `make api-check` | Regenerate Gul clients temporarily and reject schema, byte, inventory, or provider-error catalog drift. |
 | `make test-prepare` | Validate both Go manifests, the root Bun manifest, exact Go, Bun, and shell syntax, then materialize the root and locked contract dependencies with Bun lifecycle scripts disabled. |
-| `make test-unit` | Validate product manifests, typecheck and test the React foundation, test shared bundle delivery, run the headless core tests, compile generated Go clients, and run contract/facade fixtures. |
-| `make test-int` | Recheck exact Go 1.26.6, product-module tidiness, frontend bundle reproducibility, and SOT integrity, then run contract drift/schema/policy fixtures and whitespace checks. |
+| `make test-unit` | Validate product manifests, typecheck and test the React foundation and generated Gul API clients, run browser-contract fixtures and shared bundle/core tests, compile generated Go clients, and run contract/facade fixtures. |
+| `make test-int` | Recheck exact Go 1.26.6, product-module tidiness, frontend/API reproducibility, and SOT integrity, then run contract drift/schema/policy fixtures and whitespace checks. |
 | `make test-e2e` | Run the complete checker fixture through its public command boundary. |
 | `make test` | Run `test-prepare`, `test-unit`, `test-int`, and `test-e2e` serially. |
 

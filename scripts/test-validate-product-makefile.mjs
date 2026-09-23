@@ -14,6 +14,9 @@ for (const [name, mutate, pattern] of [
   ["test-unit bypasses the package command", source => source.replace("\t@bun run test", "\t@bun test frontend"), /package-owned frontend test/],
   ["test-unit drops typechecking", source => source.replace("\t@bun run typecheck\n", ""), /retain frontend typechecking/],
   ["test-int drops bundle drift", source => source.replace("\t@\$\(MAKE\) --no-print-directory frontend-check\n", ""), /retain the frontend drift gate/],
+  ["test-int drops API drift", source => source.replace("\t@\$\(MAKE\) --no-print-directory api-check\n", ""), /retain the Gul API drift gate/],
+  ["generation skips accepted errors", source => source.replace("\t@node contract/port/generate-errors.mjs generate\n", ""), /generate-api recipe drifted/],
+  ["check skips accepted errors", source => source.replace("\t@node contract/port/generate-errors.mjs check\n", ""), /api-check recipe drifted/],
 ]) {
   assert.throws(() => validateProductMakefile(mutate(current)), pattern, name);
 }

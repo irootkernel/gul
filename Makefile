@@ -1,4 +1,4 @@
-.PHONY: toolchain-check generate-contract contract-check generate-frontend frontend-check test-prepare test-unit test-int test-e2e test
+.PHONY: toolchain-check generate-contract contract-check generate-frontend frontend-check generate-api api-check test-prepare test-unit test-int test-e2e test
 
 toolchain-check:
 	@./scripts/toolchain-check.sh
@@ -20,6 +20,18 @@ frontend-check:
 	@bun install --frozen-lockfile --ignore-scripts
 	@node scripts/validate-product-package.mjs
 	@bun frontend/scripts/check-bundle.mjs
+
+generate-api:
+	@./scripts/toolchain-check.sh --api-only
+	@cd contract && bun install --frozen-lockfile --ignore-scripts
+	@node api/scripts/api-command.mjs generate
+	@node contract/port/generate-errors.mjs generate
+
+api-check:
+	@./scripts/toolchain-check.sh --api-only
+	@cd contract && bun install --frozen-lockfile --ignore-scripts
+	@node api/scripts/api-command.mjs check
+	@node contract/port/generate-errors.mjs check
 
 test-prepare:
 	@./scripts/toolchain-check.sh --manifest-only
@@ -58,6 +70,7 @@ test-int:
 	@./scripts/toolchain-check.sh --go-only
 	@GOTOOLCHAIN=local go mod tidy -diff
 	@$(MAKE) --no-print-directory frontend-check
+	@$(MAKE) --no-print-directory api-check
 	@node scripts/test-sot.mjs
 	@./scripts/check-sot.sh
 	@./scripts/contract-command.sh check

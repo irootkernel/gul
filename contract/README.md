@@ -20,6 +20,12 @@ fixtures. `check.sh` regenerates into a temporary directory and rejects drift.
 The nested Go and Bun dependency graphs exist only to compile and test these
 contract fixtures; they are not a Gul application scaffold.
 
+`port/` defines Gul's checked 27-method consumer interface and translates
+accepted typed provider errors into browser-safe codes and actions. Its
+`error_catalog_gen.go` is generated from the pinned upstream error policy by
+`port/generate-errors.mjs`; run root `make generate-api` to regenerate it and
+`make api-check` to verify drift.
+
 Protobuf-ES v2 generates TypeScript message schemas and Connect service
 descriptors in the same checked module. The incompatible Connect-ES v1 plugin
 and its unchecked `_connect.ts` output are deliberately absent. The imported

@@ -5,10 +5,10 @@ import {fileURLToPath} from "node:url";
 const expectedScripts = {
   build: "make generate-frontend",
   "check:bundle": "make frontend-check",
-  test: "bun test frontend",
-  typecheck: "tsc -p frontend/tsconfig.json --noEmit && tsc -p frontend/tsconfig.test.json --noEmit",
+  test: "bun test frontend api",
+  typecheck: "tsc -p frontend/tsconfig.json --noEmit && tsc -p frontend/tsconfig.test.json --noEmit && tsc -p api/tsconfig.json --noEmit",
 };
-const expectedDependencies = ["react", "react-dom"];
+const expectedDependencies = ["@bufbuild/protobuf", "@connectrpc/connect", "@connectrpc/connect-web", "react", "react-dom"];
 const expectedDevDependencies = ["@types/bun", "@types/react", "@types/react-dom", "typescript"];
 
 export function validateProductPackage(manifest, versions) {
@@ -20,6 +20,9 @@ export function validateProductPackage(manifest, versions) {
   }
   requireVersion(manifest.dependencies, "react", versions.GUL_REACT_VERSION);
   requireVersion(manifest.dependencies, "react-dom", versions.GUL_REACT_DOM_VERSION);
+  requireVersion(manifest.dependencies, "@bufbuild/protobuf", versions.GUL_PROTOBUF_ES_VERSION);
+  requireVersion(manifest.dependencies, "@connectrpc/connect", versions.GUL_CONNECT_ES_VERSION);
+  requireVersion(manifest.dependencies, "@connectrpc/connect-web", versions.GUL_CONNECT_WEB_VERSION);
   requireVersion(manifest.devDependencies, "typescript", versions.GUL_TYPESCRIPT_VERSION);
   requireVersion(manifest.devDependencies, "@types/react", versions.GUL_REACT_TYPES_VERSION);
   requireVersion(manifest.devDependencies, "@types/react-dom", versions.GUL_REACT_DOM_TYPES_VERSION);

@@ -1,0 +1,278 @@
+syntax = "proto3";
+
+package gul.v1;
+
+option go_package = "github.com/rootkernel/gul/api/generated/go/gul/v1;gulv1";
+
+import "google/protobuf/timestamp.proto";
+
+// These declarations are a browser contract, not an enabled product route.
+// Feature owners supply authenticated implementations in later tasks.
+service DirectSessionService {
+  rpc ListPromptHistory(ListPromptHistoryRequest) returns (ListPromptHistoryResponse);
+  rpc GetPromptHistoryItem(GetPromptHistoryItemRequest) returns (GetPromptHistoryItemResponse);
+  rpc GetExecutionState(GetExecutionStateRequest) returns (GetExecutionStateResponse);
+  rpc ListSpecialistResults(ListSpecialistResultsRequest) returns (ListSpecialistResultsResponse);
+  rpc CloseRuntime(CloseRuntimeRequest) returns (CloseRuntimeResponse);
+}
+
+service ArtifactPresentationService {
+  rpc GetMetadata(GetMetadataRequest) returns (GetMetadataResponse);
+  rpc ReadChunk(ReadChunkRequest) returns (ReadChunkResponse);
+}
+
+message ListPromptHistoryRequest {
+  string session_id = 1;
+  optional string page_token = 2;
+  uint32 page_size = 3;
+}
+
+message PromptHistoryItem {
+  string prompt_item_id = 1;
+  uint64 ordinal = 2;
+  google.protobuf.Timestamp accepted_at = 3;
+  string preview = 4;
+  bool preview_truncated = 5;
+  string conversation_entry_id = 6;
+}
+
+message ListPromptHistoryResponse {
+  string snapshot_id = 1;
+  repeated PromptHistoryItem items = 2;
+  optional string next_page_token = 3;
+  bool traversal_complete = 4;
+  Freshness freshness = 5;
+  google.protobuf.Timestamp observed_at = 6;
+}
+
+message GetPromptHistoryItemRequest {
+  string session_id = 1;
+  string prompt_item_id = 2;
+}
+
+message PromptOriginal {
+  oneof content {
+    string inline_utf8 = 1;
+    string artifact_ref = 2;
+  }
+}
+
+message GetPromptHistoryItemResponse {
+  string prompt_item_id = 1;
+  uint64 ordinal = 2;
+  google.protobuf.Timestamp accepted_at = 3;
+  string conversation_entry_id = 4;
+  PromptOriginal original = 5;
+}
+
+enum Freshness {
+  FRESHNESS_UNSPECIFIED = 0;
+  FRESHNESS_FRESH = 1;
+  FRESHNESS_STALE = 2;
+  FRESHNESS_UNAVAILABLE = 3;
+}
+
+enum SessionLifecycle {
+  SESSION_LIFECYCLE_UNSPECIFIED = 0;
+  SESSION_LIFECYCLE_ACTIVE = 1;
+  SESSION_LIFECYCLE_CLOSING = 2;
+  SESSION_LIFECYCLE_CLOSED = 3;
+  SESSION_LIFECYCLE_RECOVERY_REQUIRED = 4;
+}
+
+enum SessionComposition {
+  SESSION_COMPOSITION_UNSPECIFIED = 0;
+  SESSION_COMPOSITION_BROKERED_HIERARCHY = 1;
+}
+
+enum ApprovalPolicy {
+  APPROVAL_POLICY_UNSPECIFIED = 0;
+  APPROVAL_POLICY_USER_APPROVAL_REQUIRED = 1;
+}
+
+enum CloseProgress {
+  CLOSE_PROGRESS_UNSPECIFIED = 0;
+  CLOSE_PROGRESS_NONE = 1;
+  CLOSE_PROGRESS_SETTLING = 2;
+  CLOSE_PROGRESS_CONFIRMED = 3;
+  CLOSE_PROGRESS_OUTCOME_UNKNOWN = 4;
+  CLOSE_PROGRESS_RECOVERY_REQUIRED = 5;
+}
+
+enum RecoveryClass {
+  RECOVERY_CLASS_UNSPECIFIED = 0;
+  RECOVERY_CLASS_NONE = 1;
+  RECOVERY_CLASS_SNAPSHOT_REQUIRED = 2;
+  RECOVERY_CLASS_RECONCILE_REQUIRED = 3;
+  RECOVERY_CLASS_OUTCOME_UNKNOWN = 4;
+}
+
+message ExecutionCounts {
+  optional uint64 nonretired_members = 1;
+  optional uint64 nonterminal_spawns = 2;
+  optional uint64 pending_approvals = 3;
+  optional uint64 accepted_unfinished_tasks = 4;
+  optional uint64 unknown_outcome_tasks = 5;
+  optional uint64 published_results = 6;
+}
+
+message GetExecutionStateRequest {
+  string session_id = 1;
+}
+
+message GetExecutionStateResponse {
+  string session_id = 1;
+  Freshness freshness = 2;
+  google.protobuf.Timestamp observed_at = 3;
+  string state_version = 4;
+  SessionLifecycle lifecycle = 5;
+  SessionComposition composition = 6;
+  ApprovalPolicy approval_policy = 7;
+  string specialist_policy_name = 8;
+  ExecutionCounts counts = 9;
+  CloseProgress close_progress = 10;
+  RecoveryClass recovery = 11;
+  optional string close_operation_ref = 12;
+}
+
+message ListSpecialistResultsRequest {
+  string session_id = 1;
+  optional string page_token = 2;
+  uint32 page_size = 3;
+}
+
+enum SpecialistResultFormat {
+  SPECIALIST_RESULT_FORMAT_UNSPECIFIED = 0;
+  SPECIALIST_RESULT_FORMAT_UTF8_TEXT = 1;
+}
+
+message SpecialistResult {
+  string result_id = 1;
+  string specialist_view_id = 2;
+  string role_label = 3;
+  uint64 publication_order = 4;
+  google.protobuf.Timestamp published_at = 5;
+  SpecialistResultFormat format = 6;
+  uint64 byte_length = 7;
+  string sha256 = 8;
+  string artifact_ref = 9;
+}
+
+message ListSpecialistResultsResponse {
+  string snapshot_id = 1;
+  repeated SpecialistResult items = 2;
+  optional string next_page_token = 3;
+  bool traversal_complete = 4;
+  Freshness freshness = 5;
+  google.protobuf.Timestamp observed_at = 6;
+}
+
+enum ErrorCode {
+  ERROR_CODE_UNSPECIFIED = 0;
+  ERROR_CODE_TRANSPORT_UNAVAILABLE = 1;
+  ERROR_CODE_DEADLINE_EXCEEDED = 2;
+  ERROR_CODE_PROTOCOL_INCOMPATIBLE = 3;
+  ERROR_CODE_CONTROLLER_MISMATCH = 4;
+  ERROR_CODE_CONTROLLER_CARRIER_INVALID = 5;
+  ERROR_CODE_WRITE_CONTINUATION_CONTROLLER_INVALID = 6;
+  ERROR_CODE_WRITER_CONFLICT = 7;
+  ERROR_CODE_THREADLESS_REQUIRES_WRITE_TURN = 8;
+  ERROR_CODE_INTERACTION_STALE = 9;
+  ERROR_CODE_INTERACTION_ALREADY_RESOLVED = 10;
+  ERROR_CODE_RECOVERY_REQUIRED = 11;
+  ERROR_CODE_OUTCOME_UNKNOWN = 12;
+  ERROR_CODE_SLOW_CONSUMER = 13;
+  ERROR_CODE_ARTIFACT_UNAVAILABLE = 14;
+  ERROR_CODE_UNSUPPORTED_PATH_ENCODING = 15;
+  ERROR_CODE_RUN_STATE_CONFLICT = 16;
+  ERROR_CODE_RPC_SERVER_ALREADY_RUNNING = 17;
+  ERROR_CODE_OPERATOR_ACTION_REQUIRED = 18;
+  ERROR_CODE_INVALID_PAGE_TOKEN = 19;
+  ERROR_CODE_PAGE_TOKEN_EXPIRED = 20;
+  ERROR_CODE_INVALID_REQUEST = 21;
+  ERROR_CODE_UNAUTHORIZED = 22;
+  ERROR_CODE_SOURCE_UNAVAILABLE = 23;
+  ERROR_CODE_LIMIT_EXCEEDED = 24;
+  ERROR_CODE_PROVIDER_BLOCKED = 25;
+  ERROR_CODE_RUNTIME_PATH_UNAVAILABLE = 26;
+}
+
+enum ActionClass {
+  ACTION_CLASS_UNSPECIFIED = 0;
+  ACTION_CLASS_ABORT = 1;
+  ACTION_CLASS_FIX_REQUEST = 2;
+  ACTION_CLASS_REFRESH_CAPABILITIES = 3;
+  ACTION_CLASS_REFRESH_SNAPSHOT = 4;
+  ACTION_CLASS_VERIFY_CONTROLLER = 5;
+  ACTION_CLASS_USE_COMPATIBLE_CONTROLLER = 6;
+  ACTION_CLASS_USE_NEW_SAME_PRINCIPAL_CONTROLLER = 7;
+  ACTION_CLASS_USE_SUPPORTED_PROFILE = 8;
+  ACTION_CLASS_USE_TERMINAL_SOURCE = 9;
+  ACTION_CLASS_SUBMIT_WRITE_TURN = 10;
+  ACTION_CLASS_WAIT = 11;
+  ACTION_CLASS_RETRY_EXACT_IDEMPOTENCY_KEY = 12;
+  ACTION_CLASS_REFETCH_INTERACTION = 13;
+  ACTION_CLASS_RECONCILE_RUN = 14;
+  ACTION_CLASS_RECOVER_RUN = 15;
+  ACTION_CLASS_RECONNECT_FROM_COMMITTED_CURSOR = 16;
+  ACTION_CLASS_RESTART_GATEWAY = 17;
+  ACTION_CLASS_OPERATOR_REPAIR = 18;
+  ACTION_CLASS_FIX_SOCKET_PATH = 19;
+}
+
+message DomainError {
+  ErrorCode code = 1;
+  ActionClass action = 2;
+}
+
+message CloseRuntimeRequest {
+  string session_id = 1;
+  bool interrupt = 2;
+  string attempt_id = 3;
+}
+
+enum CloseStatus {
+  CLOSE_STATUS_UNSPECIFIED = 0;
+  CLOSE_STATUS_REJECTED = 1;
+  CLOSE_STATUS_IN_PROGRESS = 2;
+  CLOSE_STATUS_CONFIRMED = 3;
+  CLOSE_STATUS_OUTCOME_UNKNOWN = 4;
+  CLOSE_STATUS_RECOVERY_REQUIRED = 5;
+}
+
+message CloseOutcome {
+  CloseStatus status = 1;
+  string close_attempt_id = 2;
+  optional string close_operation_ref = 3;
+  DomainError rejection = 4;
+  ActionClass next_action = 5;
+}
+
+message CloseRuntimeResponse {
+  CloseOutcome outcome = 1;
+}
+
+message GetMetadataRequest {
+  string session_id = 1;
+  string artifact_ref = 2;
+}
+
+message GetMetadataResponse {
+  string artifact_ref = 1;
+  string media_type = 2;
+  uint64 byte_length = 3;
+  string sha256 = 4;
+}
+
+message ReadChunkRequest {
+  string session_id = 1;
+  string artifact_ref = 2;
+  uint64 offset = 3;
+  uint32 length = 4;
+}
+
+message ReadChunkResponse {
+  bytes data = 1;
+  uint64 total_length = 2;
+  string sha256 = 3;
+}

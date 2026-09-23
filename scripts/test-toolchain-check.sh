@@ -100,7 +100,26 @@ write_command go "go version go$GUL_GO_VERSION darwin/arm64"
 
 PATH="$fixture_dir:/usr/bin:/bin" "$checker" >/dev/null
 
+write_command gofmt "gofmt"
+PATH="$fixture_dir:/usr/bin:/bin" "$checker" --api-only >/dev/null
+
+write_unavailable_command gofmt
+if PATH="$fixture_dir:/usr/bin:/bin" "$checker" --api-only >"$fixture_dir/out" 2>"$fixture_dir/err"; then
+  printf 'ERROR API generator accepted missing gofmt\n' >&2
+  exit 1
+fi
+if ! grep -q "gofmt: missing command 'gofmt'" "$fixture_dir/err"; then
+  printf 'ERROR missing gofmt was not reported precisely\n' >&2
+  cat "$fixture_dir/err" >&2
+  exit 1
+fi
+write_command gofmt "gofmt"
+
 write_command buf 1.65.0
+if PATH="$fixture_dir:/usr/bin:/bin" "$checker" --api-only >"$fixture_dir/out" 2>"$fixture_dir/err"; then
+  printf 'ERROR API generator accepted old Buf\n' >&2
+  exit 1
+fi
 if PATH="$fixture_dir:/usr/bin:/bin" "$checker" >"$fixture_dir/out" 2>"$fixture_dir/err"; then
   printf 'ERROR unsupported old Buf unexpectedly passed\n' >&2
   exit 1

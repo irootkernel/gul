@@ -34,8 +34,8 @@ if [ "${1-}" = "--manifest-only" ]; then
   printf 'OK manifest: %s\n' "$manifest"
   exit 0
 fi
-if [ "${1-}" != "" ] && [ "${1-}" != "--go-only" ] && [ "${1-}" != "--bun-only" ] && [ "${1-}" != "--version-at-least" ]; then
-  printf 'usage: %s [--manifest-only|--go-only|--bun-only|--version-at-least <actual> <minimum>]\n' "$0" >&2
+if [ "${1-}" != "" ] && [ "${1-}" != "--go-only" ] && [ "${1-}" != "--bun-only" ] && [ "${1-}" != "--api-only" ] && [ "${1-}" != "--version-at-least" ]; then
+  printf 'usage: %s [--manifest-only|--go-only|--bun-only|--api-only|--version-at-least <actual> <minimum>]\n' "$0" >&2
   exit 2
 fi
 
@@ -194,6 +194,24 @@ fi
 
 if [ "${1-}" = "--bun-only" ]; then
   check_minimum Bun "$GUL_BUN_MIN_VERSION" bun --version
+  if [ "$failures" -ne 0 ]; then
+    printf 'toolchain check failed: %s issue(s)\n' "$failures" >&2
+    exit 1
+  fi
+  exit 0
+fi
+
+if [ "${1-}" = "--api-only" ]; then
+  check_exact Go "$GUL_GO_VERSION" go version
+  if command_output gofmt -h >/dev/null; then
+    pass "gofmt available"
+  else
+    fail "gofmt: missing command 'gofmt'"
+  fi
+  check_minimum Node "$GUL_NODE_MIN_VERSION" node --version
+  check_minimum Bun "$GUL_BUN_MIN_VERSION" bun --version
+  check_minimum Buf "$GUL_BUF_MIN_VERSION" buf --version
+  check_minimum protoc "$GUL_PROTOC_MIN_VERSION" protoc --version
   if [ "$failures" -ne 0 ]; then
     printf 'toolchain check failed: %s issue(s)\n' "$failures" >&2
     exit 1

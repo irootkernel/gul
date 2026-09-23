@@ -3,16 +3,16 @@
 | Field | Value |
 | --- | --- |
 | Role | Sole authority for task identity, order, status, dependencies, and phase |
-| Revision | 2026-09-23 E1-T2 completion |
+| Revision | 2026-09-23 E1-T3 completion |
 | Active Task | None |
-| Next | E1 continuing at E1-T3 |
+| Next | E1 continuing at E1-T4 |
 | Required provider | Released Dolgorae v0.1.3 implementing `dolgorae.gul-consumer/v1` |
 
 ## 1. Status and execution rules
 
 Allowed executable states are `Planned`, `In Progress`, `In Review`, `Completed`,
 `Blocked`, and `Deferred`. `Retired` preserves a historical non-executable ID.
-At most one Task is In Progress or In Review globally. This plan activates none.
+At most one Task is In Progress or In Review globally. No Task is active.
 A Task completes only after its scoped outputs, verification, documentation,
 review, and ordinary completion commit requirements pass. No status implies live
 credentials, staging, commit, publication, or installation authorization.
@@ -186,7 +186,7 @@ assembly is owned by E14; actual headless provider integration is owned by E2.
 | --- | --- | --- | --- | --- |
 | E1-T1 | Pre-release | Completed | E12-T1 | Shared headless-capable core, lifecycle/provider/persistence/authorization ports and deny-by-default composition; isolated bootstrap tests without real provider startup |
 | E1-T2 | Pre-release | Completed | E1-T1 | One React bundle and delivery path for shell/browser; foundation build and delivery tests, not completed feature flows |
-| E1-T3 | Pre-release | Planned | E1-T1, E12-T1 | Typed ConnectRPC/domain ports, explicit browser history/item/state/result reads and CloseOutcome, Gul-owned pagination/references, operation/error fixtures; no generic passthrough or premature coordinator |
+| E1-T3 | Pre-release | Completed | E1-T1, E12-T1 | Typed ConnectRPC/domain ports, explicit browser history/item/state/result reads and CloseOutcome, Gul-owned pagination/references, operation/error fixtures; no generic passthrough or premature coordinator |
 | E1-T4 | Pre-release | Planned | E1-T1 | Gul-only SQLite, auth/presentation/cache/attempt repositories; migration and transaction tests |
 | E1-T5 | Pre-release | Planned | E1-T2, E1-T3, E1-T4 | Wails shell reuses the core/bundle/API; isolated shell smoke and lifecycle ports, no second authority; authenticated singleton/attach qualification belongs to E8-T3 |
 

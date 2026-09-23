@@ -4,12 +4,23 @@ import path from "node:path";
 import {fileURLToPath} from "node:url";
 import {validateProductGoManifest} from "./validate-product-go-manifest.mjs";
 
-const versions = {GUL_GO_VERSION: "1.26.6"};
+const versions = {
+  GUL_GO_VERSION: "1.26.6",
+  GUL_CONNECT_GO_VERSION: "1.20.0",
+  GUL_PROTOBUF_GO_VERSION: "1.36.12",
+};
 const valid = `module github.com/rootkernel/gul
 
 go 1.26.0
 
 toolchain go1.26.6
+
+require (
+  connectrpc.com/connect v1.20.0
+  github.com/rootkernel/gul/contract v0.0.0
+  google.golang.org/protobuf v1.36.12
+)
+replace github.com/rootkernel/gul/contract => ./contract
 `;
 
 assert.doesNotThrow(() => validateProductGoManifest(valid, versions));
@@ -30,8 +41,12 @@ for (const [name, manifest, pattern] of [
   ["wrong module", valid.replace("github.com/rootkernel/gul", "example.test/gul"), /module identity/],
   ["wrong language version", valid.replace("go 1.26.0", "go 1.27.0"), /language version/],
   ["wrong toolchain patch", valid.replace("go1.26.6", "go1.26.7"), /toolchain/],
-  ["replace directive", `${valid}replace example.test/a => ../a\n`, /replace or exclude/],
-  ["exclude directive", `${valid}exclude example.test/a v1.0.0\n`, /replace or exclude/],
+  ["wrong Connect pin", valid.replace("connect v1.20.0", "connect v1.21.0"), /Connect Go pin/],
+  ["missing local contract", valid.replace("github.com/rootkernel/gul/contract v0.0.0\n", ""), /checked local contract module/],
+  ["wrong local contract path", valid.replace("=> ./contract", "=> ../contract"), /checked local contract replacement/],
+  ["wrong Protobuf pin", valid.replace("protobuf v1.36.12", "protobuf v1.36.11"), /Protobuf Go pin/],
+  ["replace directive", `${valid}replace example.test/a => ../a\n`, /unapproved replace or exclude/],
+  ["exclude directive", `${valid}exclude example.test/a v1.0.0\n`, /unapproved replace or exclude/],
 ]) {
   assert.throws(() => validateProductGoManifest(manifest, versions), pattern, name);
 }

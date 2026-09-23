@@ -130,9 +130,6 @@ function gitValidationFixture(runGit) {
 {
   const root = fixture();
   try {
-    write(root, 'docs/roadmap.md', text => text
-      .replace('| Active Task | None |', '| Active Task | E1-T3 |')
-      .replace('| E1-T3 | Pre-release | Planned |', '| E1-T3 | Pre-release | In Review |'));
     assert.deepEqual(run(root).errors, []);
   } finally {
     fs.rmSync(root, {recursive: true, force: true});
@@ -148,13 +145,13 @@ expectFailure('duplicate requirement is not normalized away', root => {
 expectFailure('pre-E1-T2 state requires the frontend absence boundary', root => {
   write(root, 'docs/roadmap.md', text => text
     .replace('| Active Task | None |', '| Active Task | E1-T2 |')
-    .replace('| E1-T2 | Pre-release | Completed |', '| E1-T2 | Pre-release | In Review |'));
+    .replace('| E1-T2 | Pre-release | Completed |', '| E1-T2 | Pre-release | In Review |')
+    .replace('| E1-T3 | Pre-release | Completed |', '| E1-T3 | Pre-release | Planned |'));
 }, /pre-E1-T2 frontend absence boundary/);
 
 expectFailure('multiple active rows', root => {
   write(root, 'docs/roadmap.md', text => text
-    .replace('| Active Task | None |', '| Active Task | E1-T3 |')
-    .replace('| E1-T3 | Pre-release | Planned |', '| E1-T3 | Pre-release | In Progress |')
+    .replace('| E1-T3 | Pre-release | Completed |', '| E1-T3 | Pre-release | In Progress |')
     .replace('| E1-T4 | Pre-release | Planned |', '| E1-T4 | Pre-release | In Review |'));
 }, /Multiple active Tasks/);
 
@@ -164,17 +161,15 @@ expectFailure('active header mismatch', root => {
 
 expectFailure('active row mismatch', root => {
   write(root, 'docs/roadmap.md', text => text.replace(
-    '| E1-T3 | Pre-release | Planned |',
-    '| E1-T3 | Pre-release | In Progress |',
+    '| E1-T3 | Pre-release | Completed |',
+    '| E1-T3 | Pre-release | In Review |',
   ));
 }, /Active Task header must be exactly E1-T3/);
 
 expectFailure('next header misses first eligible task', root => {
-  write(root, 'docs/roadmap.md', text => text.replace(
-    '| Next | E1 continuing at E1-T3 |',
-    '| Next | E13 starting at E13-T1 |',
-  ));
-}, /Next header must identify first eligible Task E1-T3/);
+  write(root, 'docs/roadmap.md', text => text
+    .replace('| Next | E1 continuing at E1-T4 |', '| Next | E13 starting at E13-T1 |'));
+}, /Next header must identify first eligible Task E1-T4/);
 
 expectFailure('pending Epic loses shared dossier', root => {
   write(root, 'docs/roadmap.md', text => text.replace(
@@ -217,10 +212,18 @@ expectFailure('architecture drops the frontend generation command', root => {
 
 expectFailure('implementation memo drops the frontend drift command', root => {
   write(root, 'docs/implementation-memo.md', text => text.replace(
-    '`generate-frontend`, `frontend-check`, `test-prepare`',
-    '`generate-frontend`, `test-prepare`',
+    '`generate-frontend`, `frontend-check`, `generate-api`',
+    '`generate-frontend`, `generate-api`',
   ));
 }, /Implementation memo command contract is missing generate-frontend\/frontend-check/);
+
+expectFailure('architecture drops the Gul API commands', root => {
+  write(root, 'docs/architecture.md', text => text.replace('`generate-api`, `api-check`, ', ''));
+}, /Architecture command facade is missing generate-api\/api-check/);
+
+expectFailure('implementation memo drops the Gul API commands', root => {
+  write(root, 'docs/implementation-memo.md', text => text.replace('`generate-api`, `api-check`, ', ''));
+}, /Implementation memo command contract is missing generate-api\/api-check/);
 
 expectFailure('implementation memo drops frontend drift from test-int', root => {
   write(root, 'docs/implementation-memo.md', text => text.replace('frontend bundle drift, ', ''));
@@ -235,10 +238,16 @@ expectFailure('current state promotes a requirement before its owner completes',
 
 expectFailure('architecture drops an E1-T1 delivery boundary', root => {
   write(root, 'docs/architecture.md', text => text.replace(
-    'No ConnectRPC service exists.',
+    'ConnectRPC services are declared and generated but not registered.',
     'ConnectRPC delivery state is unspecified.',
   ));
-}, /Architecture must retain the E1-T1 boundary: No ConnectRPC service exists/);
+}, /Architecture must distinguish declared from registered ConnectRPC services/);
+
+expectFailure('pre-E1-T3 state requires ConnectRPC absence', root => {
+  write(root, 'docs/roadmap.md', text => text
+    .replace('| E1-T3 | Pre-release | Completed |', '| E1-T3 | Pre-release | Planned |')
+    .replace('| Next | E1 continuing at E1-T4 |', '| Next | E1 continuing at E1-T3 |'));
+}, /pre-E1-T3 ConnectRPC absence boundary/);
 
 expectFailure('retired E12 member becomes deferred', root => {
   write(root, 'docs/roadmap.md', text => text.replace(

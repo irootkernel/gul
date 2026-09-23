@@ -15,6 +15,18 @@ const expectedRecipes = {
     "@node scripts/validate-product-package.mjs",
     "@bun frontend/scripts/check-bundle.mjs",
   ],
+  "generate-api": [
+    "@./scripts/toolchain-check.sh --api-only",
+    "@cd contract && bun install --frozen-lockfile --ignore-scripts",
+    "@node api/scripts/api-command.mjs generate",
+    "@node contract/port/generate-errors.mjs generate",
+  ],
+  "api-check": [
+    "@./scripts/toolchain-check.sh --api-only",
+    "@cd contract && bun install --frozen-lockfile --ignore-scripts",
+    "@node api/scripts/api-command.mjs check",
+    "@node contract/port/generate-errors.mjs check",
+  ],
 };
 
 export function validateProductMakefile(source) {
@@ -30,6 +42,9 @@ export function validateProductMakefile(source) {
   const testIntegration = readRecipe(source, "test-int");
   if (!testIntegration.includes("@$(MAKE) --no-print-directory frontend-check")) {
     throw new Error("test-int must retain the frontend drift gate");
+  }
+  if (!testIntegration.includes("@$(MAKE) --no-print-directory api-check")) {
+    throw new Error("test-int must retain the Gul API drift gate");
   }
 }
 
