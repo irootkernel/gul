@@ -78,3 +78,26 @@ func TestPageTokenCapacityAndExpirySweep(t *testing.T) {
 		t.Fatalf("expired handles were not swept: %v", err)
 	}
 }
+
+func TestPageTokensRejectInvalidScope(t *testing.T) {
+	valid := PageScope{PageBinding: PageBinding{AccountID: "account", SessionID: "session", Query: PromptHistoryQuery, ProjectionVersion: 1}, SnapshotID: "snapshot"}
+	for _, test := range []struct {
+		name   string
+		mutate func(*PageScope)
+	}{
+		{"account", func(scope *PageScope) { scope.AccountID = "" }},
+		{"session", func(scope *PageScope) { scope.SessionID = "" }},
+		{"query", func(scope *PageScope) { scope.Query = 0 }},
+		{"projection", func(scope *PageScope) { scope.ProjectionVersion = 0 }},
+		{"snapshot", func(scope *PageScope) { scope.SnapshotID = "" }},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			scope := valid
+			test.mutate(&scope)
+			token, err := NewPageTokens().Issue(scope, PagePosition{}, time.Unix(1_000, 0), time.Unix(1_060, 0))
+			if token != "" || !errors.Is(err, ErrInvalidPageToken) {
+				t.Fatalf("invalid scope issued token %q: %v", token, err)
+			}
+		})
+	}
+}

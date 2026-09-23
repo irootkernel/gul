@@ -237,6 +237,8 @@ drift checks, typechecking, and the full `make test` gate. The review predates
 those corrections; they are not represented as provider-reviewed bytes. No
 Medium-or-higher finding, deferred finding, enabled route, or live-provider
 claim remains in this task scope.
+Epic validation added an invalid-scope issue fixture covering empty account,
+session, and snapshot IDs plus unsupported query and projection versions.
 
 ## 1.9 E1-T4 Gul-owned SQLite foundation, completed
 
