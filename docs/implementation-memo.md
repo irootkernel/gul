@@ -281,6 +281,17 @@ warning, so minimum-macOS live WebView behavior is not qualified here.
 Authenticated singleton and verified attach remain E8-T3 work; no
 provider-ready desktop behavior is claimed.
 
+## 1.11 E1 epic closeout, 2026-09-23
+
+E1-T1 through E1-T5 meet the roadmap's foundation completion criteria. The
+core, checked bundle, typed contracts, isolated SQLite repositories, and Wails
+shell passed the serial `make test` gate with Go race detection. All six review
+roles covered the epic. The current Low findings were corrected and checked
+locally; no current Medium-or-higher, completion, or unresolved Low gap remains.
+E1 closes only the foundation. Later tasks still own live provider integration,
+authenticated attach, enabled browser routes, and production storage wiring.
+The shared consumer dossier remains for E13 and the other open epics.
+
 ## 2. Current development snapshot
 
 | Area | State |
@@ -295,7 +306,7 @@ provider-ready desktop behavior is claimed.
 | Dolgorae RPC supervisor/provider | Not implemented |
 | Controller credential store | Caller-owned mechanism selected by ADR-0047; not implemented |
 | FileService/auth/PWA/Tailscale integration | Not implemented |
-| Current State promotions | REQ-HOST-005, REQ-RUNTIME-011, REQ-RUNTIME-022, and REQ-CONSUMER-001; E1-T1/T2 remain foundation evidence and do not promote REQ-HOST-001/002 |
+| Current State promotions | REQ-HOST-005, REQ-RUNTIME-011, REQ-RUNTIME-022, and REQ-CONSUMER-001; E1-T1 through E1-T5 remain foundation evidence and do not promote E14-owned REQ-HOST-001/002 |
 
 The repository contains the shared-core and single-bundle delivery foundations,
 declared but inactive Gul APIs, isolated Gul-owned SQLite repositories, bootstrap
@@ -748,4 +759,4 @@ The initial documentation assumed Gul would manage one Codex App Server, map Ses
 
 ## 12. Handoff
 
-E12 is complete. The TASK-053 consumer lock and generated contract tooling are authoritative for new implementation, while historical E0 evidence remains scoped to its original pin. E1-T1/T2/T3/T4/T5 completed the shared core, bundle, declared typed-contract, isolated SQLite, and Wails shell foundations. E1 awaits epic validation and closeout before E13 starts. E2-T0 remains blocked on an accepted compatible Dolgorae executable and live smoke evidence. No later Task or live-provider behavior is activated automatically.
+E12 and E1 are complete. The TASK-053 consumer lock and generated contract tooling are authoritative for new implementation, while historical E0 evidence remains scoped to its original pin. E1 delivered the shared core, bundle, declared typed-contract, isolated SQLite, and Wails shell foundations. E13-T1 is next; E2-T0 remains blocked on an accepted compatible Dolgorae executable and live smoke evidence. No later Task or live-provider behavior is activated automatically.
