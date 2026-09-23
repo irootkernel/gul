@@ -3,8 +3,10 @@
 E0-T8 defines a serial command facade, E1-T1 extends it with the root Go product
 module, E1-T2 adds the exact-pinned React bundle, and E1-T3 adds checked Gul
 ConnectRPC declarations and the typed consumer-port error catalog. E1-T4 adds
-isolated SQLite migration and repository fixtures. It does not install host
-tools or claim assembled runtime readiness. `make test-prepare` downloads only
+isolated SQLite migration and repository fixtures. E1-T5 adds isolated Wails
+shell lifecycle and shared-bundle tests without claiming authenticated attach.
+The facade does not install host tools or claim assembled runtime readiness.
+`make test-prepare` downloads only
 declared Go and locked Bun dependencies. Generation targets rewrite only their
 named checked outputs.
 

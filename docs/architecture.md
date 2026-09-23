@@ -957,7 +957,7 @@ The package identity is `Gul.app`, bundle identifier `xyz.rootkernel.gul`, and h
 
 `toolchain/versions.env` is the single E0-T8 bootstrap authority. The supported host is macOS `>=14.0.0` on `arm64`, with Go exactly `1.26.6`, Wails `>=3.0.0-beta.8` through `wails3`, Node `>=26.7.0`, Bun `>=1.4.2`, Buf `>=1.66.1`, protoc `>=35.1`, and Git `>=2.39.0`. Non-Go host checks do not impose upper bounds. Project manifests pin protoc-gen-go `1.36.12`, protoc-gen-connect-go `1.20.0`, and protoc-gen-es `2.14.0` exactly. Protobuf-ES v2 emits the TypeScript message schemas and Connect service descriptors together; the incompatible Connect-ES v1 generator is not part of the toolchain. Buf lints, constructs the byte-compared descriptor, and checks additive compatibility. A newer accepted host tool that changes generated or descriptor bytes fails the reproducibility checks. PATH copies of language-client generators are not used as project evidence.
 
-Future dependency manifests must match TypeScript `7.0.2`, React/React DOM `19.2.7`, React/React DOM types `19.3.0`, Bun types `1.4.2`, protobuf-go `1.36.12`, connect-go `1.20.0`, Connect-ES/Connect-Web `2.1.2`, Protobuf-ES `2.14.0`, and modernc SQLite `1.57.0`. The read-only `make toolchain-check` reports a Go pin mismatch and missing or below-minimum host tools; it never installs or substitutes a dependency. Project validation reports dependency or generator pin drift. Wails v2 does not satisfy the Wails v3 beta minimum.
+Project dependency manifests must match TypeScript `7.0.2`, React/React DOM `19.2.7`, React/React DOM types `19.3.0`, Bun types `1.4.2`, protobuf-go `1.36.12`, connect-go `1.20.0`, Connect-ES/Connect-Web `2.1.2`, Protobuf-ES `2.14.0`, modernc SQLite `1.57.0`, and the Wails Go module `v3.0.0-beta.24`. The Wails module pin is separate from the `wails3` host CLI minimum. The read-only `make toolchain-check` reports a Go pin mismatch and missing or below-minimum host tools; it never installs or substitutes a dependency. Project validation reports dependency or generator pin drift. Wails v2 does not satisfy the Wails v3 beta minimum.
 
 The serial command facade is `toolchain-check`, `generate-contract`, `contract-check`, `generate-frontend`, `frontend-check`, `generate-api`, `api-check`, `test-prepare`, `test-unit`, `test-int`, `test-e2e`, and `test`. E0-T7 supplies checked contract generation and drift delegates. E1-T2 supplies checked frontend generation and bundle drift delegates. E1-T3 supplies checked Gul API generation, drift detection and provider-error catalog coverage. These commands fail closed on their source, version, generated-output, schema, or policy boundaries. No bootstrap command scaffolds the application or claims runtime behavior.
 
@@ -986,11 +986,11 @@ The serial command facade is `toolchain-check`, `generate-contract`, `contract-c
 
 ## 19. Current snapshot
 
-**Snapshot date:** 2026-09-23 (E1-T4 storage completion)
+**Snapshot date:** 2026-09-23 (E1-T5 shell completion)
 
-**Roadmap point:** E0 is `Completed`, E12 is `Completed`, and E1 is `In Progress`; E1-T1 is `Completed`, E1-T2/T3/T4 are `Completed`, and E1-T5 is `Planned`. Former E12-T2/T3 remain Retired. E13 owns the stateful fake harness, and E14 owns pre-release application acceptance. No live-provider or assembled-application acceptance is implied.
+**Roadmap point:** E0 is `Completed`, E12 is `Completed`, and E1 is `In Progress` pending epic validation; E1-T1 is `Completed` and E1-T2/T3/T4/T5 are `Completed`. Former E12-T2/T3 remain Retired. E13 owns the stateful fake harness, and E14 owns pre-release application acceptance. No live-provider or assembled-application acceptance is implied.
 
-**Maturity:** delivery-independent Go core, shared React bundle, declared but disabled Gul API, typed provider ports, and an isolated SQLite repository foundation; shell, provider, and assembled storage lifecycle remain pending
+**Maturity:** delivery-independent Go core, shared React bundle, declared but disabled Gul API, typed provider ports, isolated SQLite repositories, and a Wails shell foundation; provider and assembled storage lifecycle remain pending
 
 ### 19.1 Implemented components
 
@@ -998,8 +998,9 @@ The serial command facade is `toolchain-check`, `generate-contract`, `contract-c
 explicit lifecycle, provider, persistence and authorization ports. Missing
 dependencies are composed with fail-closed defaults: startup performs no
 external provider work, product access is denied, and provider/persistence
-availability is not implied. The same core can be hosted later by headless and
-desktop delivery without importing Wails.
+availability is not implied. The core does not import Wails; the desktop
+foundation hosts it, while assembled headless and authenticated delivery remain
+future work.
 
 `api/proto` declares Gul-owned DirectSession and ArtifactPresentation browser
 contracts. Its `bounds.json` is the shared authority for generated Go and
@@ -1030,6 +1031,12 @@ immediate transaction. Backup checkpoints WAL and publishes an owner-only
 `VACUUM INTO` image without copying the live file. This repository remains
 unwired to production startup after E1-T4 completion.
 
+`internal/desktop` starts and stops the same core through its lifecycle boundary,
+then runs a Wails v3 window over the checked bundle's existing asset handler.
+The shell registers no Wails services or product API bindings. Its injected
+window host permits isolated lifecycle and asset smoke tests without opening a
+real WebView. Authenticated singleton and verified attach remain E8-T3 work.
+
 ### 19.2 Verified runtime behavior
 
 Isolated tests verify headless core startup/shutdown, injected lifecycle and
@@ -1052,15 +1059,16 @@ and shared delivery adapter now accompany the five SOT documents, E0-T8
 toolchain authority, and E12-T1 TASK-053 contract artifacts. The serial Make
 facade validates both Go manifests, the root package pins, exact Go 1.26.6, and
 the Bun minimum before running frontend, core, contract, SOT and drift gates.
-Historical E0-T7 facts remain scoped to their original digests. No Wails host,
-enabled browser route, assembled database service, provider adapter, or live provider behavior exists.
+Historical E0-T7 facts remain scoped to their original digests. The Wails shell
+has no authenticated attach or enabled product route; no assembled database
+service, provider adapter, or live provider behavior exists.
 
 ### 19.4 Current topology and data
 
 ```text
-Shared Go core composition and lifecycle exist without a delivery process.
+Shared Go core composition and lifecycle exist without assembled delivery.
 One checked React bundle and shared browser/shell asset delivery exist.
-No Wails host exists.
+An isolated Wails shell foundation reuses the shared core and checked bundle; authenticated attach is not enabled.
 ConnectRPC services are declared and generated but not registered.
 Gul-only SQLite schema and repositories exist in isolated tests; no production database lifecycle is enabled.
 No Runtime Provider adapter, RPC supervisor, Controller credential store, timeline adapter, or Artifact adapter exists.

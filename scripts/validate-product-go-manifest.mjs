@@ -8,6 +8,7 @@ export function validateProductGoManifest(goManifest, versionManifest) {
   requireExactly(lines, `toolchain go${versionManifest.GUL_GO_VERSION}`, "product Go toolchain");
   requireExactly(lines, `connectrpc.com/connect v${versionManifest.GUL_CONNECT_GO_VERSION}`, "product Connect Go pin");
   requireExactly(lines, "github.com/rootkernel/gul/contract v0.0.0", "checked local contract module");
+  requireExactly(lines, `github.com/wailsapp/wails/v3 v${versionManifest.GUL_WAILS_GO_VERSION}`, "product Wails Go pin");
   requireExactly(lines, `google.golang.org/protobuf v${versionManifest.GUL_PROTOBUF_GO_VERSION}`, "product Protobuf Go pin");
   requireExactly(lines, `modernc.org/sqlite v${versionManifest.GUL_MODERNC_SQLITE_VERSION}`, "product SQLite pin");
   requireExactly(lines, "replace github.com/rootkernel/gul/contract => ./contract", "checked local contract replacement");

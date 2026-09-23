@@ -3,9 +3,9 @@
 | Field | Value |
 | --- | --- |
 | Role | Sole authority for task identity, order, status, dependencies, and phase |
-| Revision | 2026-09-23 E1-T4 completion |
+| Revision | 2026-09-23 E1-T5 completion |
 | Active Task | None |
-| Next | E1-T5 |
+| Next | E1 validation and closeout, then E13-T1 |
 | Required provider | Released Dolgorae v0.1.3 implementing `dolgorae.gul-consumer/v1` |
 
 ## 1. Status and execution rules
@@ -188,7 +188,7 @@ assembly is owned by E14; actual headless provider integration is owned by E2.
 | E1-T2 | Pre-release | Completed | E1-T1 | One React bundle and delivery path for shell/browser; foundation build and delivery tests, not completed feature flows |
 | E1-T3 | Pre-release | Completed | E1-T1, E12-T1 | Typed ConnectRPC/domain ports, explicit browser history/item/state/result reads and CloseOutcome, Gul-owned pagination/references, operation/error fixtures; no generic passthrough or premature coordinator |
 | E1-T4 | Pre-release | Completed | E1-T1 | Gul-only SQLite, auth/presentation/cache/attempt repositories; migration and transaction tests |
-| E1-T5 | Pre-release | Planned | E1-T2, E1-T3, E1-T4 | Wails shell reuses the core/bundle/API; isolated shell smoke and lifecycle ports, no second authority; authenticated singleton/attach qualification belongs to E8-T3 |
+| E1-T5 | Pre-release | Completed | E1-T2, E1-T3, E1-T4 | Wails shell reuses the core/bundle/API; isolated shell smoke and lifecycle ports, no second authority; authenticated singleton/attach qualification belongs to E8-T3 |
 
 ### E13: Supply stateful consumer fakes
 

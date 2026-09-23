@@ -475,11 +475,12 @@ REQ-WRITER-004 retains its original ID and meaning and is deferred, not supersed
 
 ## 7. Current State ledger
 
-E1-T1/T2 task evidence records the delivery-independent Go core, one checked
-React bundle, and the shared browser/shell asset-delivery boundary. It does not
-promote E14-owned REQ-HOST-001/002 or implement a listener, Wails host, browser
-API, persistence repository, provider adapter, product route, or production
-authentication.
+E1-T1 through E1-T5 establish the delivery-independent Go core, one checked
+React bundle, declared but disabled browser API, isolated SQLite repositories,
+and a Wails shell foundation using the shared asset-delivery boundary. They do
+not promote E14-owned REQ-HOST-001/002 or implement a listener, enabled browser
+API, production persistence lifecycle, provider adapter, product route, or
+production authentication. The Wails shell has no authenticated attach.
 E12-T1 has accepted the immutable consumer contract and generated tooling
 boundary; later Tasks still own the remaining product behavior. Former
 E12-T2/T3 are Retired without implementation evidence.

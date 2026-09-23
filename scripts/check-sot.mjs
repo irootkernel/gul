@@ -290,11 +290,18 @@ export function validateRepository(root, options = {}) {
     const memoCommands = section(documents.get('implementation-memo.md'), '## 10.', '## 11.', errors);
     for (const boundary of [
       'One checked React bundle and shared browser/shell asset delivery exist.',
-      'No Wails host exists.',
     ]) {
       if (!architecture.includes(boundary)) {
         errors.push(`E1-T2 shared-bundle boundary is missing: ${boundary}`);
       }
+    }
+    if (tasks.get('E1-T5')?.state === 'Planned') {
+      if (!architecture.includes('No Wails host exists.')) errors.push('Architecture must retain the pre-E1-T5 Wails absence boundary');
+    } else if (!architecture.includes('An isolated Wails shell foundation reuses the shared core and checked bundle; authenticated attach is not enabled.')) {
+      errors.push('Architecture must distinguish the isolated Wails shell from authenticated attach');
+    }
+    if (tasks.get('E1-T5')?.state !== 'Planned' && !documents.get('required-specs.md').includes('The Wails shell has no authenticated attach.')) {
+      errors.push('Required Specifications must retain the E1-T5 unauthenticated shell boundary');
     }
     if (!documents.get('required-specs.md').includes('not partial promotion of E14-owned REQ-HOST-001/002')) {
       errors.push('E1-T2 requirement non-promotion boundary is missing from Required Specifications');

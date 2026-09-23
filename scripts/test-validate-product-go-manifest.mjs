@@ -7,6 +7,7 @@ import {validateProductGoManifest} from "./validate-product-go-manifest.mjs";
 const versions = {
   GUL_GO_VERSION: "1.26.6",
   GUL_CONNECT_GO_VERSION: "1.20.0",
+  GUL_WAILS_GO_VERSION: "3.0.0-beta.24",
   GUL_PROTOBUF_GO_VERSION: "1.36.12",
   GUL_MODERNC_SQLITE_VERSION: "1.57.0",
 };
@@ -19,6 +20,7 @@ toolchain go1.26.6
 require (
   connectrpc.com/connect v1.20.0
   github.com/rootkernel/gul/contract v0.0.0
+  github.com/wailsapp/wails/v3 v3.0.0-beta.24
   google.golang.org/protobuf v1.36.12
   modernc.org/sqlite v1.57.0
 )
@@ -45,6 +47,7 @@ for (const [name, manifest, pattern] of [
   ["wrong toolchain patch", valid.replace("go1.26.6", "go1.26.7"), /toolchain/],
   ["wrong Connect pin", valid.replace("connect v1.20.0", "connect v1.21.0"), /Connect Go pin/],
   ["missing local contract", valid.replace("github.com/rootkernel/gul/contract v0.0.0\n", ""), /checked local contract module/],
+  ["wrong Wails pin", valid.replace("wails/v3 v3.0.0-beta.24", "wails/v3 v3.0.0-beta.25"), /Wails Go pin/],
   ["wrong local contract path", valid.replace("=> ./contract", "=> ../contract"), /checked local contract replacement/],
   ["wrong Protobuf pin", valid.replace("protobuf v1.36.12", "protobuf v1.36.11"), /Protobuf Go pin/],
   ["wrong SQLite pin", valid.replace("sqlite v1.57.0", "sqlite v1.57.1"), /SQLite pin/],
