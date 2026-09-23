@@ -231,3 +231,32 @@ func TestBackupPublishesConsistentSnapshotWithoutOverwrite(t *testing.T) {
 		t.Fatalf("backup accounts = %d, %v", count, err)
 	}
 }
+
+func TestBackupRefusesBusyWALCheckpoint(t *testing.T) {
+	store, filename := openTestStore(t)
+	backup := filepath.Join(filepath.Dir(filename), "busy-backup.sqlite")
+	reader, err := store.reader.BeginTx(t.Context(), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer reader.Rollback()
+	var count int
+	if err := reader.QueryRowContext(t.Context(), "SELECT COUNT(*) FROM app_account").Scan(&count); err != nil {
+		t.Fatal(err)
+	}
+	if err := store.Auth().CreateAccount(t.Context(), "account-after-snapshot", time.Now()); err != nil {
+		t.Fatal(err)
+	}
+	if err := store.Backup(t.Context(), backup); err == nil || !strings.Contains(err.Error(), "checkpoint is busy") {
+		t.Fatalf("backup with held WAL reader = %v, want busy checkpoint", err)
+	}
+	if _, err := os.Stat(backup); !errors.Is(err, os.ErrNotExist) {
+		t.Fatalf("busy checkpoint published backup: %v", err)
+	}
+	if err := reader.Rollback(); err != nil {
+		t.Fatal(err)
+	}
+	if err := store.Backup(t.Context(), backup); err != nil {
+		t.Fatalf("backup after releasing reader: %v", err)
+	}
+}

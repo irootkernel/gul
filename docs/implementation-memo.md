@@ -260,6 +260,8 @@ Delivery sequence allocation uses `UPDATE ... RETURNING` in the same immediate
 transaction as its journal insert. Backup checkpoints WAL and publishes an
 owner-only `VACUUM INTO` image. Focused fixtures exercise these boundaries;
 the package is not yet wired into production startup.
+Epic validation added a held-WAL-reader fixture showing that a busy checkpoint
+publishes no backup and succeeds after the reader releases its snapshot.
 
 ## 1.10 E1-T5 Wails shell foundation, completed
 
