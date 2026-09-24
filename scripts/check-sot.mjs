@@ -260,9 +260,13 @@ export function validateRepository(root, options = {}) {
   }
 
   const e12State = epicSummaries.find(match => match[1] === 'E12')?.[2].trim();
+  const e1State = epicSummaries.find(match => match[1] === 'E1')?.[2].trim();
   const currentSnapshot = section(architecture, '## 19. Current snapshot', '### 19.1 ', errors);
   if (e12State === 'Completed' && !currentSnapshot.includes('E12 is `Completed`')) {
     errors.push('Architecture current snapshot must identify E12 as Completed');
+  }
+  if (e1State && !currentSnapshot.includes(`E1 is \`${e1State}\``)) {
+    errors.push(`Architecture current snapshot must identify E1 as ${e1State}`);
   }
   if (tasks.get('E1-T1')?.state === 'Completed' && !currentSnapshot.includes('E1-T1 is `Completed`')) {
     errors.push('Architecture current snapshot must identify E1-T1 as Completed');

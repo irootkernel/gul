@@ -986,9 +986,9 @@ The serial command facade is `toolchain-check`, `generate-contract`, `contract-c
 
 ## 19. Current snapshot
 
-**Snapshot date:** 2026-09-23 (E1-T5 shell completion)
+**Snapshot date:** 2026-09-24 (E1 epic validation)
 
-**Roadmap point:** E0 is `Completed`, E12 is `Completed`, and E1 is `In Progress` pending epic validation; E1-T1 is `Completed` and E1-T2/T3/T4/T5 are `Completed`. Former E12-T2/T3 remain Retired. E13 owns the stateful fake harness, and E14 owns pre-release application acceptance. No live-provider or assembled-application acceptance is implied.
+**Roadmap point:** E0 is `Completed`, E12 is `Completed`, and E1 is `Completed`; E1-T1 is `Completed` and E1-T2/T3/T4/T5 are `Completed`. Former E12-T2/T3 remain Retired. E13 owns the stateful fake harness, and E14 owns pre-release application acceptance. No live-provider or assembled-application acceptance is implied.
 
 **Maturity:** delivery-independent Go core, shared React bundle, declared but disabled Gul API, typed provider ports, isolated SQLite repositories, and a Wails shell foundation; provider and assembled storage lifecycle remain pending
 

@@ -184,6 +184,13 @@ expectFailure('architecture retains stale E12 lifecycle', root => {
   ));
 }, /Architecture current snapshot must identify E12 as Completed/);
 
+expectFailure('architecture retains stale E1 lifecycle', root => {
+  write(root, 'docs/architecture.md', text => text.replace(
+    'E1 is `Completed`',
+    'E1 is `In Progress` pending epic validation',
+  ));
+}, /Architecture current snapshot must identify E1 as Completed/);
+
 expectFailure('architecture retains stale E1-T1 lifecycle', root => {
   write(root, 'docs/architecture.md', text => text.replace(
     'E1-T1 is `Completed`',

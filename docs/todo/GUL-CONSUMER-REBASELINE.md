@@ -94,7 +94,7 @@ continuation implementation.
 ## 3.1 Review closure checklist
 
 - [x] E12-T1 pins TASK-053's exact CloseRun progress/error/operation correlation and field-sourceability fixtures. Historical REQ-RUNTIME-022/E0-T7 evidence is not the new pin.
-- [ ] E1-T3 declares ListPromptHistory, GetPromptHistoryItem, GetExecutionState, ListSpecialistResults and CloseOutcome with Gul-owned DTOs, IDs, tokens and bounds.
+- [x] E1-T3 declares ListPromptHistory, GetPromptHistoryItem, GetExecutionState, ListSpecialistResults and CloseOutcome with Gul-owned DTOs, IDs, tokens and bounds.
 - [ ] E3-T3 completes passive aggregate reads and member status only. No temporary executable close route is installed.
 - [ ] E4-T3 completes the shared close-eligibility and interrupt-confirmation evaluator.
 - [ ] E4-T5 implements browser history/item/result reads, empty-but-continuable pages, complete original text, fixed traversal scope, token expiry and authorization.
