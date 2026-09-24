@@ -39,7 +39,7 @@ const boundaries = [
   ["delivery", delivery, [/\bListenAndServe\b/, /"database\/sql"/, /"github\.com\/wailsapp/]],
   ["desktop", desktop, [/\bListenAndServe\b/, /"database\/sql"/, /"github\.com\/rootkernel\/gul\/contract\//, /"github\.com\/rootkernel\/gul\/internal\/storage"/, /\bNewService\s*\(/]],
   ["command", command, [/\bListenAndServe\b/, /"database\/sql"/, /"github\.com\/rootkernel\/gul\/contract\//, /"github\.com\/rootkernel\/gul\/internal\/storage"/, /\bNewService\s*\(/]],
-  ["app", app, [/"github\.com\/rootkernel\/gul\/internal\/(?:delivery|desktop|storage)(?:\/|")/, /"github\.com\/wailsapp/, /\bListenAndServe\b/]],
+  ["app", app, [/"github\.com\/rootkernel\/gul\/internal\/(?:delivery|desktop|storage)(?:\/|")/, /"github\.com\/rootkernel\/gul\/(?:contract|api\/generated)(?:\/|")/, /"github\.com\/wailsapp/, /\bListenAndServe\b/]],
   ["domain", domain, [/"github\.com\/rootkernel\/gul\/internal\//, /"github\.com\/wailsapp/, /"database\/sql"/, /\bListenAndServe\b/]],
   ["storage", storage, [/"github\.com\/rootkernel\/gul\/internal\/(?:app|delivery|desktop)(?:\/|")/, /"github\.com\/rootkernel\/gul\/(?:contract|api\/generated)(?:\/|")/, /"github\.com\/wailsapp/, /\bListenAndServe\b/]],
 ];
@@ -64,6 +64,8 @@ try {
     ["desktop", '"github.com/rootkernel/gul/internal/storage"', boundaries[3][2]],
     ["command", '"github.com/rootkernel/gul/contract/generated"', boundaries[4][2]],
     ["app", '"github.com/rootkernel/gul/internal/desktop"', boundaries[5][2]],
+    ["app", '"github.com/rootkernel/gul/contract/port"', boundaries[5][2]],
+    ["app", '"github.com/rootkernel/gul/api/generated/go/gul/v1"', boundaries[5][2]],
     ["domain", '"github.com/rootkernel/gul/internal/app"', boundaries[6][2]],
     ["storage", '"github.com/rootkernel/gul/internal/delivery/web"', boundaries[7][2]],
     ["storage", '"github.com/rootkernel/gul/contract/port"', boundaries[7][2]],
