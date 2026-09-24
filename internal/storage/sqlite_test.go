@@ -103,12 +103,13 @@ func TestOpenMigratesAndRejectsDrift(t *testing.T) {
 
 func TestOpenRejectsMigrationAndSchemaObjectDrift(t *testing.T) {
 	for name, mutation := range map[string]string{
-		"digest":  "UPDATE schema_migrations SET digest = 'wrong'",
-		"version": "PRAGMA user_version = 2",
-		"missing": "DROP TABLE navigation_state",
-		"trigger": "CREATE TRIGGER unexpected AFTER INSERT ON app_account BEGIN DELETE FROM app_account; END",
-		"view":    "CREATE VIEW unexpected AS SELECT subject_id FROM app_account",
-		"index":   "CREATE INDEX unexpected ON app_account(created_at)",
+		"digest":                "UPDATE schema_migrations SET digest = 'wrong'",
+		"version":               "PRAGMA user_version = 2",
+		"missing migration row": "DELETE FROM schema_migrations",
+		"missing":               "DROP TABLE navigation_state",
+		"trigger":               "CREATE TRIGGER unexpected AFTER INSERT ON app_account BEGIN DELETE FROM app_account; END",
+		"view":                  "CREATE VIEW unexpected AS SELECT subject_id FROM app_account",
+		"index":                 "CREATE INDEX unexpected ON app_account(created_at)",
 	} {
 		t.Run(name, func(t *testing.T) {
 			store, filename := openTestStore(t)

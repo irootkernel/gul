@@ -41,7 +41,7 @@ const boundaries = [
   ["command", command, [/\bListenAndServe\b/, /"database\/sql"/, /"github\.com\/rootkernel\/gul\/contract\//, /"github\.com\/rootkernel\/gul\/internal\/storage"/, /\bNewService\s*\(/]],
   ["app", app, [/"github\.com\/rootkernel\/gul\/internal\/(?:delivery|desktop|storage)(?:\/|")/, /"github\.com\/wailsapp/, /\bListenAndServe\b/]],
   ["domain", domain, [/"github\.com\/rootkernel\/gul\/internal\//, /"github\.com\/wailsapp/, /"database\/sql"/, /\bListenAndServe\b/]],
-  ["storage", storage, [/"github\.com\/rootkernel\/gul\/internal\/(?:app|delivery|desktop)(?:\/|")/, /"github\.com\/wailsapp/, /\bListenAndServe\b/]],
+  ["storage", storage, [/"github\.com\/rootkernel\/gul\/internal\/(?:app|delivery|desktop)(?:\/|")/, /"github\.com\/rootkernel\/gul\/(?:contract|api\/generated)(?:\/|")/, /"github\.com\/wailsapp/, /\bListenAndServe\b/]],
 ];
 
 for (const [label, source, forbidden] of boundaries) {
@@ -66,6 +66,8 @@ try {
     ["app", '"github.com/rootkernel/gul/internal/desktop"', boundaries[5][2]],
     ["domain", '"github.com/rootkernel/gul/internal/app"', boundaries[6][2]],
     ["storage", '"github.com/rootkernel/gul/internal/delivery/web"', boundaries[7][2]],
+    ["storage", '"github.com/rootkernel/gul/contract/port"', boundaries[7][2]],
+    ["storage", '"github.com/rootkernel/gul/api/generated/go/gul/v1"', boundaries[7][2]],
   ]) {
     assert(forbidden.some(pattern => pattern.test(source)), `${label} negative fixture must match a forbidden pattern`);
   }

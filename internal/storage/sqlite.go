@@ -157,12 +157,13 @@ func migrate(ctx context.Context, db *sql.DB) error {
 			return err
 		}
 	case schemaVersion:
-		var digest string
-		var count, recordedVersion int
+		var count int
+		var recordedVersion sql.NullInt64
+		var digest sql.NullString
 		if err := conn.QueryRowContext(ctx, "SELECT COUNT(*), MAX(version), MAX(digest) FROM schema_migrations").Scan(&count, &recordedVersion, &digest); err != nil {
 			return err
 		}
-		if count != 1 || recordedVersion != schemaVersion || digest != schemaDigest() {
+		if count != 1 || !recordedVersion.Valid || recordedVersion.Int64 != schemaVersion || !digest.Valid || digest.String != schemaDigest() {
 			return ErrSchemaDrift
 		}
 	default:
