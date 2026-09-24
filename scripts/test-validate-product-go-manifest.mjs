@@ -5,7 +5,7 @@ import {fileURLToPath} from "node:url";
 import {validateProductGoManifest} from "./validate-product-go-manifest.mjs";
 
 const versions = {
-  GUL_GO_VERSION: "1.26.6",
+  GUL_GO_VERSION: "1.27.1",
   GUL_CONNECT_GO_VERSION: "1.20.0",
   GUL_WAILS_GO_VERSION: "3.0.0-beta.24",
   GUL_PROTOBUF_GO_VERSION: "1.36.12",
@@ -13,9 +13,9 @@ const versions = {
 };
 const valid = `module github.com/rootkernel/gul
 
-go 1.26.0
+go 1.27.0
 
-toolchain go1.26.6
+toolchain go1.27.1
 
 require (
   connectrpc.com/connect v1.20.0
@@ -43,8 +43,8 @@ assert.doesNotThrow(() => validateProductGoManifest(
 
 for (const [name, manifest, pattern] of [
   ["wrong module", valid.replace("github.com/rootkernel/gul", "example.test/gul"), /module identity/],
-  ["wrong language version", valid.replace("go 1.26.0", "go 1.27.0"), /language version/],
-  ["wrong toolchain patch", valid.replace("go1.26.6", "go1.26.7"), /toolchain/],
+  ["wrong language version", valid.replace("go 1.27.0", "go 1.28.0"), /language version/],
+  ["wrong toolchain patch", valid.replace("go1.27.1", "go1.27.2"), /toolchain/],
   ["wrong Connect pin", valid.replace("connect v1.20.0", "connect v1.21.0"), /Connect Go pin/],
   ["missing local contract", valid.replace("github.com/rootkernel/gul/contract v0.0.0\n", ""), /checked local contract module/],
   ["wrong Wails pin", valid.replace("wails/v3 v3.0.0-beta.24", "wails/v3 v3.0.0-beta.25"), /Wails Go pin/],

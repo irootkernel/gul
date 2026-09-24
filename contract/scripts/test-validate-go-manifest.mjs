@@ -5,15 +5,15 @@ import {fileURLToPath} from "node:url";
 import { validateGoManifest } from "./validate-go-manifest.mjs";
 
 const versions = {
-  GUL_GO_VERSION: "1.26.6",
+  GUL_GO_VERSION: "1.27.1",
   GUL_CONNECT_GO_VERSION: "1.20.0",
   GUL_PROTOBUF_GO_VERSION: "1.36.12",
 };
 const valid = `module example.test/contract
 
-go 1.26.0
+go 1.27.0
 
-toolchain go1.26.6
+toolchain go1.27.1
 
 require (
   connectrpc.com/connect v1.20.0
@@ -43,7 +43,7 @@ assert.doesNotThrow(() => validateGoManifest(
 for (const [name, manifest, pattern] of [
   ["indirect dependency", valid.replace("connectrpc.com/connect v1.20.0", "connectrpc.com/connect v1.20.0 // indirect"), /exact direct requirement/],
   ["version prefix", valid.replace("connectrpc.com/connect v1.20.0", "connectrpc.com/connect v1.20.0-rc.1"), /exact direct requirement/],
-  ["wrong toolchain patch", valid.replace("go1.26.6", "go1.26.7"), /toolchain/],
+  ["wrong toolchain patch", valid.replace("go1.27.1", "go1.27.2"), /toolchain/],
   ["comment decoy", valid.replace("connectrpc.com/connect v1.20.0", "// connectrpc.com/connect v1.20.0\n  connectrpc.com/connect v1.19.0"), /exact direct requirement/],
   ["replace directive", `${valid}\nreplace connectrpc.com/connect => ../connect\n`, /replace or exclude/],
   ["exclude directive", `${valid}\nexclude connectrpc.com/connect v1.19.0\n`, /replace or exclude/],

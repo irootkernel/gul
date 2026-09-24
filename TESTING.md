@@ -21,11 +21,11 @@ named checked outputs.
 | `make api-check` | Regenerate Gul clients temporarily and reject schema, byte, inventory, or provider-error catalog drift. |
 | `make test-prepare` | Validate both Go manifests, the root Bun manifest, exact Go, Bun, and shell syntax, then materialize the root and locked contract dependencies with Bun lifecycle scripts disabled. |
 | `make test-unit` | Validate product manifests, typecheck and test the React foundation and generated Gul API clients, run browser-contract fixtures and race-enabled shared bundle/core/storage tests, compile generated Go clients, and run contract/facade fixtures. |
-| `make test-int` | Recheck exact Go 1.26.6, product-module tidiness, frontend/API reproducibility, and SOT integrity, then run contract drift/schema/policy fixtures and whitespace checks. |
+| `make test-int` | Recheck exact Go 1.27.1, product-module tidiness, frontend/API reproducibility, and SOT integrity, then run contract drift/schema/policy fixtures and whitespace checks. |
 | `make test-e2e` | Run the complete checker fixture through its public command boundary. |
 | `make test` | Run `test-prepare`, `test-unit`, `test-int`, and `test-e2e` serially. |
 
-Go is fixed at exactly `1.26.6` until an explicit toolchain upgrade. Other host
+Go is fixed at exactly `1.27.1` until an explicit toolchain upgrade. Other host
 executables use minimum-compatible versions: `wails3` `>=3.0.0-beta.8`, Node
 `>=26.7.0`, Bun `>=1.4.2`, Buf `>=1.66.1`, protoc
 `>=35.1`, Git `>=2.39.0`, and macOS `>=14.0.0` on arm64. A `wails` v2
@@ -36,7 +36,7 @@ Bun manifests. PATH copies of those generators are not part of the host check.
 
 `make test-prepare` checks the Bun minimum before dependency materialization.
 The root Go module hosts the shared core; both Go modules use
-`toolchain go1.26.6`, and Go commands run with `GOTOOLCHAIN=local` after the
+`toolchain go1.27.1`, and Go commands run with `GOTOOLCHAIN=local` after the
 live manifests and host compiler are checked. The root Bun manifest owns the
 React bundle and uses only exact dependency versions; the nested contract Bun
 graph remains separate. Later Tasks may extend the tests but must keep the

@@ -428,6 +428,12 @@ The accepted contract at Dolgorae revision `85a8862f784cc57701751d81a9e03bf7c572
 
 E12-T1 supersedes that historical consumer pin for new implementation with immutable TASK-053 commit `21aefe5b2a8dc6fb18a58338090348b23d2f0a4a`, dependency-lock SHA-256 `8f52ae66e126f37013d7842b2113fc509d21af4e4fc465cecdbeef7e21619f01`, and generated-lock SHA-256 `6284064e720e2220d6960c42faef6a4c13292ce1327f44e00388dc52b2e17d4a`. The checked profile distinguishes 27 required methods from nine unavailable descriptor methods and retains the Machine CLI as diagnostic-only. This decision accepts reproducible contract tooling, not runtime implementation, executable qualification, or live compatibility.
 
+The Go 1.27.1 toolchain rebaseline preserves that historical E12-T1 digest and
+updates the current generated-lock SHA-256 to
+`96da1b0a5caeffac1bc9d387c4c4e4ee4159daf47e3877ed748d291be9bb5bc0`.
+The generated Go header now records host protoc 36.2; the descriptor and
+dependency lock remain unchanged.
+
 ### ADR-0044: Derive a closed Gul action set and activate threadless writing through the first write Turn
 
 **Scope amendment, ADR-0050:** the first-release closed set is REQ-WRITER-008,
@@ -667,11 +673,14 @@ exact-host requirement.
 
 **Status:** Accepted, 2026-09-22
 
-Go remains exactly pinned at `1.26.6` until an explicit toolchain upgrade. Other
+Go remains exactly pinned at `1.27.1` until an explicit toolchain upgrade. Other
 host executables use minimum versions with no upper bound: Wails
 `3.0.0-beta.8`, Node `26.7.0`, Bun `1.4.2`, Buf `1.66.1`, protoc `35.1`, Git
 `2.39.0`, and macOS `14.0.0` on arm64. Newer non-Go host versions do not fail
 the host check solely because their version differs.
+
+The Go pin changed from `1.26.6` to `1.27.1` on 2026-09-24. Both Go modules,
+the host check, fixtures, and checked generation outputs use the new pin.
 
 Project Go and Bun manifests retain exact dependency and code-generator pins.
 Contract generation invokes those project-owned generators instead of unrelated

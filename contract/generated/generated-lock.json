@@ -20,7 +20,7 @@
     },
     {
       "path": "go/dolgorae/public/v1/dolgorae.pb.go",
-      "sha256": "aeca54772b14d4d0d1d9683e250b3800104a0a7294e6e236710565e812cc56ed"
+      "sha256": "b1c42842e6441f3db99da4a1927b34e3c1d6877d045509095a6afa72c19d70a6"
     },
     {
       "path": "go/dolgorae/public/v1/dolgoraev1connect/dolgorae.connect.go",

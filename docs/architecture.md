@@ -6,13 +6,13 @@
 | Product | Gul |
 | Version | 0.1-dolgorae-consumer-v1 |
 | Status | Approved target rebaseline; E1 core and shared-bundle foundations current |
-| Last updated | 2026-09-23 |
+| Last updated | 2026-09-24 |
 
 ## 1. Purpose and change control
 
 This document translates `required-specs.md` and accepted ADRs into component, trust, data, API, event, recovery, and deployment boundaries. Required architecture is not implementation evidence. Part B remains the only Current Architecture statement.
 
-The canonical producer contract is Dolgorae `docs/specs/gul-consumer-v1.md`, ID `dolgorae.gul-consumer/v1`. E12-T1 pins immutable TASK-053 commit `21aefe5b2a8dc6fb18a58338090348b23d2f0a4a`. Its first-release profile requires 27 methods, including full timeline and two read-only aggregate queries, from a 36-method descriptor; nine descriptor methods remain unavailable to first-release Gul actions. The checked consumer boundary is locked by dependency-lock SHA-256 `8f52ae66e126f37013d7842b2113fc509d21af4e4fc465cecdbeef7e21619f01` and generated-lock SHA-256 `6284064e720e2220d6960c42faef6a4c13292ce1327f44e00388dc52b2e17d4a`. This is contract/tooling evidence only, not product runtime or live-provider acceptance. Continuation and Delete remain optional future functions.
+The canonical producer contract is Dolgorae `docs/specs/gul-consumer-v1.md`, ID `dolgorae.gul-consumer/v1`. E12-T1 pins immutable TASK-053 commit `21aefe5b2a8dc6fb18a58338090348b23d2f0a4a`. Its first-release profile requires 27 methods, including full timeline and two read-only aggregate queries, from a 36-method descriptor; nine descriptor methods remain unavailable to first-release Gul actions. The checked consumer boundary is locked by dependency-lock SHA-256 `8f52ae66e126f37013d7842b2113fc509d21af4e4fc465cecdbeef7e21619f01` and current generated-lock SHA-256 `96da1b0a5caeffac1bc9d387c4c4e4ee4159daf47e3877ed748d291be9bb5bc0` after the Go 1.27.1 toolchain rebaseline. E12-T1's original generated-lock digest was `6284064e720e2220d6960c42faef6a4c13292ce1327f44e00388dc52b2e17d4a`. This is contract/tooling evidence only, not product runtime or live-provider acceptance. Continuation and Delete remain optional future functions.
 
 # Part A. Target Architecture
 
@@ -955,7 +955,7 @@ The package identity is `Gul.app`, bundle identifier `xyz.rootkernel.gul`, and h
 
 ### 17.1 Bootstrap toolchain and command contract
 
-`toolchain/versions.env` is the single E0-T8 bootstrap authority. The supported host is macOS `>=14.0.0` on `arm64`, with Go exactly `1.26.6`, Wails `>=3.0.0-beta.8` through `wails3`, Node `>=26.7.0`, Bun `>=1.4.2`, Buf `>=1.66.1`, protoc `>=35.1`, and Git `>=2.39.0`. Non-Go host checks do not impose upper bounds. Project manifests pin protoc-gen-go `1.36.12`, protoc-gen-connect-go `1.20.0`, and protoc-gen-es `2.14.0` exactly. Protobuf-ES v2 emits the TypeScript message schemas and Connect service descriptors together; the incompatible Connect-ES v1 generator is not part of the toolchain. Buf lints, constructs the byte-compared descriptor, and checks additive compatibility. A newer accepted host tool that changes generated or descriptor bytes fails the reproducibility checks. PATH copies of language-client generators are not used as project evidence.
+`toolchain/versions.env` is the single E0-T8 bootstrap authority. The supported host is macOS `>=14.0.0` on `arm64`, with Go exactly `1.27.1`, Wails `>=3.0.0-beta.8` through `wails3`, Node `>=26.7.0`, Bun `>=1.4.2`, Buf `>=1.66.1`, protoc `>=35.1`, and Git `>=2.39.0`. Non-Go host checks do not impose upper bounds. Project manifests pin protoc-gen-go `1.36.12`, protoc-gen-connect-go `1.20.0`, and protoc-gen-es `2.14.0` exactly. Protobuf-ES v2 emits the TypeScript message schemas and Connect service descriptors together; the incompatible Connect-ES v1 generator is not part of the toolchain. Buf lints, constructs the byte-compared descriptor, and checks additive compatibility. A newer accepted host tool that changes generated or descriptor bytes fails the reproducibility checks. PATH copies of language-client generators are not used as project evidence.
 
 Project dependency manifests must match TypeScript `7.0.2`, React/React DOM `19.2.7`, React/React DOM types `19.3.0`, Bun types `1.4.2`, protobuf-go `1.36.12`, connect-go `1.20.0`, Connect-ES/Connect-Web `2.1.2`, Protobuf-ES `2.14.0`, modernc SQLite `1.57.0`, and the Wails Go module `v3.0.0-beta.24`. The Wails module pin is separate from the `wails3` host CLI minimum. The read-only `make toolchain-check` reports a Go pin mismatch and missing or below-minimum host tools; it never installs or substitutes a dependency. Project validation reports dependency or generator pin drift. Wails v2 does not satisfy the Wails v3 beta minimum.
 
@@ -1059,7 +1059,7 @@ sequence allocation, cache staleness, and backup publication.
 The root Go and Bun manifests, `internal/app` core, React source, checked bundle,
 and shared delivery adapter now accompany the five SOT documents, E0-T8
 toolchain authority, and E12-T1 TASK-053 contract artifacts. The serial Make
-facade validates both Go manifests, the root package pins, exact Go 1.26.6, and
+facade validates both Go manifests, the root package pins, exact Go 1.27.1, and
 the Bun minimum before running frontend, core, contract, SOT and drift gates.
 Historical E0-T7 facts remain scoped to their original digests. The Wails shell
 has no authenticated attach or enabled product route; no assembled database

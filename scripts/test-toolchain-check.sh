@@ -8,8 +8,8 @@ manifest="$script_dir/../toolchain/versions.env"
 # shellcheck disable=SC1090
 . "$manifest"
 
-if [ "$GUL_GO_VERSION" != "1.26.6" ]; then
-  printf 'ERROR Go must remain exactly pinned to 1.26.6, found %s\n' "$GUL_GO_VERSION" >&2
+if [ "$GUL_GO_VERSION" != "1.27.1" ]; then
+  printf 'ERROR Go must remain exactly pinned to 1.27.1, found %s\n' "$GUL_GO_VERSION" >&2
   exit 1
 fi
 
@@ -63,7 +63,7 @@ expect_version_below() {
 expect_version_at_least 3.0.0-beta.10 "$GUL_WAILS_MIN_VERSION"
 expect_version_at_least 3.0.0 "$GUL_WAILS_MIN_VERSION"
 expect_version_below 3.0.0-beta.7 "$GUL_WAILS_MIN_VERSION"
-expect_version_below 1.26.6-rc.1 "$GUL_GO_VERSION"
+expect_version_below 1.27.1-rc.1 "$GUL_GO_VERSION"
 expect_version_below 35.1-rc1 "$GUL_PROTOC_MIN_VERSION"
 expect_version_below 35.1rc1 "$GUL_PROTOC_MIN_VERSION"
 expect_version_below 1.66.1-rc.1 "$GUL_BUF_MIN_VERSION"
@@ -143,12 +143,12 @@ PATH="$fixture_dir:/usr/bin:/bin" "$checker" >/dev/null
 write_command wails3 'v3.0.0'
 PATH="$fixture_dir:/usr/bin:/bin" "$checker" >/dev/null
 
-write_command go 'go version go1.27.0 darwin/arm64'
+write_command go 'go version go1.28.0 darwin/arm64'
 if PATH="$fixture_dir:/usr/bin:/bin" "$checker" >"$fixture_dir/out" 2>"$fixture_dir/err"; then
   printf 'ERROR newer non-pinned Go unexpectedly passed\n' >&2
   exit 1
 fi
-if ! grep -q "Go: expected exactly $GUL_GO_VERSION, found 1.27.0" "$fixture_dir/err"; then
+if ! grep -q "Go: expected exactly $GUL_GO_VERSION, found 1.28.0" "$fixture_dir/err"; then
   printf 'ERROR exact Go mismatch was not reported precisely\n' >&2
   cat "$fixture_dir/err" >&2
   exit 1
@@ -157,7 +157,7 @@ if PATH="$fixture_dir:/usr/bin:/bin" "$checker" --go-only >"$fixture_dir/out" 2>
   printf 'ERROR newer non-pinned Go unexpectedly passed --go-only\n' >&2
   exit 1
 fi
-if ! grep -q "Go: expected exactly $GUL_GO_VERSION, found 1.27.0" "$fixture_dir/err"; then
+if ! grep -q "Go: expected exactly $GUL_GO_VERSION, found 1.28.0" "$fixture_dir/err"; then
   printf 'ERROR exact Go --go-only mismatch was not reported precisely\n' >&2
   cat "$fixture_dir/err" >&2
   exit 1
@@ -245,12 +245,12 @@ if ! grep -q "requires Go on darwin/$GUL_TARGET_ARCH; found linux/amd64" "$fixtu
   exit 1
 fi
 
-write_command go 'go version go1.26.6-rc.1 darwin/arm64'
+write_command go 'go version go1.27.1-rc.1 darwin/arm64'
 if PATH="$fixture_dir:$PATH" "$script_dir/../contract/generate.sh" "$fixture_dir/generated" >"$fixture_dir/out" 2>"$fixture_dir/err"; then
   printf 'ERROR contract generation accepted a non-pinned Go prerelease\n' >&2
   exit 1
 fi
-if ! grep -q "requires Go exactly $GUL_GO_VERSION; found 1.26.6-rc.1" "$fixture_dir/err"; then
+if ! grep -q "requires Go exactly $GUL_GO_VERSION; found 1.27.1-rc.1" "$fixture_dir/err"; then
   printf 'ERROR contract generation Go prerelease gate did not fail precisely\n' >&2
   cat "$fixture_dir/err" >&2
   exit 1
@@ -302,13 +302,13 @@ if ! grep -q "requires Buf >= $GUL_BUF_MIN_VERSION; found 1.66.1-rc.1" "$fixture
   exit 1
 fi
 
-write_command go 'go version go1.27rc1 darwin/arm64'
+write_command go 'go version go1.28rc1 darwin/arm64'
 write_command protoc "libprotoc $GUL_PROTOC_MIN_VERSION"
 if PATH="$fixture_dir:$PATH" "$script_dir/../contract/generate.sh" "$fixture_dir/generated" >"$fixture_dir/out" 2>"$fixture_dir/err"; then
   printf 'ERROR contract generation accepted a non-pinned newer Go prerelease\n' >&2
   exit 1
 fi
-if ! grep -q "requires Go exactly $GUL_GO_VERSION; found 1.27rc1" "$fixture_dir/err"; then
+if ! grep -q "requires Go exactly $GUL_GO_VERSION; found 1.28rc1" "$fixture_dir/err"; then
   printf 'ERROR exact Go gate did not reject a newer release candidate precisely\n' >&2
   cat "$fixture_dir/err" >&2
   exit 1

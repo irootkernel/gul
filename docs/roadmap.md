@@ -401,6 +401,9 @@ The accepted E12 consumer boundary pins TASK-053 commit
 `8f52ae66e126f37013d7842b2113fc509d21af4e4fc465cecdbeef7e21619f01` and
 generated-lock SHA-256
 `6284064e720e2220d6960c42faef6a4c13292ce1327f44e00388dc52b2e17d4a`.
+The current generated-lock SHA-256 after the Go 1.27.1 toolchain rebaseline is
+`96da1b0a5caeffac1bc9d387c4c4e4ee4159daf47e3877ed748d291be9bb5bc0`;
+the E12-T1 completion digest above remains historical.
 It is contract/tooling Current State only; product runtime and live-provider
 evidence remain with their later owners.
 The historical pin remains bound to dependency-lock SHA-256

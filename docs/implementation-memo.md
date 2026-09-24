@@ -112,6 +112,10 @@ E12-T1 imports immutable TASK-053 commit
 `8f52ae66e126f37013d7842b2113fc509d21af4e4fc465cecdbeef7e21619f01` plus
 generated-lock SHA-256
 `6284064e720e2220d6960c42faef6a4c13292ce1327f44e00388dc52b2e17d4a`.
+The Go 1.27.1 toolchain rebaseline retains this historical completion digest;
+the current generated-lock SHA-256 is
+`96da1b0a5caeffac1bc9d387c4c4e4ee4159daf47e3877ed748d291be9bb5bc0`
+after regenerating the Go header with host protoc 36.2.
 The generator reproduces the 8-service, 36-method descriptor with Buf 1.69,
 checks additive compatibility against the pre-TASK-053 descriptor, and emits
 typed Go/TypeScript clients, an all-method transport fake, 31 semantic operations,
@@ -421,7 +425,7 @@ Gate A's earlier source and checked-artifact digests are recorded below. E0-T7 r
 | Public transport | Accepted target: supervised local gRPC over private UDS | Pinned release/descriptor/lifecycle evidence; private, TCP, REST, and operator interfaces excluded | E0-T7/E2-T0 |
 | Gul adapter version | Unset | Versioned adapter contract | E2-T1 |
 | Last successful compatibility probe | None | Timestamp, environment, result, redacted evidence | E2-T1 |
-| Go/Wails/Node/Bun/TypeScript/React | Host Go exactly `1.26.6`; Wails `>=3.0.0-beta.8` (`wails3`); Node `>=26.7.0`; Bun `>=1.4.2`; project TypeScript `7.0.2`; React/DOM `19.2.7` | `toolchain/versions.env`; exact Go and non-Go host minimum checks; exact project manifests; clean-host fixtures | E0-T8; ADR-0054 |
+| Go/Wails/Node/Bun/TypeScript/React | Host Go exactly `1.27.1`; Wails `>=3.0.0-beta.8` (`wails3`); Node `>=26.7.0`; Bun `>=1.4.2`; project TypeScript `7.0.2`; React/DOM `19.2.7` | `toolchain/versions.env`; exact Go and non-Go host minimum checks; exact project manifests; clean-host fixtures | E0-T8; ADR-0054 |
 | Protobuf/Buf/ConnectRPC | Host Buf `>=1.66.1`; protoc `>=35.1`; project protoc-gen-go/protobuf-go `1.36.12`; connect-go/protoc-gen-connect-go `1.20.0`; Connect-ES/Web `2.1.2`; Protobuf-ES/protoc-gen-es `2.14.0`; historical protoc-gen-connect-es `1.7.0` | Host minimum checks; exact project manifests; Buf lint and generated-output drift checks | E0-T8; ADR-0054 |
 | Host platform | macOS `>=14.0.0`, exact `arm64`; Git `>=2.39.0` | Minimum checks for macOS and Git; exact architecture check; no installation or mutation | E0-T8; ADR-0054 |
 | SQLite driver/settings | modernc.org/sqlite `1.57.0`; WAL; foreign keys; `synchronous=FULL`; 5-second busy timeout; one writer and at most four read-only connections; immediate transactional sequence allocation; checkpoint plus `VACUUM INTO` backup | Accepted ADR-0017 and future E1-T4 fault/race/backup tests | E0-T8 |
@@ -742,7 +746,7 @@ These cases are normative future acceptance owned by the Roadmap tasks named in 
 
 The root Makefile provides the serial facade `toolchain-check`, `generate-contract`, `contract-check`, `generate-frontend`, `frontend-check`, `generate-api`, `api-check`, `test-prepare`, `test-unit`, `test-int`, `test-e2e`, and `test`. Generation rewrites only its named checked outputs; `contract-check`, `frontend-check`, and `api-check` reject drift without rewriting them. `test-prepare` validates the Go and product manifests, the Make recipes, shell syntax, exact Go, and Bun minimum. It then downloads the root Go graph, installs the root locked Bun graph, downloads the contract Go graph, and installs the contract locked Bun graph; both Bun installs disable lifecycle scripts. `test-unit` repeats the manifest and Make-recipe checks, typechecks the frontend and generated API clients, tests the frontend/API contracts, runs both Go suites, and executes the contract fixtures. `test-int` checks the exact Go toolchain again before module tidiness, frontend bundle drift, Gul API drift, SOT validation, contract drift, and whitespace checks. The checking targets do not rewrite tracked files, and `test` invokes the four test phases serially. E0-T7's checked delegates require exact generator versions, verify imported source hashes, reproduce the descriptor and all tracked outputs, run the all-RPC fake-server tests and TypeScript checker, and validate generated policies plus the separate Machine CLI fixture. Later Tasks extend these stable targets for frontend/browser E2E and opt-in pinned-runtime smoke tests. Real provider tests remain opt-in and must never reveal Controller capabilities, carrier/socket paths, or protected input.
 
-The current host check requires Go exactly `1.26.6`, requires architecture to
+The current host check requires Go exactly `1.27.1`, requires architecture to
 match `arm64` exactly, and reports Wails, Node, Bun, Buf, protoc, Git, and macOS
 against minimum versions. It does not inspect PATH copies of project
 generators. Project Go and Bun manifests provide the exact generator and library
