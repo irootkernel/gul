@@ -75,7 +75,7 @@ ADR-0050 explicitly amends the product/child-presentation scope in ADR-0021/0022
 | ADR-0051 | Keep future Podway visualization strictly read-only | Accepted, future scope | None |
 | ADR-0052 | Execute complete Epics without cross-Epic interleaving | Accepted | None |
 | ADR-0053 | Use a compatible system Buf for contract linting | Accepted, modified | ADR-0054 |
-| ADR-0054 | Pin Go and separate other host minimums from project pins | Accepted | None |
+| ADR-0054 | Pin Go and separate other host minimums from project pins | Accepted, modified | None |
 
 ## 3. Retained decisions
 
@@ -671,7 +671,7 @@ exact-host requirement.
 
 ### ADR-0054: Pin Go and separate other host minimums from project pins
 
-**Status:** Accepted, 2026-09-22
+**Status:** Accepted, modified 2026-09-24
 
 Go remains exactly pinned at `1.27.1` until an explicit toolchain upgrade. Other
 host executables use minimum versions with no upper bound: Wails

@@ -5,7 +5,7 @@
 | Role | Non-normative implementation observations, dependencies, risks, and handoff |
 | Product | Gul |
 | Version | 0.1-dolgorae-consumer-v1 |
-| Last updated | 2026-09-23 |
+| Last updated | 2026-09-24 |
 
 ## 1. Boundary
 
@@ -598,8 +598,8 @@ The current boundary pack must verify unique permanent requirement IDs and valid
 | 15 | Observation checkpoints and client delivery sequences are distinct. | Pass |
 | 16 | Guarded read-only FileService remains in scope. | Pass |
 | 18 | The 107-row requirement appendix and ADR migration matrix explicitly supersede obsolete artifacts. | Pass |
-| 19 | Exactly one task, E0-T4, occupies the Active Task slot. | Pass |
-| 20 | E1-T1 is `Completed`; E1 remains `In Progress`, while later implementation tasks retain their roadmap state. | Pass |
+| 19 | No Task occupies the Active Task slot. | Pass |
+| 20 | E1 and E1-T1 through E1-T5 are `Completed`, while later implementation tasks retain their roadmap state. | Pass |
 | 21 | Current State records the reviewed core task evidence without promoting incomplete assembled-product requirements. | Pass |
 | 22 | Cross-document IDs, owners, decisions, DAG, authority, and security gates agree. | Pass |
 

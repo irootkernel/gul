@@ -3,7 +3,7 @@
 | Field | Value |
 | --- | --- |
 | Role | Sole authority for task identity, order, status, dependencies, and phase |
-| Revision | 2026-09-23 E1 epic closeout |
+| Revision | 2026-09-24 Go 1.27.1 rebaseline |
 | Active Task | None |
 | Next | E13-T1 |
 | Required provider | Released Dolgorae v0.1.3 implementing `dolgorae.gul-consumer/v1` |
