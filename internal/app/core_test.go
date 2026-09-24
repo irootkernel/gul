@@ -347,6 +347,24 @@ func TestCanceledLifecycleRequestsDoNotChangeState(t *testing.T) {
 	}
 }
 
+func TestSuccessfulLifecycleStartRemainsStoppableAfterCallerCancellation(t *testing.T) {
+	ctx, cancel := context.WithCancel(t.Context())
+	var calls []string
+	core := NewCore(Dependencies{Lifecycle: &cancelingLifecycle{cancel: cancel, calls: &calls}})
+	if err := core.Start(ctx); err != nil {
+		t.Fatalf("completed start: %v", err)
+	}
+	if !core.Running() {
+		t.Fatal("completed lifecycle start must remain stoppable")
+	}
+	if err := core.Stop(t.Context()); err != nil {
+		t.Fatalf("stop started lifecycle: %v", err)
+	}
+	if want := []string{"start", "stop"}; !reflect.DeepEqual(calls, want) {
+		t.Fatalf("lifecycle calls = %v, want %v", calls, want)
+	}
+}
+
 func waitUntilNotRunning(t *testing.T, core *Core) {
 	t.Helper()
 	deadline := time.Now().Add(time.Second)
@@ -377,6 +395,22 @@ type recordingLifecycle struct {
 	calls    *[]string
 	startErr error
 	stopErr  error
+}
+
+type cancelingLifecycle struct {
+	cancel context.CancelFunc
+	calls  *[]string
+}
+
+func (l *cancelingLifecycle) Start(context.Context) error {
+	*l.calls = append(*l.calls, "start")
+	l.cancel()
+	return nil
+}
+
+func (l *cancelingLifecycle) Stop(context.Context) error {
+	*l.calls = append(*l.calls, "stop")
+	return nil
 }
 
 type blockingLifecycle struct {

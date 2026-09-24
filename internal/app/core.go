@@ -94,9 +94,6 @@ func (c *Core) Start(ctx context.Context) error {
 	}
 
 	err := c.lifecycle.Start(ctx)
-	if err == nil {
-		err = ctx.Err()
-	}
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	if err != nil {
