@@ -500,14 +500,20 @@ func (h *Harness) completeTurn(r *run, status publicv1.TurnStatus) {
 	})
 	r.projection.ActiveTurn = nil
 	if r.projection.GetLifecycle() != publicv1.RunLifecycle_RUN_LIFECYCLE_PAUSED {
-		if r.projection.GetPendingInteractionCount() != 0 {
-			r.projection.Lifecycle = publicv1.RunLifecycle_RUN_LIFECYCLE_WAITING_INTERACTION
-		} else {
-			r.projection.Lifecycle = publicv1.RunLifecycle_RUN_LIFECYCLE_IDLE
-		}
+		r.projection.Lifecycle = lifecycleFromWork(r)
 	}
 	h.emit(r, &publicv1.DurableRunEvent{Event: &publicv1.DurableRunEvent_TurnStateChanged{TurnStateChanged: &publicv1.TurnStateChanged{Current: status}}})
 	h.changed(r)
+}
+
+func lifecycleFromWork(r *run) publicv1.RunLifecycle {
+	if r.projection.GetPendingInteractionCount() != 0 {
+		return publicv1.RunLifecycle_RUN_LIFECYCLE_WAITING_INTERACTION
+	}
+	if r.projection.GetActiveTurn() != nil {
+		return publicv1.RunLifecycle_RUN_LIFECYCLE_RUNNING
+	}
+	return publicv1.RunLifecycle_RUN_LIFECYCLE_IDLE
 }
 
 func terminalItemStatus(status publicv1.TurnStatus) publicv1.TimelineItemStatus {

@@ -97,13 +97,7 @@ func (h *Harness) ResolveInteraction(_ context.Context, request *publicv1.Resolv
 		r.session.PendingApprovalCount--
 	}
 	if r.projection.GetLifecycle() != publicv1.RunLifecycle_RUN_LIFECYCLE_PAUSED {
-		if r.projection.GetPendingInteractionCount() != 0 {
-			r.projection.Lifecycle = publicv1.RunLifecycle_RUN_LIFECYCLE_WAITING_INTERACTION
-		} else if r.projection.GetActiveTurn() != nil {
-			r.projection.Lifecycle = publicv1.RunLifecycle_RUN_LIFECYCLE_RUNNING
-		} else {
-			r.projection.Lifecycle = publicv1.RunLifecycle_RUN_LIFECYCLE_IDLE
-		}
+		r.projection.Lifecycle = lifecycleFromWork(r)
 	}
 	h.emit(r, &publicv1.DurableRunEvent{Event: &publicv1.DurableRunEvent_InteractionResolved{InteractionResolved: &publicv1.InteractionResolvedEvent{InteractionId: request.GetInteractionId(), Outcome: publicv1.InteractionOutcome_INTERACTION_OUTCOME_ANSWERED}}})
 	h.changed(r)

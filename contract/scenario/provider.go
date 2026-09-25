@@ -417,13 +417,7 @@ func (h *Harness) ResumeRun(_ context.Context, request *publicv1.ResumeRunReques
 	if r.projection.GetLifecycle() != publicv1.RunLifecycle_RUN_LIFECYCLE_PAUSED {
 		return nil, conflict()
 	}
-	if r.projection.GetPendingInteractionCount() != 0 {
-		r.projection.Lifecycle = publicv1.RunLifecycle_RUN_LIFECYCLE_WAITING_INTERACTION
-	} else if r.projection.GetActiveTurn() != nil {
-		r.projection.Lifecycle = publicv1.RunLifecycle_RUN_LIFECYCLE_RUNNING
-	} else {
-		r.projection.Lifecycle = publicv1.RunLifecycle_RUN_LIFECYCLE_IDLE
-	}
+	r.projection.Lifecycle = lifecycleFromWork(r)
 	h.changed(r)
 	if err := h.after("ResumeRun"); err != nil {
 		return nil, err

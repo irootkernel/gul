@@ -67,6 +67,22 @@ func requireProviderCode(t *testing.T, err error, code string) {
 	}
 }
 
+func requireProviderDetailCode(t *testing.T, err error, code string) {
+	t.Helper()
+	var connectErr *connect.Error
+	if !errors.As(err, &connectErr) || len(connectErr.Details()) != 1 {
+		t.Fatalf("provider detail for %s = %v", code, err)
+	}
+	value, detailErr := connectErr.Details()[0].Value()
+	if detailErr != nil {
+		t.Fatal(detailErr)
+	}
+	detail, ok := value.(*publicv1.DolgoraeErrorDetail)
+	if !ok || detail.GetDolgoraeErrorCode() != code {
+		t.Fatalf("provider detail = %v, want %s", value, code)
+	}
+}
+
 func TestStartRunKeepsDistinctIdempotencyTuples(t *testing.T) {
 	f := newFixture(t)
 	ctx := context.Background()
@@ -537,6 +553,7 @@ func TestAcceptedHistoryCapturedPagesAndProtectedArtifact(t *testing.T) {
 	foreign := pageCursor("timeline", "other-run", 1, 0)
 	_, err = f.h.ListRunTimelineItems(ctx, &publicv1.ListRunTimelineItemsRequest{Run: f.run, Controller: f.controller, TimelineVersion: 1, AfterCursor: foreign})
 	requireProviderCode(t, err, "INVALID_REQUEST")
+	requireProviderDetailCode(t, err, "EVENT_CURSOR_INVALID")
 }
 
 func TestAcceptedInputAndChunkBoundary(t *testing.T) {
@@ -890,7 +907,14 @@ func TestEventsFaultsClockAndReset(t *testing.T) {
 		if receiveErr != nil || item.GetDurableEvent().GetEvent() == nil {
 			t.Fatalf("event %d = %v, %v", i, item, receiveErr)
 		}
-		lastCursor, lastEventID = item.GetDurableEvent().GetCursor(), item.GetDurableEvent().GetEventId()
+		event := item.GetDurableEvent()
+		if event.GetWorkspaceId() != f.workspace.GetExpectedWorkspaceId() || event.GetRunId() != f.run.GetRunId() ||
+			event.GetServerKey() != "scenario-server" || event.GetServerEpoch() != 1 ||
+			event.GetProjection() != publicv1.ProjectionProfile_PROJECTION_PROFILE_OPERATIONAL || event.GetProjectionVersion() != 1 ||
+			event.GetOccurredAt() == nil || event.GetCursor() == "" || event.GetEventId() == "" {
+			t.Fatalf("event %d lost envelope identity: %v", i, event)
+		}
+		lastCursor, lastEventID = event.GetCursor(), event.GetEventId()
 	}
 	replay, err := stream.Receive()
 	if err != nil || !replay.GetDurableEvent().GetReplay() || replay.GetDurableEvent().GetCursor() != lastCursor || replay.GetDurableEvent().GetEventId() != lastEventID {
@@ -917,6 +941,7 @@ func TestEventsFaultsClockAndReset(t *testing.T) {
 	requireProviderCode(t, err, "SLOW_CONSUMER")
 	_, err = f.h.WatchRunEvents(ctx, &publicv1.WatchRunEventsRequest{Run: f.run, AfterCursor: "foreign-cursor"})
 	requireProviderCode(t, err, "INVALID_REQUEST")
+	requireProviderDetailCode(t, err, "EVENT_CURSOR_INVALID")
 	if err := f.h.AppendEvent(f.run.GetRunId(), events[0]); err != nil {
 		t.Fatal(err)
 	}
@@ -1090,6 +1115,52 @@ func TestResetReleasesBlockedStream(t *testing.T) {
 		}
 	case <-time.After(2 * time.Second):
 		t.Fatal("Reset left stream blocked")
+	}
+}
+
+func TestSameRunWatchersReceiveEveryEvent(t *testing.T) {
+	f := newFixture(t)
+	streams := make([]port.EventStream, 2)
+	for i := range streams {
+		stream, err := f.h.WatchRunEvents(context.Background(), &publicv1.WatchRunEventsRequest{Run: f.run})
+		if err != nil {
+			t.Fatal(err)
+		}
+		streams[i] = stream
+		defer stream.Close()
+	}
+	type received struct {
+		index int
+		item  *publicv1.RunEventEnvelope
+		err   error
+	}
+	results := make(chan received, len(streams))
+	for i, stream := range streams {
+		go func() {
+			item, err := stream.Receive()
+			results <- received{index: i, item: item, err: err}
+		}()
+	}
+	if err := f.h.AppendEvent(f.run.GetRunId(), &publicv1.DurableRunEvent{
+		Event: &publicv1.DurableRunEvent_RunStateChanged{RunStateChanged: &publicv1.RunStateChanged{Current: publicv1.RunLifecycle_RUN_LIFECYCLE_IDLE}},
+	}); err != nil {
+		t.Fatal(err)
+	}
+	seen := make(map[int]string, len(streams))
+	for range streams {
+		select {
+		case result := <-results:
+			event := result.item.GetDurableEvent()
+			if result.err != nil || event == nil || event.GetCursor() == "" {
+				t.Fatalf("watcher %d event = %v, %v", result.index, result.item, result.err)
+			}
+			seen[result.index] = event.GetCursor()
+		case <-time.After(2 * time.Second):
+			t.Fatal("same-Run watcher remained blocked after append")
+		}
+	}
+	if len(seen) != len(streams) || seen[0] != seen[1] {
+		t.Fatalf("watchers received different events: %v", seen)
 	}
 }
 
