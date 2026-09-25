@@ -263,7 +263,7 @@ scope. E2/E9 still own actual-provider proof.
 | REQ-WS-009 | v0.1 MUST accept pre-initialized workspaces with a compatible user-global Profile and preprovisioned named Specialist Policy. | Missing workspace/profile/policy or unavailable Profile Server produces typed provider blockers; Gul does not provision or repair them. | E3-T1 |
 | REQ-WS-010 | Canonicalization MUST collapse symlink, `..`, case-alias, and alternate-spelling paths into one verified workspace identity where the host filesystem does so. | Duplicate and move/mismatch tests fail closed or resolve to the same identity. | E3-T1 |
 | REQ-WS-011 | Gul MUST NOT create an automatic Git worktree. | Inspection and tests show no worktree-creation operation. | E3-T1 |
-| REQ-WS-012 | The workspace-root allowlist MUST be host-configured, canonically resolved at load, and MUST bound every registration browse; no listing, existence answer, or error MUST reveal or resolve a path outside it, and the reserved provider-private subtree MUST stay denied. | Absolute, traversal, symlink-escape, case-alias, and outside-root probes fail closed with an indistinguishable typed error; an empty or unresolvable allowlist disables server-side browsing without disabling the host picker. | E3-T1 |
+| REQ-WS-012 | The workspace-root allowlist MUST be host-configured, canonically resolved at load, and MUST bound every registration browse; no listing, existence answer, or error MUST reveal or resolve a path outside it, and the reserved provider-private subtree MUST stay denied. | Absolute, traversal, symlink-escape, case-variant private-subtree, and outside-root probes fail closed with an indistinguishable typed error; an empty or unresolvable allowlist disables server-side browsing without disabling the host picker. In-root case aliases resolve under REQ-WS-010. | E3-T1 |
 
 ### 5.4 Direct Sessions and provider references
 
@@ -486,6 +486,9 @@ boundary; later Tasks still own the remaining product behavior. Former
 E12-T2/T3 are Retired without implementation evidence.
 E13-T1 adds an independently tested scenario provider over the frozen port;
 assembled application behavior and a live provider remain future work.
+E3-T1 adds fake-scoped Workspace registration and revalidation through an
+unmounted authenticated handler; it does not enable a product route or qualify
+the released provider.
 
 | Requirement | Accepted Current State | Evidence |
 |---|---|---|
@@ -494,6 +497,13 @@ assembled application behavior and a live provider remain future work.
 | REQ-RUNTIME-022 | Independently typed projection inputs, public enum/event inventory, convergence and fail-closed compatibility fixtures | E0-T7 historical digests recorded in the implementation memo; current live policy maps are E12-T1 evidence; conformance pin |
 | REQ-CONSUMER-001 | Immutable TASK-053 consumer source, 36-method descriptor inventory, explicit 27-required/9-unavailable profile, generated clients/maps/fake transport, and close/sourceability fixtures; no runtime-support claim | E12-T1; dependency/generated locks; additive descriptor check; contract validator |
 | REQ-CONSUMER-002 | Explicit deterministic stateful provider implementing all 27 required port methods with reset, clock, fault and stream controls; no production injection or fallback | E13-T1; `contract/scenario` port assertions and scenario tests; `make test` |
+| REQ-WS-001 | Host picker and allowlist-relative remote registration reach one canonical attachment; no browser absolute-path input | E3-T1; `internal/workspace` and `internal/delivery/api` tests; `make test` |
+| REQ-WS-006 | Attachment revalidation verifies stored canonical root, inode, and provider identity before scoped use | E3-T1; moved-root and changed-ID fixtures; `make test` |
+| REQ-WS-007 | Bootstrap inspection omits expected provider ID; subsequent revalidation sends the stored path and ID; no initialization call | E3-T1; recording fake provider fixture; `make test` |
+| REQ-WS-009 | Registration accepts a compatible inspected workspace and returns typed unavailable-workspace, profile, and Profile Server blockers without provisioning | E3-T1 fake-scoped blocker fixtures; launch Policy selection remains E3-T4; `make test` |
+| REQ-WS-010 | Symlink aliases collapse to one attachment; moved or replaced identity fails closed | E3-T1 canonicalization and revalidation fixtures; `make test` |
+| REQ-WS-011 | Registration invokes inspection only and creates no Git worktree | E3-T1; inspected `internal/workspace` provider port and registration call graph |
+| REQ-WS-012 | Host-loaded canonical allowlist bounds browsing; outside, traversal, symlink, and private-subtree probes fail with one typed selection error | E3-T1 containment fixtures; `make test` |
 
 ## 8. Explicit v0.1 non-goals and limitations
 

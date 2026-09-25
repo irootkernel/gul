@@ -9,6 +9,8 @@ import (
 	"sync"
 	"testing"
 	"time"
+
+	"github.com/rootkernel/gul/internal/workspace"
 )
 
 func openTestStore(t *testing.T) (*Store, string) {
@@ -60,6 +62,9 @@ func TestAuthPresentationAndCache(t *testing.T) {
 	}
 	if _, err := store.Auth().SessionSubject(t.Context(), tokenSHA256, now); !errors.Is(err, sql.ErrNoRows) {
 		t.Fatalf("revoked session = %v", err)
+	}
+	if err := store.Presentation().CreateAttachment(t.Context(), workspace.Attachment{SubjectID: "account-1", ID: "workspace-1", DisplayName: "Workspace", CanonicalRoot: filepath.Join(t.TempDir(), "workspace"), ProviderID: "provider-1", FileDevice: "1", FileInode: "1"}); err != nil {
+		t.Fatal(err)
 	}
 	if err := store.Presentation().PutWorkspace(t.Context(), WorkspaceEntry{SubjectID: "account-1", WorkspaceID: "workspace-1", DisplayName: "Workspace", Hidden: true}); err != nil {
 		t.Fatal(err)
@@ -147,7 +152,10 @@ func TestRepositoryUpsertsReplaceExistingRows(t *testing.T) {
 		t.Fatal(err)
 	}
 	workspace := WorkspaceEntry{SubjectID: "subject", WorkspaceID: "workspace", DisplayName: "Before"}
-	if err := store.Presentation().PutWorkspace(ctx, workspace); err != nil {
+	if err := store.Presentation().PutWorkspace(ctx, workspace); !errors.Is(err, sql.ErrNoRows) {
+		t.Fatalf("unattached presentation update = %v", err)
+	}
+	if err := store.Presentation().CreateAttachment(ctx, workspaceAttachment(workspace, filepath.Join(t.TempDir(), "workspace"))); err != nil {
 		t.Fatal(err)
 	}
 	workspace.DisplayName, workspace.Hidden = "After", true
@@ -219,6 +227,10 @@ func TestRepositoryUpsertsReplaceExistingRows(t *testing.T) {
 	if got, err := store.Cache().Checkpoint(ctx, "provider", "object", "run"); err != nil || got != checkpoint {
 		t.Fatalf("updated checkpoint = %+v, %v", got, err)
 	}
+}
+
+func workspaceAttachment(entry WorkspaceEntry, root string) workspace.Attachment {
+	return workspace.Attachment{SubjectID: entry.SubjectID, ID: entry.WorkspaceID, DisplayName: entry.DisplayName, CanonicalRoot: root, ProviderID: "provider-1", FileDevice: "1", FileInode: "1"}
 }
 
 func TestAttemptsRejectUnsafeReferencesAndDeliveryAllocatesAtomically(t *testing.T) {

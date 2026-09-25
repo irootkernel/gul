@@ -523,7 +523,7 @@ Every field is independently required even when another aggregate appears to imp
 4. Gul verifies the returned root and identity, stores WorkspaceEntry metadata, and supplies the stored canonical path plus expected Runtime Workspace ID on every later revalidation. Every later workspace-scoped call uses a `WorkspaceRef` built from that attachment. It returns typed `workspace_not_provisioned`, `profile_missing`, or identity-mismatch blockers as applicable. Gul never invokes `init`, provisions a profile, or trusts a browser-supplied provider path or workspace ID.
 5. FileService uses that verified snapshot for subsequent relative-path access.
 
-Remote clients cannot supply an absolute path. Registration browsing never resolves or reveals anything outside the allowlist: outside-root, traversal, symlink-escape, and case-alias probes return one indistinguishable typed error, and the reserved provider-private subtree stays denied. An empty or unresolvable allowlist disables server-side browsing while leaving the host picker available.
+Remote clients cannot supply an absolute path. Registration browsing never resolves or reveals anything outside the allowlist: outside-root, traversal, and symlink-escape probes return one indistinguishable typed error. Case-variant provider-private paths stay denied; in-root case aliases resolve under REQ-WS-010. An empty or unresolvable allowlist disables server-side browsing while leaving the host picker available.
 
 ### 8.2 Submit
 
@@ -646,10 +646,11 @@ RuntimeService
   ListRuntimeProfiles, CheckCompatibility
 
 WorkspacePresentationService
-  List, Get, Rename, SetFavorite,
+  ListWorkspaces, Get, Rename, SetFavorite,
   UpdateNavigation, RemovePresentation,
   RegisterFromHostSelection,
-  ListRegistrableRoots, BrowseRegistrableRoot, RegisterFromAllowlistPath
+  ListRegistrableRoots, BrowseRegistrableRoot, RegisterFromAllowlistPath,
+  RevalidateWorkspace
 
 DirectSessionService
   Create, List, Get, RenamePresentation, ArchivePresentation,
@@ -816,13 +817,14 @@ The upstream cursor uses the accepted Protobuf representation and never becomes 
 
 ## 11. Persistence
 
-Initial logical tables are limited to:
+The current versioned schema contains these Gul-owned logical tables:
 
 ```text
 app_account
 web_sessions
 runtime_attachments
 workspace_entries
+workspace_attachments
 direct_session_presentations
 controller_binding_references
 navigation_state
@@ -835,6 +837,9 @@ observation_checkpoints
 provider_operation_attempts
 schema_migrations
 ```
+
+`workspace_attachments` was added by migration 2; the other tables were created
+by the initial migration.
 
 Prohibited authoritative tables/aggregates include Codex threads, Turns, workspace writer locks, writer generations, pending runtime interactions, native subagents, background processes, and runtime recovery state. A projection table is named and documented as a cache.
 
@@ -986,11 +991,11 @@ The serial command facade is `toolchain-check`, `generate-contract`, `contract-c
 
 ## 19. Current snapshot
 
-**Snapshot date:** 2026-09-25 (E13 closeout)
+**Snapshot date:** 2026-09-25 (E3-T1 completion)
 
-**Roadmap point:** E0 is `Completed`, E12 is `Completed`, E1 is `Completed`, and E13 is `Completed`; E1-T1 is `Completed` and E1-T2/T3/T4/T5 are `Completed`. E13-T1 is `Completed` with a stateful scenario provider under `contract/scenario`. E3-T1 is next. Former E12-T2/T3 remain Retired. E14 owns pre-release application acceptance. No live-provider or assembled-application acceptance is implied.
+**Roadmap point:** E0 is `Completed`, E12 is `Completed`, E1 is `Completed`, and E13 is `Completed`; E1-T1 is `Completed` and E1-T2/T3/T4/T5 are `Completed`. E3-T1 is `Completed`; E3-T2 is next and E3 closeout remains pending. Former E12-T2/T3 remain Retired. E14 owns pre-release application acceptance. No live-provider or assembled-application acceptance is implied.
 
-**Maturity:** delivery-independent Go core, shared React bundle, declared but disabled Gul API, typed provider ports and explicit scenario harness, isolated SQLite repositories, and a Wails shell foundation; provider and assembled storage lifecycle remain pending
+**Maturity:** delivery-independent Go core, shared React bundle, declared but disabled Gul API, typed provider ports and explicit scenario harness, isolated SQLite repositories with fake-scoped Workspace attachment, and a Wails shell foundation; provider and assembled storage lifecycle remain pending
 
 ### 19.1 Implemented components
 
@@ -1021,6 +1026,20 @@ Gul path-encoding error, not a label for an unsafe provider socket.
 embedded filesystem to browser delivery and the Wails shell, preventing a
 second frontend build or delivery-specific domain surface.
 
+`internal/workspace` accepts a trusted host directory selection or a relative
+path beneath a host-loaded canonical allowlist. It rejects symlink traversal,
+outside roots, and provider-private paths before inspection, then stores the
+provider's verified canonical path and ID with local presentation metadata.
+Revalidation checks the original filesystem identity and expected provider ID.
+An explicit registration can reattach a moved or replaced workspace after
+inspection while retaining its Gul presentation ID and metadata. The pinned
+inspection adapter lives in `internal/workspace/contractprovider`, keeping the
+Workspace service and SQLite adapter independent of generated provider types.
+`internal/delivery/api` exposes the typed Workspace handler only for explicit
+authenticated composition; no production route is registered. The macOS shell
+has a directory-picker adapter, but no attached product binding. Dismissing the
+host picker returns a typed cancelled registration result with no Workspace.
+
 `internal/storage` requires an owner-only database directory and file, then
 opens the pinned SQLite driver with one writer and at most four read-only
 connections. Versioned migration creates only Gul-owned records;
@@ -1032,6 +1051,8 @@ on reopen. Delivery sequence allocation and journal insertion share one
 immediate transaction. Backup checkpoints WAL and publishes an owner-only
 `VACUUM INTO` image without copying the live file. This repository remains
 unwired to production startup after E1-T4 completion.
+Its second migration adds a subject-scoped Workspace attachment record; local
+presentation and verified provider reference commit in one transaction.
 
 `internal/desktop` starts and stops the same core through its lifecycle boundary,
 then runs a Wails v3 window over the checked bundle's existing asset handler.
@@ -1057,6 +1078,8 @@ provider and do not establish a listener, authenticated client, Wails host, enab
 assembled persistence lifecycle, or live compatibility. Isolated SQLite tests
 exercise migration, schema drift, connection settings, typed records, rollback,
 sequence allocation, cache staleness, and backup publication.
+Workspace tests cover picker and remote registration, canonical aliases, denied
+private/escaping paths, typed provider blockers, moved roots, and changed IDs.
 
 ### 19.3 Existing artifacts
 
@@ -1067,7 +1090,7 @@ facade validates both Go manifests, the root package pins, exact Go 1.27.1, and
 the Bun minimum before running frontend, core, contract, SOT and drift gates.
 Historical E0-T7 facts remain scoped to their original digests. The Wails shell
 has no authenticated attach or enabled product route; no assembled database
-service, provider adapter, or live provider behavior exists.
+service, live provider adapter, or live provider behavior exists.
 
 ### 19.4 Current topology and data
 
@@ -1077,7 +1100,7 @@ One checked React bundle and shared browser/shell asset delivery exist.
 An isolated Wails shell foundation reuses the shared core and checked bundle; authenticated attach is not enabled.
 ConnectRPC services are declared and generated but not registered.
 Gul-only SQLite schema and repositories exist in isolated tests; no production database lifecycle is enabled.
-No Runtime Provider adapter, RPC supervisor, Controller credential store, timeline adapter, or Artifact adapter exists.
+No Runtime Provider adapter, RPC supervisor, Controller credential store, timeline adapter, or Artifact adapter exists in the assembled product. An isolated Workspace inspection adapter uses the pinned provider port with a scenario fake.
 ```
 
 ### 19.5 Security posture

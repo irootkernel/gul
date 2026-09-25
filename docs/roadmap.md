@@ -3,9 +3,9 @@
 | Field | Value |
 | --- | --- |
 | Role | Sole authority for task identity, order, status, dependencies, and phase |
-| Revision | 2026-09-25 E13 Epic closeout |
+| Revision | 2026-09-25 E3-T1 workspace attachment |
 | Active Task | None |
-| Next | E3 starting at E3-T1 |
+| Next | E3-T2 after E3-T1 completion |
 | Required provider | Released Dolgorae v0.1.3 implementing `dolgorae.gul-consumer/v1` |
 
 ## 1. Status and execution rules
@@ -128,7 +128,7 @@ second owner of membership, order or status.
 | E12 | Completed | Immutable consumer contract pin only; E12-T1 | [Roadmap](#e12-pin-the-immutable-consumer-contract); [Memo](implementation-memo.md#15-e12-epic-closeout-2026-09-22) |
 | E1 | Completed | Core, typed APIs, persistence, one frontend and desktop-shell foundation | [Roadmap](#e1-build-the-application-foundation); [Memo](implementation-memo.md#111-e1-epic-closeout-2026-09-23) |
 | E13 | Completed | Stateful consumer fake provider and reusable scenario harness; E13-T1 | [Roadmap](#e13-supply-stateful-consumer-fakes); [Memo](implementation-memo.md#113-e13-epic-closeout-2026-09-25) |
-| E3 | Planned | Workspace/session presentation and global Profile selection | [Shared](todo/GUL-CONSUMER-REBASELINE.md) |
+| E3 | In Progress | Workspace/session presentation and global Profile selection | [Shared](todo/GUL-CONSUMER-REBASELINE.md) |
 | E4 | Planned | Events, interactions, writer evaluator, complete timeline and artifacts; excludes E4-T4 | [Shared](todo/GUL-CONSUMER-REBASELINE.md) |
 | E5 | Planned | Safe whole-session close, projection convergence and ambiguous-outcome handling | [Shared](todo/GUL-CONSUMER-REBASELINE.md) |
 | E6 | Planned | Read-only FileService and bounded preview/review | [Shared](todo/GUL-CONSUMER-REBASELINE.md) |
@@ -211,7 +211,7 @@ E5. Result/history implementation is owned by E4, not an E3 audit prerequisite.
 
 | Task | Phase | Status | Predecessors | Owned result and verification |
 | --- | --- | --- | --- | --- |
-| E3-T1 | Pre-release | Planned | E1-T3, E13-T1 | Host/allowlisted Workspace selection and canonical attachment via fake provider; containment/identity tests |
+| E3-T1 | Pre-release | Completed | E1-T3, E13-T1 | Host/allowlisted Workspace selection and canonical attachment via fake provider; containment/identity tests |
 | E3-T2 | Pre-release | Planned | E3-T1, E1-T4 | Rename/favorite/hide presentation without runtime mutations |
 | E3-T3 | Pre-release | Planned | E3-T1, E13-T1 | Passive Orchestrated Session model, Primary binding, GetExecutionState implementation and observer-only member status; no close coordinator or executable placeholder |
 | E3-T4 | Pre-release | Planned | E3-T1, E13-T1 | Global Profile/model/lane selection, preprovisioned Policy name and explicit launch configuration |

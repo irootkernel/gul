@@ -12,7 +12,268 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file gul/v1/gul.proto.
  */
 export const file_gul_v1_gul: GenFile = /*@__PURE__*/
-  fileDesc("ChBndWwvdjEvZ3VsLnByb3RvEgZndWwudjEiaQoYTGlzdFByb21wdEhpc3RvcnlSZXF1ZXN0EhIKCnNlc3Npb25faWQYASABKAkSFwoKcGFnZV90b2tlbhgCIAEoCUgAiAEBEhEKCXBhZ2Vfc2l6ZRgDIAEoDUINCgtfcGFnZV90b2tlbiK4AQoRUHJvbXB0SGlzdG9yeUl0ZW0SFgoOcHJvbXB0X2l0ZW1faWQYASABKAkSDwoHb3JkaW5hbBgCIAEoBBIvCgthY2NlcHRlZF9hdBgDIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXASDwoHcHJldmlldxgEIAEoCRIZChFwcmV2aWV3X3RydW5jYXRlZBgFIAEoCBIdChVjb252ZXJzYXRpb25fZW50cnlfaWQYBiABKAki/wEKGUxpc3RQcm9tcHRIaXN0b3J5UmVzcG9uc2USEwoLc25hcHNob3RfaWQYASABKAkSKAoFaXRlbXMYAiADKAsyGS5ndWwudjEuUHJvbXB0SGlzdG9yeUl0ZW0SHAoPbmV4dF9wYWdlX3Rva2VuGAMgASgJSACIAQESGgoSdHJhdmVyc2FsX2NvbXBsZXRlGAQgASgIEiQKCWZyZXNobmVzcxgFIAEoDjIRLmd1bC52MS5GcmVzaG5lc3MSLwoLb2JzZXJ2ZWRfYXQYBiABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wQhIKEF9uZXh0X3BhZ2VfdG9rZW4iSQobR2V0UHJvbXB0SGlzdG9yeUl0ZW1SZXF1ZXN0EhIKCnNlc3Npb25faWQYASABKAkSFgoOcHJvbXB0X2l0ZW1faWQYAiABKAkiSgoOUHJvbXB0T3JpZ2luYWwSFQoLaW5saW5lX3V0ZjgYASABKAlIABIWCgxhcnRpZmFjdF9yZWYYAiABKAlIAEIJCgdjb250ZW50IsEBChxHZXRQcm9tcHRIaXN0b3J5SXRlbVJlc3BvbnNlEhYKDnByb21wdF9pdGVtX2lkGAEgASgJEg8KB29yZGluYWwYAiABKAQSLwoLYWNjZXB0ZWRfYXQYAyABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEh0KFWNvbnZlcnNhdGlvbl9lbnRyeV9pZBgEIAEoCRIoCghvcmlnaW5hbBgFIAEoCzIWLmd1bC52MS5Qcm9tcHRPcmlnaW5hbCLxAgoPRXhlY3V0aW9uQ291bnRzEh8KEm5vbnJldGlyZWRfbWVtYmVycxgBIAEoBEgAiAEBEh8KEm5vbnRlcm1pbmFsX3NwYXducxgCIAEoBEgBiAEBEh4KEXBlbmRpbmdfYXBwcm92YWxzGAMgASgESAKIAQESJgoZYWNjZXB0ZWRfdW5maW5pc2hlZF90YXNrcxgEIAEoBEgDiAEBEiIKFXVua25vd25fb3V0Y29tZV90YXNrcxgFIAEoBEgEiAEBEh4KEXB1Ymxpc2hlZF9yZXN1bHRzGAYgASgESAWIAQFCFQoTX25vbnJldGlyZWRfbWVtYmVyc0IVChNfbm9udGVybWluYWxfc3Bhd25zQhQKEl9wZW5kaW5nX2FwcHJvdmFsc0IcChpfYWNjZXB0ZWRfdW5maW5pc2hlZF90YXNrc0IYChZfdW5rbm93bl9vdXRjb21lX3Rhc2tzQhQKEl9wdWJsaXNoZWRfcmVzdWx0cyIuChhHZXRFeGVjdXRpb25TdGF0ZVJlcXVlc3QSEgoKc2Vzc2lvbl9pZBgBIAEoCSKHBAoZR2V0RXhlY3V0aW9uU3RhdGVSZXNwb25zZRISCgpzZXNzaW9uX2lkGAEgASgJEiQKCWZyZXNobmVzcxgCIAEoDjIRLmd1bC52MS5GcmVzaG5lc3MSLwoLb2JzZXJ2ZWRfYXQYAyABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEhUKDXN0YXRlX3ZlcnNpb24YBCABKAkSKwoJbGlmZWN5Y2xlGAUgASgOMhguZ3VsLnYxLlNlc3Npb25MaWZlY3ljbGUSLwoLY29tcG9zaXRpb24YBiABKA4yGi5ndWwudjEuU2Vzc2lvbkNvbXBvc2l0aW9uEi8KD2FwcHJvdmFsX3BvbGljeRgHIAEoDjIWLmd1bC52MS5BcHByb3ZhbFBvbGljeRIeChZzcGVjaWFsaXN0X3BvbGljeV9uYW1lGAggASgJEicKBmNvdW50cxgJIAEoCzIXLmd1bC52MS5FeGVjdXRpb25Db3VudHMSLQoOY2xvc2VfcHJvZ3Jlc3MYCiABKA4yFS5ndWwudjEuQ2xvc2VQcm9ncmVzcxInCghyZWNvdmVyeRgLIAEoDjIVLmd1bC52MS5SZWNvdmVyeUNsYXNzEiAKE2Nsb3NlX29wZXJhdGlvbl9yZWYYDCABKAlIAIgBAUIWChRfY2xvc2Vfb3BlcmF0aW9uX3JlZiJtChxMaXN0U3BlY2lhbGlzdFJlc3VsdHNSZXF1ZXN0EhIKCnNlc3Npb25faWQYASABKAkSFwoKcGFnZV90b2tlbhgCIAEoCUgAiAEBEhEKCXBhZ2Vfc2l6ZRgDIAEoDUINCgtfcGFnZV90b2tlbiKNAgoQU3BlY2lhbGlzdFJlc3VsdBIRCglyZXN1bHRfaWQYASABKAkSGgoSc3BlY2lhbGlzdF92aWV3X2lkGAIgASgJEhIKCnJvbGVfbGFiZWwYAyABKAkSGQoRcHVibGljYXRpb25fb3JkZXIYBCABKAQSMAoMcHVibGlzaGVkX2F0GAUgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBIuCgZmb3JtYXQYBiABKA4yHi5ndWwudjEuU3BlY2lhbGlzdFJlc3VsdEZvcm1hdBITCgtieXRlX2xlbmd0aBgHIAEoBBIOCgZzaGEyNTYYCCABKAkSFAoMYXJ0aWZhY3RfcmVmGAkgASgJIoICCh1MaXN0U3BlY2lhbGlzdFJlc3VsdHNSZXNwb25zZRITCgtzbmFwc2hvdF9pZBgBIAEoCRInCgVpdGVtcxgCIAMoCzIYLmd1bC52MS5TcGVjaWFsaXN0UmVzdWx0EhwKD25leHRfcGFnZV90b2tlbhgDIAEoCUgAiAEBEhoKEnRyYXZlcnNhbF9jb21wbGV0ZRgEIAEoCBIkCglmcmVzaG5lc3MYBSABKA4yES5ndWwudjEuRnJlc2huZXNzEi8KC29ic2VydmVkX2F0GAYgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcEISChBfbmV4dF9wYWdlX3Rva2VuIlMKC0RvbWFpbkVycm9yEh8KBGNvZGUYASABKA4yES5ndWwudjEuRXJyb3JDb2RlEiMKBmFjdGlvbhgCIAEoDjITLmd1bC52MS5BY3Rpb25DbGFzcyJQChNDbG9zZVJ1bnRpbWVSZXF1ZXN0EhIKCnNlc3Npb25faWQYASABKAkSEQoJaW50ZXJydXB0GAIgASgIEhIKCmF0dGVtcHRfaWQYAyABKAki2QEKDENsb3NlT3V0Y29tZRIjCgZzdGF0dXMYASABKA4yEy5ndWwudjEuQ2xvc2VTdGF0dXMSGAoQY2xvc2VfYXR0ZW1wdF9pZBgCIAEoCRIgChNjbG9zZV9vcGVyYXRpb25fcmVmGAMgASgJSACIAQESJgoJcmVqZWN0aW9uGAQgASgLMhMuZ3VsLnYxLkRvbWFpbkVycm9yEigKC25leHRfYWN0aW9uGAUgASgOMhMuZ3VsLnYxLkFjdGlvbkNsYXNzQhYKFF9jbG9zZV9vcGVyYXRpb25fcmVmIj0KFENsb3NlUnVudGltZVJlc3BvbnNlEiUKB291dGNvbWUYASABKAsyFC5ndWwudjEuQ2xvc2VPdXRjb21lIj4KEkdldE1ldGFkYXRhUmVxdWVzdBISCgpzZXNzaW9uX2lkGAEgASgJEhQKDGFydGlmYWN0X3JlZhgCIAEoCSJkChNHZXRNZXRhZGF0YVJlc3BvbnNlEhQKDGFydGlmYWN0X3JlZhgBIAEoCRISCgptZWRpYV90eXBlGAIgASgJEhMKC2J5dGVfbGVuZ3RoGAMgASgEEg4KBnNoYTI1NhgEIAEoCSJcChBSZWFkQ2h1bmtSZXF1ZXN0EhIKCnNlc3Npb25faWQYASABKAkSFAoMYXJ0aWZhY3RfcmVmGAIgASgJEg4KBm9mZnNldBgDIAEoBBIOCgZsZW5ndGgYBCABKA0iRwoRUmVhZENodW5rUmVzcG9uc2USDAoEZGF0YRgBIAEoDBIUCgx0b3RhbF9sZW5ndGgYAiABKAQSDgoGc2hhMjU2GAMgASgJKmsKCUZyZXNobmVzcxIZChVGUkVTSE5FU1NfVU5TUEVDSUZJRUQQABITCg9GUkVTSE5FU1NfRlJFU0gQARITCg9GUkVTSE5FU1NfU1RBTEUQAhIZChVGUkVTSE5FU1NfVU5BVkFJTEFCTEUQAyq5AQoQU2Vzc2lvbkxpZmVjeWNsZRIhCh1TRVNTSU9OX0xJRkVDWUNMRV9VTlNQRUNJRklFRBAAEhwKGFNFU1NJT05fTElGRUNZQ0xFX0FDVElWRRABEh0KGVNFU1NJT05fTElGRUNZQ0xFX0NMT1NJTkcQAhIcChhTRVNTSU9OX0xJRkVDWUNMRV9DTE9TRUQQAxInCiNTRVNTSU9OX0xJRkVDWUNMRV9SRUNPVkVSWV9SRVFVSVJFRBAEKmUKElNlc3Npb25Db21wb3NpdGlvbhIjCh9TRVNTSU9OX0NPTVBPU0lUSU9OX1VOU1BFQ0lGSUVEEAASKgomU0VTU0lPTl9DT01QT1NJVElPTl9CUk9LRVJFRF9ISUVSQVJDSFkQASpdCg5BcHByb3ZhbFBvbGljeRIfChtBUFBST1ZBTF9QT0xJQ1lfVU5TUEVDSUZJRUQQABIqCiZBUFBST1ZBTF9QT0xJQ1lfVVNFUl9BUFBST1ZBTF9SRVFVSVJFRBABKs0BCg1DbG9zZVByb2dyZXNzEh4KGkNMT1NFX1BST0dSRVNTX1VOU1BFQ0lGSUVEEAASFwoTQ0xPU0VfUFJPR1JFU1NfTk9ORRABEhsKF0NMT1NFX1BST0dSRVNTX1NFVFRMSU5HEAISHAoYQ0xPU0VfUFJPR1JFU1NfQ09ORklSTUVEEAMSIgoeQ0xPU0VfUFJPR1JFU1NfT1VUQ09NRV9VTktOT1dOEAQSJAogQ0xPU0VfUFJPR1JFU1NfUkVDT1ZFUllfUkVRVUlSRUQQBSq5AQoNUmVjb3ZlcnlDbGFzcxIeChpSRUNPVkVSWV9DTEFTU19VTlNQRUNJRklFRBAAEhcKE1JFQ09WRVJZX0NMQVNTX05PTkUQARIkCiBSRUNPVkVSWV9DTEFTU19TTkFQU0hPVF9SRVFVSVJFRBACEiUKIVJFQ09WRVJZX0NMQVNTX1JFQ09OQ0lMRV9SRVFVSVJFRBADEiIKHlJFQ09WRVJZX0NMQVNTX09VVENPTUVfVU5LTk9XThAEKmoKFlNwZWNpYWxpc3RSZXN1bHRGb3JtYXQSKAokU1BFQ0lBTElTVF9SRVNVTFRfRk9STUFUX1VOU1BFQ0lGSUVEEAASJgoiU1BFQ0lBTElTVF9SRVNVTFRfRk9STUFUX1VURjhfVEVYVBABKu0HCglFcnJvckNvZGUSGgoWRVJST1JfQ09ERV9VTlNQRUNJRklFRBAAEiQKIEVSUk9SX0NPREVfVFJBTlNQT1JUX1VOQVZBSUxBQkxFEAESIAocRVJST1JfQ09ERV9ERUFETElORV9FWENFRURFRBACEiQKIEVSUk9SX0NPREVfUFJPVE9DT0xfSU5DT01QQVRJQkxFEAMSIgoeRVJST1JfQ09ERV9DT05UUk9MTEVSX01JU01BVENIEAQSKQolRVJST1JfQ09ERV9DT05UUk9MTEVSX0NBUlJJRVJfSU5WQUxJRBAFEjQKMEVSUk9SX0NPREVfV1JJVEVfQ09OVElOVUFUSU9OX0NPTlRST0xMRVJfSU5WQUxJRBAGEh4KGkVSUk9SX0NPREVfV1JJVEVSX0NPTkZMSUNUEAcSLQopRVJST1JfQ09ERV9USFJFQURMRVNTX1JFUVVJUkVTX1dSSVRFX1RVUk4QCBIgChxFUlJPUl9DT0RFX0lOVEVSQUNUSU9OX1NUQUxFEAkSKwonRVJST1JfQ09ERV9JTlRFUkFDVElPTl9BTFJFQURZX1JFU09MVkVEEAoSIAocRVJST1JfQ09ERV9SRUNPVkVSWV9SRVFVSVJFRBALEh4KGkVSUk9SX0NPREVfT1VUQ09NRV9VTktOT1dOEAwSHAoYRVJST1JfQ09ERV9TTE9XX0NPTlNVTUVSEA0SIwofRVJST1JfQ09ERV9BUlRJRkFDVF9VTkFWQUlMQUJMRRAOEigKJEVSUk9SX0NPREVfVU5TVVBQT1JURURfUEFUSF9FTkNPRElORxAPEiEKHUVSUk9SX0NPREVfUlVOX1NUQVRFX0NPTkZMSUNUEBASKQolRVJST1JfQ09ERV9SUENfU0VSVkVSX0FMUkVBRFlfUlVOTklORxAREicKI0VSUk9SX0NPREVfT1BFUkFUT1JfQUNUSU9OX1JFUVVJUkVEEBISIQodRVJST1JfQ09ERV9JTlZBTElEX1BBR0VfVE9LRU4QExIhCh1FUlJPUl9DT0RFX1BBR0VfVE9LRU5fRVhQSVJFRBAUEh4KGkVSUk9SX0NPREVfSU5WQUxJRF9SRVFVRVNUEBUSGwoXRVJST1JfQ09ERV9VTkFVVEhPUklaRUQQFhIhCh1FUlJPUl9DT0RFX1NPVVJDRV9VTkFWQUlMQUJMRRAXEh0KGUVSUk9SX0NPREVfTElNSVRfRVhDRUVERUQQGBIfChtFUlJPUl9DT0RFX1BST1ZJREVSX0JMT0NLRUQQGRInCiNFUlJPUl9DT0RFX1JVTlRJTUVfUEFUSF9VTkFWQUlMQUJMRRAaKuIFCgtBY3Rpb25DbGFzcxIcChhBQ1RJT05fQ0xBU1NfVU5TUEVDSUZJRUQQABIWChJBQ1RJT05fQ0xBU1NfQUJPUlQQARIcChhBQ1RJT05fQ0xBU1NfRklYX1JFUVVFU1QQAhIlCiFBQ1RJT05fQ0xBU1NfUkVGUkVTSF9DQVBBQklMSVRJRVMQAxIhCh1BQ1RJT05fQ0xBU1NfUkVGUkVTSF9TTkFQU0hPVBAEEiIKHkFDVElPTl9DTEFTU19WRVJJRllfQ09OVFJPTExFUhAFEioKJkFDVElPTl9DTEFTU19VU0VfQ09NUEFUSUJMRV9DT05UUk9MTEVSEAYSMgouQUNUSU9OX0NMQVNTX1VTRV9ORVdfU0FNRV9QUklOQ0lQQUxfQ09OVFJPTExFUhAHEiYKIkFDVElPTl9DTEFTU19VU0VfU1VQUE9SVEVEX1BST0ZJTEUQCBIkCiBBQ1RJT05fQ0xBU1NfVVNFX1RFUk1JTkFMX1NPVVJDRRAJEiIKHkFDVElPTl9DTEFTU19TVUJNSVRfV1JJVEVfVFVSThAKEhUKEUFDVElPTl9DTEFTU19XQUlUEAsSLAooQUNUSU9OX0NMQVNTX1JFVFJZX0VYQUNUX0lERU1QT1RFTkNZX0tFWRAMEiQKIEFDVElPTl9DTEFTU19SRUZFVENIX0lOVEVSQUNUSU9OEA0SHgoaQUNUSU9OX0NMQVNTX1JFQ09OQ0lMRV9SVU4QDhIcChhBQ1RJT05fQ0xBU1NfUkVDT1ZFUl9SVU4QDxIwCixBQ1RJT05fQ0xBU1NfUkVDT05ORUNUX0ZST01fQ09NTUlUVEVEX0NVUlNPUhAQEiAKHEFDVElPTl9DTEFTU19SRVNUQVJUX0dBVEVXQVkQERIgChxBQ1RJT05fQ0xBU1NfT1BFUkFUT1JfUkVQQUlSEBISIAocQUNUSU9OX0NMQVNTX0ZJWF9TT0NLRVRfUEFUSBATKsYBCgtDbG9zZVN0YXR1cxIcChhDTE9TRV9TVEFUVVNfVU5TUEVDSUZJRUQQABIZChVDTE9TRV9TVEFUVVNfUkVKRUNURUQQARIcChhDTE9TRV9TVEFUVVNfSU5fUFJPR1JFU1MQAhIaChZDTE9TRV9TVEFUVVNfQ09ORklSTUVEEAMSIAocQ0xPU0VfU1RBVFVTX09VVENPTUVfVU5LTk9XThAEEiIKHkNMT1NFX1NUQVRVU19SRUNPVkVSWV9SRVFVSVJFRBAFMt4DChREaXJlY3RTZXNzaW9uU2VydmljZRJYChFMaXN0UHJvbXB0SGlzdG9yeRIgLmd1bC52MS5MaXN0UHJvbXB0SGlzdG9yeVJlcXVlc3QaIS5ndWwudjEuTGlzdFByb21wdEhpc3RvcnlSZXNwb25zZRJhChRHZXRQcm9tcHRIaXN0b3J5SXRlbRIjLmd1bC52MS5HZXRQcm9tcHRIaXN0b3J5SXRlbVJlcXVlc3QaJC5ndWwudjEuR2V0UHJvbXB0SGlzdG9yeUl0ZW1SZXNwb25zZRJYChFHZXRFeGVjdXRpb25TdGF0ZRIgLmd1bC52MS5HZXRFeGVjdXRpb25TdGF0ZVJlcXVlc3QaIS5ndWwudjEuR2V0RXhlY3V0aW9uU3RhdGVSZXNwb25zZRJkChVMaXN0U3BlY2lhbGlzdFJlc3VsdHMSJC5ndWwudjEuTGlzdFNwZWNpYWxpc3RSZXN1bHRzUmVxdWVzdBolLmd1bC52MS5MaXN0U3BlY2lhbGlzdFJlc3VsdHNSZXNwb25zZRJJCgxDbG9zZVJ1bnRpbWUSGy5ndWwudjEuQ2xvc2VSdW50aW1lUmVxdWVzdBocLmd1bC52MS5DbG9zZVJ1bnRpbWVSZXNwb25zZTKnAQobQXJ0aWZhY3RQcmVzZW50YXRpb25TZXJ2aWNlEkYKC0dldE1ldGFkYXRhEhouZ3VsLnYxLkdldE1ldGFkYXRhUmVxdWVzdBobLmd1bC52MS5HZXRNZXRhZGF0YVJlc3BvbnNlEkAKCVJlYWRDaHVuaxIYLmd1bC52MS5SZWFkQ2h1bmtSZXF1ZXN0GhkuZ3VsLnYxLlJlYWRDaHVua1Jlc3BvbnNlQjlaN2dpdGh1Yi5jb20vcm9vdGtlcm5lbC9ndWwvYXBpL2dlbmVyYXRlZC9nby9ndWwvdjE7Z3VsdjFiBnByb3RvMw", [file_google_protobuf_timestamp]);
+  fileDesc("ChBndWwvdjEvZ3VsLnByb3RvEgZndWwudjEiHQobTGlzdFJlZ2lzdHJhYmxlUm9vdHNSZXF1ZXN0IjEKD1JlZ2lzdHJhYmxlUm9vdBIPCgdyb290X2lkGAEgASgJEg0KBWxhYmVsGAIgASgJIkYKHExpc3RSZWdpc3RyYWJsZVJvb3RzUmVzcG9uc2USJgoFcm9vdHMYASADKAsyFy5ndWwudjEuUmVnaXN0cmFibGVSb290IkYKHEJyb3dzZVJlZ2lzdHJhYmxlUm9vdFJlcXVlc3QSDwoHcm9vdF9pZBgBIAEoCRIVCg1yZWxhdGl2ZV9wYXRoGAIgASgJIjsKFFJlZ2lzdHJhYmxlRGlyZWN0b3J5EgwKBG5hbWUYASABKAkSFQoNcmVsYXRpdmVfcGF0aBgCIAEoCSJSCh1Ccm93c2VSZWdpc3RyYWJsZVJvb3RSZXNwb25zZRIxCgtkaXJlY3RvcmllcxgBIAMoCzIcLmd1bC52MS5SZWdpc3RyYWJsZURpcmVjdG9yeSIiCiBSZWdpc3RlckZyb21Ib3N0U2VsZWN0aW9uUmVxdWVzdCJKCiBSZWdpc3RlckZyb21BbGxvd2xpc3RQYXRoUmVxdWVzdBIPCgdyb290X2lkGAEgASgJEhUKDXJlbGF0aXZlX3BhdGgYAiABKAkiTAoOV29ya3NwYWNlRW50cnkSFAoMd29ya3NwYWNlX2lkGAEgASgJEhQKDGRpc3BsYXlfbmFtZRgCIAEoCRIOCgZoaWRkZW4YAyABKAgiWQoZUmVnaXN0ZXJXb3Jrc3BhY2VSZXNwb25zZRIpCgl3b3Jrc3BhY2UYASABKAsyFi5ndWwudjEuV29ya3NwYWNlRW50cnkSEQoJY2FuY2VsbGVkGAIgASgIIjIKGlJldmFsaWRhdGVXb3Jrc3BhY2VSZXF1ZXN0EhQKDHdvcmtzcGFjZV9pZBgBIAEoCSJIChtSZXZhbGlkYXRlV29ya3NwYWNlUmVzcG9uc2USKQoJd29ya3NwYWNlGAEgASgLMhYuZ3VsLnYxLldvcmtzcGFjZUVudHJ5IhcKFUxpc3RXb3Jrc3BhY2VzUmVxdWVzdCJEChZMaXN0V29ya3NwYWNlc1Jlc3BvbnNlEioKCndvcmtzcGFjZXMYASADKAsyFi5ndWwudjEuV29ya3NwYWNlRW50cnkiaQoYTGlzdFByb21wdEhpc3RvcnlSZXF1ZXN0EhIKCnNlc3Npb25faWQYASABKAkSFwoKcGFnZV90b2tlbhgCIAEoCUgAiAEBEhEKCXBhZ2Vfc2l6ZRgDIAEoDUINCgtfcGFnZV90b2tlbiK4AQoRUHJvbXB0SGlzdG9yeUl0ZW0SFgoOcHJvbXB0X2l0ZW1faWQYASABKAkSDwoHb3JkaW5hbBgCIAEoBBIvCgthY2NlcHRlZF9hdBgDIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXASDwoHcHJldmlldxgEIAEoCRIZChFwcmV2aWV3X3RydW5jYXRlZBgFIAEoCBIdChVjb252ZXJzYXRpb25fZW50cnlfaWQYBiABKAki/wEKGUxpc3RQcm9tcHRIaXN0b3J5UmVzcG9uc2USEwoLc25hcHNob3RfaWQYASABKAkSKAoFaXRlbXMYAiADKAsyGS5ndWwudjEuUHJvbXB0SGlzdG9yeUl0ZW0SHAoPbmV4dF9wYWdlX3Rva2VuGAMgASgJSACIAQESGgoSdHJhdmVyc2FsX2NvbXBsZXRlGAQgASgIEiQKCWZyZXNobmVzcxgFIAEoDjIRLmd1bC52MS5GcmVzaG5lc3MSLwoLb2JzZXJ2ZWRfYXQYBiABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wQhIKEF9uZXh0X3BhZ2VfdG9rZW4iSQobR2V0UHJvbXB0SGlzdG9yeUl0ZW1SZXF1ZXN0EhIKCnNlc3Npb25faWQYASABKAkSFgoOcHJvbXB0X2l0ZW1faWQYAiABKAkiSgoOUHJvbXB0T3JpZ2luYWwSFQoLaW5saW5lX3V0ZjgYASABKAlIABIWCgxhcnRpZmFjdF9yZWYYAiABKAlIAEIJCgdjb250ZW50IsEBChxHZXRQcm9tcHRIaXN0b3J5SXRlbVJlc3BvbnNlEhYKDnByb21wdF9pdGVtX2lkGAEgASgJEg8KB29yZGluYWwYAiABKAQSLwoLYWNjZXB0ZWRfYXQYAyABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEh0KFWNvbnZlcnNhdGlvbl9lbnRyeV9pZBgEIAEoCRIoCghvcmlnaW5hbBgFIAEoCzIWLmd1bC52MS5Qcm9tcHRPcmlnaW5hbCLxAgoPRXhlY3V0aW9uQ291bnRzEh8KEm5vbnJldGlyZWRfbWVtYmVycxgBIAEoBEgAiAEBEh8KEm5vbnRlcm1pbmFsX3NwYXducxgCIAEoBEgBiAEBEh4KEXBlbmRpbmdfYXBwcm92YWxzGAMgASgESAKIAQESJgoZYWNjZXB0ZWRfdW5maW5pc2hlZF90YXNrcxgEIAEoBEgDiAEBEiIKFXVua25vd25fb3V0Y29tZV90YXNrcxgFIAEoBEgEiAEBEh4KEXB1Ymxpc2hlZF9yZXN1bHRzGAYgASgESAWIAQFCFQoTX25vbnJldGlyZWRfbWVtYmVyc0IVChNfbm9udGVybWluYWxfc3Bhd25zQhQKEl9wZW5kaW5nX2FwcHJvdmFsc0IcChpfYWNjZXB0ZWRfdW5maW5pc2hlZF90YXNrc0IYChZfdW5rbm93bl9vdXRjb21lX3Rhc2tzQhQKEl9wdWJsaXNoZWRfcmVzdWx0cyIuChhHZXRFeGVjdXRpb25TdGF0ZVJlcXVlc3QSEgoKc2Vzc2lvbl9pZBgBIAEoCSKHBAoZR2V0RXhlY3V0aW9uU3RhdGVSZXNwb25zZRISCgpzZXNzaW9uX2lkGAEgASgJEiQKCWZyZXNobmVzcxgCIAEoDjIRLmd1bC52MS5GcmVzaG5lc3MSLwoLb2JzZXJ2ZWRfYXQYAyABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEhUKDXN0YXRlX3ZlcnNpb24YBCABKAkSKwoJbGlmZWN5Y2xlGAUgASgOMhguZ3VsLnYxLlNlc3Npb25MaWZlY3ljbGUSLwoLY29tcG9zaXRpb24YBiABKA4yGi5ndWwudjEuU2Vzc2lvbkNvbXBvc2l0aW9uEi8KD2FwcHJvdmFsX3BvbGljeRgHIAEoDjIWLmd1bC52MS5BcHByb3ZhbFBvbGljeRIeChZzcGVjaWFsaXN0X3BvbGljeV9uYW1lGAggASgJEicKBmNvdW50cxgJIAEoCzIXLmd1bC52MS5FeGVjdXRpb25Db3VudHMSLQoOY2xvc2VfcHJvZ3Jlc3MYCiABKA4yFS5ndWwudjEuQ2xvc2VQcm9ncmVzcxInCghyZWNvdmVyeRgLIAEoDjIVLmd1bC52MS5SZWNvdmVyeUNsYXNzEiAKE2Nsb3NlX29wZXJhdGlvbl9yZWYYDCABKAlIAIgBAUIWChRfY2xvc2Vfb3BlcmF0aW9uX3JlZiJtChxMaXN0U3BlY2lhbGlzdFJlc3VsdHNSZXF1ZXN0EhIKCnNlc3Npb25faWQYASABKAkSFwoKcGFnZV90b2tlbhgCIAEoCUgAiAEBEhEKCXBhZ2Vfc2l6ZRgDIAEoDUINCgtfcGFnZV90b2tlbiKNAgoQU3BlY2lhbGlzdFJlc3VsdBIRCglyZXN1bHRfaWQYASABKAkSGgoSc3BlY2lhbGlzdF92aWV3X2lkGAIgASgJEhIKCnJvbGVfbGFiZWwYAyABKAkSGQoRcHVibGljYXRpb25fb3JkZXIYBCABKAQSMAoMcHVibGlzaGVkX2F0GAUgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBIuCgZmb3JtYXQYBiABKA4yHi5ndWwudjEuU3BlY2lhbGlzdFJlc3VsdEZvcm1hdBITCgtieXRlX2xlbmd0aBgHIAEoBBIOCgZzaGEyNTYYCCABKAkSFAoMYXJ0aWZhY3RfcmVmGAkgASgJIoICCh1MaXN0U3BlY2lhbGlzdFJlc3VsdHNSZXNwb25zZRITCgtzbmFwc2hvdF9pZBgBIAEoCRInCgVpdGVtcxgCIAMoCzIYLmd1bC52MS5TcGVjaWFsaXN0UmVzdWx0EhwKD25leHRfcGFnZV90b2tlbhgDIAEoCUgAiAEBEhoKEnRyYXZlcnNhbF9jb21wbGV0ZRgEIAEoCBIkCglmcmVzaG5lc3MYBSABKA4yES5ndWwudjEuRnJlc2huZXNzEi8KC29ic2VydmVkX2F0GAYgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcEISChBfbmV4dF9wYWdlX3Rva2VuIlMKC0RvbWFpbkVycm9yEh8KBGNvZGUYASABKA4yES5ndWwudjEuRXJyb3JDb2RlEiMKBmFjdGlvbhgCIAEoDjITLmd1bC52MS5BY3Rpb25DbGFzcyJQChNDbG9zZVJ1bnRpbWVSZXF1ZXN0EhIKCnNlc3Npb25faWQYASABKAkSEQoJaW50ZXJydXB0GAIgASgIEhIKCmF0dGVtcHRfaWQYAyABKAki2QEKDENsb3NlT3V0Y29tZRIjCgZzdGF0dXMYASABKA4yEy5ndWwudjEuQ2xvc2VTdGF0dXMSGAoQY2xvc2VfYXR0ZW1wdF9pZBgCIAEoCRIgChNjbG9zZV9vcGVyYXRpb25fcmVmGAMgASgJSACIAQESJgoJcmVqZWN0aW9uGAQgASgLMhMuZ3VsLnYxLkRvbWFpbkVycm9yEigKC25leHRfYWN0aW9uGAUgASgOMhMuZ3VsLnYxLkFjdGlvbkNsYXNzQhYKFF9jbG9zZV9vcGVyYXRpb25fcmVmIj0KFENsb3NlUnVudGltZVJlc3BvbnNlEiUKB291dGNvbWUYASABKAsyFC5ndWwudjEuQ2xvc2VPdXRjb21lIj4KEkdldE1ldGFkYXRhUmVxdWVzdBISCgpzZXNzaW9uX2lkGAEgASgJEhQKDGFydGlmYWN0X3JlZhgCIAEoCSJkChNHZXRNZXRhZGF0YVJlc3BvbnNlEhQKDGFydGlmYWN0X3JlZhgBIAEoCRISCgptZWRpYV90eXBlGAIgASgJEhMKC2J5dGVfbGVuZ3RoGAMgASgEEg4KBnNoYTI1NhgEIAEoCSJcChBSZWFkQ2h1bmtSZXF1ZXN0EhIKCnNlc3Npb25faWQYASABKAkSFAoMYXJ0aWZhY3RfcmVmGAIgASgJEg4KBm9mZnNldBgDIAEoBBIOCgZsZW5ndGgYBCABKA0iRwoRUmVhZENodW5rUmVzcG9uc2USDAoEZGF0YRgBIAEoDBIUCgx0b3RhbF9sZW5ndGgYAiABKAQSDgoGc2hhMjU2GAMgASgJKmsKCUZyZXNobmVzcxIZChVGUkVTSE5FU1NfVU5TUEVDSUZJRUQQABITCg9GUkVTSE5FU1NfRlJFU0gQARITCg9GUkVTSE5FU1NfU1RBTEUQAhIZChVGUkVTSE5FU1NfVU5BVkFJTEFCTEUQAyq5AQoQU2Vzc2lvbkxpZmVjeWNsZRIhCh1TRVNTSU9OX0xJRkVDWUNMRV9VTlNQRUNJRklFRBAAEhwKGFNFU1NJT05fTElGRUNZQ0xFX0FDVElWRRABEh0KGVNFU1NJT05fTElGRUNZQ0xFX0NMT1NJTkcQAhIcChhTRVNTSU9OX0xJRkVDWUNMRV9DTE9TRUQQAxInCiNTRVNTSU9OX0xJRkVDWUNMRV9SRUNPVkVSWV9SRVFVSVJFRBAEKmUKElNlc3Npb25Db21wb3NpdGlvbhIjCh9TRVNTSU9OX0NPTVBPU0lUSU9OX1VOU1BFQ0lGSUVEEAASKgomU0VTU0lPTl9DT01QT1NJVElPTl9CUk9LRVJFRF9ISUVSQVJDSFkQASpdCg5BcHByb3ZhbFBvbGljeRIfChtBUFBST1ZBTF9QT0xJQ1lfVU5TUEVDSUZJRUQQABIqCiZBUFBST1ZBTF9QT0xJQ1lfVVNFUl9BUFBST1ZBTF9SRVFVSVJFRBABKs0BCg1DbG9zZVByb2dyZXNzEh4KGkNMT1NFX1BST0dSRVNTX1VOU1BFQ0lGSUVEEAASFwoTQ0xPU0VfUFJPR1JFU1NfTk9ORRABEhsKF0NMT1NFX1BST0dSRVNTX1NFVFRMSU5HEAISHAoYQ0xPU0VfUFJPR1JFU1NfQ09ORklSTUVEEAMSIgoeQ0xPU0VfUFJPR1JFU1NfT1VUQ09NRV9VTktOT1dOEAQSJAogQ0xPU0VfUFJPR1JFU1NfUkVDT1ZFUllfUkVRVUlSRUQQBSq5AQoNUmVjb3ZlcnlDbGFzcxIeChpSRUNPVkVSWV9DTEFTU19VTlNQRUNJRklFRBAAEhcKE1JFQ09WRVJZX0NMQVNTX05PTkUQARIkCiBSRUNPVkVSWV9DTEFTU19TTkFQU0hPVF9SRVFVSVJFRBACEiUKIVJFQ09WRVJZX0NMQVNTX1JFQ09OQ0lMRV9SRVFVSVJFRBADEiIKHlJFQ09WRVJZX0NMQVNTX09VVENPTUVfVU5LTk9XThAEKmoKFlNwZWNpYWxpc3RSZXN1bHRGb3JtYXQSKAokU1BFQ0lBTElTVF9SRVNVTFRfRk9STUFUX1VOU1BFQ0lGSUVEEAASJgoiU1BFQ0lBTElTVF9SRVNVTFRfRk9STUFUX1VURjhfVEVYVBABKuYJCglFcnJvckNvZGUSGgoWRVJST1JfQ09ERV9VTlNQRUNJRklFRBAAEiQKIEVSUk9SX0NPREVfVFJBTlNQT1JUX1VOQVZBSUxBQkxFEAESIAocRVJST1JfQ09ERV9ERUFETElORV9FWENFRURFRBACEiQKIEVSUk9SX0NPREVfUFJPVE9DT0xfSU5DT01QQVRJQkxFEAMSIgoeRVJST1JfQ09ERV9DT05UUk9MTEVSX01JU01BVENIEAQSKQolRVJST1JfQ09ERV9DT05UUk9MTEVSX0NBUlJJRVJfSU5WQUxJRBAFEjQKMEVSUk9SX0NPREVfV1JJVEVfQ09OVElOVUFUSU9OX0NPTlRST0xMRVJfSU5WQUxJRBAGEh4KGkVSUk9SX0NPREVfV1JJVEVSX0NPTkZMSUNUEAcSLQopRVJST1JfQ09ERV9USFJFQURMRVNTX1JFUVVJUkVTX1dSSVRFX1RVUk4QCBIgChxFUlJPUl9DT0RFX0lOVEVSQUNUSU9OX1NUQUxFEAkSKwonRVJST1JfQ09ERV9JTlRFUkFDVElPTl9BTFJFQURZX1JFU09MVkVEEAoSIAocRVJST1JfQ09ERV9SRUNPVkVSWV9SRVFVSVJFRBALEh4KGkVSUk9SX0NPREVfT1VUQ09NRV9VTktOT1dOEAwSHAoYRVJST1JfQ09ERV9TTE9XX0NPTlNVTUVSEA0SIwofRVJST1JfQ09ERV9BUlRJRkFDVF9VTkFWQUlMQUJMRRAOEigKJEVSUk9SX0NPREVfVU5TVVBQT1JURURfUEFUSF9FTkNPRElORxAPEiEKHUVSUk9SX0NPREVfUlVOX1NUQVRFX0NPTkZMSUNUEBASKQolRVJST1JfQ09ERV9SUENfU0VSVkVSX0FMUkVBRFlfUlVOTklORxAREicKI0VSUk9SX0NPREVfT1BFUkFUT1JfQUNUSU9OX1JFUVVJUkVEEBISIQodRVJST1JfQ09ERV9JTlZBTElEX1BBR0VfVE9LRU4QExIhCh1FUlJPUl9DT0RFX1BBR0VfVE9LRU5fRVhQSVJFRBAUEh4KGkVSUk9SX0NPREVfSU5WQUxJRF9SRVFVRVNUEBUSGwoXRVJST1JfQ09ERV9VTkFVVEhPUklaRUQQFhIhCh1FUlJPUl9DT0RFX1NPVVJDRV9VTkFWQUlMQUJMRRAXEh0KGUVSUk9SX0NPREVfTElNSVRfRVhDRUVERUQQGBIfChtFUlJPUl9DT0RFX1BST1ZJREVSX0JMT0NLRUQQGRInCiNFUlJPUl9DT0RFX1JVTlRJTUVfUEFUSF9VTkFWQUlMQUJMRRAaEi4KKkVSUk9SX0NPREVfV09SS1NQQUNFX1NFTEVDVElPTl9VTkFWQUlMQUJMRRAbEigKJEVSUk9SX0NPREVfV09SS1NQQUNFX05PVF9QUk9WSVNJT05FRBAcEh4KGkVSUk9SX0NPREVfUFJPRklMRV9NSVNTSU5HEB0SKQolRVJST1JfQ09ERV9QUk9GSUxFX1NFUlZFUl9VTkFWQUlMQUJMRRAeEioKJkVSUk9SX0NPREVfV09SS1NQQUNFX0lERU5USVRZX01JU01BVENIEB8SJgoiRVJST1JfQ09ERV9QRVJTSVNURU5DRV9VTkFWQUlMQUJMRRAgKuIFCgtBY3Rpb25DbGFzcxIcChhBQ1RJT05fQ0xBU1NfVU5TUEVDSUZJRUQQABIWChJBQ1RJT05fQ0xBU1NfQUJPUlQQARIcChhBQ1RJT05fQ0xBU1NfRklYX1JFUVVFU1QQAhIlCiFBQ1RJT05fQ0xBU1NfUkVGUkVTSF9DQVBBQklMSVRJRVMQAxIhCh1BQ1RJT05fQ0xBU1NfUkVGUkVTSF9TTkFQU0hPVBAEEiIKHkFDVElPTl9DTEFTU19WRVJJRllfQ09OVFJPTExFUhAFEioKJkFDVElPTl9DTEFTU19VU0VfQ09NUEFUSUJMRV9DT05UUk9MTEVSEAYSMgouQUNUSU9OX0NMQVNTX1VTRV9ORVdfU0FNRV9QUklOQ0lQQUxfQ09OVFJPTExFUhAHEiYKIkFDVElPTl9DTEFTU19VU0VfU1VQUE9SVEVEX1BST0ZJTEUQCBIkCiBBQ1RJT05fQ0xBU1NfVVNFX1RFUk1JTkFMX1NPVVJDRRAJEiIKHkFDVElPTl9DTEFTU19TVUJNSVRfV1JJVEVfVFVSThAKEhUKEUFDVElPTl9DTEFTU19XQUlUEAsSLAooQUNUSU9OX0NMQVNTX1JFVFJZX0VYQUNUX0lERU1QT1RFTkNZX0tFWRAMEiQKIEFDVElPTl9DTEFTU19SRUZFVENIX0lOVEVSQUNUSU9OEA0SHgoaQUNUSU9OX0NMQVNTX1JFQ09OQ0lMRV9SVU4QDhIcChhBQ1RJT05fQ0xBU1NfUkVDT1ZFUl9SVU4QDxIwCixBQ1RJT05fQ0xBU1NfUkVDT05ORUNUX0ZST01fQ09NTUlUVEVEX0NVUlNPUhAQEiAKHEFDVElPTl9DTEFTU19SRVNUQVJUX0dBVEVXQVkQERIgChxBQ1RJT05fQ0xBU1NfT1BFUkFUT1JfUkVQQUlSEBISIAocQUNUSU9OX0NMQVNTX0ZJWF9TT0NLRVRfUEFUSBATKsYBCgtDbG9zZVN0YXR1cxIcChhDTE9TRV9TVEFUVVNfVU5TUEVDSUZJRUQQABIZChVDTE9TRV9TVEFUVVNfUkVKRUNURUQQARIcChhDTE9TRV9TVEFUVVNfSU5fUFJPR1JFU1MQAhIaChZDTE9TRV9TVEFUVVNfQ09ORklSTUVEEAMSIAocQ0xPU0VfU1RBVFVTX09VVENPTUVfVU5LTk9XThAEEiIKHkNMT1NFX1NUQVRVU19SRUNPVkVSWV9SRVFVSVJFRBAFMuwEChxXb3Jrc3BhY2VQcmVzZW50YXRpb25TZXJ2aWNlEmEKFExpc3RSZWdpc3RyYWJsZVJvb3RzEiMuZ3VsLnYxLkxpc3RSZWdpc3RyYWJsZVJvb3RzUmVxdWVzdBokLmd1bC52MS5MaXN0UmVnaXN0cmFibGVSb290c1Jlc3BvbnNlEmQKFUJyb3dzZVJlZ2lzdHJhYmxlUm9vdBIkLmd1bC52MS5Ccm93c2VSZWdpc3RyYWJsZVJvb3RSZXF1ZXN0GiUuZ3VsLnYxLkJyb3dzZVJlZ2lzdHJhYmxlUm9vdFJlc3BvbnNlEmgKGVJlZ2lzdGVyRnJvbUhvc3RTZWxlY3Rpb24SKC5ndWwudjEuUmVnaXN0ZXJGcm9tSG9zdFNlbGVjdGlvblJlcXVlc3QaIS5ndWwudjEuUmVnaXN0ZXJXb3Jrc3BhY2VSZXNwb25zZRJoChlSZWdpc3RlckZyb21BbGxvd2xpc3RQYXRoEiguZ3VsLnYxLlJlZ2lzdGVyRnJvbUFsbG93bGlzdFBhdGhSZXF1ZXN0GiEuZ3VsLnYxLlJlZ2lzdGVyV29ya3NwYWNlUmVzcG9uc2USXgoTUmV2YWxpZGF0ZVdvcmtzcGFjZRIiLmd1bC52MS5SZXZhbGlkYXRlV29ya3NwYWNlUmVxdWVzdBojLmd1bC52MS5SZXZhbGlkYXRlV29ya3NwYWNlUmVzcG9uc2USTwoOTGlzdFdvcmtzcGFjZXMSHS5ndWwudjEuTGlzdFdvcmtzcGFjZXNSZXF1ZXN0Gh4uZ3VsLnYxLkxpc3RXb3Jrc3BhY2VzUmVzcG9uc2Uy3gMKFERpcmVjdFNlc3Npb25TZXJ2aWNlElgKEUxpc3RQcm9tcHRIaXN0b3J5EiAuZ3VsLnYxLkxpc3RQcm9tcHRIaXN0b3J5UmVxdWVzdBohLmd1bC52MS5MaXN0UHJvbXB0SGlzdG9yeVJlc3BvbnNlEmEKFEdldFByb21wdEhpc3RvcnlJdGVtEiMuZ3VsLnYxLkdldFByb21wdEhpc3RvcnlJdGVtUmVxdWVzdBokLmd1bC52MS5HZXRQcm9tcHRIaXN0b3J5SXRlbVJlc3BvbnNlElgKEUdldEV4ZWN1dGlvblN0YXRlEiAuZ3VsLnYxLkdldEV4ZWN1dGlvblN0YXRlUmVxdWVzdBohLmd1bC52MS5HZXRFeGVjdXRpb25TdGF0ZVJlc3BvbnNlEmQKFUxpc3RTcGVjaWFsaXN0UmVzdWx0cxIkLmd1bC52MS5MaXN0U3BlY2lhbGlzdFJlc3VsdHNSZXF1ZXN0GiUuZ3VsLnYxLkxpc3RTcGVjaWFsaXN0UmVzdWx0c1Jlc3BvbnNlEkkKDENsb3NlUnVudGltZRIbLmd1bC52MS5DbG9zZVJ1bnRpbWVSZXF1ZXN0GhwuZ3VsLnYxLkNsb3NlUnVudGltZVJlc3BvbnNlMqcBChtBcnRpZmFjdFByZXNlbnRhdGlvblNlcnZpY2USRgoLR2V0TWV0YWRhdGESGi5ndWwudjEuR2V0TWV0YWRhdGFSZXF1ZXN0GhsuZ3VsLnYxLkdldE1ldGFkYXRhUmVzcG9uc2USQAoJUmVhZENodW5rEhguZ3VsLnYxLlJlYWRDaHVua1JlcXVlc3QaGS5ndWwudjEuUmVhZENodW5rUmVzcG9uc2VCOVo3Z2l0aHViLmNvbS9yb290a2VybmVsL2d1bC9hcGkvZ2VuZXJhdGVkL2dvL2d1bC92MTtndWx2MWIGcHJvdG8z", [file_google_protobuf_timestamp]);
+
+/**
+ * @generated from message gul.v1.ListRegistrableRootsRequest
+ */
+export type ListRegistrableRootsRequest = Message<"gul.v1.ListRegistrableRootsRequest"> & {
+};
+
+/**
+ * Describes the message gul.v1.ListRegistrableRootsRequest.
+ * Use `create(ListRegistrableRootsRequestSchema)` to create a new message.
+ */
+export const ListRegistrableRootsRequestSchema: GenMessage<ListRegistrableRootsRequest> = /*@__PURE__*/
+  messageDesc(file_gul_v1_gul, 0);
+
+/**
+ * @generated from message gul.v1.RegistrableRoot
+ */
+export type RegistrableRoot = Message<"gul.v1.RegistrableRoot"> & {
+  /**
+   * @generated from field: string root_id = 1;
+   */
+  rootId: string;
+
+  /**
+   * @generated from field: string label = 2;
+   */
+  label: string;
+};
+
+/**
+ * Describes the message gul.v1.RegistrableRoot.
+ * Use `create(RegistrableRootSchema)` to create a new message.
+ */
+export const RegistrableRootSchema: GenMessage<RegistrableRoot> = /*@__PURE__*/
+  messageDesc(file_gul_v1_gul, 1);
+
+/**
+ * @generated from message gul.v1.ListRegistrableRootsResponse
+ */
+export type ListRegistrableRootsResponse = Message<"gul.v1.ListRegistrableRootsResponse"> & {
+  /**
+   * @generated from field: repeated gul.v1.RegistrableRoot roots = 1;
+   */
+  roots: RegistrableRoot[];
+};
+
+/**
+ * Describes the message gul.v1.ListRegistrableRootsResponse.
+ * Use `create(ListRegistrableRootsResponseSchema)` to create a new message.
+ */
+export const ListRegistrableRootsResponseSchema: GenMessage<ListRegistrableRootsResponse> = /*@__PURE__*/
+  messageDesc(file_gul_v1_gul, 2);
+
+/**
+ * @generated from message gul.v1.BrowseRegistrableRootRequest
+ */
+export type BrowseRegistrableRootRequest = Message<"gul.v1.BrowseRegistrableRootRequest"> & {
+  /**
+   * @generated from field: string root_id = 1;
+   */
+  rootId: string;
+
+  /**
+   * @generated from field: string relative_path = 2;
+   */
+  relativePath: string;
+};
+
+/**
+ * Describes the message gul.v1.BrowseRegistrableRootRequest.
+ * Use `create(BrowseRegistrableRootRequestSchema)` to create a new message.
+ */
+export const BrowseRegistrableRootRequestSchema: GenMessage<BrowseRegistrableRootRequest> = /*@__PURE__*/
+  messageDesc(file_gul_v1_gul, 3);
+
+/**
+ * @generated from message gul.v1.RegistrableDirectory
+ */
+export type RegistrableDirectory = Message<"gul.v1.RegistrableDirectory"> & {
+  /**
+   * @generated from field: string name = 1;
+   */
+  name: string;
+
+  /**
+   * @generated from field: string relative_path = 2;
+   */
+  relativePath: string;
+};
+
+/**
+ * Describes the message gul.v1.RegistrableDirectory.
+ * Use `create(RegistrableDirectorySchema)` to create a new message.
+ */
+export const RegistrableDirectorySchema: GenMessage<RegistrableDirectory> = /*@__PURE__*/
+  messageDesc(file_gul_v1_gul, 4);
+
+/**
+ * @generated from message gul.v1.BrowseRegistrableRootResponse
+ */
+export type BrowseRegistrableRootResponse = Message<"gul.v1.BrowseRegistrableRootResponse"> & {
+  /**
+   * @generated from field: repeated gul.v1.RegistrableDirectory directories = 1;
+   */
+  directories: RegistrableDirectory[];
+};
+
+/**
+ * Describes the message gul.v1.BrowseRegistrableRootResponse.
+ * Use `create(BrowseRegistrableRootResponseSchema)` to create a new message.
+ */
+export const BrowseRegistrableRootResponseSchema: GenMessage<BrowseRegistrableRootResponse> = /*@__PURE__*/
+  messageDesc(file_gul_v1_gul, 5);
+
+/**
+ * @generated from message gul.v1.RegisterFromHostSelectionRequest
+ */
+export type RegisterFromHostSelectionRequest = Message<"gul.v1.RegisterFromHostSelectionRequest"> & {
+};
+
+/**
+ * Describes the message gul.v1.RegisterFromHostSelectionRequest.
+ * Use `create(RegisterFromHostSelectionRequestSchema)` to create a new message.
+ */
+export const RegisterFromHostSelectionRequestSchema: GenMessage<RegisterFromHostSelectionRequest> = /*@__PURE__*/
+  messageDesc(file_gul_v1_gul, 6);
+
+/**
+ * @generated from message gul.v1.RegisterFromAllowlistPathRequest
+ */
+export type RegisterFromAllowlistPathRequest = Message<"gul.v1.RegisterFromAllowlistPathRequest"> & {
+  /**
+   * @generated from field: string root_id = 1;
+   */
+  rootId: string;
+
+  /**
+   * @generated from field: string relative_path = 2;
+   */
+  relativePath: string;
+};
+
+/**
+ * Describes the message gul.v1.RegisterFromAllowlistPathRequest.
+ * Use `create(RegisterFromAllowlistPathRequestSchema)` to create a new message.
+ */
+export const RegisterFromAllowlistPathRequestSchema: GenMessage<RegisterFromAllowlistPathRequest> = /*@__PURE__*/
+  messageDesc(file_gul_v1_gul, 7);
+
+/**
+ * @generated from message gul.v1.WorkspaceEntry
+ */
+export type WorkspaceEntry = Message<"gul.v1.WorkspaceEntry"> & {
+  /**
+   * @generated from field: string workspace_id = 1;
+   */
+  workspaceId: string;
+
+  /**
+   * @generated from field: string display_name = 2;
+   */
+  displayName: string;
+
+  /**
+   * @generated from field: bool hidden = 3;
+   */
+  hidden: boolean;
+};
+
+/**
+ * Describes the message gul.v1.WorkspaceEntry.
+ * Use `create(WorkspaceEntrySchema)` to create a new message.
+ */
+export const WorkspaceEntrySchema: GenMessage<WorkspaceEntry> = /*@__PURE__*/
+  messageDesc(file_gul_v1_gul, 8);
+
+/**
+ * @generated from message gul.v1.RegisterWorkspaceResponse
+ */
+export type RegisterWorkspaceResponse = Message<"gul.v1.RegisterWorkspaceResponse"> & {
+  /**
+   * @generated from field: gul.v1.WorkspaceEntry workspace = 1;
+   */
+  workspace?: WorkspaceEntry | undefined;
+
+  /**
+   * @generated from field: bool cancelled = 2;
+   */
+  cancelled: boolean;
+};
+
+/**
+ * Describes the message gul.v1.RegisterWorkspaceResponse.
+ * Use `create(RegisterWorkspaceResponseSchema)` to create a new message.
+ */
+export const RegisterWorkspaceResponseSchema: GenMessage<RegisterWorkspaceResponse> = /*@__PURE__*/
+  messageDesc(file_gul_v1_gul, 9);
+
+/**
+ * @generated from message gul.v1.RevalidateWorkspaceRequest
+ */
+export type RevalidateWorkspaceRequest = Message<"gul.v1.RevalidateWorkspaceRequest"> & {
+  /**
+   * @generated from field: string workspace_id = 1;
+   */
+  workspaceId: string;
+};
+
+/**
+ * Describes the message gul.v1.RevalidateWorkspaceRequest.
+ * Use `create(RevalidateWorkspaceRequestSchema)` to create a new message.
+ */
+export const RevalidateWorkspaceRequestSchema: GenMessage<RevalidateWorkspaceRequest> = /*@__PURE__*/
+  messageDesc(file_gul_v1_gul, 10);
+
+/**
+ * @generated from message gul.v1.RevalidateWorkspaceResponse
+ */
+export type RevalidateWorkspaceResponse = Message<"gul.v1.RevalidateWorkspaceResponse"> & {
+  /**
+   * @generated from field: gul.v1.WorkspaceEntry workspace = 1;
+   */
+  workspace?: WorkspaceEntry | undefined;
+};
+
+/**
+ * Describes the message gul.v1.RevalidateWorkspaceResponse.
+ * Use `create(RevalidateWorkspaceResponseSchema)` to create a new message.
+ */
+export const RevalidateWorkspaceResponseSchema: GenMessage<RevalidateWorkspaceResponse> = /*@__PURE__*/
+  messageDesc(file_gul_v1_gul, 11);
+
+/**
+ * @generated from message gul.v1.ListWorkspacesRequest
+ */
+export type ListWorkspacesRequest = Message<"gul.v1.ListWorkspacesRequest"> & {
+};
+
+/**
+ * Describes the message gul.v1.ListWorkspacesRequest.
+ * Use `create(ListWorkspacesRequestSchema)` to create a new message.
+ */
+export const ListWorkspacesRequestSchema: GenMessage<ListWorkspacesRequest> = /*@__PURE__*/
+  messageDesc(file_gul_v1_gul, 12);
+
+/**
+ * @generated from message gul.v1.ListWorkspacesResponse
+ */
+export type ListWorkspacesResponse = Message<"gul.v1.ListWorkspacesResponse"> & {
+  /**
+   * @generated from field: repeated gul.v1.WorkspaceEntry workspaces = 1;
+   */
+  workspaces: WorkspaceEntry[];
+};
+
+/**
+ * Describes the message gul.v1.ListWorkspacesResponse.
+ * Use `create(ListWorkspacesResponseSchema)` to create a new message.
+ */
+export const ListWorkspacesResponseSchema: GenMessage<ListWorkspacesResponse> = /*@__PURE__*/
+  messageDesc(file_gul_v1_gul, 13);
 
 /**
  * @generated from message gul.v1.ListPromptHistoryRequest
@@ -39,7 +300,7 @@ export type ListPromptHistoryRequest = Message<"gul.v1.ListPromptHistoryRequest"
  * Use `create(ListPromptHistoryRequestSchema)` to create a new message.
  */
 export const ListPromptHistoryRequestSchema: GenMessage<ListPromptHistoryRequest> = /*@__PURE__*/
-  messageDesc(file_gul_v1_gul, 0);
+  messageDesc(file_gul_v1_gul, 14);
 
 /**
  * @generated from message gul.v1.PromptHistoryItem
@@ -81,7 +342,7 @@ export type PromptHistoryItem = Message<"gul.v1.PromptHistoryItem"> & {
  * Use `create(PromptHistoryItemSchema)` to create a new message.
  */
 export const PromptHistoryItemSchema: GenMessage<PromptHistoryItem> = /*@__PURE__*/
-  messageDesc(file_gul_v1_gul, 1);
+  messageDesc(file_gul_v1_gul, 15);
 
 /**
  * @generated from message gul.v1.ListPromptHistoryResponse
@@ -123,7 +384,7 @@ export type ListPromptHistoryResponse = Message<"gul.v1.ListPromptHistoryRespons
  * Use `create(ListPromptHistoryResponseSchema)` to create a new message.
  */
 export const ListPromptHistoryResponseSchema: GenMessage<ListPromptHistoryResponse> = /*@__PURE__*/
-  messageDesc(file_gul_v1_gul, 2);
+  messageDesc(file_gul_v1_gul, 16);
 
 /**
  * @generated from message gul.v1.GetPromptHistoryItemRequest
@@ -145,7 +406,7 @@ export type GetPromptHistoryItemRequest = Message<"gul.v1.GetPromptHistoryItemRe
  * Use `create(GetPromptHistoryItemRequestSchema)` to create a new message.
  */
 export const GetPromptHistoryItemRequestSchema: GenMessage<GetPromptHistoryItemRequest> = /*@__PURE__*/
-  messageDesc(file_gul_v1_gul, 3);
+  messageDesc(file_gul_v1_gul, 17);
 
 /**
  * @generated from message gul.v1.PromptOriginal
@@ -174,7 +435,7 @@ export type PromptOriginal = Message<"gul.v1.PromptOriginal"> & {
  * Use `create(PromptOriginalSchema)` to create a new message.
  */
 export const PromptOriginalSchema: GenMessage<PromptOriginal> = /*@__PURE__*/
-  messageDesc(file_gul_v1_gul, 4);
+  messageDesc(file_gul_v1_gul, 18);
 
 /**
  * @generated from message gul.v1.GetPromptHistoryItemResponse
@@ -211,7 +472,7 @@ export type GetPromptHistoryItemResponse = Message<"gul.v1.GetPromptHistoryItemR
  * Use `create(GetPromptHistoryItemResponseSchema)` to create a new message.
  */
 export const GetPromptHistoryItemResponseSchema: GenMessage<GetPromptHistoryItemResponse> = /*@__PURE__*/
-  messageDesc(file_gul_v1_gul, 5);
+  messageDesc(file_gul_v1_gul, 19);
 
 /**
  * @generated from message gul.v1.ExecutionCounts
@@ -253,7 +514,7 @@ export type ExecutionCounts = Message<"gul.v1.ExecutionCounts"> & {
  * Use `create(ExecutionCountsSchema)` to create a new message.
  */
 export const ExecutionCountsSchema: GenMessage<ExecutionCounts> = /*@__PURE__*/
-  messageDesc(file_gul_v1_gul, 6);
+  messageDesc(file_gul_v1_gul, 20);
 
 /**
  * @generated from message gul.v1.GetExecutionStateRequest
@@ -270,7 +531,7 @@ export type GetExecutionStateRequest = Message<"gul.v1.GetExecutionStateRequest"
  * Use `create(GetExecutionStateRequestSchema)` to create a new message.
  */
 export const GetExecutionStateRequestSchema: GenMessage<GetExecutionStateRequest> = /*@__PURE__*/
-  messageDesc(file_gul_v1_gul, 7);
+  messageDesc(file_gul_v1_gul, 21);
 
 /**
  * @generated from message gul.v1.GetExecutionStateResponse
@@ -342,7 +603,7 @@ export type GetExecutionStateResponse = Message<"gul.v1.GetExecutionStateRespons
  * Use `create(GetExecutionStateResponseSchema)` to create a new message.
  */
 export const GetExecutionStateResponseSchema: GenMessage<GetExecutionStateResponse> = /*@__PURE__*/
-  messageDesc(file_gul_v1_gul, 8);
+  messageDesc(file_gul_v1_gul, 22);
 
 /**
  * @generated from message gul.v1.ListSpecialistResultsRequest
@@ -369,7 +630,7 @@ export type ListSpecialistResultsRequest = Message<"gul.v1.ListSpecialistResults
  * Use `create(ListSpecialistResultsRequestSchema)` to create a new message.
  */
 export const ListSpecialistResultsRequestSchema: GenMessage<ListSpecialistResultsRequest> = /*@__PURE__*/
-  messageDesc(file_gul_v1_gul, 9);
+  messageDesc(file_gul_v1_gul, 23);
 
 /**
  * @generated from message gul.v1.SpecialistResult
@@ -426,7 +687,7 @@ export type SpecialistResult = Message<"gul.v1.SpecialistResult"> & {
  * Use `create(SpecialistResultSchema)` to create a new message.
  */
 export const SpecialistResultSchema: GenMessage<SpecialistResult> = /*@__PURE__*/
-  messageDesc(file_gul_v1_gul, 10);
+  messageDesc(file_gul_v1_gul, 24);
 
 /**
  * @generated from message gul.v1.ListSpecialistResultsResponse
@@ -468,7 +729,7 @@ export type ListSpecialistResultsResponse = Message<"gul.v1.ListSpecialistResult
  * Use `create(ListSpecialistResultsResponseSchema)` to create a new message.
  */
 export const ListSpecialistResultsResponseSchema: GenMessage<ListSpecialistResultsResponse> = /*@__PURE__*/
-  messageDesc(file_gul_v1_gul, 11);
+  messageDesc(file_gul_v1_gul, 25);
 
 /**
  * @generated from message gul.v1.DomainError
@@ -490,7 +751,7 @@ export type DomainError = Message<"gul.v1.DomainError"> & {
  * Use `create(DomainErrorSchema)` to create a new message.
  */
 export const DomainErrorSchema: GenMessage<DomainError> = /*@__PURE__*/
-  messageDesc(file_gul_v1_gul, 12);
+  messageDesc(file_gul_v1_gul, 26);
 
 /**
  * @generated from message gul.v1.CloseRuntimeRequest
@@ -517,7 +778,7 @@ export type CloseRuntimeRequest = Message<"gul.v1.CloseRuntimeRequest"> & {
  * Use `create(CloseRuntimeRequestSchema)` to create a new message.
  */
 export const CloseRuntimeRequestSchema: GenMessage<CloseRuntimeRequest> = /*@__PURE__*/
-  messageDesc(file_gul_v1_gul, 13);
+  messageDesc(file_gul_v1_gul, 27);
 
 /**
  * @generated from message gul.v1.CloseOutcome
@@ -554,7 +815,7 @@ export type CloseOutcome = Message<"gul.v1.CloseOutcome"> & {
  * Use `create(CloseOutcomeSchema)` to create a new message.
  */
 export const CloseOutcomeSchema: GenMessage<CloseOutcome> = /*@__PURE__*/
-  messageDesc(file_gul_v1_gul, 14);
+  messageDesc(file_gul_v1_gul, 28);
 
 /**
  * @generated from message gul.v1.CloseRuntimeResponse
@@ -571,7 +832,7 @@ export type CloseRuntimeResponse = Message<"gul.v1.CloseRuntimeResponse"> & {
  * Use `create(CloseRuntimeResponseSchema)` to create a new message.
  */
 export const CloseRuntimeResponseSchema: GenMessage<CloseRuntimeResponse> = /*@__PURE__*/
-  messageDesc(file_gul_v1_gul, 15);
+  messageDesc(file_gul_v1_gul, 29);
 
 /**
  * @generated from message gul.v1.GetMetadataRequest
@@ -593,7 +854,7 @@ export type GetMetadataRequest = Message<"gul.v1.GetMetadataRequest"> & {
  * Use `create(GetMetadataRequestSchema)` to create a new message.
  */
 export const GetMetadataRequestSchema: GenMessage<GetMetadataRequest> = /*@__PURE__*/
-  messageDesc(file_gul_v1_gul, 16);
+  messageDesc(file_gul_v1_gul, 30);
 
 /**
  * @generated from message gul.v1.GetMetadataResponse
@@ -625,7 +886,7 @@ export type GetMetadataResponse = Message<"gul.v1.GetMetadataResponse"> & {
  * Use `create(GetMetadataResponseSchema)` to create a new message.
  */
 export const GetMetadataResponseSchema: GenMessage<GetMetadataResponse> = /*@__PURE__*/
-  messageDesc(file_gul_v1_gul, 17);
+  messageDesc(file_gul_v1_gul, 31);
 
 /**
  * @generated from message gul.v1.ReadChunkRequest
@@ -657,7 +918,7 @@ export type ReadChunkRequest = Message<"gul.v1.ReadChunkRequest"> & {
  * Use `create(ReadChunkRequestSchema)` to create a new message.
  */
 export const ReadChunkRequestSchema: GenMessage<ReadChunkRequest> = /*@__PURE__*/
-  messageDesc(file_gul_v1_gul, 18);
+  messageDesc(file_gul_v1_gul, 32);
 
 /**
  * @generated from message gul.v1.ReadChunkResponse
@@ -684,7 +945,7 @@ export type ReadChunkResponse = Message<"gul.v1.ReadChunkResponse"> & {
  * Use `create(ReadChunkResponseSchema)` to create a new message.
  */
 export const ReadChunkResponseSchema: GenMessage<ReadChunkResponse> = /*@__PURE__*/
-  messageDesc(file_gul_v1_gul, 19);
+  messageDesc(file_gul_v1_gul, 33);
 
 /**
  * @generated from enum gul.v1.Freshness
@@ -1031,6 +1292,36 @@ export enum ErrorCode {
    * @generated from enum value: ERROR_CODE_RUNTIME_PATH_UNAVAILABLE = 26;
    */
   RUNTIME_PATH_UNAVAILABLE = 26,
+
+  /**
+   * @generated from enum value: ERROR_CODE_WORKSPACE_SELECTION_UNAVAILABLE = 27;
+   */
+  WORKSPACE_SELECTION_UNAVAILABLE = 27,
+
+  /**
+   * @generated from enum value: ERROR_CODE_WORKSPACE_NOT_PROVISIONED = 28;
+   */
+  WORKSPACE_NOT_PROVISIONED = 28,
+
+  /**
+   * @generated from enum value: ERROR_CODE_PROFILE_MISSING = 29;
+   */
+  PROFILE_MISSING = 29,
+
+  /**
+   * @generated from enum value: ERROR_CODE_PROFILE_SERVER_UNAVAILABLE = 30;
+   */
+  PROFILE_SERVER_UNAVAILABLE = 30,
+
+  /**
+   * @generated from enum value: ERROR_CODE_WORKSPACE_IDENTITY_MISMATCH = 31;
+   */
+  WORKSPACE_IDENTITY_MISMATCH = 31,
+
+  /**
+   * @generated from enum value: ERROR_CODE_PERSISTENCE_UNAVAILABLE = 32;
+   */
+  PERSISTENCE_UNAVAILABLE = 32,
 }
 
 /**
@@ -1195,6 +1486,61 @@ export const CloseStatusSchema: GenEnum<CloseStatus> = /*@__PURE__*/
  * These declarations are a browser contract, not an enabled product route.
  * Feature owners supply authenticated implementations in later tasks.
  *
+ * @generated from service gul.v1.WorkspacePresentationService
+ */
+export const WorkspacePresentationService: GenService<{
+  /**
+   * @generated from rpc gul.v1.WorkspacePresentationService.ListRegistrableRoots
+   */
+  listRegistrableRoots: {
+    methodKind: "unary";
+    input: typeof ListRegistrableRootsRequestSchema;
+    output: typeof ListRegistrableRootsResponseSchema;
+  },
+  /**
+   * @generated from rpc gul.v1.WorkspacePresentationService.BrowseRegistrableRoot
+   */
+  browseRegistrableRoot: {
+    methodKind: "unary";
+    input: typeof BrowseRegistrableRootRequestSchema;
+    output: typeof BrowseRegistrableRootResponseSchema;
+  },
+  /**
+   * @generated from rpc gul.v1.WorkspacePresentationService.RegisterFromHostSelection
+   */
+  registerFromHostSelection: {
+    methodKind: "unary";
+    input: typeof RegisterFromHostSelectionRequestSchema;
+    output: typeof RegisterWorkspaceResponseSchema;
+  },
+  /**
+   * @generated from rpc gul.v1.WorkspacePresentationService.RegisterFromAllowlistPath
+   */
+  registerFromAllowlistPath: {
+    methodKind: "unary";
+    input: typeof RegisterFromAllowlistPathRequestSchema;
+    output: typeof RegisterWorkspaceResponseSchema;
+  },
+  /**
+   * @generated from rpc gul.v1.WorkspacePresentationService.RevalidateWorkspace
+   */
+  revalidateWorkspace: {
+    methodKind: "unary";
+    input: typeof RevalidateWorkspaceRequestSchema;
+    output: typeof RevalidateWorkspaceResponseSchema;
+  },
+  /**
+   * @generated from rpc gul.v1.WorkspacePresentationService.ListWorkspaces
+   */
+  listWorkspaces: {
+    methodKind: "unary";
+    input: typeof ListWorkspacesRequestSchema;
+    output: typeof ListWorkspacesResponseSchema;
+  },
+}> = /*@__PURE__*/
+  serviceDesc(file_gul_v1_gul, 0);
+
+/**
  * @generated from service gul.v1.DirectSessionService
  */
 export const DirectSessionService: GenService<{
@@ -1239,7 +1585,7 @@ export const DirectSessionService: GenService<{
     output: typeof CloseRuntimeResponseSchema;
   },
 }> = /*@__PURE__*/
-  serviceDesc(file_gul_v1_gul, 0);
+  serviceDesc(file_gul_v1_gul, 1);
 
 /**
  * @generated from service gul.v1.ArtifactPresentationService
@@ -1262,4 +1608,4 @@ export const ArtifactPresentationService: GenService<{
     output: typeof ReadChunkResponseSchema;
   },
 }> = /*@__PURE__*/
-  serviceDesc(file_gul_v1_gul, 1);
+  serviceDesc(file_gul_v1_gul, 2);

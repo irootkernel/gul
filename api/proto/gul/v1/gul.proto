@@ -8,6 +8,72 @@ import "google/protobuf/timestamp.proto";
 
 // These declarations are a browser contract, not an enabled product route.
 // Feature owners supply authenticated implementations in later tasks.
+service WorkspacePresentationService {
+  rpc ListRegistrableRoots(ListRegistrableRootsRequest) returns (ListRegistrableRootsResponse);
+  rpc BrowseRegistrableRoot(BrowseRegistrableRootRequest) returns (BrowseRegistrableRootResponse);
+  rpc RegisterFromHostSelection(RegisterFromHostSelectionRequest) returns (RegisterWorkspaceResponse);
+  rpc RegisterFromAllowlistPath(RegisterFromAllowlistPathRequest) returns (RegisterWorkspaceResponse);
+  rpc RevalidateWorkspace(RevalidateWorkspaceRequest) returns (RevalidateWorkspaceResponse);
+  rpc ListWorkspaces(ListWorkspacesRequest) returns (ListWorkspacesResponse);
+}
+
+message ListRegistrableRootsRequest {}
+
+message RegistrableRoot {
+  string root_id = 1;
+  string label = 2;
+}
+
+message ListRegistrableRootsResponse {
+  repeated RegistrableRoot roots = 1;
+}
+
+message BrowseRegistrableRootRequest {
+  string root_id = 1;
+  string relative_path = 2;
+}
+
+message RegistrableDirectory {
+  string name = 1;
+  string relative_path = 2;
+}
+
+message BrowseRegistrableRootResponse {
+  repeated RegistrableDirectory directories = 1;
+}
+
+message RegisterFromHostSelectionRequest {}
+
+message RegisterFromAllowlistPathRequest {
+  string root_id = 1;
+  string relative_path = 2;
+}
+
+message WorkspaceEntry {
+  string workspace_id = 1;
+  string display_name = 2;
+  bool hidden = 3;
+}
+
+message RegisterWorkspaceResponse {
+  WorkspaceEntry workspace = 1;
+  bool cancelled = 2;
+}
+
+message RevalidateWorkspaceRequest {
+  string workspace_id = 1;
+}
+
+message RevalidateWorkspaceResponse {
+  WorkspaceEntry workspace = 1;
+}
+
+message ListWorkspacesRequest {}
+
+message ListWorkspacesResponse {
+  repeated WorkspaceEntry workspaces = 1;
+}
+
 service DirectSessionService {
   rpc ListPromptHistory(ListPromptHistoryRequest) returns (ListPromptHistoryResponse);
   rpc GetPromptHistoryItem(GetPromptHistoryItemRequest) returns (GetPromptHistoryItemResponse);
@@ -195,6 +261,12 @@ enum ErrorCode {
   ERROR_CODE_LIMIT_EXCEEDED = 24;
   ERROR_CODE_PROVIDER_BLOCKED = 25;
   ERROR_CODE_RUNTIME_PATH_UNAVAILABLE = 26;
+  ERROR_CODE_WORKSPACE_SELECTION_UNAVAILABLE = 27;
+  ERROR_CODE_WORKSPACE_NOT_PROVISIONED = 28;
+  ERROR_CODE_PROFILE_MISSING = 29;
+  ERROR_CODE_PROFILE_SERVER_UNAVAILABLE = 30;
+  ERROR_CODE_WORKSPACE_IDENTITY_MISMATCH = 31;
+  ERROR_CODE_PERSISTENCE_UNAVAILABLE = 32;
 }
 
 enum ActionClass {

@@ -21,6 +21,9 @@ import (
 const _ = connect.IsAtLeastVersion1_13_0
 
 const (
+	// WorkspacePresentationServiceName is the fully-qualified name of the WorkspacePresentationService
+	// service.
+	WorkspacePresentationServiceName = "gul.v1.WorkspacePresentationService"
 	// DirectSessionServiceName is the fully-qualified name of the DirectSessionService service.
 	DirectSessionServiceName = "gul.v1.DirectSessionService"
 	// ArtifactPresentationServiceName is the fully-qualified name of the ArtifactPresentationService
@@ -36,6 +39,24 @@ const (
 // reflection-formatted method names, remove the leading slash and convert the remaining slash to a
 // period.
 const (
+	// WorkspacePresentationServiceListRegistrableRootsProcedure is the fully-qualified name of the
+	// WorkspacePresentationService's ListRegistrableRoots RPC.
+	WorkspacePresentationServiceListRegistrableRootsProcedure = "/gul.v1.WorkspacePresentationService/ListRegistrableRoots"
+	// WorkspacePresentationServiceBrowseRegistrableRootProcedure is the fully-qualified name of the
+	// WorkspacePresentationService's BrowseRegistrableRoot RPC.
+	WorkspacePresentationServiceBrowseRegistrableRootProcedure = "/gul.v1.WorkspacePresentationService/BrowseRegistrableRoot"
+	// WorkspacePresentationServiceRegisterFromHostSelectionProcedure is the fully-qualified name of the
+	// WorkspacePresentationService's RegisterFromHostSelection RPC.
+	WorkspacePresentationServiceRegisterFromHostSelectionProcedure = "/gul.v1.WorkspacePresentationService/RegisterFromHostSelection"
+	// WorkspacePresentationServiceRegisterFromAllowlistPathProcedure is the fully-qualified name of the
+	// WorkspacePresentationService's RegisterFromAllowlistPath RPC.
+	WorkspacePresentationServiceRegisterFromAllowlistPathProcedure = "/gul.v1.WorkspacePresentationService/RegisterFromAllowlistPath"
+	// WorkspacePresentationServiceRevalidateWorkspaceProcedure is the fully-qualified name of the
+	// WorkspacePresentationService's RevalidateWorkspace RPC.
+	WorkspacePresentationServiceRevalidateWorkspaceProcedure = "/gul.v1.WorkspacePresentationService/RevalidateWorkspace"
+	// WorkspacePresentationServiceListWorkspacesProcedure is the fully-qualified name of the
+	// WorkspacePresentationService's ListWorkspaces RPC.
+	WorkspacePresentationServiceListWorkspacesProcedure = "/gul.v1.WorkspacePresentationService/ListWorkspaces"
 	// DirectSessionServiceListPromptHistoryProcedure is the fully-qualified name of the
 	// DirectSessionService's ListPromptHistory RPC.
 	DirectSessionServiceListPromptHistoryProcedure = "/gul.v1.DirectSessionService/ListPromptHistory"
@@ -58,6 +79,208 @@ const (
 	// ArtifactPresentationService's ReadChunk RPC.
 	ArtifactPresentationServiceReadChunkProcedure = "/gul.v1.ArtifactPresentationService/ReadChunk"
 )
+
+// WorkspacePresentationServiceClient is a client for the gul.v1.WorkspacePresentationService
+// service.
+type WorkspacePresentationServiceClient interface {
+	ListRegistrableRoots(context.Context, *connect.Request[v1.ListRegistrableRootsRequest]) (*connect.Response[v1.ListRegistrableRootsResponse], error)
+	BrowseRegistrableRoot(context.Context, *connect.Request[v1.BrowseRegistrableRootRequest]) (*connect.Response[v1.BrowseRegistrableRootResponse], error)
+	RegisterFromHostSelection(context.Context, *connect.Request[v1.RegisterFromHostSelectionRequest]) (*connect.Response[v1.RegisterWorkspaceResponse], error)
+	RegisterFromAllowlistPath(context.Context, *connect.Request[v1.RegisterFromAllowlistPathRequest]) (*connect.Response[v1.RegisterWorkspaceResponse], error)
+	RevalidateWorkspace(context.Context, *connect.Request[v1.RevalidateWorkspaceRequest]) (*connect.Response[v1.RevalidateWorkspaceResponse], error)
+	ListWorkspaces(context.Context, *connect.Request[v1.ListWorkspacesRequest]) (*connect.Response[v1.ListWorkspacesResponse], error)
+}
+
+// NewWorkspacePresentationServiceClient constructs a client for the
+// gul.v1.WorkspacePresentationService service. By default, it uses the Connect protocol with the
+// binary Protobuf Codec, asks for gzipped responses, and sends uncompressed requests. To use the
+// gRPC or gRPC-Web protocols, supply the connect.WithGRPC() or connect.WithGRPCWeb() options.
+//
+// The URL supplied here should be the base URL for the Connect or gRPC server (for example,
+// http://api.acme.com or https://acme.com/grpc).
+func NewWorkspacePresentationServiceClient(httpClient connect.HTTPClient, baseURL string, opts ...connect.ClientOption) WorkspacePresentationServiceClient {
+	baseURL = strings.TrimRight(baseURL, "/")
+	workspacePresentationServiceMethods := v1.File_gul_v1_gul_proto.Services().ByName("WorkspacePresentationService").Methods()
+	return &workspacePresentationServiceClient{
+		listRegistrableRoots: connect.NewClient[v1.ListRegistrableRootsRequest, v1.ListRegistrableRootsResponse](
+			httpClient,
+			baseURL+WorkspacePresentationServiceListRegistrableRootsProcedure,
+			connect.WithSchema(workspacePresentationServiceMethods.ByName("ListRegistrableRoots")),
+			connect.WithClientOptions(opts...),
+		),
+		browseRegistrableRoot: connect.NewClient[v1.BrowseRegistrableRootRequest, v1.BrowseRegistrableRootResponse](
+			httpClient,
+			baseURL+WorkspacePresentationServiceBrowseRegistrableRootProcedure,
+			connect.WithSchema(workspacePresentationServiceMethods.ByName("BrowseRegistrableRoot")),
+			connect.WithClientOptions(opts...),
+		),
+		registerFromHostSelection: connect.NewClient[v1.RegisterFromHostSelectionRequest, v1.RegisterWorkspaceResponse](
+			httpClient,
+			baseURL+WorkspacePresentationServiceRegisterFromHostSelectionProcedure,
+			connect.WithSchema(workspacePresentationServiceMethods.ByName("RegisterFromHostSelection")),
+			connect.WithClientOptions(opts...),
+		),
+		registerFromAllowlistPath: connect.NewClient[v1.RegisterFromAllowlistPathRequest, v1.RegisterWorkspaceResponse](
+			httpClient,
+			baseURL+WorkspacePresentationServiceRegisterFromAllowlistPathProcedure,
+			connect.WithSchema(workspacePresentationServiceMethods.ByName("RegisterFromAllowlistPath")),
+			connect.WithClientOptions(opts...),
+		),
+		revalidateWorkspace: connect.NewClient[v1.RevalidateWorkspaceRequest, v1.RevalidateWorkspaceResponse](
+			httpClient,
+			baseURL+WorkspacePresentationServiceRevalidateWorkspaceProcedure,
+			connect.WithSchema(workspacePresentationServiceMethods.ByName("RevalidateWorkspace")),
+			connect.WithClientOptions(opts...),
+		),
+		listWorkspaces: connect.NewClient[v1.ListWorkspacesRequest, v1.ListWorkspacesResponse](
+			httpClient,
+			baseURL+WorkspacePresentationServiceListWorkspacesProcedure,
+			connect.WithSchema(workspacePresentationServiceMethods.ByName("ListWorkspaces")),
+			connect.WithClientOptions(opts...),
+		),
+	}
+}
+
+// workspacePresentationServiceClient implements WorkspacePresentationServiceClient.
+type workspacePresentationServiceClient struct {
+	listRegistrableRoots      *connect.Client[v1.ListRegistrableRootsRequest, v1.ListRegistrableRootsResponse]
+	browseRegistrableRoot     *connect.Client[v1.BrowseRegistrableRootRequest, v1.BrowseRegistrableRootResponse]
+	registerFromHostSelection *connect.Client[v1.RegisterFromHostSelectionRequest, v1.RegisterWorkspaceResponse]
+	registerFromAllowlistPath *connect.Client[v1.RegisterFromAllowlistPathRequest, v1.RegisterWorkspaceResponse]
+	revalidateWorkspace       *connect.Client[v1.RevalidateWorkspaceRequest, v1.RevalidateWorkspaceResponse]
+	listWorkspaces            *connect.Client[v1.ListWorkspacesRequest, v1.ListWorkspacesResponse]
+}
+
+// ListRegistrableRoots calls gul.v1.WorkspacePresentationService.ListRegistrableRoots.
+func (c *workspacePresentationServiceClient) ListRegistrableRoots(ctx context.Context, req *connect.Request[v1.ListRegistrableRootsRequest]) (*connect.Response[v1.ListRegistrableRootsResponse], error) {
+	return c.listRegistrableRoots.CallUnary(ctx, req)
+}
+
+// BrowseRegistrableRoot calls gul.v1.WorkspacePresentationService.BrowseRegistrableRoot.
+func (c *workspacePresentationServiceClient) BrowseRegistrableRoot(ctx context.Context, req *connect.Request[v1.BrowseRegistrableRootRequest]) (*connect.Response[v1.BrowseRegistrableRootResponse], error) {
+	return c.browseRegistrableRoot.CallUnary(ctx, req)
+}
+
+// RegisterFromHostSelection calls gul.v1.WorkspacePresentationService.RegisterFromHostSelection.
+func (c *workspacePresentationServiceClient) RegisterFromHostSelection(ctx context.Context, req *connect.Request[v1.RegisterFromHostSelectionRequest]) (*connect.Response[v1.RegisterWorkspaceResponse], error) {
+	return c.registerFromHostSelection.CallUnary(ctx, req)
+}
+
+// RegisterFromAllowlistPath calls gul.v1.WorkspacePresentationService.RegisterFromAllowlistPath.
+func (c *workspacePresentationServiceClient) RegisterFromAllowlistPath(ctx context.Context, req *connect.Request[v1.RegisterFromAllowlistPathRequest]) (*connect.Response[v1.RegisterWorkspaceResponse], error) {
+	return c.registerFromAllowlistPath.CallUnary(ctx, req)
+}
+
+// RevalidateWorkspace calls gul.v1.WorkspacePresentationService.RevalidateWorkspace.
+func (c *workspacePresentationServiceClient) RevalidateWorkspace(ctx context.Context, req *connect.Request[v1.RevalidateWorkspaceRequest]) (*connect.Response[v1.RevalidateWorkspaceResponse], error) {
+	return c.revalidateWorkspace.CallUnary(ctx, req)
+}
+
+// ListWorkspaces calls gul.v1.WorkspacePresentationService.ListWorkspaces.
+func (c *workspacePresentationServiceClient) ListWorkspaces(ctx context.Context, req *connect.Request[v1.ListWorkspacesRequest]) (*connect.Response[v1.ListWorkspacesResponse], error) {
+	return c.listWorkspaces.CallUnary(ctx, req)
+}
+
+// WorkspacePresentationServiceHandler is an implementation of the
+// gul.v1.WorkspacePresentationService service.
+type WorkspacePresentationServiceHandler interface {
+	ListRegistrableRoots(context.Context, *connect.Request[v1.ListRegistrableRootsRequest]) (*connect.Response[v1.ListRegistrableRootsResponse], error)
+	BrowseRegistrableRoot(context.Context, *connect.Request[v1.BrowseRegistrableRootRequest]) (*connect.Response[v1.BrowseRegistrableRootResponse], error)
+	RegisterFromHostSelection(context.Context, *connect.Request[v1.RegisterFromHostSelectionRequest]) (*connect.Response[v1.RegisterWorkspaceResponse], error)
+	RegisterFromAllowlistPath(context.Context, *connect.Request[v1.RegisterFromAllowlistPathRequest]) (*connect.Response[v1.RegisterWorkspaceResponse], error)
+	RevalidateWorkspace(context.Context, *connect.Request[v1.RevalidateWorkspaceRequest]) (*connect.Response[v1.RevalidateWorkspaceResponse], error)
+	ListWorkspaces(context.Context, *connect.Request[v1.ListWorkspacesRequest]) (*connect.Response[v1.ListWorkspacesResponse], error)
+}
+
+// NewWorkspacePresentationServiceHandler builds an HTTP handler from the service implementation. It
+// returns the path on which to mount the handler and the handler itself.
+//
+// By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf
+// and JSON codecs. They also support gzip compression.
+func NewWorkspacePresentationServiceHandler(svc WorkspacePresentationServiceHandler, opts ...connect.HandlerOption) (string, http.Handler) {
+	workspacePresentationServiceMethods := v1.File_gul_v1_gul_proto.Services().ByName("WorkspacePresentationService").Methods()
+	workspacePresentationServiceListRegistrableRootsHandler := connect.NewUnaryHandler(
+		WorkspacePresentationServiceListRegistrableRootsProcedure,
+		svc.ListRegistrableRoots,
+		connect.WithSchema(workspacePresentationServiceMethods.ByName("ListRegistrableRoots")),
+		connect.WithHandlerOptions(opts...),
+	)
+	workspacePresentationServiceBrowseRegistrableRootHandler := connect.NewUnaryHandler(
+		WorkspacePresentationServiceBrowseRegistrableRootProcedure,
+		svc.BrowseRegistrableRoot,
+		connect.WithSchema(workspacePresentationServiceMethods.ByName("BrowseRegistrableRoot")),
+		connect.WithHandlerOptions(opts...),
+	)
+	workspacePresentationServiceRegisterFromHostSelectionHandler := connect.NewUnaryHandler(
+		WorkspacePresentationServiceRegisterFromHostSelectionProcedure,
+		svc.RegisterFromHostSelection,
+		connect.WithSchema(workspacePresentationServiceMethods.ByName("RegisterFromHostSelection")),
+		connect.WithHandlerOptions(opts...),
+	)
+	workspacePresentationServiceRegisterFromAllowlistPathHandler := connect.NewUnaryHandler(
+		WorkspacePresentationServiceRegisterFromAllowlistPathProcedure,
+		svc.RegisterFromAllowlistPath,
+		connect.WithSchema(workspacePresentationServiceMethods.ByName("RegisterFromAllowlistPath")),
+		connect.WithHandlerOptions(opts...),
+	)
+	workspacePresentationServiceRevalidateWorkspaceHandler := connect.NewUnaryHandler(
+		WorkspacePresentationServiceRevalidateWorkspaceProcedure,
+		svc.RevalidateWorkspace,
+		connect.WithSchema(workspacePresentationServiceMethods.ByName("RevalidateWorkspace")),
+		connect.WithHandlerOptions(opts...),
+	)
+	workspacePresentationServiceListWorkspacesHandler := connect.NewUnaryHandler(
+		WorkspacePresentationServiceListWorkspacesProcedure,
+		svc.ListWorkspaces,
+		connect.WithSchema(workspacePresentationServiceMethods.ByName("ListWorkspaces")),
+		connect.WithHandlerOptions(opts...),
+	)
+	return "/gul.v1.WorkspacePresentationService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case WorkspacePresentationServiceListRegistrableRootsProcedure:
+			workspacePresentationServiceListRegistrableRootsHandler.ServeHTTP(w, r)
+		case WorkspacePresentationServiceBrowseRegistrableRootProcedure:
+			workspacePresentationServiceBrowseRegistrableRootHandler.ServeHTTP(w, r)
+		case WorkspacePresentationServiceRegisterFromHostSelectionProcedure:
+			workspacePresentationServiceRegisterFromHostSelectionHandler.ServeHTTP(w, r)
+		case WorkspacePresentationServiceRegisterFromAllowlistPathProcedure:
+			workspacePresentationServiceRegisterFromAllowlistPathHandler.ServeHTTP(w, r)
+		case WorkspacePresentationServiceRevalidateWorkspaceProcedure:
+			workspacePresentationServiceRevalidateWorkspaceHandler.ServeHTTP(w, r)
+		case WorkspacePresentationServiceListWorkspacesProcedure:
+			workspacePresentationServiceListWorkspacesHandler.ServeHTTP(w, r)
+		default:
+			http.NotFound(w, r)
+		}
+	})
+}
+
+// UnimplementedWorkspacePresentationServiceHandler returns CodeUnimplemented from all methods.
+type UnimplementedWorkspacePresentationServiceHandler struct{}
+
+func (UnimplementedWorkspacePresentationServiceHandler) ListRegistrableRoots(context.Context, *connect.Request[v1.ListRegistrableRootsRequest]) (*connect.Response[v1.ListRegistrableRootsResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("gul.v1.WorkspacePresentationService.ListRegistrableRoots is not implemented"))
+}
+
+func (UnimplementedWorkspacePresentationServiceHandler) BrowseRegistrableRoot(context.Context, *connect.Request[v1.BrowseRegistrableRootRequest]) (*connect.Response[v1.BrowseRegistrableRootResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("gul.v1.WorkspacePresentationService.BrowseRegistrableRoot is not implemented"))
+}
+
+func (UnimplementedWorkspacePresentationServiceHandler) RegisterFromHostSelection(context.Context, *connect.Request[v1.RegisterFromHostSelectionRequest]) (*connect.Response[v1.RegisterWorkspaceResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("gul.v1.WorkspacePresentationService.RegisterFromHostSelection is not implemented"))
+}
+
+func (UnimplementedWorkspacePresentationServiceHandler) RegisterFromAllowlistPath(context.Context, *connect.Request[v1.RegisterFromAllowlistPathRequest]) (*connect.Response[v1.RegisterWorkspaceResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("gul.v1.WorkspacePresentationService.RegisterFromAllowlistPath is not implemented"))
+}
+
+func (UnimplementedWorkspacePresentationServiceHandler) RevalidateWorkspace(context.Context, *connect.Request[v1.RevalidateWorkspaceRequest]) (*connect.Response[v1.RevalidateWorkspaceResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("gul.v1.WorkspacePresentationService.RevalidateWorkspace is not implemented"))
+}
+
+func (UnimplementedWorkspacePresentationServiceHandler) ListWorkspaces(context.Context, *connect.Request[v1.ListWorkspacesRequest]) (*connect.Response[v1.ListWorkspacesResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("gul.v1.WorkspacePresentationService.ListWorkspaces is not implemented"))
+}
 
 // DirectSessionServiceClient is a client for the gul.v1.DirectSessionService service.
 type DirectSessionServiceClient interface {

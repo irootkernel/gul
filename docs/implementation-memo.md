@@ -355,6 +355,37 @@ REQ-CONSUMER-002 is complete for the fake provider only; E14 owns assembled
 application acceptance, and E2/E9 own released-provider evidence. The shared
 consumer dossier remains for the other open Epics.
 
+## 1.14 E3-T1 Workspace attachment, 2026-09-25
+
+`internal/workspace` registers a selected host directory or an allowlist-relative
+directory by invoking the pinned `InspectWorkspace` port with no expected ID.
+The returned canonical root must identify the same open directory and remain
+inside the configured allowlist when browsing supplied the selection. SQLite
+migration 2 stores the canonical root, provider ID, and filesystem identity
+beside the subject-scoped presentation in one transaction. Revalidation sends
+the stored root and expected ID, refuses moved or replaced directories, and
+preserves typed provisioning and Profile Server blockers. A new explicit
+registration re-inspects and atomically replaces the stale attachment while
+retaining its Gul presentation identity and metadata. The pinned contract
+adapter is isolated in `internal/workspace/contractprovider`. Local Workspace
+presentation updates require an existing attachment, so they cannot create an
+unattached entry. The browser-facing Workspace handler exposes only Gul IDs and
+display metadata behind the injected trusted principal and core access gate;
+it is not mounted as a production route. Host allowlist and picker failures use
+an operator-directed unavailable error, while invalid browser paths retain one
+selection error. The macOS directory picker is an isolated host adapter;
+dismissing it returns an empty success result, while request cancellation remains
+a cancellation error. Neither path initializes
+a provider workspace, provisions a Profile or Policy, or creates a Git worktree.
+
+Focused Go tests cover the scenario provider, picker aliases, relative browsing,
+outside and private path denial, duplicate attachment, typed blockers, provider
+identity changes, reattachment, and migration from the prior schema. `make test` and the
+generated API drift check passed. This is fake-scoped evidence for REQ-WS-001,
+REQ-WS-006/007, and REQ-WS-009..012; E6 still owns FileService use of the
+verified root, E3-T4 owns launch Policy selection, E8 owns authenticated route
+assembly, and E2/E9 own released-provider compatibility.
+
 ## 2. Current development snapshot
 
 | Area | State |
@@ -362,14 +393,14 @@ consumer dossier remains for the other open Epics.
 | Five Gul SOT documents | E0-T4 completed the consumer alignment and Gate A reproduction; E0-T8 completed toolchain/ADR alignment; E0-T7 completed Gate B |
 | Toolchain and developer-command artifacts | E0-T8 accepted one pin manifest and read-only host checks; E0-T7 adds checked contract generation/drift delegates; E1-T1 adds the root Go module; E1-T2 adds root Bun pin validation and checked frontend generation/drift commands; E1-T3 adds checked Gul API/error-catalog generation; no installer |
 | Contract boundary | E12-T1 pins TASK-053 and regenerates checked clients/maps/fake transport for 36 known, 27 required, and 9 unavailable methods; E13-T1 adds an explicit stateful scenario provider over the 27-method port |
-| Production source | E1-T1 shared Go core under `internal/app`; E1-T2 shared embedded bundle delivery under `internal/delivery/web`; E1-T3 declared browser API, typed 27-method consumer port and page-token boundary; E1-T4 isolated SQLite package under `internal/storage` is complete but unwired to startup; E1-T5 isolated Wails shell under `internal/desktop` is complete |
+| Production source | E1 shared core, bundle, API declarations, isolated SQLite and Wails shell; E3-T1 adds isolated Workspace attachment, schema migration 2, inspection adapter, and unmounted typed handler |
 | Wails host/frontend | One React foundation bundle and isolated Wails shell foundation implemented; feature UI and authenticated attach not implemented |
-| ConnectRPC schema/services | Gul DirectSession and ArtifactPresentation declarations and generated clients exist; no handler or route enabled |
-| Gul SQLite schema | Gul-owned version 1 schema and isolated repositories implemented; production startup integration pending |
+| ConnectRPC schema/services | Gul DirectSession, ArtifactPresentation and WorkspacePresentation declarations and generated clients exist; only an isolated Workspace handler exists, with no product route enabled |
+| Gul SQLite schema | Gul-owned version 2 schema with Workspace attachment migration and isolated repositories implemented; production startup integration pending |
 | Dolgorae RPC supervisor/provider | Not implemented |
 | Controller credential store | Caller-owned mechanism selected by ADR-0047; not implemented |
 | FileService/auth/PWA/Tailscale integration | Not implemented |
-| Current State promotions | REQ-HOST-005, REQ-RUNTIME-011, REQ-RUNTIME-022, REQ-CONSUMER-001, and fake-scoped REQ-CONSUMER-002; E1-T1 through E1-T5 remain foundation evidence and do not promote E14-owned REQ-HOST-001/002 |
+| Current State promotions | REQ-HOST-005, REQ-RUNTIME-011, REQ-RUNTIME-022, REQ-CONSUMER-001/002 and fake-scoped REQ-WS-001/006/007/009/010/011/012; no assembled-product or released-provider claim |
 
 The repository contains the shared-core and single-bundle delivery foundations,
 declared but inactive Gul APIs, isolated Gul-owned SQLite repositories, bootstrap
@@ -822,4 +853,4 @@ The initial documentation assumed Gul would manage one Codex App Server, map Ses
 
 ## 12. Handoff
 
-E12, E1, and E13 are complete. The TASK-053 consumer lock and generated contract tooling are authoritative for new implementation, while historical E0 evidence remains scoped to its original pin. E1 delivered the shared core, bundle, declared typed-contract, isolated SQLite, and Wails shell foundations. E13 delivered the fake-scoped REQ-CONSUMER-002 scenario provider. E3-T1 is next. E2-T0 remains blocked on an accepted compatible Dolgorae executable and live smoke evidence. No later Task or live-provider behavior is activated automatically.
+E12, E1, and E13 are complete. The TASK-053 consumer lock and generated contract tooling remain authoritative. E3-T1 added fake-scoped canonical Workspace attachment and revalidation; E3-T2 is next. E2-T0 remains blocked on an accepted compatible Dolgorae executable and live smoke evidence. No product route or live-provider behavior is activated automatically.

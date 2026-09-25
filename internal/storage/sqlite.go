@@ -16,7 +16,7 @@ import (
 	_ "modernc.org/sqlite"
 )
 
-const schemaVersion = 1
+const schemaVersion = 2
 
 var ErrSchemaDrift = errors.New("Gul SQLite schema drift")
 
@@ -140,34 +140,44 @@ func migrate(ctx context.Context, db *sql.DB) error {
 	if err := conn.QueryRowContext(ctx, "PRAGMA user_version").Scan(&version); err != nil {
 		return err
 	}
-	switch version {
-	case 0:
-		for _, statement := range schemaStatements {
+	if version < 0 || version > schemaVersion {
+		return fmt.Errorf("%w: unsupported version %d", ErrSchemaDrift, version)
+	}
+	for next := version + 1; next <= schemaVersion; next++ {
+		statements := migrationStatements(next)
+		if len(statements) == 0 {
+			return fmt.Errorf("%w: unregistered migration %d", ErrSchemaDrift, next)
+		}
+		for _, statement := range statements {
 			if _, err := conn.ExecContext(ctx, statement); err != nil {
-				return fmt.Errorf("Gul migration 1: %w", err)
+				return fmt.Errorf("Gul migration %d: %w", next, err)
 			}
 		}
-		if _, err := conn.ExecContext(ctx, "INSERT INTO schema_migrations(version, digest, applied_at) VALUES (1, ?, ?)", schemaDigest(), time.Now().UTC().Format(time.RFC3339Nano)); err != nil {
+		if _, err := conn.ExecContext(ctx, "INSERT INTO schema_migrations(version, digest, applied_at) VALUES (?, ?, ?)", next, digestStatements(statements), time.Now().UTC().Format(time.RFC3339Nano)); err != nil {
 			return err
 		}
-		if _, err := conn.ExecContext(ctx, "INSERT INTO client_delivery_counter(id, next_sequence) VALUES (1, 0)"); err != nil {
+		if next == 1 {
+			if _, err := conn.ExecContext(ctx, "INSERT INTO client_delivery_counter(id, next_sequence) VALUES (1, 0)"); err != nil {
+				return err
+			}
+		}
+		if _, err := conn.ExecContext(ctx, fmt.Sprintf("PRAGMA user_version = %d", next)); err != nil {
 			return err
 		}
-		if _, err := conn.ExecContext(ctx, "PRAGMA user_version = 1"); err != nil {
-			return err
+	}
+	for migration := 1; migration <= schemaVersion; migration++ {
+		statements := migrationStatements(migration)
+		if len(statements) == 0 {
+			return fmt.Errorf("%w: unregistered migration %d", ErrSchemaDrift, migration)
 		}
-	case schemaVersion:
-		var count int
-		var recordedVersion sql.NullInt64
-		var digest sql.NullString
-		if err := conn.QueryRowContext(ctx, "SELECT COUNT(*), MAX(version), MAX(digest) FROM schema_migrations").Scan(&count, &recordedVersion, &digest); err != nil {
-			return err
-		}
-		if count != 1 || !recordedVersion.Valid || recordedVersion.Int64 != schemaVersion || !digest.Valid || digest.String != schemaDigest() {
+		var digest string
+		if err := conn.QueryRowContext(ctx, "SELECT digest FROM schema_migrations WHERE version = ?", migration).Scan(&digest); err != nil || digest != digestStatements(statements) {
 			return ErrSchemaDrift
 		}
-	default:
-		return fmt.Errorf("%w: unsupported version %d", ErrSchemaDrift, version)
+	}
+	var count int
+	if err := conn.QueryRowContext(ctx, "SELECT COUNT(*) FROM schema_migrations").Scan(&count); err != nil || count != schemaVersion {
+		return ErrSchemaDrift
 	}
 	if err := verifySchema(ctx, conn); err != nil {
 		return err
@@ -176,9 +186,20 @@ func migrate(ctx context.Context, db *sql.DB) error {
 	return err
 }
 
-func schemaDigest() string {
-	digest := sha256.Sum256([]byte(strings.Join(schemaStatements, "\n")))
+func digestStatements(statements []string) string {
+	digest := sha256.Sum256([]byte(strings.Join(statements, "\n")))
 	return hex.EncodeToString(digest[:])
+}
+
+func migrationStatements(version int) []string {
+	switch version {
+	case 1:
+		return schemaStatements
+	case 2:
+		return attachmentStatements
+	default:
+		return nil
+	}
 }
 
 func verifySchema(ctx context.Context, conn *sql.Conn) error {
@@ -187,10 +208,12 @@ func verifySchema(ctx context.Context, conn *sql.Conn) error {
 		return err
 	}
 	defer rows.Close()
-	expected := make(map[string]string, len(schemaStatements))
-	for _, statement := range schemaStatements {
-		name := strings.Fields(statement)[2]
-		expected[name] = statement
+	expected := make(map[string]string)
+	for version := 1; version <= schemaVersion; version++ {
+		for _, statement := range migrationStatements(version) {
+			name := strings.Fields(statement)[2]
+			expected[name] = statement
+		}
 	}
 	count := 0
 	for rows.Next() {

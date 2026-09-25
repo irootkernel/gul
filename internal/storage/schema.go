@@ -102,3 +102,20 @@ state TEXT NOT NULL CHECK(state IN ('pending', 'outcome_unknown', 'resolved')),
 created_at TEXT NOT NULL
 )`,
 }
+
+// Each unique key backs a related-attachment match in workspace registration;
+// contention returns an existing entry only when all identity fields match.
+var attachmentStatements = []string{
+	`CREATE TABLE workspace_attachments (
+subject_id TEXT NOT NULL,
+workspace_id TEXT NOT NULL,
+canonical_root TEXT NOT NULL,
+provider_workspace_id TEXT NOT NULL,
+file_device TEXT NOT NULL,
+file_inode TEXT NOT NULL,
+PRIMARY KEY(subject_id, workspace_id),
+UNIQUE(subject_id, canonical_root),
+UNIQUE(subject_id, provider_workspace_id),
+FOREIGN KEY(subject_id, workspace_id) REFERENCES workspace_entries(subject_id, workspace_id) ON DELETE CASCADE
+)`,
+}

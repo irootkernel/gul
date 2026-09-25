@@ -66,7 +66,7 @@ func TestOpenMigratesAndRejectsDrift(t *testing.T) {
 		}
 		count++
 	}
-	if err := rows.Err(); err != nil || count != len(schemaStatements) {
+	if err := rows.Err(); err != nil || count != len(schemaStatements)+len(attachmentStatements) {
 		t.Fatalf("schema inventory = %d, %v", count, err)
 	}
 	rows.Close()
@@ -104,7 +104,7 @@ func TestOpenMigratesAndRejectsDrift(t *testing.T) {
 func TestOpenRejectsMigrationAndSchemaObjectDrift(t *testing.T) {
 	for name, mutation := range map[string]string{
 		"digest":                "UPDATE schema_migrations SET digest = 'wrong'",
-		"version":               "PRAGMA user_version = 2",
+		"version":               "PRAGMA user_version = 3",
 		"missing migration row": "DELETE FROM schema_migrations",
 		"missing":               "DROP TABLE navigation_state",
 		"trigger":               "CREATE TRIGGER unexpected AFTER INSERT ON app_account BEGIN DELETE FROM app_account; END",
@@ -123,6 +123,109 @@ func TestOpenRejectsMigrationAndSchemaObjectDrift(t *testing.T) {
 				t.Fatalf("accepted %s drift: %v", name, err)
 			}
 		})
+	}
+}
+
+func TestOpenMigratesExistingVersionOneDatabase(t *testing.T) {
+	filename, db := versionOneDatabase(t)
+	if err := db.Close(); err != nil {
+		t.Fatal(err)
+	}
+	store, err := Open(t.Context(), filename)
+	if err != nil {
+		t.Fatalf("migrate v1: %v", err)
+	}
+	defer store.Close()
+	var version, migrationCount int
+	if err := store.reader.QueryRowContext(t.Context(), "PRAGMA user_version").Scan(&version); err != nil {
+		t.Fatal(err)
+	}
+	if err := store.reader.QueryRowContext(t.Context(), "SELECT COUNT(*) FROM schema_migrations").Scan(&migrationCount); err != nil {
+		t.Fatal(err)
+	}
+	if version != schemaVersion || migrationCount != schemaVersion {
+		t.Fatalf("version = %d, migrations = %d", version, migrationCount)
+	}
+}
+
+func versionOneDatabase(t *testing.T) (string, *sql.DB) {
+	t.Helper()
+	directory := t.TempDir()
+	if err := os.Chmod(directory, 0700); err != nil {
+		t.Fatal(err)
+	}
+	filename := filepath.Join(directory, "gul.sqlite")
+	file, err := os.OpenFile(filename, os.O_CREATE|os.O_EXCL|os.O_RDWR, 0600)
+	if err != nil {
+		t.Fatal(err)
+	}
+	file.Close()
+	db, err := sql.Open("sqlite", databaseURL(filename, false))
+	if err != nil {
+		t.Fatal(err)
+	}
+	transaction, err := db.BeginTx(t.Context(), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, statement := range schemaStatements {
+		if _, err := transaction.ExecContext(t.Context(), statement); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if _, err := transaction.ExecContext(t.Context(), "INSERT INTO schema_migrations(version, digest, applied_at) VALUES (1, ?, '2026-09-23')", digestStatements(schemaStatements)); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := transaction.ExecContext(t.Context(), "INSERT INTO client_delivery_counter(id, next_sequence) VALUES (1, 0)"); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := transaction.ExecContext(t.Context(), "PRAGMA user_version = 1"); err != nil {
+		t.Fatal(err)
+	}
+	if err := transaction.Commit(); err != nil {
+		t.Fatal(err)
+	}
+	return filename, db
+}
+
+func TestFailedSecondMigrationPreservesVersionOne(t *testing.T) {
+	filename, db := versionOneDatabase(t)
+	if _, err := db.ExecContext(t.Context(), "CREATE TABLE workspace_attachments(unexpected TEXT)"); err != nil {
+		t.Fatal(err)
+	}
+	if err := db.Close(); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := Open(t.Context(), filename); err == nil || !strings.Contains(err.Error(), "Gul migration 2") {
+		t.Fatalf("conflicting second migration = %v", err)
+	}
+	db, err := sql.Open("sqlite", databaseURL(filename, false))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer db.Close()
+	var version, migrationCount int
+	if err := db.QueryRowContext(t.Context(), "PRAGMA user_version").Scan(&version); err != nil {
+		t.Fatal(err)
+	}
+	if err := db.QueryRowContext(t.Context(), "SELECT COUNT(*) FROM schema_migrations").Scan(&migrationCount); err != nil {
+		t.Fatal(err)
+	}
+	if version != 1 || migrationCount != 1 {
+		t.Fatalf("failed migration committed version %d, rows %d", version, migrationCount)
+	}
+}
+
+func TestVersionOneDigestDriftBlocksUpgrade(t *testing.T) {
+	filename, db := versionOneDatabase(t)
+	if _, err := db.ExecContext(t.Context(), "UPDATE schema_migrations SET digest = 'wrong' WHERE version = 1"); err != nil {
+		t.Fatal(err)
+	}
+	if err := db.Close(); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := Open(t.Context(), filename); !errors.Is(err, ErrSchemaDrift) {
+		t.Fatalf("tampered version-one digest = %v", err)
 	}
 }
 

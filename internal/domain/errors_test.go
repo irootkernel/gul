@@ -22,12 +22,18 @@ func TestProviderDispositionReachesGeneratedBrowserEnums(t *testing.T) {
 
 func TestEveryProviderDispositionSymbolHasGeneratedBrowserEnum(t *testing.T) {
 	browserOnly := map[string]bool{
-		"CONTROLLER_CARRIER_INVALID": true,
-		"UNSUPPORTED_PATH_ENCODING":  true,
-		"INVALID_PAGE_TOKEN":         true,
-		"PAGE_TOKEN_EXPIRED":         true,
-		"UNAUTHORIZED":               true,
-		"SOURCE_UNAVAILABLE":         true,
+		"CONTROLLER_CARRIER_INVALID":      true,
+		"UNSUPPORTED_PATH_ENCODING":       true,
+		"INVALID_PAGE_TOKEN":              true,
+		"PAGE_TOKEN_EXPIRED":              true,
+		"UNAUTHORIZED":                    true,
+		"SOURCE_UNAVAILABLE":              true,
+		"WORKSPACE_SELECTION_UNAVAILABLE": true,
+		"WORKSPACE_NOT_PROVISIONED":       true,
+		"PROFILE_MISSING":                 true,
+		"PROFILE_SERVER_UNAVAILABLE":      true,
+		"WORKSPACE_IDENTITY_MISMATCH":     true,
+		"PERSISTENCE_UNAVAILABLE":         true,
 	}
 	mappedCodes := make(map[string]bool)
 	for _, code := range port.MappedErrorCodes() {

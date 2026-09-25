@@ -86,14 +86,27 @@ type DirectSessionPresentation struct {
 	Hidden      bool
 }
 
+// PutWorkspace changes local presentation only for a verified attachment.
+// CreateAttachment owns creation of the entry and provider reference together.
 func (r PresentationRepository) PutWorkspace(ctx context.Context, entry WorkspaceEntry) error {
 	if entry.SubjectID == "" || entry.WorkspaceID == "" || entry.DisplayName == "" {
 		return errors.New("invalid workspace entry")
 	}
-	_, err := r.store.writer.ExecContext(ctx, `INSERT INTO workspace_entries(subject_id, workspace_id, display_name, hidden)
-VALUES (?, ?, ?, ?) ON CONFLICT(subject_id, workspace_id) DO UPDATE SET display_name = excluded.display_name, hidden = excluded.hidden`,
-		entry.SubjectID, entry.WorkspaceID, entry.DisplayName, entry.Hidden)
-	return err
+	result, err := r.store.writer.ExecContext(ctx, `UPDATE workspace_entries SET display_name = ?, hidden = ?
+WHERE subject_id = ? AND workspace_id = ? AND EXISTS (
+  SELECT 1 FROM workspace_attachments WHERE subject_id = ? AND workspace_id = ?)`,
+		entry.DisplayName, entry.Hidden, entry.SubjectID, entry.WorkspaceID, entry.SubjectID, entry.WorkspaceID)
+	if err != nil {
+		return err
+	}
+	count, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if count != 1 {
+		return sql.ErrNoRows
+	}
+	return nil
 }
 
 func (r PresentationRepository) Workspace(ctx context.Context, subjectID, workspaceID string) (WorkspaceEntry, error) {
