@@ -11,5 +11,5 @@
     "target": "ES2024",
     "types": ["react", "react-dom"]
   },
-  "include": ["src/app.tsx", "src/gul.tsx", "src/**/*.d.ts"]
+  "include": ["src/app.tsx", "src/gul.tsx", "src/launch-selection.tsx", "src/**/*.d.ts"]
 }

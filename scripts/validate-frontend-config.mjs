@@ -4,7 +4,7 @@ import {fileURLToPath} from "node:url";
 
 const expectedBrowser = {
   types: ["react", "react-dom"],
-  include: ["src/app.tsx", "src/gul.tsx", "src/**/*.d.ts"],
+  include: ["src/app.tsx", "src/gul.tsx", "src/launch-selection.tsx", "src/**/*.d.ts"],
 };
 const expectedTest = {
   types: ["bun", "react", "react-dom"],

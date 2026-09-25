@@ -441,6 +441,26 @@ subject isolation. This promotes fake-scoped REQ-WS-004/008,
 REQ-DIRECT-001/015/019 and REQ-SESSION-003. E2/E9 retain released-provider
 qualification and E8 owns authenticated route assembly.
 
+## 1.17 E3-T4 Profile and launch selection, 2026-09-26
+
+`internal/launch` reads the user-global ListProfiles and GetProfile projections
+through the pinned provider port. It checks an explicit Profile, model, effort,
+lane and assurance against the current selected Profile. It checks the Policy
+name against trusted local preprovisioning; Dolgorae confirms it at StartRun.
+Compatible projections require a runtime version and known capability
+fields; malformed and transport responses fail closed. The result is a
+prospective Direct Interactive configuration with an explicit orchestration
+intent. It does not create a provider Run or credential carrier.
+
+The unmounted RuntimeService handler and React selector expose the catalog and
+configuration check without enabling a route. The selector displays Profile
+compatibility, runtime version, models, lanes, maximum assurance and capability
+summary. Shared read-only needs an explicit lane choice, visible permanent-use
+warning and acknowledgement in both the UI and API. Scenario and browser tests
+cover the catalog, unsupported choices and consent, promoting fake-scoped
+REQ-DIRECT-003/009. E2-T3 owns fresh launch revalidation and StartRun; E8 owns
+authenticated route assembly, and E9 retains released-provider acceptance.
+
 ## 2. Current development snapshot
 
 | Area | State |
@@ -448,9 +468,9 @@ qualification and E8 owns authenticated route assembly.
 | Five Gul SOT documents | E0-T4 completed the consumer alignment and Gate A reproduction; E0-T8 completed toolchain/ADR alignment; E0-T7 completed Gate B |
 | Toolchain and developer-command artifacts | E0-T8 accepted one pin manifest and read-only host checks; E0-T7 adds checked contract generation/drift delegates; E1-T1 adds the root Go module; E1-T2 adds root Bun pin validation and checked frontend generation/drift commands; E1-T3 adds checked Gul API/error-catalog generation; no installer |
 | Contract boundary | E12-T1 pins TASK-053 and regenerates checked clients/maps/fake transport for 36 known, 27 required, and 9 unavailable methods; E13-T1 adds an explicit stateful scenario provider over the 27-method port |
-| Production source | E1 shared core, bundle, API declarations, isolated SQLite and Wails shell; E3-T1 adds Workspace attachment; E3-T2 adds local presentation; E3-T3 adds passive session binding, aggregate reads and unmounted typed handlers |
-| Wails host/frontend | One React foundation bundle and isolated Wails shell foundation implemented; feature UI and authenticated attach not implemented |
-| ConnectRPC schema/services | Gul DirectSession, ArtifactPresentation and WorkspacePresentation declarations and generated clients exist; isolated Workspace and Direct Session presentation/read handlers remain unmounted |
+| Production source | E1 shared core, bundle, API declarations, isolated SQLite and Wails shell; E3-T1 adds Workspace attachment; E3-T2 adds local presentation; E3-T3 adds passive session binding and aggregate reads; E3-T4 adds global Profile launch selection and unmounted typed handler |
+| Wails host/frontend | One React foundation bundle and isolated Wails shell foundation implemented; E3-T4 launch selector is unmounted and authenticated attach is not implemented |
+| ConnectRPC schema/services | Gul Runtime, DirectSession, ArtifactPresentation and WorkspacePresentation declarations and generated clients exist; isolated handlers remain unmounted |
 | Gul SQLite schema | Gul-owned version 4 schema with Workspace attachment, favorites and Primary binding migrations and isolated repositories implemented; production startup integration pending |
 | Dolgorae RPC supervisor/provider | Not implemented |
 | Controller credential store | Caller-owned mechanism selected by ADR-0047; not implemented |
@@ -908,4 +928,4 @@ The initial documentation assumed Gul would manage one Codex App Server, map Ses
 
 ## 12. Handoff
 
-E12, E1, and E13 are complete. The TASK-053 consumer lock and generated contract tooling remain authoritative. E3-T1 added fake-scoped Workspace attachment, E3-T2 added local-only presentation, and E3-T3 added passive session reads; E3-T4 is next. E2-T0 remains blocked on an accepted compatible Dolgorae executable and live smoke evidence. No product route or live-provider behavior is activated automatically.
+E12, E1, and E13 are complete. The TASK-053 consumer lock and generated contract tooling remain authoritative. E3-T1 added fake-scoped Workspace attachment, E3-T2 added local-only presentation, E3-T3 added passive session reads, and E3-T4 added prospective global Profile launch selection. E3 closeout remains pending. E2-T0 remains blocked on an accepted compatible Dolgorae executable and live smoke evidence. No product route or live-provider behavior is activated automatically.

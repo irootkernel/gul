@@ -493,6 +493,9 @@ E3-T2 adds subject-scoped Workspace and Direct Session display metadata and
 navigation with local-only mutations. Its typed handlers remain unmounted.
 E3-T3 adds fake-scoped Primary bindings and passive aggregate reads. It does
 not create Runs, register a product route, or enable whole-session close.
+E3-T4 adds fake-scoped global Profile launch selection, unmounted catalog and
+configuration handlers, and the shared read-only consent boundary. It creates
+no Run or Controller carrier.
 
 | Requirement | Accepted Current State | Evidence |
 |---|---|---|
@@ -507,12 +510,14 @@ not create Runs, register a product route, or enable whole-session close.
 | REQ-WS-006 | Attachment revalidation verifies stored canonical root, inode, and provider identity before scoped use | E3-T1; moved-root and changed-ID fixtures; `make test` |
 | REQ-WS-007 | Bootstrap inspection omits expected provider ID; subsequent revalidation sends the stored path and ID; no initialization call | E3-T1; recording fake provider fixture; `make test` |
 | REQ-WS-008 | Removing a Workspace Entry deletes only Gul presentation, navigation and local bindings; provider Runs remain untouched | E3-T3 local removal and API tests; `make test` |
-| REQ-WS-009 | Registration accepts a compatible inspected workspace and returns typed unavailable-workspace, profile, and Profile Server blockers without provisioning | E3-T1 fake-scoped blocker fixtures; launch Policy selection remains E3-T4; `make test` |
+| REQ-WS-009 | Registration accepts a compatible inspected workspace and returns typed unavailable-workspace, profile, and Profile Server blockers without provisioning | E3-T1 fake-scoped blocker fixtures; E3-T4 fake-scoped launch Policy selection; `make test` |
 | REQ-WS-010 | Symlink aliases collapse to one attachment; moved or replaced identity fails closed | E3-T1 canonicalization and revalidation fixtures; `make test` |
 | REQ-WS-011 | Registration invokes inspection only and creates no Git worktree | E3-T1; inspected `internal/workspace` provider port and registration call graph |
 | REQ-WS-012 | Host-loaded canonical allowlist bounds browsing; outside, traversal, symlink, and private-subtree probes fail with one typed selection error | E3-T1 containment fixtures; `make test` |
 | REQ-DIRECT-001 | Each locally accepted Primary Run has one persisted subject-scoped Direct Session binding; three Runs list and reopen without a Codex thread field | E3-T3 scenario-backed binding and SQLite reopen test; `make test` |
+| REQ-DIRECT-003 | Permanent shared read-only launch requires an explicit lane choice, visible warning and acknowledgement before configuration check | E3-T4 React selection, authenticated handler and domain tests; `make test` |
 | REQ-DIRECT-007 | Direct Session name, favorite, archive and last navigation selection are subject-scoped SQLite presentation; offline actions invoke no provider method | E3-T2; restart, isolation and offline handler tests; `make test` |
+| REQ-DIRECT-009 | Global Profile catalog projects compatibility, models, lanes, maximum assurance, capability summary and runtime version; unsupported choices are blocked | E3-T4 pinned-contract adapter, browser validator and UI tests; `make test` |
 | REQ-DIRECT-015 | Specialist parent links provide typed observer-only status; aggregate counts and state come only from authorized GetOrchestratedSession | E3-T3 scenario Specialist and wrong-Controller fixtures; `make test` |
 | REQ-DIRECT-019 | Checked GetRun configuration refreshes the local Primary projection on bind, rediscovery and reopen, including profile, purpose, model, effort, capabilities and instruction identity | E3-T3 provider-overrides-cache and reopen fixtures; `make test` |
 | REQ-SESSION-003 | Authorized GetOrchestratedSession supplies aggregate identity, revision, policy, counts and recovery; non-session roots and unavailable reads cannot become an empty or completed aggregate | E3-T3 scenario-backed provider adapter and browser read tests; `make test` |

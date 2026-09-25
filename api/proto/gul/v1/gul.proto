@@ -7,7 +7,92 @@ option go_package = "github.com/rootkernel/gul/api/generated/go/gul/v1;gulv1";
 import "google/protobuf/timestamp.proto";
 
 // These declarations are a browser contract, not an enabled product route.
-// Feature owners supply authenticated implementations in later tasks.
+// Some handlers exist but remain unmounted until authenticated route assembly.
+service RuntimeService {
+  rpc ListRuntimeProfiles(ListRuntimeProfilesRequest) returns (ListRuntimeProfilesResponse);
+  rpc CheckCompatibility(CheckCompatibilityRequest) returns (CheckCompatibilityResponse);
+}
+
+enum RuntimeProfileCompatibility {
+  RUNTIME_PROFILE_COMPATIBILITY_UNSPECIFIED = 0;
+  RUNTIME_PROFILE_COMPATIBILITY_COMPATIBLE = 1;
+  RUNTIME_PROFILE_COMPATIBILITY_INCOMPATIBLE = 2;
+  RUNTIME_PROFILE_COMPATIBILITY_UNVERIFIED = 3;
+  RUNTIME_PROFILE_COMPATIBILITY_UNAVAILABLE = 4;
+}
+
+enum LaunchExecutionLane {
+  LAUNCH_EXECUTION_LANE_UNSPECIFIED = 0;
+  LAUNCH_EXECUTION_LANE_DEDICATED = 1;
+  LAUNCH_EXECUTION_LANE_SHARED_READONLY = 2;
+}
+
+enum LaunchAssurance {
+  // Wire numbers are ordered from weakest to strongest assurance.
+  LAUNCH_ASSURANCE_UNSPECIFIED = 0;
+  LAUNCH_ASSURANCE_BEST_EFFORT_PERSONAL_ALPHA = 1;
+  LAUNCH_ASSURANCE_VERIFIED_THREAD_SCOPED_CONTROL = 2;
+  LAUNCH_ASSURANCE_STRONG_PROCESS_CONTAINMENT = 3;
+}
+
+message RuntimeModelChoice {
+  string model_id = 1;
+  bool is_default = 2;
+  repeated string supported_efforts = 3;
+}
+
+message RuntimeProfileChoice {
+  string name = 1;
+  RuntimeProfileCompatibility compatibility = 2;
+  string runtime_version = 3;
+  repeated RuntimeModelChoice models = 4;
+  repeated LaunchExecutionLane supported_lanes = 5;
+  LaunchAssurance maximum_assurance = 6;
+  repeated string feature_flags = 7;
+  repeated string supported_interactions = 8;
+  string access_policy_transition = 9;
+  string background_execution = 10;
+  bool native_subagents_enabled = 11;
+}
+
+message ListRuntimeProfilesRequest {}
+
+message ListRuntimeProfilesResponse {
+  repeated RuntimeProfileChoice profiles = 1;
+  repeated string preprovisioned_policy_names = 2;
+  string shared_readonly_warning = 3;
+}
+
+message CheckCompatibilityRequest {
+  string profile_name = 1;
+  string model_id = 2;
+  string effort = 3;
+  LaunchExecutionLane lane = 4;
+  LaunchAssurance required_assurance = 5;
+  string policy_name = 6;
+  bool acknowledge_shared_readonly = 7;
+}
+
+message ProspectiveLaunchConfiguration {
+  string profile_name = 1;
+  string model_id = 2;
+  string effort = 3;
+  LaunchExecutionLane lane = 4;
+  LaunchAssurance required_assurance = 5;
+  string policy_name = 6;
+  // First-release values are fixed: direct_interactive, interactive,
+  // interactive_client, and dolgorae_orchestrated_session respectively.
+  string control_mode = 7;
+  string purpose = 8;
+  string controller_kind = 9;
+  string orchestration_use_case = 10;
+  string shared_readonly_warning = 11;
+}
+
+message CheckCompatibilityResponse {
+  ProspectiveLaunchConfiguration configuration = 1;
+}
+
 service WorkspacePresentationService {
   rpc ListRegistrableRoots(ListRegistrableRootsRequest) returns (ListRegistrableRootsResponse);
   rpc BrowseRegistrableRoot(BrowseRegistrableRootRequest) returns (BrowseRegistrableRootResponse);

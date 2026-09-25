@@ -133,10 +133,11 @@ func (h *Harness) Reset() {
 	h.laterMethods = nil
 	h.profiles = map[string]*publicv1.ProfileProjection{
 		"default": {
-			Name: "default", ServerKey: "scenario-server",
+			Name: "default", ServerKey: "scenario-server", RuntimeVersion: proto.String("scenario-runtime-1"),
 			Compatibility:           publicv1.ProfileCompatibility_PROFILE_COMPATIBILITY_COMPATIBLE,
 			Models:                  []*publicv1.ModelCapability{{ModelId: "scenario-model", IsDefault: true, SupportedEfforts: []string{"low", "medium", "high"}}},
 			SupportedExecutionLanes: []publicv1.ExecutionLane{publicv1.ExecutionLane_EXECUTION_LANE_DEDICATED},
+			MaximumAssurance:        publicv1.AssuranceLevel_ASSURANCE_LEVEL_BEST_EFFORT_PERSONAL_ALPHA,
 		},
 	}
 	h.controllers = make(map[string]ControllerSpec)

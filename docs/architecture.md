@@ -302,6 +302,17 @@ required_assurance = best_effort_personal_alpha
 
 Before StartRun, Gul locally creates and validates a credential carrier under the Dolgorae-owned Gul carrier root, then supplies its derived carrier reference to Dolgorae. Dolgorae verifies and binds the carrier; it does not create the credential or implicitly invent a Gul binding.
 
+E3-T4 provides an unmounted launch selector and authenticated browser handler over
+the user-global Profile registry. It displays compatibility, runtime version,
+models and efforts, supported lanes, maximum assurance, and capability summary.
+The selected model, effort, lane and assurance are checked against a fresh
+`GetProfile` projection. The Policy name is checked against trusted local
+preprovisioning; Dolgorae confirms its validity at StartRun. The resulting
+prospective configuration includes both choices. The shared read-only lane
+requires a separate choice and acknowledgement of its permanent effect.
+E2-T3 owns revalidation and the
+actual carrier and StartRun mutation; E8 owns route registration.
+
 `shared_readonly` is permanent. The first release blocks a later write request with a typed unsupported-transition result and preserves the source. E4-T4 owns any future `CreateWriteContinuation` flow. Starting a fresh Orchestrated Session is a new launch and is never labeled or recorded as lineage continuation.
 
 An existing-thread `dedicated` Run offers in-place write only while the selected profile reports transition support. When unsupported or unverified, the first release blocks the write without offering continuation. An upstream transition rejection is a typed blocker, never a retryable failure.
@@ -995,9 +1006,9 @@ The serial command facade is `toolchain-check`, `generate-contract`, `contract-c
 
 ## 19. Current snapshot
 
-**Snapshot date:** 2026-09-26 (E3-T3 completion)
+**Snapshot date:** 2026-09-26 (E3-T4 completion)
 
-**Roadmap point:** E0 is `Completed`, E12 is `Completed`, E1 is `Completed`, and E13 is `Completed`; E1-T1 is `Completed` and E1-T2/T3/T4/T5 are `Completed`. E3-T1/T2/T3 are `Completed`; E3-T4 is next and E3 closeout remains pending. Former E12-T2/T3 remain Retired. E14 owns pre-release application acceptance. No live-provider or assembled-application acceptance is implied.
+**Roadmap point:** E0 is `Completed`, E12 is `Completed`, E1 is `Completed`, and E13 is `Completed`; E1-T1 is `Completed` and E1-T2/T3/T4/T5 are `Completed`. E3-T1/T2/T3/T4 are `Completed`; E3 closeout remains pending. Former E12-T2/T3 remain Retired. E14 owns pre-release application acceptance. No live-provider or assembled-application acceptance is implied.
 
 **Maturity:** delivery-independent Go core, shared React bundle, declared but disabled Gul API, typed provider ports and explicit scenario harness, isolated SQLite repositories with fake-scoped Workspace attachment, local presentation and passive session reads, and a Wails shell foundation; provider and assembled storage lifecycle remain pending
 
@@ -1011,7 +1022,7 @@ availability is not implied. The core does not import Wails; the desktop
 foundation hosts it, while assembled headless and authenticated delivery remain
 future work.
 
-`api/proto` declares Gul-owned WorkspacePresentation, DirectSession and
+`api/proto` declares Gul-owned Runtime, WorkspacePresentation, DirectSession and
 ArtifactPresentation browser
 contracts. Its `bounds.json` is the shared authority for generated Go and
 TypeScript page/content limits. Generated clients are checked for drift. The
@@ -1040,7 +1051,7 @@ An explicit registration can reattach a moved or replaced workspace after
 inspection while retaining its Gul presentation ID and metadata. The pinned
 inspection adapter lives in `internal/workspace/contractprovider`, keeping the
 Workspace service and SQLite adapter independent of generated provider types.
-`internal/delivery/api` exposes typed Workspace and Direct Session presentation
+`internal/delivery/api` exposes typed Runtime, Workspace and Direct Session presentation
 handlers for explicit authenticated composition; no production route is
 registered. The macOS shell
 has a directory-picker adapter, but no attached product binding. Dismissing the
@@ -1073,6 +1084,13 @@ The unmounted Direct Session handler
 lists local bindings and maps aggregate reads to Gul-owned browser types.
 Unavailable reads omit counts and close references. Workspace removal clears
 only local presentation, navigation and binding rows.
+
+`internal/launch` reads the global Profile catalog through the pinned
+ListProfiles/GetProfile adapter and checks explicit launch choices against a
+fresh selected Profile. It checks the Policy name against trusted local
+preprovisioning. The unmounted Runtime handler returns a bounded browser
+catalog and prospective configuration, including the shared read-only warning.
+It creates no Run or Controller carrier.
 
 `internal/storage` requires an owner-only database directory and file, then
 opens the pinned SQLite driver with one writer and at most four read-only
@@ -1123,6 +1141,8 @@ private/escaping paths, typed provider blockers, moved roots, and changed IDs.
 Session tests cover three Runs across two Workspaces, wrong-Controller and
 non-session rejection, provider configuration refresh, typed Specialist status,
 coalesced passive reads, stale/unavailable state, subject isolation and reopen.
+Launch tests cover the scenario Profile catalog, unsupported choices, malformed
+projections, consent, browser errors and UI readiness.
 
 ### 19.3 Existing artifacts
 
@@ -1143,7 +1163,7 @@ One checked React bundle and shared browser/shell asset delivery exist.
 An isolated Wails shell foundation reuses the shared core and checked bundle; authenticated attach is not enabled.
 ConnectRPC services are declared and generated but not registered.
 Gul-only SQLite schema and repositories exist in isolated tests; no production database lifecycle is enabled.
-No Runtime Provider adapter, RPC supervisor, Controller credential store, timeline adapter, or Artifact adapter exists in the assembled product. Isolated Workspace inspection and passive session adapters use the pinned provider port with a scenario fake.
+No Runtime Provider adapter, RPC supervisor, Controller credential store, timeline adapter, or Artifact adapter exists in the assembled product. Isolated Workspace inspection, passive session and launch selection adapters use the pinned provider port with a scenario fake.
 ```
 
 ### 19.5 Security posture

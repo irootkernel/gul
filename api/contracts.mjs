@@ -1,6 +1,12 @@
 import {toBinary} from "@bufbuild/protobuf";
 import {
   ActionClass,
+  LaunchExecutionLane,
+  LaunchAssurance,
+  RuntimeProfileCompatibility,
+  ListRuntimeProfilesResponseSchema,
+  CheckCompatibilityRequestSchema,
+  CheckCompatibilityResponseSchema,
   CloseOutcomeSchema,
   CloseStatus,
   ErrorCode,
@@ -33,6 +39,65 @@ export {maximumPageMetadataBytes, maximumPreviewBytes};
 
 /** @param {string} value */
 const byteLength = value => new TextEncoder().encode(value).length;
+/** @param {Array<string | number>} values */
+const hasDuplicates = values => new Set(values).size !== values.length;
+
+/** @param {import("./generated/ts/gul/v1/gul_pb.ts").ListRuntimeProfilesResponse} response */
+export function validateRuntimeProfiles(response) {
+  const validLanes = [LaunchExecutionLane.DEDICATED, LaunchExecutionLane.SHARED_READONLY];
+  const validAssurance = [LaunchAssurance.BEST_EFFORT_PERSONAL_ALPHA,
+    LaunchAssurance.VERIFIED_THREAD_SCOPED_CONTROL, LaunchAssurance.STRONG_PROCESS_CONTAINMENT];
+  if (!response.sharedReadonlyWarning || response.profiles.length > 100 || response.preprovisionedPolicyNames.length > 100 ||
+      hasDuplicates(response.profiles.map(profile => profile.name)) || hasDuplicates(response.preprovisionedPolicyNames) ||
+      response.profiles.some(profile => !profile.name || ![
+        RuntimeProfileCompatibility.COMPATIBLE, RuntimeProfileCompatibility.INCOMPATIBLE,
+        RuntimeProfileCompatibility.UNVERIFIED, RuntimeProfileCompatibility.UNAVAILABLE,
+      ].includes(profile.compatibility) ||
+        (profile.compatibility === RuntimeProfileCompatibility.COMPATIBLE &&
+          (!profile.runtimeVersion || !profile.models.length || !profile.supportedLanes.length ||
+            !validAssurance.includes(profile.maximumAssurance))) ||
+        hasDuplicates(profile.models.map(model => model.modelId)) || hasDuplicates(profile.supportedLanes) ||
+        profile.models.some(model => !model.modelId || !model.supportedEfforts.length ||
+          model.supportedEfforts.some(effort => !effort) || hasDuplicates(model.supportedEfforts)) ||
+        profile.supportedLanes.some(lane => !validLanes.includes(lane))) ||
+      response.preprovisionedPolicyNames.some(name => !name)) {
+    throw new Error("invalid Gul runtime profile catalog");
+  }
+  const bytes = toBinary(ListRuntimeProfilesResponseSchema, response);
+  if (bytes.length > maximumPageMetadataBytes) throw new Error("Gul runtime profile catalog exceeds bound");
+  return bytes;
+}
+
+/** @param {import("./generated/ts/gul/v1/gul_pb.ts").CheckCompatibilityRequest} request */
+export function validateLaunchChoice(request) {
+  if (!request.profileName || !request.modelId || !request.effort || !request.policyName ||
+      ![LaunchExecutionLane.DEDICATED, LaunchExecutionLane.SHARED_READONLY].includes(request.lane) ||
+      ![LaunchAssurance.BEST_EFFORT_PERSONAL_ALPHA, LaunchAssurance.VERIFIED_THREAD_SCOPED_CONTROL,
+        LaunchAssurance.STRONG_PROCESS_CONTAINMENT].includes(request.requiredAssurance) ||
+      (request.lane === LaunchExecutionLane.SHARED_READONLY && !request.acknowledgeSharedReadonly)) {
+    throw new Error("invalid Gul launch choice");
+  }
+  const bytes = toBinary(CheckCompatibilityRequestSchema, request);
+  if (bytes.length > maximumPageMetadataBytes) throw new Error("Gul launch choice exceeds bound");
+  return bytes;
+}
+
+/** @param {import("./generated/ts/gul/v1/gul_pb.ts").CheckCompatibilityResponse} response */
+export function validateLaunchConfiguration(response) {
+  const value = response.configuration;
+  if (!value || !value.profileName || !value.modelId || !value.effort || !value.policyName ||
+      value.controlMode !== "direct_interactive" || value.purpose !== "interactive" ||
+      value.controllerKind !== "interactive_client" || value.orchestrationUseCase !== "dolgorae_orchestrated_session" ||
+      ![LaunchExecutionLane.DEDICATED, LaunchExecutionLane.SHARED_READONLY].includes(value.lane) ||
+      ![LaunchAssurance.BEST_EFFORT_PERSONAL_ALPHA, LaunchAssurance.VERIFIED_THREAD_SCOPED_CONTROL,
+        LaunchAssurance.STRONG_PROCESS_CONTAINMENT].includes(value.requiredAssurance) ||
+      (value.lane === LaunchExecutionLane.SHARED_READONLY && !value.sharedReadonlyWarning)) {
+    throw new Error("invalid Gul prospective launch configuration");
+  }
+  const bytes = toBinary(CheckCompatibilityResponseSchema, response);
+  if (bytes.length > maximumPageMetadataBytes) throw new Error("Gul launch configuration exceeds bound");
+  return bytes;
+}
 
 /** @param {import("./generated/ts/gul/v1/gul_pb.ts").ListPromptHistoryRequest | import("./generated/ts/gul/v1/gul_pb.ts").ListSpecialistResultsRequest} request */
 export function validatePageRequest(request) {

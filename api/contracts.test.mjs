@@ -2,6 +2,13 @@ import {expect, test} from "bun:test";
 import {create, fromBinary, toBinary} from "@bufbuild/protobuf";
 import {
   ActionClass,
+  RuntimeService,
+  LaunchExecutionLane,
+  LaunchAssurance,
+  RuntimeProfileCompatibility,
+  ListRuntimeProfilesResponseSchema,
+  CheckCompatibilityRequestSchema,
+  CheckCompatibilityResponseSchema,
   CloseOutcomeSchema,
   CloseStatus,
   DirectSessionService,
@@ -27,9 +34,10 @@ import {
   PromptOriginalSchema,
   file_gul_v1_gul,
 } from "./generated/ts/gul/v1/gul_pb.ts";
-import {validateArtifactChunkRequest, validateArtifactChunkResponse, validateArtifactMetadata, validateCloseOutcome, validateExecutionState, validatePageRequest, validatePageResponse, validatePromptOriginal} from "./contracts.mjs";
+import {validateArtifactChunkRequest, validateArtifactChunkResponse, validateArtifactMetadata, validateCloseOutcome, validateExecutionState, validatePageRequest, validatePageResponse, validatePromptOriginal, validateRuntimeProfiles, validateLaunchChoice, validateLaunchConfiguration} from "./contracts.mjs";
 
 test("the generated browser surface is explicit and contains no upstream private fields", () => {
+  expect(Object.keys(RuntimeService.method).sort()).toEqual(["checkCompatibility", "listRuntimeProfiles"]);
   expect(Object.keys(DirectSessionService.method).sort()).toEqual([
     "closeRuntime", "getDirectSessionPresentation", "getExecutionState", "getPromptHistoryItem", "listDirectSessions", "listPromptHistory", "listSpecialistResults",
     "renameDirectSession", "setDirectSessionArchived", "setDirectSessionFavorite",
@@ -42,6 +50,44 @@ test("the generated browser surface is explicit and contains no upstream private
   for (const forbidden of ["provider_cursor", "run_id", "controller_carrier", "socket_path", "worker_id", "operation_id", "workspace_absolute_path"]) {
     expect(names).not.toContain(forbidden);
   }
+});
+
+test("global Profile and launch choice require supported typed fields and shared read-only consent", () => {
+  const catalog = create(ListRuntimeProfilesResponseSchema, {
+    profiles: [{name: "profile", compatibility: RuntimeProfileCompatibility.COMPATIBLE, runtimeVersion: "runtime-1",
+      models: [{modelId: "model", isDefault: true, supportedEfforts: ["medium"]}],
+      supportedLanes: [LaunchExecutionLane.DEDICATED, LaunchExecutionLane.SHARED_READONLY],
+      maximumAssurance: LaunchAssurance.BEST_EFFORT_PERSONAL_ALPHA,
+      featureFlags: ["safe_client_projection"], accessPolicyTransition: "unverified", backgroundExecution: "unavailable"}],
+    preprovisionedPolicyNames: ["named-policy"], sharedReadonlyWarning: "Shared read-only access is permanent.",
+  });
+  expect(() => validateRuntimeProfiles(catalog)).not.toThrow();
+  expect(() => validateRuntimeProfiles({...catalog, profiles: [{...catalog.profiles[0], runtimeVersion: ""}]})).toThrow("runtime profile");
+  expect(() => validateRuntimeProfiles({...catalog, profiles: [{...catalog.profiles[0], models: [{...catalog.profiles[0].models[0], supportedEfforts: [""]}]}]})).toThrow("runtime profile");
+  expect(() => validateRuntimeProfiles({...catalog, profiles: Array.from({length: 101}, (_, index) => ({...catalog.profiles[0], name: `profile-${index}`}))})).toThrow("runtime profile");
+  expect(() => validateRuntimeProfiles({...catalog, preprovisionedPolicyNames: ["named-policy", "named-policy"]})).toThrow("runtime profile");
+  expect(() => validateRuntimeProfiles({...catalog, sharedReadonlyWarning: ""})).toThrow("runtime profile");
+  expect(() => validateRuntimeProfiles({...catalog, profiles: [catalog.profiles[0], catalog.profiles[0]]})).toThrow("runtime profile");
+  expect(() => validateRuntimeProfiles({...catalog, profiles: [{...catalog.profiles[0], featureFlags: ["x".repeat(262144)]}]})).toThrow("exceeds bound");
+  const choice = create(CheckCompatibilityRequestSchema, {profileName: "profile", modelId: "model", effort: "medium",
+    lane: LaunchExecutionLane.SHARED_READONLY, requiredAssurance: LaunchAssurance.BEST_EFFORT_PERSONAL_ALPHA,
+    policyName: "named-policy"});
+  expect(() => validateLaunchChoice(choice)).toThrow("launch choice");
+  choice.acknowledgeSharedReadonly = true;
+  expect(() => validateLaunchChoice(choice)).not.toThrow();
+  expect(() => validateLaunchChoice({...choice, lane: LaunchExecutionLane.UNSPECIFIED})).toThrow("launch choice");
+  expect(() => validateLaunchChoice({...choice, modelId: "m".repeat(262144)})).toThrow("exceeds bound");
+  const configured = create(CheckCompatibilityResponseSchema, {configuration: {profileName: "profile", modelId: "model", effort: "medium",
+    lane: LaunchExecutionLane.SHARED_READONLY, requiredAssurance: LaunchAssurance.BEST_EFFORT_PERSONAL_ALPHA,
+    policyName: "named-policy", controlMode: "direct_interactive", purpose: "interactive", controllerKind: "interactive_client",
+    orchestrationUseCase: "dolgorae_orchestrated_session", sharedReadonlyWarning: "Shared read-only access is permanent."}});
+  expect(() => validateLaunchConfiguration(configured)).not.toThrow();
+  expect(() => validateLaunchConfiguration({...configured, configuration: {...configured.configuration, sharedReadonlyWarning: ""}})).toThrow("launch configuration");
+  for (const key of ["controlMode", "purpose", "controllerKind", "orchestrationUseCase"]) {
+    expect(() => validateLaunchConfiguration({...configured, configuration: {...configured.configuration, [key]: "unsupported"}})).toThrow("launch configuration");
+  }
+  expect(() => validateLaunchConfiguration({...configured, configuration: undefined})).toThrow("launch configuration");
+  expect(() => validateLaunchConfiguration({...configured, configuration: {...configured.configuration, profileName: "p".repeat(262144)}})).toThrow("exceeds bound");
 });
 
 test("history preserves distinct accepted items and exact original Unicode", () => {

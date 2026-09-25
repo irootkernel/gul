@@ -22,6 +22,163 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+type RuntimeProfileCompatibility int32
+
+const (
+	RuntimeProfileCompatibility_RUNTIME_PROFILE_COMPATIBILITY_UNSPECIFIED  RuntimeProfileCompatibility = 0
+	RuntimeProfileCompatibility_RUNTIME_PROFILE_COMPATIBILITY_COMPATIBLE   RuntimeProfileCompatibility = 1
+	RuntimeProfileCompatibility_RUNTIME_PROFILE_COMPATIBILITY_INCOMPATIBLE RuntimeProfileCompatibility = 2
+	RuntimeProfileCompatibility_RUNTIME_PROFILE_COMPATIBILITY_UNVERIFIED   RuntimeProfileCompatibility = 3
+	RuntimeProfileCompatibility_RUNTIME_PROFILE_COMPATIBILITY_UNAVAILABLE  RuntimeProfileCompatibility = 4
+)
+
+// Enum value maps for RuntimeProfileCompatibility.
+var (
+	RuntimeProfileCompatibility_name = map[int32]string{
+		0: "RUNTIME_PROFILE_COMPATIBILITY_UNSPECIFIED",
+		1: "RUNTIME_PROFILE_COMPATIBILITY_COMPATIBLE",
+		2: "RUNTIME_PROFILE_COMPATIBILITY_INCOMPATIBLE",
+		3: "RUNTIME_PROFILE_COMPATIBILITY_UNVERIFIED",
+		4: "RUNTIME_PROFILE_COMPATIBILITY_UNAVAILABLE",
+	}
+	RuntimeProfileCompatibility_value = map[string]int32{
+		"RUNTIME_PROFILE_COMPATIBILITY_UNSPECIFIED":  0,
+		"RUNTIME_PROFILE_COMPATIBILITY_COMPATIBLE":   1,
+		"RUNTIME_PROFILE_COMPATIBILITY_INCOMPATIBLE": 2,
+		"RUNTIME_PROFILE_COMPATIBILITY_UNVERIFIED":   3,
+		"RUNTIME_PROFILE_COMPATIBILITY_UNAVAILABLE":  4,
+	}
+)
+
+func (x RuntimeProfileCompatibility) Enum() *RuntimeProfileCompatibility {
+	p := new(RuntimeProfileCompatibility)
+	*p = x
+	return p
+}
+
+func (x RuntimeProfileCompatibility) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (RuntimeProfileCompatibility) Descriptor() protoreflect.EnumDescriptor {
+	return file_gul_v1_gul_proto_enumTypes[0].Descriptor()
+}
+
+func (RuntimeProfileCompatibility) Type() protoreflect.EnumType {
+	return &file_gul_v1_gul_proto_enumTypes[0]
+}
+
+func (x RuntimeProfileCompatibility) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use RuntimeProfileCompatibility.Descriptor instead.
+func (RuntimeProfileCompatibility) EnumDescriptor() ([]byte, []int) {
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{0}
+}
+
+type LaunchExecutionLane int32
+
+const (
+	LaunchExecutionLane_LAUNCH_EXECUTION_LANE_UNSPECIFIED     LaunchExecutionLane = 0
+	LaunchExecutionLane_LAUNCH_EXECUTION_LANE_DEDICATED       LaunchExecutionLane = 1
+	LaunchExecutionLane_LAUNCH_EXECUTION_LANE_SHARED_READONLY LaunchExecutionLane = 2
+)
+
+// Enum value maps for LaunchExecutionLane.
+var (
+	LaunchExecutionLane_name = map[int32]string{
+		0: "LAUNCH_EXECUTION_LANE_UNSPECIFIED",
+		1: "LAUNCH_EXECUTION_LANE_DEDICATED",
+		2: "LAUNCH_EXECUTION_LANE_SHARED_READONLY",
+	}
+	LaunchExecutionLane_value = map[string]int32{
+		"LAUNCH_EXECUTION_LANE_UNSPECIFIED":     0,
+		"LAUNCH_EXECUTION_LANE_DEDICATED":       1,
+		"LAUNCH_EXECUTION_LANE_SHARED_READONLY": 2,
+	}
+)
+
+func (x LaunchExecutionLane) Enum() *LaunchExecutionLane {
+	p := new(LaunchExecutionLane)
+	*p = x
+	return p
+}
+
+func (x LaunchExecutionLane) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (LaunchExecutionLane) Descriptor() protoreflect.EnumDescriptor {
+	return file_gul_v1_gul_proto_enumTypes[1].Descriptor()
+}
+
+func (LaunchExecutionLane) Type() protoreflect.EnumType {
+	return &file_gul_v1_gul_proto_enumTypes[1]
+}
+
+func (x LaunchExecutionLane) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use LaunchExecutionLane.Descriptor instead.
+func (LaunchExecutionLane) EnumDescriptor() ([]byte, []int) {
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{1}
+}
+
+type LaunchAssurance int32
+
+const (
+	// Wire numbers are ordered from weakest to strongest assurance.
+	LaunchAssurance_LAUNCH_ASSURANCE_UNSPECIFIED                    LaunchAssurance = 0
+	LaunchAssurance_LAUNCH_ASSURANCE_BEST_EFFORT_PERSONAL_ALPHA     LaunchAssurance = 1
+	LaunchAssurance_LAUNCH_ASSURANCE_VERIFIED_THREAD_SCOPED_CONTROL LaunchAssurance = 2
+	LaunchAssurance_LAUNCH_ASSURANCE_STRONG_PROCESS_CONTAINMENT     LaunchAssurance = 3
+)
+
+// Enum value maps for LaunchAssurance.
+var (
+	LaunchAssurance_name = map[int32]string{
+		0: "LAUNCH_ASSURANCE_UNSPECIFIED",
+		1: "LAUNCH_ASSURANCE_BEST_EFFORT_PERSONAL_ALPHA",
+		2: "LAUNCH_ASSURANCE_VERIFIED_THREAD_SCOPED_CONTROL",
+		3: "LAUNCH_ASSURANCE_STRONG_PROCESS_CONTAINMENT",
+	}
+	LaunchAssurance_value = map[string]int32{
+		"LAUNCH_ASSURANCE_UNSPECIFIED":                    0,
+		"LAUNCH_ASSURANCE_BEST_EFFORT_PERSONAL_ALPHA":     1,
+		"LAUNCH_ASSURANCE_VERIFIED_THREAD_SCOPED_CONTROL": 2,
+		"LAUNCH_ASSURANCE_STRONG_PROCESS_CONTAINMENT":     3,
+	}
+)
+
+func (x LaunchAssurance) Enum() *LaunchAssurance {
+	p := new(LaunchAssurance)
+	*p = x
+	return p
+}
+
+func (x LaunchAssurance) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (LaunchAssurance) Descriptor() protoreflect.EnumDescriptor {
+	return file_gul_v1_gul_proto_enumTypes[2].Descriptor()
+}
+
+func (LaunchAssurance) Type() protoreflect.EnumType {
+	return &file_gul_v1_gul_proto_enumTypes[2]
+}
+
+func (x LaunchAssurance) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use LaunchAssurance.Descriptor instead.
+func (LaunchAssurance) EnumDescriptor() ([]byte, []int) {
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{2}
+}
+
 type Freshness int32
 
 const (
@@ -58,11 +215,11 @@ func (x Freshness) String() string {
 }
 
 func (Freshness) Descriptor() protoreflect.EnumDescriptor {
-	return file_gul_v1_gul_proto_enumTypes[0].Descriptor()
+	return file_gul_v1_gul_proto_enumTypes[3].Descriptor()
 }
 
 func (Freshness) Type() protoreflect.EnumType {
-	return &file_gul_v1_gul_proto_enumTypes[0]
+	return &file_gul_v1_gul_proto_enumTypes[3]
 }
 
 func (x Freshness) Number() protoreflect.EnumNumber {
@@ -71,7 +228,7 @@ func (x Freshness) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use Freshness.Descriptor instead.
 func (Freshness) EnumDescriptor() ([]byte, []int) {
-	return file_gul_v1_gul_proto_rawDescGZIP(), []int{0}
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{3}
 }
 
 type SessionLifecycle int32
@@ -125,11 +282,11 @@ func (x SessionLifecycle) String() string {
 }
 
 func (SessionLifecycle) Descriptor() protoreflect.EnumDescriptor {
-	return file_gul_v1_gul_proto_enumTypes[1].Descriptor()
+	return file_gul_v1_gul_proto_enumTypes[4].Descriptor()
 }
 
 func (SessionLifecycle) Type() protoreflect.EnumType {
-	return &file_gul_v1_gul_proto_enumTypes[1]
+	return &file_gul_v1_gul_proto_enumTypes[4]
 }
 
 func (x SessionLifecycle) Number() protoreflect.EnumNumber {
@@ -138,7 +295,7 @@ func (x SessionLifecycle) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use SessionLifecycle.Descriptor instead.
 func (SessionLifecycle) EnumDescriptor() ([]byte, []int) {
-	return file_gul_v1_gul_proto_rawDescGZIP(), []int{1}
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{4}
 }
 
 type SessionComposition int32
@@ -174,11 +331,11 @@ func (x SessionComposition) String() string {
 }
 
 func (SessionComposition) Descriptor() protoreflect.EnumDescriptor {
-	return file_gul_v1_gul_proto_enumTypes[2].Descriptor()
+	return file_gul_v1_gul_proto_enumTypes[5].Descriptor()
 }
 
 func (SessionComposition) Type() protoreflect.EnumType {
-	return &file_gul_v1_gul_proto_enumTypes[2]
+	return &file_gul_v1_gul_proto_enumTypes[5]
 }
 
 func (x SessionComposition) Number() protoreflect.EnumNumber {
@@ -187,7 +344,7 @@ func (x SessionComposition) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use SessionComposition.Descriptor instead.
 func (SessionComposition) EnumDescriptor() ([]byte, []int) {
-	return file_gul_v1_gul_proto_rawDescGZIP(), []int{2}
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{5}
 }
 
 type ApprovalPolicy int32
@@ -223,11 +380,11 @@ func (x ApprovalPolicy) String() string {
 }
 
 func (ApprovalPolicy) Descriptor() protoreflect.EnumDescriptor {
-	return file_gul_v1_gul_proto_enumTypes[3].Descriptor()
+	return file_gul_v1_gul_proto_enumTypes[6].Descriptor()
 }
 
 func (ApprovalPolicy) Type() protoreflect.EnumType {
-	return &file_gul_v1_gul_proto_enumTypes[3]
+	return &file_gul_v1_gul_proto_enumTypes[6]
 }
 
 func (x ApprovalPolicy) Number() protoreflect.EnumNumber {
@@ -236,7 +393,7 @@ func (x ApprovalPolicy) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use ApprovalPolicy.Descriptor instead.
 func (ApprovalPolicy) EnumDescriptor() ([]byte, []int) {
-	return file_gul_v1_gul_proto_rawDescGZIP(), []int{3}
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{6}
 }
 
 type CloseProgress int32
@@ -281,11 +438,11 @@ func (x CloseProgress) String() string {
 }
 
 func (CloseProgress) Descriptor() protoreflect.EnumDescriptor {
-	return file_gul_v1_gul_proto_enumTypes[4].Descriptor()
+	return file_gul_v1_gul_proto_enumTypes[7].Descriptor()
 }
 
 func (CloseProgress) Type() protoreflect.EnumType {
-	return &file_gul_v1_gul_proto_enumTypes[4]
+	return &file_gul_v1_gul_proto_enumTypes[7]
 }
 
 func (x CloseProgress) Number() protoreflect.EnumNumber {
@@ -294,7 +451,7 @@ func (x CloseProgress) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use CloseProgress.Descriptor instead.
 func (CloseProgress) EnumDescriptor() ([]byte, []int) {
-	return file_gul_v1_gul_proto_rawDescGZIP(), []int{4}
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{7}
 }
 
 type RecoveryClass int32
@@ -336,11 +493,11 @@ func (x RecoveryClass) String() string {
 }
 
 func (RecoveryClass) Descriptor() protoreflect.EnumDescriptor {
-	return file_gul_v1_gul_proto_enumTypes[5].Descriptor()
+	return file_gul_v1_gul_proto_enumTypes[8].Descriptor()
 }
 
 func (RecoveryClass) Type() protoreflect.EnumType {
-	return &file_gul_v1_gul_proto_enumTypes[5]
+	return &file_gul_v1_gul_proto_enumTypes[8]
 }
 
 func (x RecoveryClass) Number() protoreflect.EnumNumber {
@@ -349,7 +506,7 @@ func (x RecoveryClass) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use RecoveryClass.Descriptor instead.
 func (RecoveryClass) EnumDescriptor() ([]byte, []int) {
-	return file_gul_v1_gul_proto_rawDescGZIP(), []int{5}
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{8}
 }
 
 type ObservedMemberLifecycle int32
@@ -406,11 +563,11 @@ func (x ObservedMemberLifecycle) String() string {
 }
 
 func (ObservedMemberLifecycle) Descriptor() protoreflect.EnumDescriptor {
-	return file_gul_v1_gul_proto_enumTypes[6].Descriptor()
+	return file_gul_v1_gul_proto_enumTypes[9].Descriptor()
 }
 
 func (ObservedMemberLifecycle) Type() protoreflect.EnumType {
-	return &file_gul_v1_gul_proto_enumTypes[6]
+	return &file_gul_v1_gul_proto_enumTypes[9]
 }
 
 func (x ObservedMemberLifecycle) Number() protoreflect.EnumNumber {
@@ -419,7 +576,7 @@ func (x ObservedMemberLifecycle) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use ObservedMemberLifecycle.Descriptor instead.
 func (ObservedMemberLifecycle) EnumDescriptor() ([]byte, []int) {
-	return file_gul_v1_gul_proto_rawDescGZIP(), []int{6}
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{9}
 }
 
 type SpecialistResultFormat int32
@@ -452,11 +609,11 @@ func (x SpecialistResultFormat) String() string {
 }
 
 func (SpecialistResultFormat) Descriptor() protoreflect.EnumDescriptor {
-	return file_gul_v1_gul_proto_enumTypes[7].Descriptor()
+	return file_gul_v1_gul_proto_enumTypes[10].Descriptor()
 }
 
 func (SpecialistResultFormat) Type() protoreflect.EnumType {
-	return &file_gul_v1_gul_proto_enumTypes[7]
+	return &file_gul_v1_gul_proto_enumTypes[10]
 }
 
 func (x SpecialistResultFormat) Number() protoreflect.EnumNumber {
@@ -465,7 +622,7 @@ func (x SpecialistResultFormat) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use SpecialistResultFormat.Descriptor instead.
 func (SpecialistResultFormat) EnumDescriptor() ([]byte, []int) {
-	return file_gul_v1_gul_proto_rawDescGZIP(), []int{7}
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{10}
 }
 
 type ErrorCode int32
@@ -591,11 +748,11 @@ func (x ErrorCode) String() string {
 }
 
 func (ErrorCode) Descriptor() protoreflect.EnumDescriptor {
-	return file_gul_v1_gul_proto_enumTypes[8].Descriptor()
+	return file_gul_v1_gul_proto_enumTypes[11].Descriptor()
 }
 
 func (ErrorCode) Type() protoreflect.EnumType {
-	return &file_gul_v1_gul_proto_enumTypes[8]
+	return &file_gul_v1_gul_proto_enumTypes[11]
 }
 
 func (x ErrorCode) Number() protoreflect.EnumNumber {
@@ -604,7 +761,7 @@ func (x ErrorCode) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use ErrorCode.Descriptor instead.
 func (ErrorCode) EnumDescriptor() ([]byte, []int) {
-	return file_gul_v1_gul_proto_rawDescGZIP(), []int{8}
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{11}
 }
 
 type ActionClass int32
@@ -691,11 +848,11 @@ func (x ActionClass) String() string {
 }
 
 func (ActionClass) Descriptor() protoreflect.EnumDescriptor {
-	return file_gul_v1_gul_proto_enumTypes[9].Descriptor()
+	return file_gul_v1_gul_proto_enumTypes[12].Descriptor()
 }
 
 func (ActionClass) Type() protoreflect.EnumType {
-	return &file_gul_v1_gul_proto_enumTypes[9]
+	return &file_gul_v1_gul_proto_enumTypes[12]
 }
 
 func (x ActionClass) Number() protoreflect.EnumNumber {
@@ -704,7 +861,7 @@ func (x ActionClass) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use ActionClass.Descriptor instead.
 func (ActionClass) EnumDescriptor() ([]byte, []int) {
-	return file_gul_v1_gul_proto_rawDescGZIP(), []int{9}
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{12}
 }
 
 type CloseStatus int32
@@ -749,11 +906,11 @@ func (x CloseStatus) String() string {
 }
 
 func (CloseStatus) Descriptor() protoreflect.EnumDescriptor {
-	return file_gul_v1_gul_proto_enumTypes[10].Descriptor()
+	return file_gul_v1_gul_proto_enumTypes[13].Descriptor()
 }
 
 func (CloseStatus) Type() protoreflect.EnumType {
-	return &file_gul_v1_gul_proto_enumTypes[10]
+	return &file_gul_v1_gul_proto_enumTypes[13]
 }
 
 func (x CloseStatus) Number() protoreflect.EnumNumber {
@@ -762,7 +919,549 @@ func (x CloseStatus) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use CloseStatus.Descriptor instead.
 func (CloseStatus) EnumDescriptor() ([]byte, []int) {
-	return file_gul_v1_gul_proto_rawDescGZIP(), []int{10}
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{13}
+}
+
+type RuntimeModelChoice struct {
+	state            protoimpl.MessageState `protogen:"open.v1"`
+	ModelId          string                 `protobuf:"bytes,1,opt,name=model_id,json=modelId,proto3" json:"model_id,omitempty"`
+	IsDefault        bool                   `protobuf:"varint,2,opt,name=is_default,json=isDefault,proto3" json:"is_default,omitempty"`
+	SupportedEfforts []string               `protobuf:"bytes,3,rep,name=supported_efforts,json=supportedEfforts,proto3" json:"supported_efforts,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
+}
+
+func (x *RuntimeModelChoice) Reset() {
+	*x = RuntimeModelChoice{}
+	mi := &file_gul_v1_gul_proto_msgTypes[0]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RuntimeModelChoice) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RuntimeModelChoice) ProtoMessage() {}
+
+func (x *RuntimeModelChoice) ProtoReflect() protoreflect.Message {
+	mi := &file_gul_v1_gul_proto_msgTypes[0]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RuntimeModelChoice.ProtoReflect.Descriptor instead.
+func (*RuntimeModelChoice) Descriptor() ([]byte, []int) {
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *RuntimeModelChoice) GetModelId() string {
+	if x != nil {
+		return x.ModelId
+	}
+	return ""
+}
+
+func (x *RuntimeModelChoice) GetIsDefault() bool {
+	if x != nil {
+		return x.IsDefault
+	}
+	return false
+}
+
+func (x *RuntimeModelChoice) GetSupportedEfforts() []string {
+	if x != nil {
+		return x.SupportedEfforts
+	}
+	return nil
+}
+
+type RuntimeProfileChoice struct {
+	state                  protoimpl.MessageState      `protogen:"open.v1"`
+	Name                   string                      `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Compatibility          RuntimeProfileCompatibility `protobuf:"varint,2,opt,name=compatibility,proto3,enum=gul.v1.RuntimeProfileCompatibility" json:"compatibility,omitempty"`
+	RuntimeVersion         string                      `protobuf:"bytes,3,opt,name=runtime_version,json=runtimeVersion,proto3" json:"runtime_version,omitempty"`
+	Models                 []*RuntimeModelChoice       `protobuf:"bytes,4,rep,name=models,proto3" json:"models,omitempty"`
+	SupportedLanes         []LaunchExecutionLane       `protobuf:"varint,5,rep,packed,name=supported_lanes,json=supportedLanes,proto3,enum=gul.v1.LaunchExecutionLane" json:"supported_lanes,omitempty"`
+	MaximumAssurance       LaunchAssurance             `protobuf:"varint,6,opt,name=maximum_assurance,json=maximumAssurance,proto3,enum=gul.v1.LaunchAssurance" json:"maximum_assurance,omitempty"`
+	FeatureFlags           []string                    `protobuf:"bytes,7,rep,name=feature_flags,json=featureFlags,proto3" json:"feature_flags,omitempty"`
+	SupportedInteractions  []string                    `protobuf:"bytes,8,rep,name=supported_interactions,json=supportedInteractions,proto3" json:"supported_interactions,omitempty"`
+	AccessPolicyTransition string                      `protobuf:"bytes,9,opt,name=access_policy_transition,json=accessPolicyTransition,proto3" json:"access_policy_transition,omitempty"`
+	BackgroundExecution    string                      `protobuf:"bytes,10,opt,name=background_execution,json=backgroundExecution,proto3" json:"background_execution,omitempty"`
+	NativeSubagentsEnabled bool                        `protobuf:"varint,11,opt,name=native_subagents_enabled,json=nativeSubagentsEnabled,proto3" json:"native_subagents_enabled,omitempty"`
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *RuntimeProfileChoice) Reset() {
+	*x = RuntimeProfileChoice{}
+	mi := &file_gul_v1_gul_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RuntimeProfileChoice) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RuntimeProfileChoice) ProtoMessage() {}
+
+func (x *RuntimeProfileChoice) ProtoReflect() protoreflect.Message {
+	mi := &file_gul_v1_gul_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RuntimeProfileChoice.ProtoReflect.Descriptor instead.
+func (*RuntimeProfileChoice) Descriptor() ([]byte, []int) {
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *RuntimeProfileChoice) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *RuntimeProfileChoice) GetCompatibility() RuntimeProfileCompatibility {
+	if x != nil {
+		return x.Compatibility
+	}
+	return RuntimeProfileCompatibility_RUNTIME_PROFILE_COMPATIBILITY_UNSPECIFIED
+}
+
+func (x *RuntimeProfileChoice) GetRuntimeVersion() string {
+	if x != nil {
+		return x.RuntimeVersion
+	}
+	return ""
+}
+
+func (x *RuntimeProfileChoice) GetModels() []*RuntimeModelChoice {
+	if x != nil {
+		return x.Models
+	}
+	return nil
+}
+
+func (x *RuntimeProfileChoice) GetSupportedLanes() []LaunchExecutionLane {
+	if x != nil {
+		return x.SupportedLanes
+	}
+	return nil
+}
+
+func (x *RuntimeProfileChoice) GetMaximumAssurance() LaunchAssurance {
+	if x != nil {
+		return x.MaximumAssurance
+	}
+	return LaunchAssurance_LAUNCH_ASSURANCE_UNSPECIFIED
+}
+
+func (x *RuntimeProfileChoice) GetFeatureFlags() []string {
+	if x != nil {
+		return x.FeatureFlags
+	}
+	return nil
+}
+
+func (x *RuntimeProfileChoice) GetSupportedInteractions() []string {
+	if x != nil {
+		return x.SupportedInteractions
+	}
+	return nil
+}
+
+func (x *RuntimeProfileChoice) GetAccessPolicyTransition() string {
+	if x != nil {
+		return x.AccessPolicyTransition
+	}
+	return ""
+}
+
+func (x *RuntimeProfileChoice) GetBackgroundExecution() string {
+	if x != nil {
+		return x.BackgroundExecution
+	}
+	return ""
+}
+
+func (x *RuntimeProfileChoice) GetNativeSubagentsEnabled() bool {
+	if x != nil {
+		return x.NativeSubagentsEnabled
+	}
+	return false
+}
+
+type ListRuntimeProfilesRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListRuntimeProfilesRequest) Reset() {
+	*x = ListRuntimeProfilesRequest{}
+	mi := &file_gul_v1_gul_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListRuntimeProfilesRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListRuntimeProfilesRequest) ProtoMessage() {}
+
+func (x *ListRuntimeProfilesRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_gul_v1_gul_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListRuntimeProfilesRequest.ProtoReflect.Descriptor instead.
+func (*ListRuntimeProfilesRequest) Descriptor() ([]byte, []int) {
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{2}
+}
+
+type ListRuntimeProfilesResponse struct {
+	state                     protoimpl.MessageState  `protogen:"open.v1"`
+	Profiles                  []*RuntimeProfileChoice `protobuf:"bytes,1,rep,name=profiles,proto3" json:"profiles,omitempty"`
+	PreprovisionedPolicyNames []string                `protobuf:"bytes,2,rep,name=preprovisioned_policy_names,json=preprovisionedPolicyNames,proto3" json:"preprovisioned_policy_names,omitempty"`
+	SharedReadonlyWarning     string                  `protobuf:"bytes,3,opt,name=shared_readonly_warning,json=sharedReadonlyWarning,proto3" json:"shared_readonly_warning,omitempty"`
+	unknownFields             protoimpl.UnknownFields
+	sizeCache                 protoimpl.SizeCache
+}
+
+func (x *ListRuntimeProfilesResponse) Reset() {
+	*x = ListRuntimeProfilesResponse{}
+	mi := &file_gul_v1_gul_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListRuntimeProfilesResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListRuntimeProfilesResponse) ProtoMessage() {}
+
+func (x *ListRuntimeProfilesResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_gul_v1_gul_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListRuntimeProfilesResponse.ProtoReflect.Descriptor instead.
+func (*ListRuntimeProfilesResponse) Descriptor() ([]byte, []int) {
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *ListRuntimeProfilesResponse) GetProfiles() []*RuntimeProfileChoice {
+	if x != nil {
+		return x.Profiles
+	}
+	return nil
+}
+
+func (x *ListRuntimeProfilesResponse) GetPreprovisionedPolicyNames() []string {
+	if x != nil {
+		return x.PreprovisionedPolicyNames
+	}
+	return nil
+}
+
+func (x *ListRuntimeProfilesResponse) GetSharedReadonlyWarning() string {
+	if x != nil {
+		return x.SharedReadonlyWarning
+	}
+	return ""
+}
+
+type CheckCompatibilityRequest struct {
+	state                     protoimpl.MessageState `protogen:"open.v1"`
+	ProfileName               string                 `protobuf:"bytes,1,opt,name=profile_name,json=profileName,proto3" json:"profile_name,omitempty"`
+	ModelId                   string                 `protobuf:"bytes,2,opt,name=model_id,json=modelId,proto3" json:"model_id,omitempty"`
+	Effort                    string                 `protobuf:"bytes,3,opt,name=effort,proto3" json:"effort,omitempty"`
+	Lane                      LaunchExecutionLane    `protobuf:"varint,4,opt,name=lane,proto3,enum=gul.v1.LaunchExecutionLane" json:"lane,omitempty"`
+	RequiredAssurance         LaunchAssurance        `protobuf:"varint,5,opt,name=required_assurance,json=requiredAssurance,proto3,enum=gul.v1.LaunchAssurance" json:"required_assurance,omitempty"`
+	PolicyName                string                 `protobuf:"bytes,6,opt,name=policy_name,json=policyName,proto3" json:"policy_name,omitempty"`
+	AcknowledgeSharedReadonly bool                   `protobuf:"varint,7,opt,name=acknowledge_shared_readonly,json=acknowledgeSharedReadonly,proto3" json:"acknowledge_shared_readonly,omitempty"`
+	unknownFields             protoimpl.UnknownFields
+	sizeCache                 protoimpl.SizeCache
+}
+
+func (x *CheckCompatibilityRequest) Reset() {
+	*x = CheckCompatibilityRequest{}
+	mi := &file_gul_v1_gul_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CheckCompatibilityRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CheckCompatibilityRequest) ProtoMessage() {}
+
+func (x *CheckCompatibilityRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_gul_v1_gul_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CheckCompatibilityRequest.ProtoReflect.Descriptor instead.
+func (*CheckCompatibilityRequest) Descriptor() ([]byte, []int) {
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *CheckCompatibilityRequest) GetProfileName() string {
+	if x != nil {
+		return x.ProfileName
+	}
+	return ""
+}
+
+func (x *CheckCompatibilityRequest) GetModelId() string {
+	if x != nil {
+		return x.ModelId
+	}
+	return ""
+}
+
+func (x *CheckCompatibilityRequest) GetEffort() string {
+	if x != nil {
+		return x.Effort
+	}
+	return ""
+}
+
+func (x *CheckCompatibilityRequest) GetLane() LaunchExecutionLane {
+	if x != nil {
+		return x.Lane
+	}
+	return LaunchExecutionLane_LAUNCH_EXECUTION_LANE_UNSPECIFIED
+}
+
+func (x *CheckCompatibilityRequest) GetRequiredAssurance() LaunchAssurance {
+	if x != nil {
+		return x.RequiredAssurance
+	}
+	return LaunchAssurance_LAUNCH_ASSURANCE_UNSPECIFIED
+}
+
+func (x *CheckCompatibilityRequest) GetPolicyName() string {
+	if x != nil {
+		return x.PolicyName
+	}
+	return ""
+}
+
+func (x *CheckCompatibilityRequest) GetAcknowledgeSharedReadonly() bool {
+	if x != nil {
+		return x.AcknowledgeSharedReadonly
+	}
+	return false
+}
+
+type ProspectiveLaunchConfiguration struct {
+	state             protoimpl.MessageState `protogen:"open.v1"`
+	ProfileName       string                 `protobuf:"bytes,1,opt,name=profile_name,json=profileName,proto3" json:"profile_name,omitempty"`
+	ModelId           string                 `protobuf:"bytes,2,opt,name=model_id,json=modelId,proto3" json:"model_id,omitempty"`
+	Effort            string                 `protobuf:"bytes,3,opt,name=effort,proto3" json:"effort,omitempty"`
+	Lane              LaunchExecutionLane    `protobuf:"varint,4,opt,name=lane,proto3,enum=gul.v1.LaunchExecutionLane" json:"lane,omitempty"`
+	RequiredAssurance LaunchAssurance        `protobuf:"varint,5,opt,name=required_assurance,json=requiredAssurance,proto3,enum=gul.v1.LaunchAssurance" json:"required_assurance,omitempty"`
+	PolicyName        string                 `protobuf:"bytes,6,opt,name=policy_name,json=policyName,proto3" json:"policy_name,omitempty"`
+	// First-release values are fixed: direct_interactive, interactive,
+	// interactive_client, and dolgorae_orchestrated_session respectively.
+	ControlMode           string `protobuf:"bytes,7,opt,name=control_mode,json=controlMode,proto3" json:"control_mode,omitempty"`
+	Purpose               string `protobuf:"bytes,8,opt,name=purpose,proto3" json:"purpose,omitempty"`
+	ControllerKind        string `protobuf:"bytes,9,opt,name=controller_kind,json=controllerKind,proto3" json:"controller_kind,omitempty"`
+	OrchestrationUseCase  string `protobuf:"bytes,10,opt,name=orchestration_use_case,json=orchestrationUseCase,proto3" json:"orchestration_use_case,omitempty"`
+	SharedReadonlyWarning string `protobuf:"bytes,11,opt,name=shared_readonly_warning,json=sharedReadonlyWarning,proto3" json:"shared_readonly_warning,omitempty"`
+	unknownFields         protoimpl.UnknownFields
+	sizeCache             protoimpl.SizeCache
+}
+
+func (x *ProspectiveLaunchConfiguration) Reset() {
+	*x = ProspectiveLaunchConfiguration{}
+	mi := &file_gul_v1_gul_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ProspectiveLaunchConfiguration) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ProspectiveLaunchConfiguration) ProtoMessage() {}
+
+func (x *ProspectiveLaunchConfiguration) ProtoReflect() protoreflect.Message {
+	mi := &file_gul_v1_gul_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ProspectiveLaunchConfiguration.ProtoReflect.Descriptor instead.
+func (*ProspectiveLaunchConfiguration) Descriptor() ([]byte, []int) {
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *ProspectiveLaunchConfiguration) GetProfileName() string {
+	if x != nil {
+		return x.ProfileName
+	}
+	return ""
+}
+
+func (x *ProspectiveLaunchConfiguration) GetModelId() string {
+	if x != nil {
+		return x.ModelId
+	}
+	return ""
+}
+
+func (x *ProspectiveLaunchConfiguration) GetEffort() string {
+	if x != nil {
+		return x.Effort
+	}
+	return ""
+}
+
+func (x *ProspectiveLaunchConfiguration) GetLane() LaunchExecutionLane {
+	if x != nil {
+		return x.Lane
+	}
+	return LaunchExecutionLane_LAUNCH_EXECUTION_LANE_UNSPECIFIED
+}
+
+func (x *ProspectiveLaunchConfiguration) GetRequiredAssurance() LaunchAssurance {
+	if x != nil {
+		return x.RequiredAssurance
+	}
+	return LaunchAssurance_LAUNCH_ASSURANCE_UNSPECIFIED
+}
+
+func (x *ProspectiveLaunchConfiguration) GetPolicyName() string {
+	if x != nil {
+		return x.PolicyName
+	}
+	return ""
+}
+
+func (x *ProspectiveLaunchConfiguration) GetControlMode() string {
+	if x != nil {
+		return x.ControlMode
+	}
+	return ""
+}
+
+func (x *ProspectiveLaunchConfiguration) GetPurpose() string {
+	if x != nil {
+		return x.Purpose
+	}
+	return ""
+}
+
+func (x *ProspectiveLaunchConfiguration) GetControllerKind() string {
+	if x != nil {
+		return x.ControllerKind
+	}
+	return ""
+}
+
+func (x *ProspectiveLaunchConfiguration) GetOrchestrationUseCase() string {
+	if x != nil {
+		return x.OrchestrationUseCase
+	}
+	return ""
+}
+
+func (x *ProspectiveLaunchConfiguration) GetSharedReadonlyWarning() string {
+	if x != nil {
+		return x.SharedReadonlyWarning
+	}
+	return ""
+}
+
+type CheckCompatibilityResponse struct {
+	state         protoimpl.MessageState          `protogen:"open.v1"`
+	Configuration *ProspectiveLaunchConfiguration `protobuf:"bytes,1,opt,name=configuration,proto3" json:"configuration,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CheckCompatibilityResponse) Reset() {
+	*x = CheckCompatibilityResponse{}
+	mi := &file_gul_v1_gul_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CheckCompatibilityResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CheckCompatibilityResponse) ProtoMessage() {}
+
+func (x *CheckCompatibilityResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_gul_v1_gul_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CheckCompatibilityResponse.ProtoReflect.Descriptor instead.
+func (*CheckCompatibilityResponse) Descriptor() ([]byte, []int) {
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *CheckCompatibilityResponse) GetConfiguration() *ProspectiveLaunchConfiguration {
+	if x != nil {
+		return x.Configuration
+	}
+	return nil
 }
 
 type RemoveWorkspaceEntryRequest struct {
@@ -774,7 +1473,7 @@ type RemoveWorkspaceEntryRequest struct {
 
 func (x *RemoveWorkspaceEntryRequest) Reset() {
 	*x = RemoveWorkspaceEntryRequest{}
-	mi := &file_gul_v1_gul_proto_msgTypes[0]
+	mi := &file_gul_v1_gul_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -786,7 +1485,7 @@ func (x *RemoveWorkspaceEntryRequest) String() string {
 func (*RemoveWorkspaceEntryRequest) ProtoMessage() {}
 
 func (x *RemoveWorkspaceEntryRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_gul_v1_gul_proto_msgTypes[0]
+	mi := &file_gul_v1_gul_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -799,7 +1498,7 @@ func (x *RemoveWorkspaceEntryRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RemoveWorkspaceEntryRequest.ProtoReflect.Descriptor instead.
 func (*RemoveWorkspaceEntryRequest) Descriptor() ([]byte, []int) {
-	return file_gul_v1_gul_proto_rawDescGZIP(), []int{0}
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *RemoveWorkspaceEntryRequest) GetWorkspaceId() string {
@@ -817,7 +1516,7 @@ type RemoveWorkspaceEntryResponse struct {
 
 func (x *RemoveWorkspaceEntryResponse) Reset() {
 	*x = RemoveWorkspaceEntryResponse{}
-	mi := &file_gul_v1_gul_proto_msgTypes[1]
+	mi := &file_gul_v1_gul_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -829,7 +1528,7 @@ func (x *RemoveWorkspaceEntryResponse) String() string {
 func (*RemoveWorkspaceEntryResponse) ProtoMessage() {}
 
 func (x *RemoveWorkspaceEntryResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_gul_v1_gul_proto_msgTypes[1]
+	mi := &file_gul_v1_gul_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -842,7 +1541,7 @@ func (x *RemoveWorkspaceEntryResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RemoveWorkspaceEntryResponse.ProtoReflect.Descriptor instead.
 func (*RemoveWorkspaceEntryResponse) Descriptor() ([]byte, []int) {
-	return file_gul_v1_gul_proto_rawDescGZIP(), []int{1}
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{8}
 }
 
 type ListRegistrableRootsRequest struct {
@@ -853,7 +1552,7 @@ type ListRegistrableRootsRequest struct {
 
 func (x *ListRegistrableRootsRequest) Reset() {
 	*x = ListRegistrableRootsRequest{}
-	mi := &file_gul_v1_gul_proto_msgTypes[2]
+	mi := &file_gul_v1_gul_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -865,7 +1564,7 @@ func (x *ListRegistrableRootsRequest) String() string {
 func (*ListRegistrableRootsRequest) ProtoMessage() {}
 
 func (x *ListRegistrableRootsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_gul_v1_gul_proto_msgTypes[2]
+	mi := &file_gul_v1_gul_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -878,7 +1577,7 @@ func (x *ListRegistrableRootsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListRegistrableRootsRequest.ProtoReflect.Descriptor instead.
 func (*ListRegistrableRootsRequest) Descriptor() ([]byte, []int) {
-	return file_gul_v1_gul_proto_rawDescGZIP(), []int{2}
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{9}
 }
 
 type RegistrableRoot struct {
@@ -891,7 +1590,7 @@ type RegistrableRoot struct {
 
 func (x *RegistrableRoot) Reset() {
 	*x = RegistrableRoot{}
-	mi := &file_gul_v1_gul_proto_msgTypes[3]
+	mi := &file_gul_v1_gul_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -903,7 +1602,7 @@ func (x *RegistrableRoot) String() string {
 func (*RegistrableRoot) ProtoMessage() {}
 
 func (x *RegistrableRoot) ProtoReflect() protoreflect.Message {
-	mi := &file_gul_v1_gul_proto_msgTypes[3]
+	mi := &file_gul_v1_gul_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -916,7 +1615,7 @@ func (x *RegistrableRoot) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RegistrableRoot.ProtoReflect.Descriptor instead.
 func (*RegistrableRoot) Descriptor() ([]byte, []int) {
-	return file_gul_v1_gul_proto_rawDescGZIP(), []int{3}
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *RegistrableRoot) GetRootId() string {
@@ -942,7 +1641,7 @@ type ListRegistrableRootsResponse struct {
 
 func (x *ListRegistrableRootsResponse) Reset() {
 	*x = ListRegistrableRootsResponse{}
-	mi := &file_gul_v1_gul_proto_msgTypes[4]
+	mi := &file_gul_v1_gul_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -954,7 +1653,7 @@ func (x *ListRegistrableRootsResponse) String() string {
 func (*ListRegistrableRootsResponse) ProtoMessage() {}
 
 func (x *ListRegistrableRootsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_gul_v1_gul_proto_msgTypes[4]
+	mi := &file_gul_v1_gul_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -967,7 +1666,7 @@ func (x *ListRegistrableRootsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListRegistrableRootsResponse.ProtoReflect.Descriptor instead.
 func (*ListRegistrableRootsResponse) Descriptor() ([]byte, []int) {
-	return file_gul_v1_gul_proto_rawDescGZIP(), []int{4}
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *ListRegistrableRootsResponse) GetRoots() []*RegistrableRoot {
@@ -987,7 +1686,7 @@ type BrowseRegistrableRootRequest struct {
 
 func (x *BrowseRegistrableRootRequest) Reset() {
 	*x = BrowseRegistrableRootRequest{}
-	mi := &file_gul_v1_gul_proto_msgTypes[5]
+	mi := &file_gul_v1_gul_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -999,7 +1698,7 @@ func (x *BrowseRegistrableRootRequest) String() string {
 func (*BrowseRegistrableRootRequest) ProtoMessage() {}
 
 func (x *BrowseRegistrableRootRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_gul_v1_gul_proto_msgTypes[5]
+	mi := &file_gul_v1_gul_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1012,7 +1711,7 @@ func (x *BrowseRegistrableRootRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use BrowseRegistrableRootRequest.ProtoReflect.Descriptor instead.
 func (*BrowseRegistrableRootRequest) Descriptor() ([]byte, []int) {
-	return file_gul_v1_gul_proto_rawDescGZIP(), []int{5}
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *BrowseRegistrableRootRequest) GetRootId() string {
@@ -1039,7 +1738,7 @@ type RegistrableDirectory struct {
 
 func (x *RegistrableDirectory) Reset() {
 	*x = RegistrableDirectory{}
-	mi := &file_gul_v1_gul_proto_msgTypes[6]
+	mi := &file_gul_v1_gul_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1051,7 +1750,7 @@ func (x *RegistrableDirectory) String() string {
 func (*RegistrableDirectory) ProtoMessage() {}
 
 func (x *RegistrableDirectory) ProtoReflect() protoreflect.Message {
-	mi := &file_gul_v1_gul_proto_msgTypes[6]
+	mi := &file_gul_v1_gul_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1064,7 +1763,7 @@ func (x *RegistrableDirectory) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RegistrableDirectory.ProtoReflect.Descriptor instead.
 func (*RegistrableDirectory) Descriptor() ([]byte, []int) {
-	return file_gul_v1_gul_proto_rawDescGZIP(), []int{6}
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *RegistrableDirectory) GetName() string {
@@ -1090,7 +1789,7 @@ type BrowseRegistrableRootResponse struct {
 
 func (x *BrowseRegistrableRootResponse) Reset() {
 	*x = BrowseRegistrableRootResponse{}
-	mi := &file_gul_v1_gul_proto_msgTypes[7]
+	mi := &file_gul_v1_gul_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1102,7 +1801,7 @@ func (x *BrowseRegistrableRootResponse) String() string {
 func (*BrowseRegistrableRootResponse) ProtoMessage() {}
 
 func (x *BrowseRegistrableRootResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_gul_v1_gul_proto_msgTypes[7]
+	mi := &file_gul_v1_gul_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1115,7 +1814,7 @@ func (x *BrowseRegistrableRootResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use BrowseRegistrableRootResponse.ProtoReflect.Descriptor instead.
 func (*BrowseRegistrableRootResponse) Descriptor() ([]byte, []int) {
-	return file_gul_v1_gul_proto_rawDescGZIP(), []int{7}
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *BrowseRegistrableRootResponse) GetDirectories() []*RegistrableDirectory {
@@ -1133,7 +1832,7 @@ type RegisterFromHostSelectionRequest struct {
 
 func (x *RegisterFromHostSelectionRequest) Reset() {
 	*x = RegisterFromHostSelectionRequest{}
-	mi := &file_gul_v1_gul_proto_msgTypes[8]
+	mi := &file_gul_v1_gul_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1145,7 +1844,7 @@ func (x *RegisterFromHostSelectionRequest) String() string {
 func (*RegisterFromHostSelectionRequest) ProtoMessage() {}
 
 func (x *RegisterFromHostSelectionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_gul_v1_gul_proto_msgTypes[8]
+	mi := &file_gul_v1_gul_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1158,7 +1857,7 @@ func (x *RegisterFromHostSelectionRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RegisterFromHostSelectionRequest.ProtoReflect.Descriptor instead.
 func (*RegisterFromHostSelectionRequest) Descriptor() ([]byte, []int) {
-	return file_gul_v1_gul_proto_rawDescGZIP(), []int{8}
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{15}
 }
 
 type RegisterFromAllowlistPathRequest struct {
@@ -1171,7 +1870,7 @@ type RegisterFromAllowlistPathRequest struct {
 
 func (x *RegisterFromAllowlistPathRequest) Reset() {
 	*x = RegisterFromAllowlistPathRequest{}
-	mi := &file_gul_v1_gul_proto_msgTypes[9]
+	mi := &file_gul_v1_gul_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1183,7 +1882,7 @@ func (x *RegisterFromAllowlistPathRequest) String() string {
 func (*RegisterFromAllowlistPathRequest) ProtoMessage() {}
 
 func (x *RegisterFromAllowlistPathRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_gul_v1_gul_proto_msgTypes[9]
+	mi := &file_gul_v1_gul_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1196,7 +1895,7 @@ func (x *RegisterFromAllowlistPathRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RegisterFromAllowlistPathRequest.ProtoReflect.Descriptor instead.
 func (*RegisterFromAllowlistPathRequest) Descriptor() ([]byte, []int) {
-	return file_gul_v1_gul_proto_rawDescGZIP(), []int{9}
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *RegisterFromAllowlistPathRequest) GetRootId() string {
@@ -1225,7 +1924,7 @@ type WorkspaceEntry struct {
 
 func (x *WorkspaceEntry) Reset() {
 	*x = WorkspaceEntry{}
-	mi := &file_gul_v1_gul_proto_msgTypes[10]
+	mi := &file_gul_v1_gul_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1237,7 +1936,7 @@ func (x *WorkspaceEntry) String() string {
 func (*WorkspaceEntry) ProtoMessage() {}
 
 func (x *WorkspaceEntry) ProtoReflect() protoreflect.Message {
-	mi := &file_gul_v1_gul_proto_msgTypes[10]
+	mi := &file_gul_v1_gul_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1250,7 +1949,7 @@ func (x *WorkspaceEntry) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use WorkspaceEntry.ProtoReflect.Descriptor instead.
 func (*WorkspaceEntry) Descriptor() ([]byte, []int) {
-	return file_gul_v1_gul_proto_rawDescGZIP(), []int{10}
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{17}
 }
 
 func (x *WorkspaceEntry) GetWorkspaceId() string {
@@ -1291,7 +1990,7 @@ type RenameWorkspaceRequest struct {
 
 func (x *RenameWorkspaceRequest) Reset() {
 	*x = RenameWorkspaceRequest{}
-	mi := &file_gul_v1_gul_proto_msgTypes[11]
+	mi := &file_gul_v1_gul_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1303,7 +2002,7 @@ func (x *RenameWorkspaceRequest) String() string {
 func (*RenameWorkspaceRequest) ProtoMessage() {}
 
 func (x *RenameWorkspaceRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_gul_v1_gul_proto_msgTypes[11]
+	mi := &file_gul_v1_gul_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1316,7 +2015,7 @@ func (x *RenameWorkspaceRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RenameWorkspaceRequest.ProtoReflect.Descriptor instead.
 func (*RenameWorkspaceRequest) Descriptor() ([]byte, []int) {
-	return file_gul_v1_gul_proto_rawDescGZIP(), []int{11}
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{18}
 }
 
 func (x *RenameWorkspaceRequest) GetWorkspaceId() string {
@@ -1343,7 +2042,7 @@ type SetWorkspaceFavoriteRequest struct {
 
 func (x *SetWorkspaceFavoriteRequest) Reset() {
 	*x = SetWorkspaceFavoriteRequest{}
-	mi := &file_gul_v1_gul_proto_msgTypes[12]
+	mi := &file_gul_v1_gul_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1355,7 +2054,7 @@ func (x *SetWorkspaceFavoriteRequest) String() string {
 func (*SetWorkspaceFavoriteRequest) ProtoMessage() {}
 
 func (x *SetWorkspaceFavoriteRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_gul_v1_gul_proto_msgTypes[12]
+	mi := &file_gul_v1_gul_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1368,7 +2067,7 @@ func (x *SetWorkspaceFavoriteRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SetWorkspaceFavoriteRequest.ProtoReflect.Descriptor instead.
 func (*SetWorkspaceFavoriteRequest) Descriptor() ([]byte, []int) {
-	return file_gul_v1_gul_proto_rawDescGZIP(), []int{12}
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{19}
 }
 
 func (x *SetWorkspaceFavoriteRequest) GetWorkspaceId() string {
@@ -1395,7 +2094,7 @@ type SetWorkspaceHiddenRequest struct {
 
 func (x *SetWorkspaceHiddenRequest) Reset() {
 	*x = SetWorkspaceHiddenRequest{}
-	mi := &file_gul_v1_gul_proto_msgTypes[13]
+	mi := &file_gul_v1_gul_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1407,7 +2106,7 @@ func (x *SetWorkspaceHiddenRequest) String() string {
 func (*SetWorkspaceHiddenRequest) ProtoMessage() {}
 
 func (x *SetWorkspaceHiddenRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_gul_v1_gul_proto_msgTypes[13]
+	mi := &file_gul_v1_gul_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1420,7 +2119,7 @@ func (x *SetWorkspaceHiddenRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SetWorkspaceHiddenRequest.ProtoReflect.Descriptor instead.
 func (*SetWorkspaceHiddenRequest) Descriptor() ([]byte, []int) {
-	return file_gul_v1_gul_proto_rawDescGZIP(), []int{13}
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{20}
 }
 
 func (x *SetWorkspaceHiddenRequest) GetWorkspaceId() string {
@@ -1446,7 +2145,7 @@ type WorkspacePresentationResponse struct {
 
 func (x *WorkspacePresentationResponse) Reset() {
 	*x = WorkspacePresentationResponse{}
-	mi := &file_gul_v1_gul_proto_msgTypes[14]
+	mi := &file_gul_v1_gul_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1458,7 +2157,7 @@ func (x *WorkspacePresentationResponse) String() string {
 func (*WorkspacePresentationResponse) ProtoMessage() {}
 
 func (x *WorkspacePresentationResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_gul_v1_gul_proto_msgTypes[14]
+	mi := &file_gul_v1_gul_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1471,7 +2170,7 @@ func (x *WorkspacePresentationResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use WorkspacePresentationResponse.ProtoReflect.Descriptor instead.
 func (*WorkspacePresentationResponse) Descriptor() ([]byte, []int) {
-	return file_gul_v1_gul_proto_rawDescGZIP(), []int{14}
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{21}
 }
 
 func (x *WorkspacePresentationResponse) GetWorkspace() *WorkspaceEntry {
@@ -1489,7 +2188,7 @@ type GetNavigationRequest struct {
 
 func (x *GetNavigationRequest) Reset() {
 	*x = GetNavigationRequest{}
-	mi := &file_gul_v1_gul_proto_msgTypes[15]
+	mi := &file_gul_v1_gul_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1501,7 +2200,7 @@ func (x *GetNavigationRequest) String() string {
 func (*GetNavigationRequest) ProtoMessage() {}
 
 func (x *GetNavigationRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_gul_v1_gul_proto_msgTypes[15]
+	mi := &file_gul_v1_gul_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1514,7 +2213,7 @@ func (x *GetNavigationRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetNavigationRequest.ProtoReflect.Descriptor instead.
 func (*GetNavigationRequest) Descriptor() ([]byte, []int) {
-	return file_gul_v1_gul_proto_rawDescGZIP(), []int{15}
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{22}
 }
 
 type SetNavigationRequest struct {
@@ -1527,7 +2226,7 @@ type SetNavigationRequest struct {
 
 func (x *SetNavigationRequest) Reset() {
 	*x = SetNavigationRequest{}
-	mi := &file_gul_v1_gul_proto_msgTypes[16]
+	mi := &file_gul_v1_gul_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1539,7 +2238,7 @@ func (x *SetNavigationRequest) String() string {
 func (*SetNavigationRequest) ProtoMessage() {}
 
 func (x *SetNavigationRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_gul_v1_gul_proto_msgTypes[16]
+	mi := &file_gul_v1_gul_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1552,7 +2251,7 @@ func (x *SetNavigationRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SetNavigationRequest.ProtoReflect.Descriptor instead.
 func (*SetNavigationRequest) Descriptor() ([]byte, []int) {
-	return file_gul_v1_gul_proto_rawDescGZIP(), []int{16}
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{23}
 }
 
 func (x *SetNavigationRequest) GetWorkspaceId() string {
@@ -1579,7 +2278,7 @@ type NavigationResponse struct {
 
 func (x *NavigationResponse) Reset() {
 	*x = NavigationResponse{}
-	mi := &file_gul_v1_gul_proto_msgTypes[17]
+	mi := &file_gul_v1_gul_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1591,7 +2290,7 @@ func (x *NavigationResponse) String() string {
 func (*NavigationResponse) ProtoMessage() {}
 
 func (x *NavigationResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_gul_v1_gul_proto_msgTypes[17]
+	mi := &file_gul_v1_gul_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1604,7 +2303,7 @@ func (x *NavigationResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use NavigationResponse.ProtoReflect.Descriptor instead.
 func (*NavigationResponse) Descriptor() ([]byte, []int) {
-	return file_gul_v1_gul_proto_rawDescGZIP(), []int{17}
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{24}
 }
 
 func (x *NavigationResponse) GetWorkspaceId() string {
@@ -1631,7 +2330,7 @@ type RegisterWorkspaceResponse struct {
 
 func (x *RegisterWorkspaceResponse) Reset() {
 	*x = RegisterWorkspaceResponse{}
-	mi := &file_gul_v1_gul_proto_msgTypes[18]
+	mi := &file_gul_v1_gul_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1643,7 +2342,7 @@ func (x *RegisterWorkspaceResponse) String() string {
 func (*RegisterWorkspaceResponse) ProtoMessage() {}
 
 func (x *RegisterWorkspaceResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_gul_v1_gul_proto_msgTypes[18]
+	mi := &file_gul_v1_gul_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1656,7 +2355,7 @@ func (x *RegisterWorkspaceResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RegisterWorkspaceResponse.ProtoReflect.Descriptor instead.
 func (*RegisterWorkspaceResponse) Descriptor() ([]byte, []int) {
-	return file_gul_v1_gul_proto_rawDescGZIP(), []int{18}
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{25}
 }
 
 func (x *RegisterWorkspaceResponse) GetWorkspace() *WorkspaceEntry {
@@ -1682,7 +2381,7 @@ type RevalidateWorkspaceRequest struct {
 
 func (x *RevalidateWorkspaceRequest) Reset() {
 	*x = RevalidateWorkspaceRequest{}
-	mi := &file_gul_v1_gul_proto_msgTypes[19]
+	mi := &file_gul_v1_gul_proto_msgTypes[26]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1694,7 +2393,7 @@ func (x *RevalidateWorkspaceRequest) String() string {
 func (*RevalidateWorkspaceRequest) ProtoMessage() {}
 
 func (x *RevalidateWorkspaceRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_gul_v1_gul_proto_msgTypes[19]
+	mi := &file_gul_v1_gul_proto_msgTypes[26]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1707,7 +2406,7 @@ func (x *RevalidateWorkspaceRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RevalidateWorkspaceRequest.ProtoReflect.Descriptor instead.
 func (*RevalidateWorkspaceRequest) Descriptor() ([]byte, []int) {
-	return file_gul_v1_gul_proto_rawDescGZIP(), []int{19}
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{26}
 }
 
 func (x *RevalidateWorkspaceRequest) GetWorkspaceId() string {
@@ -1726,7 +2425,7 @@ type RevalidateWorkspaceResponse struct {
 
 func (x *RevalidateWorkspaceResponse) Reset() {
 	*x = RevalidateWorkspaceResponse{}
-	mi := &file_gul_v1_gul_proto_msgTypes[20]
+	mi := &file_gul_v1_gul_proto_msgTypes[27]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1738,7 +2437,7 @@ func (x *RevalidateWorkspaceResponse) String() string {
 func (*RevalidateWorkspaceResponse) ProtoMessage() {}
 
 func (x *RevalidateWorkspaceResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_gul_v1_gul_proto_msgTypes[20]
+	mi := &file_gul_v1_gul_proto_msgTypes[27]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1751,7 +2450,7 @@ func (x *RevalidateWorkspaceResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RevalidateWorkspaceResponse.ProtoReflect.Descriptor instead.
 func (*RevalidateWorkspaceResponse) Descriptor() ([]byte, []int) {
-	return file_gul_v1_gul_proto_rawDescGZIP(), []int{20}
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{27}
 }
 
 func (x *RevalidateWorkspaceResponse) GetWorkspace() *WorkspaceEntry {
@@ -1769,7 +2468,7 @@ type ListWorkspacesRequest struct {
 
 func (x *ListWorkspacesRequest) Reset() {
 	*x = ListWorkspacesRequest{}
-	mi := &file_gul_v1_gul_proto_msgTypes[21]
+	mi := &file_gul_v1_gul_proto_msgTypes[28]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1781,7 +2480,7 @@ func (x *ListWorkspacesRequest) String() string {
 func (*ListWorkspacesRequest) ProtoMessage() {}
 
 func (x *ListWorkspacesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_gul_v1_gul_proto_msgTypes[21]
+	mi := &file_gul_v1_gul_proto_msgTypes[28]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1794,7 +2493,7 @@ func (x *ListWorkspacesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListWorkspacesRequest.ProtoReflect.Descriptor instead.
 func (*ListWorkspacesRequest) Descriptor() ([]byte, []int) {
-	return file_gul_v1_gul_proto_rawDescGZIP(), []int{21}
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{28}
 }
 
 type ListWorkspacesResponse struct {
@@ -1806,7 +2505,7 @@ type ListWorkspacesResponse struct {
 
 func (x *ListWorkspacesResponse) Reset() {
 	*x = ListWorkspacesResponse{}
-	mi := &file_gul_v1_gul_proto_msgTypes[22]
+	mi := &file_gul_v1_gul_proto_msgTypes[29]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1818,7 +2517,7 @@ func (x *ListWorkspacesResponse) String() string {
 func (*ListWorkspacesResponse) ProtoMessage() {}
 
 func (x *ListWorkspacesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_gul_v1_gul_proto_msgTypes[22]
+	mi := &file_gul_v1_gul_proto_msgTypes[29]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1831,7 +2530,7 @@ func (x *ListWorkspacesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListWorkspacesResponse.ProtoReflect.Descriptor instead.
 func (*ListWorkspacesResponse) Descriptor() ([]byte, []int) {
-	return file_gul_v1_gul_proto_rawDescGZIP(), []int{22}
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{29}
 }
 
 func (x *ListWorkspacesResponse) GetWorkspaces() []*WorkspaceEntry {
@@ -1854,7 +2553,7 @@ type DirectSessionPresentation struct {
 
 func (x *DirectSessionPresentation) Reset() {
 	*x = DirectSessionPresentation{}
-	mi := &file_gul_v1_gul_proto_msgTypes[23]
+	mi := &file_gul_v1_gul_proto_msgTypes[30]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1866,7 +2565,7 @@ func (x *DirectSessionPresentation) String() string {
 func (*DirectSessionPresentation) ProtoMessage() {}
 
 func (x *DirectSessionPresentation) ProtoReflect() protoreflect.Message {
-	mi := &file_gul_v1_gul_proto_msgTypes[23]
+	mi := &file_gul_v1_gul_proto_msgTypes[30]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1879,7 +2578,7 @@ func (x *DirectSessionPresentation) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DirectSessionPresentation.ProtoReflect.Descriptor instead.
 func (*DirectSessionPresentation) Descriptor() ([]byte, []int) {
-	return file_gul_v1_gul_proto_rawDescGZIP(), []int{23}
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{30}
 }
 
 func (x *DirectSessionPresentation) GetSessionId() string {
@@ -1926,7 +2625,7 @@ type GetDirectSessionPresentationRequest struct {
 
 func (x *GetDirectSessionPresentationRequest) Reset() {
 	*x = GetDirectSessionPresentationRequest{}
-	mi := &file_gul_v1_gul_proto_msgTypes[24]
+	mi := &file_gul_v1_gul_proto_msgTypes[31]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1938,7 +2637,7 @@ func (x *GetDirectSessionPresentationRequest) String() string {
 func (*GetDirectSessionPresentationRequest) ProtoMessage() {}
 
 func (x *GetDirectSessionPresentationRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_gul_v1_gul_proto_msgTypes[24]
+	mi := &file_gul_v1_gul_proto_msgTypes[31]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1951,7 +2650,7 @@ func (x *GetDirectSessionPresentationRequest) ProtoReflect() protoreflect.Messag
 
 // Deprecated: Use GetDirectSessionPresentationRequest.ProtoReflect.Descriptor instead.
 func (*GetDirectSessionPresentationRequest) Descriptor() ([]byte, []int) {
-	return file_gul_v1_gul_proto_rawDescGZIP(), []int{24}
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{31}
 }
 
 func (x *GetDirectSessionPresentationRequest) GetSessionId() string {
@@ -1971,7 +2670,7 @@ type RenameDirectSessionRequest struct {
 
 func (x *RenameDirectSessionRequest) Reset() {
 	*x = RenameDirectSessionRequest{}
-	mi := &file_gul_v1_gul_proto_msgTypes[25]
+	mi := &file_gul_v1_gul_proto_msgTypes[32]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1983,7 +2682,7 @@ func (x *RenameDirectSessionRequest) String() string {
 func (*RenameDirectSessionRequest) ProtoMessage() {}
 
 func (x *RenameDirectSessionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_gul_v1_gul_proto_msgTypes[25]
+	mi := &file_gul_v1_gul_proto_msgTypes[32]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1996,7 +2695,7 @@ func (x *RenameDirectSessionRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RenameDirectSessionRequest.ProtoReflect.Descriptor instead.
 func (*RenameDirectSessionRequest) Descriptor() ([]byte, []int) {
-	return file_gul_v1_gul_proto_rawDescGZIP(), []int{25}
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{32}
 }
 
 func (x *RenameDirectSessionRequest) GetSessionId() string {
@@ -2023,7 +2722,7 @@ type SetDirectSessionFavoriteRequest struct {
 
 func (x *SetDirectSessionFavoriteRequest) Reset() {
 	*x = SetDirectSessionFavoriteRequest{}
-	mi := &file_gul_v1_gul_proto_msgTypes[26]
+	mi := &file_gul_v1_gul_proto_msgTypes[33]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2035,7 +2734,7 @@ func (x *SetDirectSessionFavoriteRequest) String() string {
 func (*SetDirectSessionFavoriteRequest) ProtoMessage() {}
 
 func (x *SetDirectSessionFavoriteRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_gul_v1_gul_proto_msgTypes[26]
+	mi := &file_gul_v1_gul_proto_msgTypes[33]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2048,7 +2747,7 @@ func (x *SetDirectSessionFavoriteRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SetDirectSessionFavoriteRequest.ProtoReflect.Descriptor instead.
 func (*SetDirectSessionFavoriteRequest) Descriptor() ([]byte, []int) {
-	return file_gul_v1_gul_proto_rawDescGZIP(), []int{26}
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{33}
 }
 
 func (x *SetDirectSessionFavoriteRequest) GetSessionId() string {
@@ -2075,7 +2774,7 @@ type SetDirectSessionArchivedRequest struct {
 
 func (x *SetDirectSessionArchivedRequest) Reset() {
 	*x = SetDirectSessionArchivedRequest{}
-	mi := &file_gul_v1_gul_proto_msgTypes[27]
+	mi := &file_gul_v1_gul_proto_msgTypes[34]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2087,7 +2786,7 @@ func (x *SetDirectSessionArchivedRequest) String() string {
 func (*SetDirectSessionArchivedRequest) ProtoMessage() {}
 
 func (x *SetDirectSessionArchivedRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_gul_v1_gul_proto_msgTypes[27]
+	mi := &file_gul_v1_gul_proto_msgTypes[34]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2100,7 +2799,7 @@ func (x *SetDirectSessionArchivedRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SetDirectSessionArchivedRequest.ProtoReflect.Descriptor instead.
 func (*SetDirectSessionArchivedRequest) Descriptor() ([]byte, []int) {
-	return file_gul_v1_gul_proto_rawDescGZIP(), []int{27}
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{34}
 }
 
 func (x *SetDirectSessionArchivedRequest) GetSessionId() string {
@@ -2126,7 +2825,7 @@ type DirectSessionPresentationResponse struct {
 
 func (x *DirectSessionPresentationResponse) Reset() {
 	*x = DirectSessionPresentationResponse{}
-	mi := &file_gul_v1_gul_proto_msgTypes[28]
+	mi := &file_gul_v1_gul_proto_msgTypes[35]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2138,7 +2837,7 @@ func (x *DirectSessionPresentationResponse) String() string {
 func (*DirectSessionPresentationResponse) ProtoMessage() {}
 
 func (x *DirectSessionPresentationResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_gul_v1_gul_proto_msgTypes[28]
+	mi := &file_gul_v1_gul_proto_msgTypes[35]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2151,7 +2850,7 @@ func (x *DirectSessionPresentationResponse) ProtoReflect() protoreflect.Message 
 
 // Deprecated: Use DirectSessionPresentationResponse.ProtoReflect.Descriptor instead.
 func (*DirectSessionPresentationResponse) Descriptor() ([]byte, []int) {
-	return file_gul_v1_gul_proto_rawDescGZIP(), []int{28}
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{35}
 }
 
 func (x *DirectSessionPresentationResponse) GetSession() *DirectSessionPresentation {
@@ -2170,7 +2869,7 @@ type ListDirectSessionsRequest struct {
 
 func (x *ListDirectSessionsRequest) Reset() {
 	*x = ListDirectSessionsRequest{}
-	mi := &file_gul_v1_gul_proto_msgTypes[29]
+	mi := &file_gul_v1_gul_proto_msgTypes[36]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2182,7 +2881,7 @@ func (x *ListDirectSessionsRequest) String() string {
 func (*ListDirectSessionsRequest) ProtoMessage() {}
 
 func (x *ListDirectSessionsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_gul_v1_gul_proto_msgTypes[29]
+	mi := &file_gul_v1_gul_proto_msgTypes[36]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2195,7 +2894,7 @@ func (x *ListDirectSessionsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListDirectSessionsRequest.ProtoReflect.Descriptor instead.
 func (*ListDirectSessionsRequest) Descriptor() ([]byte, []int) {
-	return file_gul_v1_gul_proto_rawDescGZIP(), []int{29}
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{36}
 }
 
 func (x *ListDirectSessionsRequest) GetWorkspaceId() string {
@@ -2214,7 +2913,7 @@ type ListDirectSessionsResponse struct {
 
 func (x *ListDirectSessionsResponse) Reset() {
 	*x = ListDirectSessionsResponse{}
-	mi := &file_gul_v1_gul_proto_msgTypes[30]
+	mi := &file_gul_v1_gul_proto_msgTypes[37]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2226,7 +2925,7 @@ func (x *ListDirectSessionsResponse) String() string {
 func (*ListDirectSessionsResponse) ProtoMessage() {}
 
 func (x *ListDirectSessionsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_gul_v1_gul_proto_msgTypes[30]
+	mi := &file_gul_v1_gul_proto_msgTypes[37]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2239,7 +2938,7 @@ func (x *ListDirectSessionsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListDirectSessionsResponse.ProtoReflect.Descriptor instead.
 func (*ListDirectSessionsResponse) Descriptor() ([]byte, []int) {
-	return file_gul_v1_gul_proto_rawDescGZIP(), []int{30}
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{37}
 }
 
 func (x *ListDirectSessionsResponse) GetSessions() []*DirectSessionPresentation {
@@ -2260,7 +2959,7 @@ type ListPromptHistoryRequest struct {
 
 func (x *ListPromptHistoryRequest) Reset() {
 	*x = ListPromptHistoryRequest{}
-	mi := &file_gul_v1_gul_proto_msgTypes[31]
+	mi := &file_gul_v1_gul_proto_msgTypes[38]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2272,7 +2971,7 @@ func (x *ListPromptHistoryRequest) String() string {
 func (*ListPromptHistoryRequest) ProtoMessage() {}
 
 func (x *ListPromptHistoryRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_gul_v1_gul_proto_msgTypes[31]
+	mi := &file_gul_v1_gul_proto_msgTypes[38]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2285,7 +2984,7 @@ func (x *ListPromptHistoryRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListPromptHistoryRequest.ProtoReflect.Descriptor instead.
 func (*ListPromptHistoryRequest) Descriptor() ([]byte, []int) {
-	return file_gul_v1_gul_proto_rawDescGZIP(), []int{31}
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{38}
 }
 
 func (x *ListPromptHistoryRequest) GetSessionId() string {
@@ -2323,7 +3022,7 @@ type PromptHistoryItem struct {
 
 func (x *PromptHistoryItem) Reset() {
 	*x = PromptHistoryItem{}
-	mi := &file_gul_v1_gul_proto_msgTypes[32]
+	mi := &file_gul_v1_gul_proto_msgTypes[39]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2335,7 +3034,7 @@ func (x *PromptHistoryItem) String() string {
 func (*PromptHistoryItem) ProtoMessage() {}
 
 func (x *PromptHistoryItem) ProtoReflect() protoreflect.Message {
-	mi := &file_gul_v1_gul_proto_msgTypes[32]
+	mi := &file_gul_v1_gul_proto_msgTypes[39]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2348,7 +3047,7 @@ func (x *PromptHistoryItem) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PromptHistoryItem.ProtoReflect.Descriptor instead.
 func (*PromptHistoryItem) Descriptor() ([]byte, []int) {
-	return file_gul_v1_gul_proto_rawDescGZIP(), []int{32}
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{39}
 }
 
 func (x *PromptHistoryItem) GetPromptItemId() string {
@@ -2407,7 +3106,7 @@ type ListPromptHistoryResponse struct {
 
 func (x *ListPromptHistoryResponse) Reset() {
 	*x = ListPromptHistoryResponse{}
-	mi := &file_gul_v1_gul_proto_msgTypes[33]
+	mi := &file_gul_v1_gul_proto_msgTypes[40]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2419,7 +3118,7 @@ func (x *ListPromptHistoryResponse) String() string {
 func (*ListPromptHistoryResponse) ProtoMessage() {}
 
 func (x *ListPromptHistoryResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_gul_v1_gul_proto_msgTypes[33]
+	mi := &file_gul_v1_gul_proto_msgTypes[40]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2432,7 +3131,7 @@ func (x *ListPromptHistoryResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListPromptHistoryResponse.ProtoReflect.Descriptor instead.
 func (*ListPromptHistoryResponse) Descriptor() ([]byte, []int) {
-	return file_gul_v1_gul_proto_rawDescGZIP(), []int{33}
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{40}
 }
 
 func (x *ListPromptHistoryResponse) GetSnapshotId() string {
@@ -2487,7 +3186,7 @@ type GetPromptHistoryItemRequest struct {
 
 func (x *GetPromptHistoryItemRequest) Reset() {
 	*x = GetPromptHistoryItemRequest{}
-	mi := &file_gul_v1_gul_proto_msgTypes[34]
+	mi := &file_gul_v1_gul_proto_msgTypes[41]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2499,7 +3198,7 @@ func (x *GetPromptHistoryItemRequest) String() string {
 func (*GetPromptHistoryItemRequest) ProtoMessage() {}
 
 func (x *GetPromptHistoryItemRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_gul_v1_gul_proto_msgTypes[34]
+	mi := &file_gul_v1_gul_proto_msgTypes[41]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2512,7 +3211,7 @@ func (x *GetPromptHistoryItemRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetPromptHistoryItemRequest.ProtoReflect.Descriptor instead.
 func (*GetPromptHistoryItemRequest) Descriptor() ([]byte, []int) {
-	return file_gul_v1_gul_proto_rawDescGZIP(), []int{34}
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{41}
 }
 
 func (x *GetPromptHistoryItemRequest) GetSessionId() string {
@@ -2542,7 +3241,7 @@ type PromptOriginal struct {
 
 func (x *PromptOriginal) Reset() {
 	*x = PromptOriginal{}
-	mi := &file_gul_v1_gul_proto_msgTypes[35]
+	mi := &file_gul_v1_gul_proto_msgTypes[42]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2554,7 +3253,7 @@ func (x *PromptOriginal) String() string {
 func (*PromptOriginal) ProtoMessage() {}
 
 func (x *PromptOriginal) ProtoReflect() protoreflect.Message {
-	mi := &file_gul_v1_gul_proto_msgTypes[35]
+	mi := &file_gul_v1_gul_proto_msgTypes[42]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2567,7 +3266,7 @@ func (x *PromptOriginal) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PromptOriginal.ProtoReflect.Descriptor instead.
 func (*PromptOriginal) Descriptor() ([]byte, []int) {
-	return file_gul_v1_gul_proto_rawDescGZIP(), []int{35}
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{42}
 }
 
 func (x *PromptOriginal) GetContent() isPromptOriginal_Content {
@@ -2624,7 +3323,7 @@ type GetPromptHistoryItemResponse struct {
 
 func (x *GetPromptHistoryItemResponse) Reset() {
 	*x = GetPromptHistoryItemResponse{}
-	mi := &file_gul_v1_gul_proto_msgTypes[36]
+	mi := &file_gul_v1_gul_proto_msgTypes[43]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2636,7 +3335,7 @@ func (x *GetPromptHistoryItemResponse) String() string {
 func (*GetPromptHistoryItemResponse) ProtoMessage() {}
 
 func (x *GetPromptHistoryItemResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_gul_v1_gul_proto_msgTypes[36]
+	mi := &file_gul_v1_gul_proto_msgTypes[43]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2649,7 +3348,7 @@ func (x *GetPromptHistoryItemResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetPromptHistoryItemResponse.ProtoReflect.Descriptor instead.
 func (*GetPromptHistoryItemResponse) Descriptor() ([]byte, []int) {
-	return file_gul_v1_gul_proto_rawDescGZIP(), []int{36}
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{43}
 }
 
 func (x *GetPromptHistoryItemResponse) GetPromptItemId() string {
@@ -2701,7 +3400,7 @@ type ExecutionCounts struct {
 
 func (x *ExecutionCounts) Reset() {
 	*x = ExecutionCounts{}
-	mi := &file_gul_v1_gul_proto_msgTypes[37]
+	mi := &file_gul_v1_gul_proto_msgTypes[44]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2713,7 +3412,7 @@ func (x *ExecutionCounts) String() string {
 func (*ExecutionCounts) ProtoMessage() {}
 
 func (x *ExecutionCounts) ProtoReflect() protoreflect.Message {
-	mi := &file_gul_v1_gul_proto_msgTypes[37]
+	mi := &file_gul_v1_gul_proto_msgTypes[44]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2726,7 +3425,7 @@ func (x *ExecutionCounts) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ExecutionCounts.ProtoReflect.Descriptor instead.
 func (*ExecutionCounts) Descriptor() ([]byte, []int) {
-	return file_gul_v1_gul_proto_rawDescGZIP(), []int{37}
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{44}
 }
 
 func (x *ExecutionCounts) GetNonretiredMembers() uint64 {
@@ -2780,7 +3479,7 @@ type GetExecutionStateRequest struct {
 
 func (x *GetExecutionStateRequest) Reset() {
 	*x = GetExecutionStateRequest{}
-	mi := &file_gul_v1_gul_proto_msgTypes[38]
+	mi := &file_gul_v1_gul_proto_msgTypes[45]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2792,7 +3491,7 @@ func (x *GetExecutionStateRequest) String() string {
 func (*GetExecutionStateRequest) ProtoMessage() {}
 
 func (x *GetExecutionStateRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_gul_v1_gul_proto_msgTypes[38]
+	mi := &file_gul_v1_gul_proto_msgTypes[45]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2805,7 +3504,7 @@ func (x *GetExecutionStateRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetExecutionStateRequest.ProtoReflect.Descriptor instead.
 func (*GetExecutionStateRequest) Descriptor() ([]byte, []int) {
-	return file_gul_v1_gul_proto_rawDescGZIP(), []int{38}
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{45}
 }
 
 func (x *GetExecutionStateRequest) GetSessionId() string {
@@ -2837,7 +3536,7 @@ type GetExecutionStateResponse struct {
 
 func (x *GetExecutionStateResponse) Reset() {
 	*x = GetExecutionStateResponse{}
-	mi := &file_gul_v1_gul_proto_msgTypes[39]
+	mi := &file_gul_v1_gul_proto_msgTypes[46]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2849,7 +3548,7 @@ func (x *GetExecutionStateResponse) String() string {
 func (*GetExecutionStateResponse) ProtoMessage() {}
 
 func (x *GetExecutionStateResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_gul_v1_gul_proto_msgTypes[39]
+	mi := &file_gul_v1_gul_proto_msgTypes[46]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2862,7 +3561,7 @@ func (x *GetExecutionStateResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetExecutionStateResponse.ProtoReflect.Descriptor instead.
 func (*GetExecutionStateResponse) Descriptor() ([]byte, []int) {
-	return file_gul_v1_gul_proto_rawDescGZIP(), []int{39}
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{46}
 }
 
 func (x *GetExecutionStateResponse) GetSessionId() string {
@@ -2973,7 +3672,7 @@ type ObservedMember struct {
 
 func (x *ObservedMember) Reset() {
 	*x = ObservedMember{}
-	mi := &file_gul_v1_gul_proto_msgTypes[40]
+	mi := &file_gul_v1_gul_proto_msgTypes[47]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2985,7 +3684,7 @@ func (x *ObservedMember) String() string {
 func (*ObservedMember) ProtoMessage() {}
 
 func (x *ObservedMember) ProtoReflect() protoreflect.Message {
-	mi := &file_gul_v1_gul_proto_msgTypes[40]
+	mi := &file_gul_v1_gul_proto_msgTypes[47]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2998,7 +3697,7 @@ func (x *ObservedMember) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ObservedMember.ProtoReflect.Descriptor instead.
 func (*ObservedMember) Descriptor() ([]byte, []int) {
-	return file_gul_v1_gul_proto_rawDescGZIP(), []int{40}
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{47}
 }
 
 func (x *ObservedMember) GetObservedRef() string {
@@ -3026,7 +3725,7 @@ type ListSpecialistResultsRequest struct {
 
 func (x *ListSpecialistResultsRequest) Reset() {
 	*x = ListSpecialistResultsRequest{}
-	mi := &file_gul_v1_gul_proto_msgTypes[41]
+	mi := &file_gul_v1_gul_proto_msgTypes[48]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3038,7 +3737,7 @@ func (x *ListSpecialistResultsRequest) String() string {
 func (*ListSpecialistResultsRequest) ProtoMessage() {}
 
 func (x *ListSpecialistResultsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_gul_v1_gul_proto_msgTypes[41]
+	mi := &file_gul_v1_gul_proto_msgTypes[48]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3051,7 +3750,7 @@ func (x *ListSpecialistResultsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListSpecialistResultsRequest.ProtoReflect.Descriptor instead.
 func (*ListSpecialistResultsRequest) Descriptor() ([]byte, []int) {
-	return file_gul_v1_gul_proto_rawDescGZIP(), []int{41}
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{48}
 }
 
 func (x *ListSpecialistResultsRequest) GetSessionId() string {
@@ -3092,7 +3791,7 @@ type SpecialistResult struct {
 
 func (x *SpecialistResult) Reset() {
 	*x = SpecialistResult{}
-	mi := &file_gul_v1_gul_proto_msgTypes[42]
+	mi := &file_gul_v1_gul_proto_msgTypes[49]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3104,7 +3803,7 @@ func (x *SpecialistResult) String() string {
 func (*SpecialistResult) ProtoMessage() {}
 
 func (x *SpecialistResult) ProtoReflect() protoreflect.Message {
-	mi := &file_gul_v1_gul_proto_msgTypes[42]
+	mi := &file_gul_v1_gul_proto_msgTypes[49]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3117,7 +3816,7 @@ func (x *SpecialistResult) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SpecialistResult.ProtoReflect.Descriptor instead.
 func (*SpecialistResult) Descriptor() ([]byte, []int) {
-	return file_gul_v1_gul_proto_rawDescGZIP(), []int{42}
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{49}
 }
 
 func (x *SpecialistResult) GetResultId() string {
@@ -3197,7 +3896,7 @@ type ListSpecialistResultsResponse struct {
 
 func (x *ListSpecialistResultsResponse) Reset() {
 	*x = ListSpecialistResultsResponse{}
-	mi := &file_gul_v1_gul_proto_msgTypes[43]
+	mi := &file_gul_v1_gul_proto_msgTypes[50]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3209,7 +3908,7 @@ func (x *ListSpecialistResultsResponse) String() string {
 func (*ListSpecialistResultsResponse) ProtoMessage() {}
 
 func (x *ListSpecialistResultsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_gul_v1_gul_proto_msgTypes[43]
+	mi := &file_gul_v1_gul_proto_msgTypes[50]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3222,7 +3921,7 @@ func (x *ListSpecialistResultsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListSpecialistResultsResponse.ProtoReflect.Descriptor instead.
 func (*ListSpecialistResultsResponse) Descriptor() ([]byte, []int) {
-	return file_gul_v1_gul_proto_rawDescGZIP(), []int{43}
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{50}
 }
 
 func (x *ListSpecialistResultsResponse) GetSnapshotId() string {
@@ -3277,7 +3976,7 @@ type DomainError struct {
 
 func (x *DomainError) Reset() {
 	*x = DomainError{}
-	mi := &file_gul_v1_gul_proto_msgTypes[44]
+	mi := &file_gul_v1_gul_proto_msgTypes[51]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3289,7 +3988,7 @@ func (x *DomainError) String() string {
 func (*DomainError) ProtoMessage() {}
 
 func (x *DomainError) ProtoReflect() protoreflect.Message {
-	mi := &file_gul_v1_gul_proto_msgTypes[44]
+	mi := &file_gul_v1_gul_proto_msgTypes[51]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3302,7 +4001,7 @@ func (x *DomainError) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DomainError.ProtoReflect.Descriptor instead.
 func (*DomainError) Descriptor() ([]byte, []int) {
-	return file_gul_v1_gul_proto_rawDescGZIP(), []int{44}
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{51}
 }
 
 func (x *DomainError) GetCode() ErrorCode {
@@ -3330,7 +4029,7 @@ type CloseRuntimeRequest struct {
 
 func (x *CloseRuntimeRequest) Reset() {
 	*x = CloseRuntimeRequest{}
-	mi := &file_gul_v1_gul_proto_msgTypes[45]
+	mi := &file_gul_v1_gul_proto_msgTypes[52]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3342,7 +4041,7 @@ func (x *CloseRuntimeRequest) String() string {
 func (*CloseRuntimeRequest) ProtoMessage() {}
 
 func (x *CloseRuntimeRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_gul_v1_gul_proto_msgTypes[45]
+	mi := &file_gul_v1_gul_proto_msgTypes[52]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3355,7 +4054,7 @@ func (x *CloseRuntimeRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CloseRuntimeRequest.ProtoReflect.Descriptor instead.
 func (*CloseRuntimeRequest) Descriptor() ([]byte, []int) {
-	return file_gul_v1_gul_proto_rawDescGZIP(), []int{45}
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{52}
 }
 
 func (x *CloseRuntimeRequest) GetSessionId() string {
@@ -3392,7 +4091,7 @@ type CloseOutcome struct {
 
 func (x *CloseOutcome) Reset() {
 	*x = CloseOutcome{}
-	mi := &file_gul_v1_gul_proto_msgTypes[46]
+	mi := &file_gul_v1_gul_proto_msgTypes[53]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3404,7 +4103,7 @@ func (x *CloseOutcome) String() string {
 func (*CloseOutcome) ProtoMessage() {}
 
 func (x *CloseOutcome) ProtoReflect() protoreflect.Message {
-	mi := &file_gul_v1_gul_proto_msgTypes[46]
+	mi := &file_gul_v1_gul_proto_msgTypes[53]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3417,7 +4116,7 @@ func (x *CloseOutcome) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CloseOutcome.ProtoReflect.Descriptor instead.
 func (*CloseOutcome) Descriptor() ([]byte, []int) {
-	return file_gul_v1_gul_proto_rawDescGZIP(), []int{46}
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{53}
 }
 
 func (x *CloseOutcome) GetStatus() CloseStatus {
@@ -3464,7 +4163,7 @@ type CloseRuntimeResponse struct {
 
 func (x *CloseRuntimeResponse) Reset() {
 	*x = CloseRuntimeResponse{}
-	mi := &file_gul_v1_gul_proto_msgTypes[47]
+	mi := &file_gul_v1_gul_proto_msgTypes[54]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3476,7 +4175,7 @@ func (x *CloseRuntimeResponse) String() string {
 func (*CloseRuntimeResponse) ProtoMessage() {}
 
 func (x *CloseRuntimeResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_gul_v1_gul_proto_msgTypes[47]
+	mi := &file_gul_v1_gul_proto_msgTypes[54]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3489,7 +4188,7 @@ func (x *CloseRuntimeResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CloseRuntimeResponse.ProtoReflect.Descriptor instead.
 func (*CloseRuntimeResponse) Descriptor() ([]byte, []int) {
-	return file_gul_v1_gul_proto_rawDescGZIP(), []int{47}
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{54}
 }
 
 func (x *CloseRuntimeResponse) GetOutcome() *CloseOutcome {
@@ -3509,7 +4208,7 @@ type GetMetadataRequest struct {
 
 func (x *GetMetadataRequest) Reset() {
 	*x = GetMetadataRequest{}
-	mi := &file_gul_v1_gul_proto_msgTypes[48]
+	mi := &file_gul_v1_gul_proto_msgTypes[55]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3521,7 +4220,7 @@ func (x *GetMetadataRequest) String() string {
 func (*GetMetadataRequest) ProtoMessage() {}
 
 func (x *GetMetadataRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_gul_v1_gul_proto_msgTypes[48]
+	mi := &file_gul_v1_gul_proto_msgTypes[55]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3534,7 +4233,7 @@ func (x *GetMetadataRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetMetadataRequest.ProtoReflect.Descriptor instead.
 func (*GetMetadataRequest) Descriptor() ([]byte, []int) {
-	return file_gul_v1_gul_proto_rawDescGZIP(), []int{48}
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{55}
 }
 
 func (x *GetMetadataRequest) GetSessionId() string {
@@ -3563,7 +4262,7 @@ type GetMetadataResponse struct {
 
 func (x *GetMetadataResponse) Reset() {
 	*x = GetMetadataResponse{}
-	mi := &file_gul_v1_gul_proto_msgTypes[49]
+	mi := &file_gul_v1_gul_proto_msgTypes[56]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3575,7 +4274,7 @@ func (x *GetMetadataResponse) String() string {
 func (*GetMetadataResponse) ProtoMessage() {}
 
 func (x *GetMetadataResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_gul_v1_gul_proto_msgTypes[49]
+	mi := &file_gul_v1_gul_proto_msgTypes[56]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3588,7 +4287,7 @@ func (x *GetMetadataResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetMetadataResponse.ProtoReflect.Descriptor instead.
 func (*GetMetadataResponse) Descriptor() ([]byte, []int) {
-	return file_gul_v1_gul_proto_rawDescGZIP(), []int{49}
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{56}
 }
 
 func (x *GetMetadataResponse) GetArtifactRef() string {
@@ -3631,7 +4330,7 @@ type ReadChunkRequest struct {
 
 func (x *ReadChunkRequest) Reset() {
 	*x = ReadChunkRequest{}
-	mi := &file_gul_v1_gul_proto_msgTypes[50]
+	mi := &file_gul_v1_gul_proto_msgTypes[57]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3643,7 +4342,7 @@ func (x *ReadChunkRequest) String() string {
 func (*ReadChunkRequest) ProtoMessage() {}
 
 func (x *ReadChunkRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_gul_v1_gul_proto_msgTypes[50]
+	mi := &file_gul_v1_gul_proto_msgTypes[57]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3656,7 +4355,7 @@ func (x *ReadChunkRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ReadChunkRequest.ProtoReflect.Descriptor instead.
 func (*ReadChunkRequest) Descriptor() ([]byte, []int) {
-	return file_gul_v1_gul_proto_rawDescGZIP(), []int{50}
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{57}
 }
 
 func (x *ReadChunkRequest) GetSessionId() string {
@@ -3698,7 +4397,7 @@ type ReadChunkResponse struct {
 
 func (x *ReadChunkResponse) Reset() {
 	*x = ReadChunkResponse{}
-	mi := &file_gul_v1_gul_proto_msgTypes[51]
+	mi := &file_gul_v1_gul_proto_msgTypes[58]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3710,7 +4409,7 @@ func (x *ReadChunkResponse) String() string {
 func (*ReadChunkResponse) ProtoMessage() {}
 
 func (x *ReadChunkResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_gul_v1_gul_proto_msgTypes[51]
+	mi := &file_gul_v1_gul_proto_msgTypes[58]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3723,7 +4422,7 @@ func (x *ReadChunkResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ReadChunkResponse.ProtoReflect.Descriptor instead.
 func (*ReadChunkResponse) Descriptor() ([]byte, []int) {
-	return file_gul_v1_gul_proto_rawDescGZIP(), []int{51}
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{58}
 }
 
 func (x *ReadChunkResponse) GetData() []byte {
@@ -3751,7 +4450,55 @@ var File_gul_v1_gul_proto protoreflect.FileDescriptor
 
 const file_gul_v1_gul_proto_rawDesc = "" +
 	"\n" +
-	"\x10gul/v1/gul.proto\x12\x06gul.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"@\n" +
+	"\x10gul/v1/gul.proto\x12\x06gul.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"{\n" +
+	"\x12RuntimeModelChoice\x12\x19\n" +
+	"\bmodel_id\x18\x01 \x01(\tR\amodelId\x12\x1d\n" +
+	"\n" +
+	"is_default\x18\x02 \x01(\bR\tisDefault\x12+\n" +
+	"\x11supported_efforts\x18\x03 \x03(\tR\x10supportedEfforts\"\xe1\x04\n" +
+	"\x14RuntimeProfileChoice\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12I\n" +
+	"\rcompatibility\x18\x02 \x01(\x0e2#.gul.v1.RuntimeProfileCompatibilityR\rcompatibility\x12'\n" +
+	"\x0fruntime_version\x18\x03 \x01(\tR\x0eruntimeVersion\x122\n" +
+	"\x06models\x18\x04 \x03(\v2\x1a.gul.v1.RuntimeModelChoiceR\x06models\x12D\n" +
+	"\x0fsupported_lanes\x18\x05 \x03(\x0e2\x1b.gul.v1.LaunchExecutionLaneR\x0esupportedLanes\x12D\n" +
+	"\x11maximum_assurance\x18\x06 \x01(\x0e2\x17.gul.v1.LaunchAssuranceR\x10maximumAssurance\x12#\n" +
+	"\rfeature_flags\x18\a \x03(\tR\ffeatureFlags\x125\n" +
+	"\x16supported_interactions\x18\b \x03(\tR\x15supportedInteractions\x128\n" +
+	"\x18access_policy_transition\x18\t \x01(\tR\x16accessPolicyTransition\x121\n" +
+	"\x14background_execution\x18\n" +
+	" \x01(\tR\x13backgroundExecution\x128\n" +
+	"\x18native_subagents_enabled\x18\v \x01(\bR\x16nativeSubagentsEnabled\"\x1c\n" +
+	"\x1aListRuntimeProfilesRequest\"\xcf\x01\n" +
+	"\x1bListRuntimeProfilesResponse\x128\n" +
+	"\bprofiles\x18\x01 \x03(\v2\x1c.gul.v1.RuntimeProfileChoiceR\bprofiles\x12>\n" +
+	"\x1bpreprovisioned_policy_names\x18\x02 \x03(\tR\x19preprovisionedPolicyNames\x126\n" +
+	"\x17shared_readonly_warning\x18\x03 \x01(\tR\x15sharedReadonlyWarning\"\xcb\x02\n" +
+	"\x19CheckCompatibilityRequest\x12!\n" +
+	"\fprofile_name\x18\x01 \x01(\tR\vprofileName\x12\x19\n" +
+	"\bmodel_id\x18\x02 \x01(\tR\amodelId\x12\x16\n" +
+	"\x06effort\x18\x03 \x01(\tR\x06effort\x12/\n" +
+	"\x04lane\x18\x04 \x01(\x0e2\x1b.gul.v1.LaunchExecutionLaneR\x04lane\x12F\n" +
+	"\x12required_assurance\x18\x05 \x01(\x0e2\x17.gul.v1.LaunchAssuranceR\x11requiredAssurance\x12\x1f\n" +
+	"\vpolicy_name\x18\x06 \x01(\tR\n" +
+	"policyName\x12>\n" +
+	"\x1backnowledge_shared_readonly\x18\a \x01(\bR\x19acknowledgeSharedReadonly\"\xe4\x03\n" +
+	"\x1eProspectiveLaunchConfiguration\x12!\n" +
+	"\fprofile_name\x18\x01 \x01(\tR\vprofileName\x12\x19\n" +
+	"\bmodel_id\x18\x02 \x01(\tR\amodelId\x12\x16\n" +
+	"\x06effort\x18\x03 \x01(\tR\x06effort\x12/\n" +
+	"\x04lane\x18\x04 \x01(\x0e2\x1b.gul.v1.LaunchExecutionLaneR\x04lane\x12F\n" +
+	"\x12required_assurance\x18\x05 \x01(\x0e2\x17.gul.v1.LaunchAssuranceR\x11requiredAssurance\x12\x1f\n" +
+	"\vpolicy_name\x18\x06 \x01(\tR\n" +
+	"policyName\x12!\n" +
+	"\fcontrol_mode\x18\a \x01(\tR\vcontrolMode\x12\x18\n" +
+	"\apurpose\x18\b \x01(\tR\apurpose\x12'\n" +
+	"\x0fcontroller_kind\x18\t \x01(\tR\x0econtrollerKind\x124\n" +
+	"\x16orchestration_use_case\x18\n" +
+	" \x01(\tR\x14orchestrationUseCase\x126\n" +
+	"\x17shared_readonly_warning\x18\v \x01(\tR\x15sharedReadonlyWarning\"j\n" +
+	"\x1aCheckCompatibilityResponse\x12L\n" +
+	"\rconfiguration\x18\x01 \x01(\v2&.gul.v1.ProspectiveLaunchConfigurationR\rconfiguration\"@\n" +
 	"\x1bRemoveWorkspaceEntryRequest\x12!\n" +
 	"\fworkspace_id\x18\x01 \x01(\tR\vworkspaceId\"\x1e\n" +
 	"\x1cRemoveWorkspaceEntryResponse\"\x1d\n" +
@@ -3985,7 +4732,22 @@ const file_gul_v1_gul_proto_rawDesc = "" +
 	"\x11ReadChunkResponse\x12\x12\n" +
 	"\x04data\x18\x01 \x01(\fR\x04data\x12!\n" +
 	"\ftotal_length\x18\x02 \x01(\x04R\vtotalLength\x12\x16\n" +
-	"\x06sha256\x18\x03 \x01(\tR\x06sha256*k\n" +
+	"\x06sha256\x18\x03 \x01(\tR\x06sha256*\x87\x02\n" +
+	"\x1bRuntimeProfileCompatibility\x12-\n" +
+	")RUNTIME_PROFILE_COMPATIBILITY_UNSPECIFIED\x10\x00\x12,\n" +
+	"(RUNTIME_PROFILE_COMPATIBILITY_COMPATIBLE\x10\x01\x12.\n" +
+	"*RUNTIME_PROFILE_COMPATIBILITY_INCOMPATIBLE\x10\x02\x12,\n" +
+	"(RUNTIME_PROFILE_COMPATIBILITY_UNVERIFIED\x10\x03\x12-\n" +
+	")RUNTIME_PROFILE_COMPATIBILITY_UNAVAILABLE\x10\x04*\x8c\x01\n" +
+	"\x13LaunchExecutionLane\x12%\n" +
+	"!LAUNCH_EXECUTION_LANE_UNSPECIFIED\x10\x00\x12#\n" +
+	"\x1fLAUNCH_EXECUTION_LANE_DEDICATED\x10\x01\x12)\n" +
+	"%LAUNCH_EXECUTION_LANE_SHARED_READONLY\x10\x02*\xca\x01\n" +
+	"\x0fLaunchAssurance\x12 \n" +
+	"\x1cLAUNCH_ASSURANCE_UNSPECIFIED\x10\x00\x12/\n" +
+	"+LAUNCH_ASSURANCE_BEST_EFFORT_PERSONAL_ALPHA\x10\x01\x123\n" +
+	"/LAUNCH_ASSURANCE_VERIFIED_THREAD_SCOPED_CONTROL\x10\x02\x12/\n" +
+	"+LAUNCH_ASSURANCE_STRONG_PROCESS_CONTAINMENT\x10\x03*k\n" +
 	"\tFreshness\x12\x19\n" +
 	"\x15FRESHNESS_UNSPECIFIED\x10\x00\x12\x13\n" +
 	"\x0fFRESHNESS_FRESH\x10\x01\x12\x13\n" +
@@ -4099,7 +4861,10 @@ const file_gul_v1_gul_proto_rawDesc = "" +
 	"\x18CLOSE_STATUS_IN_PROGRESS\x10\x02\x12\x1a\n" +
 	"\x16CLOSE_STATUS_CONFIRMED\x10\x03\x12 \n" +
 	"\x1cCLOSE_STATUS_OUTCOME_UNKNOWN\x10\x04\x12\"\n" +
-	"\x1eCLOSE_STATUS_RECOVERY_REQUIRED\x10\x052\x83\t\n" +
+	"\x1eCLOSE_STATUS_RECOVERY_REQUIRED\x10\x052\xcd\x01\n" +
+	"\x0eRuntimeService\x12^\n" +
+	"\x13ListRuntimeProfiles\x12\".gul.v1.ListRuntimeProfilesRequest\x1a#.gul.v1.ListRuntimeProfilesResponse\x12[\n" +
+	"\x12CheckCompatibility\x12!.gul.v1.CheckCompatibilityRequest\x1a\".gul.v1.CheckCompatibilityResponse2\x83\t\n" +
 	"\x1cWorkspacePresentationService\x12a\n" +
 	"\x14ListRegistrableRoots\x12#.gul.v1.ListRegistrableRootsRequest\x1a$.gul.v1.ListRegistrableRootsResponse\x12d\n" +
 	"\x15BrowseRegistrableRoot\x12$.gul.v1.BrowseRegistrableRootRequest\x1a%.gul.v1.BrowseRegistrableRootResponse\x12h\n" +
@@ -4140,163 +4905,187 @@ func file_gul_v1_gul_proto_rawDescGZIP() []byte {
 	return file_gul_v1_gul_proto_rawDescData
 }
 
-var file_gul_v1_gul_proto_enumTypes = make([]protoimpl.EnumInfo, 11)
-var file_gul_v1_gul_proto_msgTypes = make([]protoimpl.MessageInfo, 52)
+var file_gul_v1_gul_proto_enumTypes = make([]protoimpl.EnumInfo, 14)
+var file_gul_v1_gul_proto_msgTypes = make([]protoimpl.MessageInfo, 59)
 var file_gul_v1_gul_proto_goTypes = []any{
-	(Freshness)(0),                              // 0: gul.v1.Freshness
-	(SessionLifecycle)(0),                       // 1: gul.v1.SessionLifecycle
-	(SessionComposition)(0),                     // 2: gul.v1.SessionComposition
-	(ApprovalPolicy)(0),                         // 3: gul.v1.ApprovalPolicy
-	(CloseProgress)(0),                          // 4: gul.v1.CloseProgress
-	(RecoveryClass)(0),                          // 5: gul.v1.RecoveryClass
-	(ObservedMemberLifecycle)(0),                // 6: gul.v1.ObservedMemberLifecycle
-	(SpecialistResultFormat)(0),                 // 7: gul.v1.SpecialistResultFormat
-	(ErrorCode)(0),                              // 8: gul.v1.ErrorCode
-	(ActionClass)(0),                            // 9: gul.v1.ActionClass
-	(CloseStatus)(0),                            // 10: gul.v1.CloseStatus
-	(*RemoveWorkspaceEntryRequest)(nil),         // 11: gul.v1.RemoveWorkspaceEntryRequest
-	(*RemoveWorkspaceEntryResponse)(nil),        // 12: gul.v1.RemoveWorkspaceEntryResponse
-	(*ListRegistrableRootsRequest)(nil),         // 13: gul.v1.ListRegistrableRootsRequest
-	(*RegistrableRoot)(nil),                     // 14: gul.v1.RegistrableRoot
-	(*ListRegistrableRootsResponse)(nil),        // 15: gul.v1.ListRegistrableRootsResponse
-	(*BrowseRegistrableRootRequest)(nil),        // 16: gul.v1.BrowseRegistrableRootRequest
-	(*RegistrableDirectory)(nil),                // 17: gul.v1.RegistrableDirectory
-	(*BrowseRegistrableRootResponse)(nil),       // 18: gul.v1.BrowseRegistrableRootResponse
-	(*RegisterFromHostSelectionRequest)(nil),    // 19: gul.v1.RegisterFromHostSelectionRequest
-	(*RegisterFromAllowlistPathRequest)(nil),    // 20: gul.v1.RegisterFromAllowlistPathRequest
-	(*WorkspaceEntry)(nil),                      // 21: gul.v1.WorkspaceEntry
-	(*RenameWorkspaceRequest)(nil),              // 22: gul.v1.RenameWorkspaceRequest
-	(*SetWorkspaceFavoriteRequest)(nil),         // 23: gul.v1.SetWorkspaceFavoriteRequest
-	(*SetWorkspaceHiddenRequest)(nil),           // 24: gul.v1.SetWorkspaceHiddenRequest
-	(*WorkspacePresentationResponse)(nil),       // 25: gul.v1.WorkspacePresentationResponse
-	(*GetNavigationRequest)(nil),                // 26: gul.v1.GetNavigationRequest
-	(*SetNavigationRequest)(nil),                // 27: gul.v1.SetNavigationRequest
-	(*NavigationResponse)(nil),                  // 28: gul.v1.NavigationResponse
-	(*RegisterWorkspaceResponse)(nil),           // 29: gul.v1.RegisterWorkspaceResponse
-	(*RevalidateWorkspaceRequest)(nil),          // 30: gul.v1.RevalidateWorkspaceRequest
-	(*RevalidateWorkspaceResponse)(nil),         // 31: gul.v1.RevalidateWorkspaceResponse
-	(*ListWorkspacesRequest)(nil),               // 32: gul.v1.ListWorkspacesRequest
-	(*ListWorkspacesResponse)(nil),              // 33: gul.v1.ListWorkspacesResponse
-	(*DirectSessionPresentation)(nil),           // 34: gul.v1.DirectSessionPresentation
-	(*GetDirectSessionPresentationRequest)(nil), // 35: gul.v1.GetDirectSessionPresentationRequest
-	(*RenameDirectSessionRequest)(nil),          // 36: gul.v1.RenameDirectSessionRequest
-	(*SetDirectSessionFavoriteRequest)(nil),     // 37: gul.v1.SetDirectSessionFavoriteRequest
-	(*SetDirectSessionArchivedRequest)(nil),     // 38: gul.v1.SetDirectSessionArchivedRequest
-	(*DirectSessionPresentationResponse)(nil),   // 39: gul.v1.DirectSessionPresentationResponse
-	(*ListDirectSessionsRequest)(nil),           // 40: gul.v1.ListDirectSessionsRequest
-	(*ListDirectSessionsResponse)(nil),          // 41: gul.v1.ListDirectSessionsResponse
-	(*ListPromptHistoryRequest)(nil),            // 42: gul.v1.ListPromptHistoryRequest
-	(*PromptHistoryItem)(nil),                   // 43: gul.v1.PromptHistoryItem
-	(*ListPromptHistoryResponse)(nil),           // 44: gul.v1.ListPromptHistoryResponse
-	(*GetPromptHistoryItemRequest)(nil),         // 45: gul.v1.GetPromptHistoryItemRequest
-	(*PromptOriginal)(nil),                      // 46: gul.v1.PromptOriginal
-	(*GetPromptHistoryItemResponse)(nil),        // 47: gul.v1.GetPromptHistoryItemResponse
-	(*ExecutionCounts)(nil),                     // 48: gul.v1.ExecutionCounts
-	(*GetExecutionStateRequest)(nil),            // 49: gul.v1.GetExecutionStateRequest
-	(*GetExecutionStateResponse)(nil),           // 50: gul.v1.GetExecutionStateResponse
-	(*ObservedMember)(nil),                      // 51: gul.v1.ObservedMember
-	(*ListSpecialistResultsRequest)(nil),        // 52: gul.v1.ListSpecialistResultsRequest
-	(*SpecialistResult)(nil),                    // 53: gul.v1.SpecialistResult
-	(*ListSpecialistResultsResponse)(nil),       // 54: gul.v1.ListSpecialistResultsResponse
-	(*DomainError)(nil),                         // 55: gul.v1.DomainError
-	(*CloseRuntimeRequest)(nil),                 // 56: gul.v1.CloseRuntimeRequest
-	(*CloseOutcome)(nil),                        // 57: gul.v1.CloseOutcome
-	(*CloseRuntimeResponse)(nil),                // 58: gul.v1.CloseRuntimeResponse
-	(*GetMetadataRequest)(nil),                  // 59: gul.v1.GetMetadataRequest
-	(*GetMetadataResponse)(nil),                 // 60: gul.v1.GetMetadataResponse
-	(*ReadChunkRequest)(nil),                    // 61: gul.v1.ReadChunkRequest
-	(*ReadChunkResponse)(nil),                   // 62: gul.v1.ReadChunkResponse
-	(*timestamppb.Timestamp)(nil),               // 63: google.protobuf.Timestamp
+	(RuntimeProfileCompatibility)(0),            // 0: gul.v1.RuntimeProfileCompatibility
+	(LaunchExecutionLane)(0),                    // 1: gul.v1.LaunchExecutionLane
+	(LaunchAssurance)(0),                        // 2: gul.v1.LaunchAssurance
+	(Freshness)(0),                              // 3: gul.v1.Freshness
+	(SessionLifecycle)(0),                       // 4: gul.v1.SessionLifecycle
+	(SessionComposition)(0),                     // 5: gul.v1.SessionComposition
+	(ApprovalPolicy)(0),                         // 6: gul.v1.ApprovalPolicy
+	(CloseProgress)(0),                          // 7: gul.v1.CloseProgress
+	(RecoveryClass)(0),                          // 8: gul.v1.RecoveryClass
+	(ObservedMemberLifecycle)(0),                // 9: gul.v1.ObservedMemberLifecycle
+	(SpecialistResultFormat)(0),                 // 10: gul.v1.SpecialistResultFormat
+	(ErrorCode)(0),                              // 11: gul.v1.ErrorCode
+	(ActionClass)(0),                            // 12: gul.v1.ActionClass
+	(CloseStatus)(0),                            // 13: gul.v1.CloseStatus
+	(*RuntimeModelChoice)(nil),                  // 14: gul.v1.RuntimeModelChoice
+	(*RuntimeProfileChoice)(nil),                // 15: gul.v1.RuntimeProfileChoice
+	(*ListRuntimeProfilesRequest)(nil),          // 16: gul.v1.ListRuntimeProfilesRequest
+	(*ListRuntimeProfilesResponse)(nil),         // 17: gul.v1.ListRuntimeProfilesResponse
+	(*CheckCompatibilityRequest)(nil),           // 18: gul.v1.CheckCompatibilityRequest
+	(*ProspectiveLaunchConfiguration)(nil),      // 19: gul.v1.ProspectiveLaunchConfiguration
+	(*CheckCompatibilityResponse)(nil),          // 20: gul.v1.CheckCompatibilityResponse
+	(*RemoveWorkspaceEntryRequest)(nil),         // 21: gul.v1.RemoveWorkspaceEntryRequest
+	(*RemoveWorkspaceEntryResponse)(nil),        // 22: gul.v1.RemoveWorkspaceEntryResponse
+	(*ListRegistrableRootsRequest)(nil),         // 23: gul.v1.ListRegistrableRootsRequest
+	(*RegistrableRoot)(nil),                     // 24: gul.v1.RegistrableRoot
+	(*ListRegistrableRootsResponse)(nil),        // 25: gul.v1.ListRegistrableRootsResponse
+	(*BrowseRegistrableRootRequest)(nil),        // 26: gul.v1.BrowseRegistrableRootRequest
+	(*RegistrableDirectory)(nil),                // 27: gul.v1.RegistrableDirectory
+	(*BrowseRegistrableRootResponse)(nil),       // 28: gul.v1.BrowseRegistrableRootResponse
+	(*RegisterFromHostSelectionRequest)(nil),    // 29: gul.v1.RegisterFromHostSelectionRequest
+	(*RegisterFromAllowlistPathRequest)(nil),    // 30: gul.v1.RegisterFromAllowlistPathRequest
+	(*WorkspaceEntry)(nil),                      // 31: gul.v1.WorkspaceEntry
+	(*RenameWorkspaceRequest)(nil),              // 32: gul.v1.RenameWorkspaceRequest
+	(*SetWorkspaceFavoriteRequest)(nil),         // 33: gul.v1.SetWorkspaceFavoriteRequest
+	(*SetWorkspaceHiddenRequest)(nil),           // 34: gul.v1.SetWorkspaceHiddenRequest
+	(*WorkspacePresentationResponse)(nil),       // 35: gul.v1.WorkspacePresentationResponse
+	(*GetNavigationRequest)(nil),                // 36: gul.v1.GetNavigationRequest
+	(*SetNavigationRequest)(nil),                // 37: gul.v1.SetNavigationRequest
+	(*NavigationResponse)(nil),                  // 38: gul.v1.NavigationResponse
+	(*RegisterWorkspaceResponse)(nil),           // 39: gul.v1.RegisterWorkspaceResponse
+	(*RevalidateWorkspaceRequest)(nil),          // 40: gul.v1.RevalidateWorkspaceRequest
+	(*RevalidateWorkspaceResponse)(nil),         // 41: gul.v1.RevalidateWorkspaceResponse
+	(*ListWorkspacesRequest)(nil),               // 42: gul.v1.ListWorkspacesRequest
+	(*ListWorkspacesResponse)(nil),              // 43: gul.v1.ListWorkspacesResponse
+	(*DirectSessionPresentation)(nil),           // 44: gul.v1.DirectSessionPresentation
+	(*GetDirectSessionPresentationRequest)(nil), // 45: gul.v1.GetDirectSessionPresentationRequest
+	(*RenameDirectSessionRequest)(nil),          // 46: gul.v1.RenameDirectSessionRequest
+	(*SetDirectSessionFavoriteRequest)(nil),     // 47: gul.v1.SetDirectSessionFavoriteRequest
+	(*SetDirectSessionArchivedRequest)(nil),     // 48: gul.v1.SetDirectSessionArchivedRequest
+	(*DirectSessionPresentationResponse)(nil),   // 49: gul.v1.DirectSessionPresentationResponse
+	(*ListDirectSessionsRequest)(nil),           // 50: gul.v1.ListDirectSessionsRequest
+	(*ListDirectSessionsResponse)(nil),          // 51: gul.v1.ListDirectSessionsResponse
+	(*ListPromptHistoryRequest)(nil),            // 52: gul.v1.ListPromptHistoryRequest
+	(*PromptHistoryItem)(nil),                   // 53: gul.v1.PromptHistoryItem
+	(*ListPromptHistoryResponse)(nil),           // 54: gul.v1.ListPromptHistoryResponse
+	(*GetPromptHistoryItemRequest)(nil),         // 55: gul.v1.GetPromptHistoryItemRequest
+	(*PromptOriginal)(nil),                      // 56: gul.v1.PromptOriginal
+	(*GetPromptHistoryItemResponse)(nil),        // 57: gul.v1.GetPromptHistoryItemResponse
+	(*ExecutionCounts)(nil),                     // 58: gul.v1.ExecutionCounts
+	(*GetExecutionStateRequest)(nil),            // 59: gul.v1.GetExecutionStateRequest
+	(*GetExecutionStateResponse)(nil),           // 60: gul.v1.GetExecutionStateResponse
+	(*ObservedMember)(nil),                      // 61: gul.v1.ObservedMember
+	(*ListSpecialistResultsRequest)(nil),        // 62: gul.v1.ListSpecialistResultsRequest
+	(*SpecialistResult)(nil),                    // 63: gul.v1.SpecialistResult
+	(*ListSpecialistResultsResponse)(nil),       // 64: gul.v1.ListSpecialistResultsResponse
+	(*DomainError)(nil),                         // 65: gul.v1.DomainError
+	(*CloseRuntimeRequest)(nil),                 // 66: gul.v1.CloseRuntimeRequest
+	(*CloseOutcome)(nil),                        // 67: gul.v1.CloseOutcome
+	(*CloseRuntimeResponse)(nil),                // 68: gul.v1.CloseRuntimeResponse
+	(*GetMetadataRequest)(nil),                  // 69: gul.v1.GetMetadataRequest
+	(*GetMetadataResponse)(nil),                 // 70: gul.v1.GetMetadataResponse
+	(*ReadChunkRequest)(nil),                    // 71: gul.v1.ReadChunkRequest
+	(*ReadChunkResponse)(nil),                   // 72: gul.v1.ReadChunkResponse
+	(*timestamppb.Timestamp)(nil),               // 73: google.protobuf.Timestamp
 }
 var file_gul_v1_gul_proto_depIdxs = []int32{
-	14, // 0: gul.v1.ListRegistrableRootsResponse.roots:type_name -> gul.v1.RegistrableRoot
-	17, // 1: gul.v1.BrowseRegistrableRootResponse.directories:type_name -> gul.v1.RegistrableDirectory
-	21, // 2: gul.v1.WorkspacePresentationResponse.workspace:type_name -> gul.v1.WorkspaceEntry
-	21, // 3: gul.v1.RegisterWorkspaceResponse.workspace:type_name -> gul.v1.WorkspaceEntry
-	21, // 4: gul.v1.RevalidateWorkspaceResponse.workspace:type_name -> gul.v1.WorkspaceEntry
-	21, // 5: gul.v1.ListWorkspacesResponse.workspaces:type_name -> gul.v1.WorkspaceEntry
-	34, // 6: gul.v1.DirectSessionPresentationResponse.session:type_name -> gul.v1.DirectSessionPresentation
-	34, // 7: gul.v1.ListDirectSessionsResponse.sessions:type_name -> gul.v1.DirectSessionPresentation
-	63, // 8: gul.v1.PromptHistoryItem.accepted_at:type_name -> google.protobuf.Timestamp
-	43, // 9: gul.v1.ListPromptHistoryResponse.items:type_name -> gul.v1.PromptHistoryItem
-	0,  // 10: gul.v1.ListPromptHistoryResponse.freshness:type_name -> gul.v1.Freshness
-	63, // 11: gul.v1.ListPromptHistoryResponse.observed_at:type_name -> google.protobuf.Timestamp
-	63, // 12: gul.v1.GetPromptHistoryItemResponse.accepted_at:type_name -> google.protobuf.Timestamp
-	46, // 13: gul.v1.GetPromptHistoryItemResponse.original:type_name -> gul.v1.PromptOriginal
-	0,  // 14: gul.v1.GetExecutionStateResponse.freshness:type_name -> gul.v1.Freshness
-	63, // 15: gul.v1.GetExecutionStateResponse.observed_at:type_name -> google.protobuf.Timestamp
-	1,  // 16: gul.v1.GetExecutionStateResponse.lifecycle:type_name -> gul.v1.SessionLifecycle
-	2,  // 17: gul.v1.GetExecutionStateResponse.composition:type_name -> gul.v1.SessionComposition
-	3,  // 18: gul.v1.GetExecutionStateResponse.approval_policy:type_name -> gul.v1.ApprovalPolicy
-	48, // 19: gul.v1.GetExecutionStateResponse.counts:type_name -> gul.v1.ExecutionCounts
-	4,  // 20: gul.v1.GetExecutionStateResponse.close_progress:type_name -> gul.v1.CloseProgress
-	5,  // 21: gul.v1.GetExecutionStateResponse.recovery:type_name -> gul.v1.RecoveryClass
-	51, // 22: gul.v1.GetExecutionStateResponse.observed_members:type_name -> gul.v1.ObservedMember
-	6,  // 23: gul.v1.ObservedMember.lifecycle:type_name -> gul.v1.ObservedMemberLifecycle
-	63, // 24: gul.v1.SpecialistResult.published_at:type_name -> google.protobuf.Timestamp
-	7,  // 25: gul.v1.SpecialistResult.format:type_name -> gul.v1.SpecialistResultFormat
-	53, // 26: gul.v1.ListSpecialistResultsResponse.items:type_name -> gul.v1.SpecialistResult
-	0,  // 27: gul.v1.ListSpecialistResultsResponse.freshness:type_name -> gul.v1.Freshness
-	63, // 28: gul.v1.ListSpecialistResultsResponse.observed_at:type_name -> google.protobuf.Timestamp
-	8,  // 29: gul.v1.DomainError.code:type_name -> gul.v1.ErrorCode
-	9,  // 30: gul.v1.DomainError.action:type_name -> gul.v1.ActionClass
-	10, // 31: gul.v1.CloseOutcome.status:type_name -> gul.v1.CloseStatus
-	55, // 32: gul.v1.CloseOutcome.rejection:type_name -> gul.v1.DomainError
-	9,  // 33: gul.v1.CloseOutcome.next_action:type_name -> gul.v1.ActionClass
-	57, // 34: gul.v1.CloseRuntimeResponse.outcome:type_name -> gul.v1.CloseOutcome
-	13, // 35: gul.v1.WorkspacePresentationService.ListRegistrableRoots:input_type -> gul.v1.ListRegistrableRootsRequest
-	16, // 36: gul.v1.WorkspacePresentationService.BrowseRegistrableRoot:input_type -> gul.v1.BrowseRegistrableRootRequest
-	19, // 37: gul.v1.WorkspacePresentationService.RegisterFromHostSelection:input_type -> gul.v1.RegisterFromHostSelectionRequest
-	20, // 38: gul.v1.WorkspacePresentationService.RegisterFromAllowlistPath:input_type -> gul.v1.RegisterFromAllowlistPathRequest
-	30, // 39: gul.v1.WorkspacePresentationService.RevalidateWorkspace:input_type -> gul.v1.RevalidateWorkspaceRequest
-	32, // 40: gul.v1.WorkspacePresentationService.ListWorkspaces:input_type -> gul.v1.ListWorkspacesRequest
-	22, // 41: gul.v1.WorkspacePresentationService.RenameWorkspace:input_type -> gul.v1.RenameWorkspaceRequest
-	23, // 42: gul.v1.WorkspacePresentationService.SetWorkspaceFavorite:input_type -> gul.v1.SetWorkspaceFavoriteRequest
-	24, // 43: gul.v1.WorkspacePresentationService.SetWorkspaceHidden:input_type -> gul.v1.SetWorkspaceHiddenRequest
-	11, // 44: gul.v1.WorkspacePresentationService.RemoveWorkspaceEntry:input_type -> gul.v1.RemoveWorkspaceEntryRequest
-	26, // 45: gul.v1.WorkspacePresentationService.GetNavigation:input_type -> gul.v1.GetNavigationRequest
-	27, // 46: gul.v1.WorkspacePresentationService.SetNavigation:input_type -> gul.v1.SetNavigationRequest
-	40, // 47: gul.v1.DirectSessionService.ListDirectSessions:input_type -> gul.v1.ListDirectSessionsRequest
-	35, // 48: gul.v1.DirectSessionService.GetDirectSessionPresentation:input_type -> gul.v1.GetDirectSessionPresentationRequest
-	36, // 49: gul.v1.DirectSessionService.RenameDirectSession:input_type -> gul.v1.RenameDirectSessionRequest
-	37, // 50: gul.v1.DirectSessionService.SetDirectSessionFavorite:input_type -> gul.v1.SetDirectSessionFavoriteRequest
-	38, // 51: gul.v1.DirectSessionService.SetDirectSessionArchived:input_type -> gul.v1.SetDirectSessionArchivedRequest
-	42, // 52: gul.v1.DirectSessionService.ListPromptHistory:input_type -> gul.v1.ListPromptHistoryRequest
-	45, // 53: gul.v1.DirectSessionService.GetPromptHistoryItem:input_type -> gul.v1.GetPromptHistoryItemRequest
-	49, // 54: gul.v1.DirectSessionService.GetExecutionState:input_type -> gul.v1.GetExecutionStateRequest
-	52, // 55: gul.v1.DirectSessionService.ListSpecialistResults:input_type -> gul.v1.ListSpecialistResultsRequest
-	56, // 56: gul.v1.DirectSessionService.CloseRuntime:input_type -> gul.v1.CloseRuntimeRequest
-	59, // 57: gul.v1.ArtifactPresentationService.GetMetadata:input_type -> gul.v1.GetMetadataRequest
-	61, // 58: gul.v1.ArtifactPresentationService.ReadChunk:input_type -> gul.v1.ReadChunkRequest
-	15, // 59: gul.v1.WorkspacePresentationService.ListRegistrableRoots:output_type -> gul.v1.ListRegistrableRootsResponse
-	18, // 60: gul.v1.WorkspacePresentationService.BrowseRegistrableRoot:output_type -> gul.v1.BrowseRegistrableRootResponse
-	29, // 61: gul.v1.WorkspacePresentationService.RegisterFromHostSelection:output_type -> gul.v1.RegisterWorkspaceResponse
-	29, // 62: gul.v1.WorkspacePresentationService.RegisterFromAllowlistPath:output_type -> gul.v1.RegisterWorkspaceResponse
-	31, // 63: gul.v1.WorkspacePresentationService.RevalidateWorkspace:output_type -> gul.v1.RevalidateWorkspaceResponse
-	33, // 64: gul.v1.WorkspacePresentationService.ListWorkspaces:output_type -> gul.v1.ListWorkspacesResponse
-	25, // 65: gul.v1.WorkspacePresentationService.RenameWorkspace:output_type -> gul.v1.WorkspacePresentationResponse
-	25, // 66: gul.v1.WorkspacePresentationService.SetWorkspaceFavorite:output_type -> gul.v1.WorkspacePresentationResponse
-	25, // 67: gul.v1.WorkspacePresentationService.SetWorkspaceHidden:output_type -> gul.v1.WorkspacePresentationResponse
-	12, // 68: gul.v1.WorkspacePresentationService.RemoveWorkspaceEntry:output_type -> gul.v1.RemoveWorkspaceEntryResponse
-	28, // 69: gul.v1.WorkspacePresentationService.GetNavigation:output_type -> gul.v1.NavigationResponse
-	28, // 70: gul.v1.WorkspacePresentationService.SetNavigation:output_type -> gul.v1.NavigationResponse
-	41, // 71: gul.v1.DirectSessionService.ListDirectSessions:output_type -> gul.v1.ListDirectSessionsResponse
-	39, // 72: gul.v1.DirectSessionService.GetDirectSessionPresentation:output_type -> gul.v1.DirectSessionPresentationResponse
-	39, // 73: gul.v1.DirectSessionService.RenameDirectSession:output_type -> gul.v1.DirectSessionPresentationResponse
-	39, // 74: gul.v1.DirectSessionService.SetDirectSessionFavorite:output_type -> gul.v1.DirectSessionPresentationResponse
-	39, // 75: gul.v1.DirectSessionService.SetDirectSessionArchived:output_type -> gul.v1.DirectSessionPresentationResponse
-	44, // 76: gul.v1.DirectSessionService.ListPromptHistory:output_type -> gul.v1.ListPromptHistoryResponse
-	47, // 77: gul.v1.DirectSessionService.GetPromptHistoryItem:output_type -> gul.v1.GetPromptHistoryItemResponse
-	50, // 78: gul.v1.DirectSessionService.GetExecutionState:output_type -> gul.v1.GetExecutionStateResponse
-	54, // 79: gul.v1.DirectSessionService.ListSpecialistResults:output_type -> gul.v1.ListSpecialistResultsResponse
-	58, // 80: gul.v1.DirectSessionService.CloseRuntime:output_type -> gul.v1.CloseRuntimeResponse
-	60, // 81: gul.v1.ArtifactPresentationService.GetMetadata:output_type -> gul.v1.GetMetadataResponse
-	62, // 82: gul.v1.ArtifactPresentationService.ReadChunk:output_type -> gul.v1.ReadChunkResponse
-	59, // [59:83] is the sub-list for method output_type
-	35, // [35:59] is the sub-list for method input_type
-	35, // [35:35] is the sub-list for extension type_name
-	35, // [35:35] is the sub-list for extension extendee
-	0,  // [0:35] is the sub-list for field type_name
+	0,  // 0: gul.v1.RuntimeProfileChoice.compatibility:type_name -> gul.v1.RuntimeProfileCompatibility
+	14, // 1: gul.v1.RuntimeProfileChoice.models:type_name -> gul.v1.RuntimeModelChoice
+	1,  // 2: gul.v1.RuntimeProfileChoice.supported_lanes:type_name -> gul.v1.LaunchExecutionLane
+	2,  // 3: gul.v1.RuntimeProfileChoice.maximum_assurance:type_name -> gul.v1.LaunchAssurance
+	15, // 4: gul.v1.ListRuntimeProfilesResponse.profiles:type_name -> gul.v1.RuntimeProfileChoice
+	1,  // 5: gul.v1.CheckCompatibilityRequest.lane:type_name -> gul.v1.LaunchExecutionLane
+	2,  // 6: gul.v1.CheckCompatibilityRequest.required_assurance:type_name -> gul.v1.LaunchAssurance
+	1,  // 7: gul.v1.ProspectiveLaunchConfiguration.lane:type_name -> gul.v1.LaunchExecutionLane
+	2,  // 8: gul.v1.ProspectiveLaunchConfiguration.required_assurance:type_name -> gul.v1.LaunchAssurance
+	19, // 9: gul.v1.CheckCompatibilityResponse.configuration:type_name -> gul.v1.ProspectiveLaunchConfiguration
+	24, // 10: gul.v1.ListRegistrableRootsResponse.roots:type_name -> gul.v1.RegistrableRoot
+	27, // 11: gul.v1.BrowseRegistrableRootResponse.directories:type_name -> gul.v1.RegistrableDirectory
+	31, // 12: gul.v1.WorkspacePresentationResponse.workspace:type_name -> gul.v1.WorkspaceEntry
+	31, // 13: gul.v1.RegisterWorkspaceResponse.workspace:type_name -> gul.v1.WorkspaceEntry
+	31, // 14: gul.v1.RevalidateWorkspaceResponse.workspace:type_name -> gul.v1.WorkspaceEntry
+	31, // 15: gul.v1.ListWorkspacesResponse.workspaces:type_name -> gul.v1.WorkspaceEntry
+	44, // 16: gul.v1.DirectSessionPresentationResponse.session:type_name -> gul.v1.DirectSessionPresentation
+	44, // 17: gul.v1.ListDirectSessionsResponse.sessions:type_name -> gul.v1.DirectSessionPresentation
+	73, // 18: gul.v1.PromptHistoryItem.accepted_at:type_name -> google.protobuf.Timestamp
+	53, // 19: gul.v1.ListPromptHistoryResponse.items:type_name -> gul.v1.PromptHistoryItem
+	3,  // 20: gul.v1.ListPromptHistoryResponse.freshness:type_name -> gul.v1.Freshness
+	73, // 21: gul.v1.ListPromptHistoryResponse.observed_at:type_name -> google.protobuf.Timestamp
+	73, // 22: gul.v1.GetPromptHistoryItemResponse.accepted_at:type_name -> google.protobuf.Timestamp
+	56, // 23: gul.v1.GetPromptHistoryItemResponse.original:type_name -> gul.v1.PromptOriginal
+	3,  // 24: gul.v1.GetExecutionStateResponse.freshness:type_name -> gul.v1.Freshness
+	73, // 25: gul.v1.GetExecutionStateResponse.observed_at:type_name -> google.protobuf.Timestamp
+	4,  // 26: gul.v1.GetExecutionStateResponse.lifecycle:type_name -> gul.v1.SessionLifecycle
+	5,  // 27: gul.v1.GetExecutionStateResponse.composition:type_name -> gul.v1.SessionComposition
+	6,  // 28: gul.v1.GetExecutionStateResponse.approval_policy:type_name -> gul.v1.ApprovalPolicy
+	58, // 29: gul.v1.GetExecutionStateResponse.counts:type_name -> gul.v1.ExecutionCounts
+	7,  // 30: gul.v1.GetExecutionStateResponse.close_progress:type_name -> gul.v1.CloseProgress
+	8,  // 31: gul.v1.GetExecutionStateResponse.recovery:type_name -> gul.v1.RecoveryClass
+	61, // 32: gul.v1.GetExecutionStateResponse.observed_members:type_name -> gul.v1.ObservedMember
+	9,  // 33: gul.v1.ObservedMember.lifecycle:type_name -> gul.v1.ObservedMemberLifecycle
+	73, // 34: gul.v1.SpecialistResult.published_at:type_name -> google.protobuf.Timestamp
+	10, // 35: gul.v1.SpecialistResult.format:type_name -> gul.v1.SpecialistResultFormat
+	63, // 36: gul.v1.ListSpecialistResultsResponse.items:type_name -> gul.v1.SpecialistResult
+	3,  // 37: gul.v1.ListSpecialistResultsResponse.freshness:type_name -> gul.v1.Freshness
+	73, // 38: gul.v1.ListSpecialistResultsResponse.observed_at:type_name -> google.protobuf.Timestamp
+	11, // 39: gul.v1.DomainError.code:type_name -> gul.v1.ErrorCode
+	12, // 40: gul.v1.DomainError.action:type_name -> gul.v1.ActionClass
+	13, // 41: gul.v1.CloseOutcome.status:type_name -> gul.v1.CloseStatus
+	65, // 42: gul.v1.CloseOutcome.rejection:type_name -> gul.v1.DomainError
+	12, // 43: gul.v1.CloseOutcome.next_action:type_name -> gul.v1.ActionClass
+	67, // 44: gul.v1.CloseRuntimeResponse.outcome:type_name -> gul.v1.CloseOutcome
+	16, // 45: gul.v1.RuntimeService.ListRuntimeProfiles:input_type -> gul.v1.ListRuntimeProfilesRequest
+	18, // 46: gul.v1.RuntimeService.CheckCompatibility:input_type -> gul.v1.CheckCompatibilityRequest
+	23, // 47: gul.v1.WorkspacePresentationService.ListRegistrableRoots:input_type -> gul.v1.ListRegistrableRootsRequest
+	26, // 48: gul.v1.WorkspacePresentationService.BrowseRegistrableRoot:input_type -> gul.v1.BrowseRegistrableRootRequest
+	29, // 49: gul.v1.WorkspacePresentationService.RegisterFromHostSelection:input_type -> gul.v1.RegisterFromHostSelectionRequest
+	30, // 50: gul.v1.WorkspacePresentationService.RegisterFromAllowlistPath:input_type -> gul.v1.RegisterFromAllowlistPathRequest
+	40, // 51: gul.v1.WorkspacePresentationService.RevalidateWorkspace:input_type -> gul.v1.RevalidateWorkspaceRequest
+	42, // 52: gul.v1.WorkspacePresentationService.ListWorkspaces:input_type -> gul.v1.ListWorkspacesRequest
+	32, // 53: gul.v1.WorkspacePresentationService.RenameWorkspace:input_type -> gul.v1.RenameWorkspaceRequest
+	33, // 54: gul.v1.WorkspacePresentationService.SetWorkspaceFavorite:input_type -> gul.v1.SetWorkspaceFavoriteRequest
+	34, // 55: gul.v1.WorkspacePresentationService.SetWorkspaceHidden:input_type -> gul.v1.SetWorkspaceHiddenRequest
+	21, // 56: gul.v1.WorkspacePresentationService.RemoveWorkspaceEntry:input_type -> gul.v1.RemoveWorkspaceEntryRequest
+	36, // 57: gul.v1.WorkspacePresentationService.GetNavigation:input_type -> gul.v1.GetNavigationRequest
+	37, // 58: gul.v1.WorkspacePresentationService.SetNavigation:input_type -> gul.v1.SetNavigationRequest
+	50, // 59: gul.v1.DirectSessionService.ListDirectSessions:input_type -> gul.v1.ListDirectSessionsRequest
+	45, // 60: gul.v1.DirectSessionService.GetDirectSessionPresentation:input_type -> gul.v1.GetDirectSessionPresentationRequest
+	46, // 61: gul.v1.DirectSessionService.RenameDirectSession:input_type -> gul.v1.RenameDirectSessionRequest
+	47, // 62: gul.v1.DirectSessionService.SetDirectSessionFavorite:input_type -> gul.v1.SetDirectSessionFavoriteRequest
+	48, // 63: gul.v1.DirectSessionService.SetDirectSessionArchived:input_type -> gul.v1.SetDirectSessionArchivedRequest
+	52, // 64: gul.v1.DirectSessionService.ListPromptHistory:input_type -> gul.v1.ListPromptHistoryRequest
+	55, // 65: gul.v1.DirectSessionService.GetPromptHistoryItem:input_type -> gul.v1.GetPromptHistoryItemRequest
+	59, // 66: gul.v1.DirectSessionService.GetExecutionState:input_type -> gul.v1.GetExecutionStateRequest
+	62, // 67: gul.v1.DirectSessionService.ListSpecialistResults:input_type -> gul.v1.ListSpecialistResultsRequest
+	66, // 68: gul.v1.DirectSessionService.CloseRuntime:input_type -> gul.v1.CloseRuntimeRequest
+	69, // 69: gul.v1.ArtifactPresentationService.GetMetadata:input_type -> gul.v1.GetMetadataRequest
+	71, // 70: gul.v1.ArtifactPresentationService.ReadChunk:input_type -> gul.v1.ReadChunkRequest
+	17, // 71: gul.v1.RuntimeService.ListRuntimeProfiles:output_type -> gul.v1.ListRuntimeProfilesResponse
+	20, // 72: gul.v1.RuntimeService.CheckCompatibility:output_type -> gul.v1.CheckCompatibilityResponse
+	25, // 73: gul.v1.WorkspacePresentationService.ListRegistrableRoots:output_type -> gul.v1.ListRegistrableRootsResponse
+	28, // 74: gul.v1.WorkspacePresentationService.BrowseRegistrableRoot:output_type -> gul.v1.BrowseRegistrableRootResponse
+	39, // 75: gul.v1.WorkspacePresentationService.RegisterFromHostSelection:output_type -> gul.v1.RegisterWorkspaceResponse
+	39, // 76: gul.v1.WorkspacePresentationService.RegisterFromAllowlistPath:output_type -> gul.v1.RegisterWorkspaceResponse
+	41, // 77: gul.v1.WorkspacePresentationService.RevalidateWorkspace:output_type -> gul.v1.RevalidateWorkspaceResponse
+	43, // 78: gul.v1.WorkspacePresentationService.ListWorkspaces:output_type -> gul.v1.ListWorkspacesResponse
+	35, // 79: gul.v1.WorkspacePresentationService.RenameWorkspace:output_type -> gul.v1.WorkspacePresentationResponse
+	35, // 80: gul.v1.WorkspacePresentationService.SetWorkspaceFavorite:output_type -> gul.v1.WorkspacePresentationResponse
+	35, // 81: gul.v1.WorkspacePresentationService.SetWorkspaceHidden:output_type -> gul.v1.WorkspacePresentationResponse
+	22, // 82: gul.v1.WorkspacePresentationService.RemoveWorkspaceEntry:output_type -> gul.v1.RemoveWorkspaceEntryResponse
+	38, // 83: gul.v1.WorkspacePresentationService.GetNavigation:output_type -> gul.v1.NavigationResponse
+	38, // 84: gul.v1.WorkspacePresentationService.SetNavigation:output_type -> gul.v1.NavigationResponse
+	51, // 85: gul.v1.DirectSessionService.ListDirectSessions:output_type -> gul.v1.ListDirectSessionsResponse
+	49, // 86: gul.v1.DirectSessionService.GetDirectSessionPresentation:output_type -> gul.v1.DirectSessionPresentationResponse
+	49, // 87: gul.v1.DirectSessionService.RenameDirectSession:output_type -> gul.v1.DirectSessionPresentationResponse
+	49, // 88: gul.v1.DirectSessionService.SetDirectSessionFavorite:output_type -> gul.v1.DirectSessionPresentationResponse
+	49, // 89: gul.v1.DirectSessionService.SetDirectSessionArchived:output_type -> gul.v1.DirectSessionPresentationResponse
+	54, // 90: gul.v1.DirectSessionService.ListPromptHistory:output_type -> gul.v1.ListPromptHistoryResponse
+	57, // 91: gul.v1.DirectSessionService.GetPromptHistoryItem:output_type -> gul.v1.GetPromptHistoryItemResponse
+	60, // 92: gul.v1.DirectSessionService.GetExecutionState:output_type -> gul.v1.GetExecutionStateResponse
+	64, // 93: gul.v1.DirectSessionService.ListSpecialistResults:output_type -> gul.v1.ListSpecialistResultsResponse
+	68, // 94: gul.v1.DirectSessionService.CloseRuntime:output_type -> gul.v1.CloseRuntimeResponse
+	70, // 95: gul.v1.ArtifactPresentationService.GetMetadata:output_type -> gul.v1.GetMetadataResponse
+	72, // 96: gul.v1.ArtifactPresentationService.ReadChunk:output_type -> gul.v1.ReadChunkResponse
+	71, // [71:97] is the sub-list for method output_type
+	45, // [45:71] is the sub-list for method input_type
+	45, // [45:45] is the sub-list for extension type_name
+	45, // [45:45] is the sub-list for extension extendee
+	0,  // [0:45] is the sub-list for field type_name
 }
 
 func init() { file_gul_v1_gul_proto_init() }
@@ -4304,26 +5093,26 @@ func file_gul_v1_gul_proto_init() {
 	if File_gul_v1_gul_proto != nil {
 		return
 	}
-	file_gul_v1_gul_proto_msgTypes[31].OneofWrappers = []any{}
-	file_gul_v1_gul_proto_msgTypes[33].OneofWrappers = []any{}
-	file_gul_v1_gul_proto_msgTypes[35].OneofWrappers = []any{
+	file_gul_v1_gul_proto_msgTypes[38].OneofWrappers = []any{}
+	file_gul_v1_gul_proto_msgTypes[40].OneofWrappers = []any{}
+	file_gul_v1_gul_proto_msgTypes[42].OneofWrappers = []any{
 		(*PromptOriginal_InlineUtf8)(nil),
 		(*PromptOriginal_ArtifactRef)(nil),
 	}
-	file_gul_v1_gul_proto_msgTypes[37].OneofWrappers = []any{}
-	file_gul_v1_gul_proto_msgTypes[39].OneofWrappers = []any{}
-	file_gul_v1_gul_proto_msgTypes[41].OneofWrappers = []any{}
-	file_gul_v1_gul_proto_msgTypes[43].OneofWrappers = []any{}
+	file_gul_v1_gul_proto_msgTypes[44].OneofWrappers = []any{}
 	file_gul_v1_gul_proto_msgTypes[46].OneofWrappers = []any{}
+	file_gul_v1_gul_proto_msgTypes[48].OneofWrappers = []any{}
+	file_gul_v1_gul_proto_msgTypes[50].OneofWrappers = []any{}
+	file_gul_v1_gul_proto_msgTypes[53].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_gul_v1_gul_proto_rawDesc), len(file_gul_v1_gul_proto_rawDesc)),
-			NumEnums:      11,
-			NumMessages:   52,
+			NumEnums:      14,
+			NumMessages:   59,
 			NumExtensions: 0,
-			NumServices:   3,
+			NumServices:   4,
 		},
 		GoTypes:           file_gul_v1_gul_proto_goTypes,
 		DependencyIndexes: file_gul_v1_gul_proto_depIdxs,

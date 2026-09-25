@@ -21,6 +21,8 @@ import (
 const _ = connect.IsAtLeastVersion1_13_0
 
 const (
+	// RuntimeServiceName is the fully-qualified name of the RuntimeService service.
+	RuntimeServiceName = "gul.v1.RuntimeService"
 	// WorkspacePresentationServiceName is the fully-qualified name of the WorkspacePresentationService
 	// service.
 	WorkspacePresentationServiceName = "gul.v1.WorkspacePresentationService"
@@ -39,6 +41,12 @@ const (
 // reflection-formatted method names, remove the leading slash and convert the remaining slash to a
 // period.
 const (
+	// RuntimeServiceListRuntimeProfilesProcedure is the fully-qualified name of the RuntimeService's
+	// ListRuntimeProfiles RPC.
+	RuntimeServiceListRuntimeProfilesProcedure = "/gul.v1.RuntimeService/ListRuntimeProfiles"
+	// RuntimeServiceCheckCompatibilityProcedure is the fully-qualified name of the RuntimeService's
+	// CheckCompatibility RPC.
+	RuntimeServiceCheckCompatibilityProcedure = "/gul.v1.RuntimeService/CheckCompatibility"
 	// WorkspacePresentationServiceListRegistrableRootsProcedure is the fully-qualified name of the
 	// WorkspacePresentationService's ListRegistrableRoots RPC.
 	WorkspacePresentationServiceListRegistrableRootsProcedure = "/gul.v1.WorkspacePresentationService/ListRegistrableRoots"
@@ -112,6 +120,102 @@ const (
 	// ArtifactPresentationService's ReadChunk RPC.
 	ArtifactPresentationServiceReadChunkProcedure = "/gul.v1.ArtifactPresentationService/ReadChunk"
 )
+
+// RuntimeServiceClient is a client for the gul.v1.RuntimeService service.
+type RuntimeServiceClient interface {
+	ListRuntimeProfiles(context.Context, *connect.Request[v1.ListRuntimeProfilesRequest]) (*connect.Response[v1.ListRuntimeProfilesResponse], error)
+	CheckCompatibility(context.Context, *connect.Request[v1.CheckCompatibilityRequest]) (*connect.Response[v1.CheckCompatibilityResponse], error)
+}
+
+// NewRuntimeServiceClient constructs a client for the gul.v1.RuntimeService service. By default, it
+// uses the Connect protocol with the binary Protobuf Codec, asks for gzipped responses, and sends
+// uncompressed requests. To use the gRPC or gRPC-Web protocols, supply the connect.WithGRPC() or
+// connect.WithGRPCWeb() options.
+//
+// The URL supplied here should be the base URL for the Connect or gRPC server (for example,
+// http://api.acme.com or https://acme.com/grpc).
+func NewRuntimeServiceClient(httpClient connect.HTTPClient, baseURL string, opts ...connect.ClientOption) RuntimeServiceClient {
+	baseURL = strings.TrimRight(baseURL, "/")
+	runtimeServiceMethods := v1.File_gul_v1_gul_proto.Services().ByName("RuntimeService").Methods()
+	return &runtimeServiceClient{
+		listRuntimeProfiles: connect.NewClient[v1.ListRuntimeProfilesRequest, v1.ListRuntimeProfilesResponse](
+			httpClient,
+			baseURL+RuntimeServiceListRuntimeProfilesProcedure,
+			connect.WithSchema(runtimeServiceMethods.ByName("ListRuntimeProfiles")),
+			connect.WithClientOptions(opts...),
+		),
+		checkCompatibility: connect.NewClient[v1.CheckCompatibilityRequest, v1.CheckCompatibilityResponse](
+			httpClient,
+			baseURL+RuntimeServiceCheckCompatibilityProcedure,
+			connect.WithSchema(runtimeServiceMethods.ByName("CheckCompatibility")),
+			connect.WithClientOptions(opts...),
+		),
+	}
+}
+
+// runtimeServiceClient implements RuntimeServiceClient.
+type runtimeServiceClient struct {
+	listRuntimeProfiles *connect.Client[v1.ListRuntimeProfilesRequest, v1.ListRuntimeProfilesResponse]
+	checkCompatibility  *connect.Client[v1.CheckCompatibilityRequest, v1.CheckCompatibilityResponse]
+}
+
+// ListRuntimeProfiles calls gul.v1.RuntimeService.ListRuntimeProfiles.
+func (c *runtimeServiceClient) ListRuntimeProfiles(ctx context.Context, req *connect.Request[v1.ListRuntimeProfilesRequest]) (*connect.Response[v1.ListRuntimeProfilesResponse], error) {
+	return c.listRuntimeProfiles.CallUnary(ctx, req)
+}
+
+// CheckCompatibility calls gul.v1.RuntimeService.CheckCompatibility.
+func (c *runtimeServiceClient) CheckCompatibility(ctx context.Context, req *connect.Request[v1.CheckCompatibilityRequest]) (*connect.Response[v1.CheckCompatibilityResponse], error) {
+	return c.checkCompatibility.CallUnary(ctx, req)
+}
+
+// RuntimeServiceHandler is an implementation of the gul.v1.RuntimeService service.
+type RuntimeServiceHandler interface {
+	ListRuntimeProfiles(context.Context, *connect.Request[v1.ListRuntimeProfilesRequest]) (*connect.Response[v1.ListRuntimeProfilesResponse], error)
+	CheckCompatibility(context.Context, *connect.Request[v1.CheckCompatibilityRequest]) (*connect.Response[v1.CheckCompatibilityResponse], error)
+}
+
+// NewRuntimeServiceHandler builds an HTTP handler from the service implementation. It returns the
+// path on which to mount the handler and the handler itself.
+//
+// By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf
+// and JSON codecs. They also support gzip compression.
+func NewRuntimeServiceHandler(svc RuntimeServiceHandler, opts ...connect.HandlerOption) (string, http.Handler) {
+	runtimeServiceMethods := v1.File_gul_v1_gul_proto.Services().ByName("RuntimeService").Methods()
+	runtimeServiceListRuntimeProfilesHandler := connect.NewUnaryHandler(
+		RuntimeServiceListRuntimeProfilesProcedure,
+		svc.ListRuntimeProfiles,
+		connect.WithSchema(runtimeServiceMethods.ByName("ListRuntimeProfiles")),
+		connect.WithHandlerOptions(opts...),
+	)
+	runtimeServiceCheckCompatibilityHandler := connect.NewUnaryHandler(
+		RuntimeServiceCheckCompatibilityProcedure,
+		svc.CheckCompatibility,
+		connect.WithSchema(runtimeServiceMethods.ByName("CheckCompatibility")),
+		connect.WithHandlerOptions(opts...),
+	)
+	return "/gul.v1.RuntimeService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case RuntimeServiceListRuntimeProfilesProcedure:
+			runtimeServiceListRuntimeProfilesHandler.ServeHTTP(w, r)
+		case RuntimeServiceCheckCompatibilityProcedure:
+			runtimeServiceCheckCompatibilityHandler.ServeHTTP(w, r)
+		default:
+			http.NotFound(w, r)
+		}
+	})
+}
+
+// UnimplementedRuntimeServiceHandler returns CodeUnimplemented from all methods.
+type UnimplementedRuntimeServiceHandler struct{}
+
+func (UnimplementedRuntimeServiceHandler) ListRuntimeProfiles(context.Context, *connect.Request[v1.ListRuntimeProfilesRequest]) (*connect.Response[v1.ListRuntimeProfilesResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("gul.v1.RuntimeService.ListRuntimeProfiles is not implemented"))
+}
+
+func (UnimplementedRuntimeServiceHandler) CheckCompatibility(context.Context, *connect.Request[v1.CheckCompatibilityRequest]) (*connect.Response[v1.CheckCompatibilityResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("gul.v1.RuntimeService.CheckCompatibility is not implemented"))
+}
 
 // WorkspacePresentationServiceClient is a client for the gul.v1.WorkspacePresentationService
 // service.
