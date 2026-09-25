@@ -13,7 +13,7 @@ if ! diff -ru "$contract_root/generated" "$fixture_dir/generated"; then
 fi
 
 cd "$contract_root"
-GOTOOLCHAIN=local go test ./...
+GOTOOLCHAIN=local go test -race ./...
 bun run typecheck
 bun scripts/validate-contract.mjs
 printf 'contract drift and fixtures passed\n'

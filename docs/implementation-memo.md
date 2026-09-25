@@ -5,7 +5,7 @@
 | Role | Non-normative implementation observations, dependencies, risks, and handoff |
 | Product | Gul |
 | Version | 0.1-dolgorae-consumer-v1 |
-| Last updated | 2026-09-24 |
+| Last updated | 2026-09-25 |
 
 ## 1. Boundary
 
@@ -333,6 +333,15 @@ The next whole-Epic review found that `CloseRun` exposed its retained operation
 ID pointer in a terminal replay response. `CloseRun` now copies that optional
 value into its response and pending-error detail. The close test mutates both
 returned values and confirms that the provider's retained ID does not change.
+
+The third whole-Epic review found that colon-joined idempotency map keys could
+alias distinct Controller/key or Interaction/key pairs. The scenario provider
+now uses structured tuple keys, and tests prove both pairs create independent
+operations while exact retries replay the corresponding result. The contract
+module's `contract-check` and `test-unit` paths now run Go tests with the race
+detector, including concurrent scenario streams. Four E13-T1 document headers
+were brought current. These corrections remain fake-scoped; E13 closeout is
+separate.
 
 ## 2. Current development snapshot
 

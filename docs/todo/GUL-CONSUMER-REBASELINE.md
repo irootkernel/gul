@@ -7,7 +7,7 @@
 | Consumer contract | `dolgorae.gul-consumer/v1` |
 | Producer source | Dolgorae `docs/specs/gul-consumer-v1.md` |
 | Target provider | Exact released Dolgorae v0.1.3 artifact |
-| Updated | 2026-09-21 |
+| Updated | 2026-09-25 |
 
 ## 1. Scope
 

@@ -74,7 +74,7 @@ func (h *Harness) ResolveInteraction(_ context.Context, request *publicv1.Resolv
 	if err = checkController(r, request.GetController()); err != nil {
 		return nil, err
 	}
-	key := request.GetInteractionId() + ":" + request.GetIdempotencyKey()
+	key := interactionRequestKey{request.GetInteractionId(), request.GetIdempotencyKey()}
 	body := digest(request.GetResponseJson())
 	if prior := r.interactionKeys[key]; prior != nil {
 		if r.interactionBodies[key] != body {

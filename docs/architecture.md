@@ -6,7 +6,7 @@
 | Product | Gul |
 | Version | 0.1-dolgorae-consumer-v1 |
 | Status | Approved target rebaseline; E1 core and shared-bundle foundations current |
-| Last updated | 2026-09-24 |
+| Last updated | 2026-09-25 |
 
 ## 1. Purpose and change control
 

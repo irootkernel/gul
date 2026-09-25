@@ -40,12 +40,19 @@ export function validateProductMakefile(source) {
   if (!testUnit.includes("@bun run typecheck")) throw new Error("test-unit must retain frontend typechecking");
   if (!testUnit.includes("@bun run test")) throw new Error("test-unit must use the package-owned frontend test command");
   if (!testUnit.includes("@GOTOOLCHAIN=local go test -race ./...")) throw new Error("test-unit must retain race-enabled product Go tests");
+  if (!testUnit.includes("@cd contract && GOTOOLCHAIN=local go test -race ./...")) throw new Error("test-unit must retain race-enabled contract Go tests");
   const testIntegration = readRecipe(source, "test-int");
   if (!testIntegration.includes("@$(MAKE) --no-print-directory frontend-check")) {
     throw new Error("test-int must retain the frontend drift gate");
   }
   if (!testIntegration.includes("@$(MAKE) --no-print-directory api-check")) {
     throw new Error("test-int must retain the Gul API drift gate");
+  }
+}
+
+export function validateContractCheck(source) {
+  if (!source.split("\n").includes("GOTOOLCHAIN=local go test -race ./...")) {
+    throw new Error("contract-check must retain race-enabled contract Go tests");
   }
 }
 
@@ -58,4 +65,5 @@ function readRecipe(source, target) {
 if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.argv[1])) {
   const sourceRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
   validateProductMakefile(fs.readFileSync(path.join(sourceRoot, "Makefile"), "utf8"));
+  validateContractCheck(fs.readFileSync(path.join(sourceRoot, "contract/check.sh"), "utf8"));
 }

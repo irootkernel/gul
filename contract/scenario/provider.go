@@ -160,7 +160,7 @@ func (h *Harness) StartRun(_ context.Context, request *publicv1.StartRunRequest)
 	if h.profiles[request.GetProfileName()] == nil {
 		return nil, invalid()
 	}
-	key := w.id + ":" + spec.ID + ":" + request.GetIdempotencyKey()
+	key := startRequestKey{w.id, spec.ID, request.GetIdempotencyKey()}
 	body := copyOf(request)
 	body.Context = nil
 	encoded, err := proto.MarshalOptions{Deterministic: true}.Marshal(body)

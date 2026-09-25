@@ -67,6 +67,69 @@ func requireProviderCode(t *testing.T, err error, code string) {
 	}
 }
 
+func TestStartRunKeepsDistinctIdempotencyTuples(t *testing.T) {
+	f := newFixture(t)
+	ctx := context.Background()
+	first := &publicv1.StartRunRequest{Workspace: f.workspace, Controller: f.controller,
+		IdempotencyKey: "a:b", ProfileName: "default", ControlMode: publicv1.ControlMode_CONTROL_MODE_DIRECT_INTERACTIVE,
+		ExecutionLane: publicv1.ExecutionLane_EXECUTION_LANE_DEDICATED, Purpose: publicv1.PurposeKind_PURPOSE_KIND_INTERACTIVE}
+	if err := f.h.RegisterController(ControllerSpec{ID: "controller-1:a", Generation: 1, CarrierPath: "/carrier/two", OrchestrationLaunch: true, PolicyName: "preprovisioned"}); err != nil {
+		t.Fatal(err)
+	}
+	second := proto.Clone(first).(*publicv1.StartRunRequest)
+	second.Controller = &publicv1.ControllerCarrierRef{AbsoluteFilePath: "/carrier/two", ExpectedControllerId: "controller-1:a", ExpectedControllerGeneration: 1}
+	second.IdempotencyKey = "b"
+	createdFirst, err := f.h.StartRun(ctx, first)
+	if err != nil {
+		t.Fatal(err)
+	}
+	createdSecond, err := f.h.StartRun(ctx, second)
+	if err != nil || createdSecond.GetRun().GetRunId() == createdFirst.GetRun().GetRunId() {
+		t.Fatalf("distinct start tuple = %v, %v", createdSecond, err)
+	}
+	for _, tc := range []struct {
+		request *publicv1.StartRunRequest
+		runID   string
+	}{{first, createdFirst.GetRun().GetRunId()}, {second, createdSecond.GetRun().GetRunId()}} {
+		replay, err := f.h.StartRun(ctx, tc.request)
+		if err != nil || !replay.GetExactReplay() || replay.GetRun().GetRunId() != tc.runID {
+			t.Fatalf("start tuple replay = %v, %v", replay, err)
+		}
+	}
+}
+
+func TestResolveInteractionKeepsDistinctIdempotencyTuples(t *testing.T) {
+	f := newFixture(t)
+	ctx := context.Background()
+	for _, id := range []string{"approval:a", "approval"} {
+		if err := f.h.OpenInteraction(f.run.GetRunId(), &publicv1.ControllerInteraction{Summary: &publicv1.InteractionSummary{InteractionId: id}}); err != nil {
+			t.Fatal(err)
+		}
+	}
+	first := &publicv1.ResolveInteractionRequest{Run: f.run, Controller: f.controller,
+		InteractionId: "approval:a", IdempotencyKey: "b", ResponseJson: []byte(`{"approved":true}`)}
+	second := proto.Clone(first).(*publicv1.ResolveInteractionRequest)
+	second.InteractionId = "approval"
+	second.IdempotencyKey = "a:b"
+	resolvedFirst, err := f.h.ResolveInteraction(ctx, first)
+	if err != nil {
+		t.Fatal(err)
+	}
+	resolvedSecond, err := f.h.ResolveInteraction(ctx, second)
+	if err != nil || resolvedSecond.GetResolutionReceipt() == resolvedFirst.GetResolutionReceipt() {
+		t.Fatalf("distinct resolution tuple = %v, %v", resolvedSecond, err)
+	}
+	for _, tc := range []struct {
+		request *publicv1.ResolveInteractionRequest
+		receipt string
+	}{{first, resolvedFirst.GetResolutionReceipt()}, {second, resolvedSecond.GetResolutionReceipt()}} {
+		replay, err := f.h.ResolveInteraction(ctx, tc.request)
+		if err != nil || replay.GetResolutionReceipt() != tc.receipt {
+			t.Fatalf("resolution tuple replay = %v, %v", replay, err)
+		}
+	}
+}
+
 func TestProviderErrorsFollowPinnedPolicy(t *testing.T) {
 	body, err := os.ReadFile("../upstream/dolgorae-grpc-error-mapping-v1.json")
 	if err != nil {

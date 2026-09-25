@@ -14,13 +14,13 @@ named checked outputs.
 |---|---|
 | `make toolchain-check` | Compare the host with `toolchain/versions.env`; report an exact Go mismatch and every missing or below-minimum non-Go executable, then exit nonzero. |
 | `make generate-contract` | Reproduce the pinned descriptor and deterministically rewrite only checked contract outputs. |
-| `make contract-check` | Regenerate into a temporary directory; reject source/generated drift; compile and test Go/TypeScript clients, fake gRPC server, maps, fixtures, and the stateful `contract/scenario` provider. |
+| `make contract-check` | Regenerate into a temporary directory; reject source/generated drift; race-test Go clients, the fake gRPC server, and the stateful `contract/scenario` provider; then check TypeScript clients, maps, and fixtures. |
 | `make generate-frontend` | Install the frozen root Bun graph without lifecycle scripts, then build the exact-pinned React source into the checked shared browser/shell bundle. |
 | `make frontend-check` | Install the frozen root Bun graph without lifecycle scripts, rebuild the frontend in a temporary directory, and reject any checked bundle drift. |
 | `make generate-api` | Check the exact Go toolchain and available `gofmt`, then generate checked Gul Protobuf/ConnectRPC Go and TypeScript clients and the accepted provider-error catalog from pinned authorities. |
 | `make api-check` | Regenerate Gul clients temporarily and reject schema, byte, inventory, or provider-error catalog drift. |
 | `make test-prepare` | Validate both Go manifests, the root Bun manifest, exact Go, Bun, and shell syntax, then materialize the root and locked contract dependencies with Bun lifecycle scripts disabled. |
-| `make test-unit` | Validate product manifests, typecheck and test the React foundation and generated Gul API clients, run browser-contract fixtures and race-enabled shared bundle/core/storage tests, compile generated Go clients, and run contract/facade fixtures including `contract/scenario`. |
+| `make test-unit` | Validate product manifests, typecheck and test the React foundation and generated Gul API clients, run browser-contract fixtures and race-enabled root and contract Go tests including `contract/scenario`, and run contract/facade fixtures. |
 | `make test-int` | Recheck exact Go 1.27.1, product-module tidiness, frontend/API reproducibility, and SOT integrity, then run contract drift/schema/policy fixtures and whitespace checks. |
 | `make test-e2e` | Run the complete checker fixture through its public command boundary. |
 | `make test` | Run `test-prepare`, `test-unit`, `test-int`, and `test-e2e` serially. |

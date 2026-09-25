@@ -43,6 +43,14 @@ type workspace struct {
 	writer *publicv1.WriterState
 }
 
+type startRequestKey struct {
+	workspaceID, controllerID, idempotencyKey string
+}
+
+type interactionRequestKey struct {
+	interactionID, idempotencyKey string
+}
+
 type run struct {
 	projection          *publicv1.RunProjection
 	controller          *publicv1.ControllerCarrierRef
@@ -51,8 +59,8 @@ type run struct {
 	interactions        map[string]*publicv1.ControllerInteraction
 	turnKeys            map[string]*publicv1.SubmitTurnAccepted
 	turnBodies          map[string]string
-	interactionKeys     map[string]*publicv1.ResolveInteractionResponse
-	interactionBodies   map[string]string
+	interactionKeys     map[interactionRequestKey]*publicv1.ResolveInteractionResponse
+	interactionBodies   map[interactionRequestKey]string
 	interactionRevision uint64
 	session             *publicv1.OrchestratedSessionProjection
 	results             []*publicv1.OrchestratedSessionResult
@@ -85,8 +93,8 @@ type Harness struct {
 	workspaces   map[string]*workspace
 	profiles     map[string]*publicv1.ProfileProjection
 	controllers  map[string]ControllerSpec
-	startKeys    map[string]*publicv1.StartRunResponse
-	startBody    map[string]string
+	startKeys    map[startRequestKey]*publicv1.StartRunResponse
+	startBody    map[startRequestKey]string
 	faults       map[string][]fault
 	streamFaults map[string][]error
 	laterMethods []string
@@ -96,7 +104,7 @@ func newRun(controller *publicv1.ControllerCarrierRef, parentID string) *run {
 	return &run{controller: copyOf(controller), parentID: parentID,
 		interactions: make(map[string]*publicv1.ControllerInteraction),
 		turnKeys:     make(map[string]*publicv1.SubmitTurnAccepted), turnBodies: make(map[string]string),
-		interactionKeys: make(map[string]*publicv1.ResolveInteractionResponse), interactionBodies: make(map[string]string),
+		interactionKeys: make(map[interactionRequestKey]*publicv1.ResolveInteractionResponse), interactionBodies: make(map[interactionRequestKey]string),
 		artifacts: make(map[string][]byte), artifactRefs: make(map[string]*publicv1.ArtifactRef), notify: make(chan struct{})}
 }
 
@@ -118,8 +126,8 @@ func (h *Harness) Reset() {
 	h.now = h.initial
 	h.sequence = 0
 	h.workspaces = make(map[string]*workspace)
-	h.startKeys = make(map[string]*publicv1.StartRunResponse)
-	h.startBody = make(map[string]string)
+	h.startKeys = make(map[startRequestKey]*publicv1.StartRunResponse)
+	h.startBody = make(map[startRequestKey]string)
 	h.faults = make(map[string][]fault)
 	h.streamFaults = make(map[string][]error)
 	h.laterMethods = nil
