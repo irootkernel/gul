@@ -983,6 +983,22 @@ func TestEventsFaultsClockAndReset(t *testing.T) {
 	f.h.Reset()
 	_, err = f.h.GetRun(ctx, &publicv1.GetRunRequest{Run: f.run})
 	requireProviderCode(t, err, "INVALID_REQUEST")
+	if err := f.h.RegisterController(ControllerSpec{ID: "controller-1", Generation: 1, CarrierPath: "/carrier/one", OrchestrationLaunch: true, PolicyName: "preprovisioned"}); err != nil {
+		t.Fatal(err)
+	}
+	workspace, err := f.h.InspectWorkspace(ctx, &publicv1.InspectWorkspaceRequest{AbsolutePath: "/workspace/one"})
+	if err != nil || workspace.GetWorkspaceId() != f.workspace.GetExpectedWorkspaceId() {
+		t.Fatalf("workspace after Reset = %v, %v", workspace, err)
+	}
+	started, err := f.h.StartRun(ctx, &publicv1.StartRunRequest{Workspace: f.workspace, Controller: f.controller,
+		IdempotencyKey: "start-1", ProfileName: "default", ControlMode: publicv1.ControlMode_CONTROL_MODE_DIRECT_INTERACTIVE,
+		ExecutionLane: publicv1.ExecutionLane_EXECUTION_LANE_DEDICATED, Purpose: publicv1.PurposeKind_PURPOSE_KIND_INTERACTIVE})
+	if err != nil || started.GetExactReplay() {
+		t.Fatalf("stale start replay after Reset = %v, %v", started, err)
+	}
+	if _, err := f.h.GetRun(ctx, &publicv1.GetRunRequest{Run: &publicv1.RunRef{Workspace: f.workspace, RunId: started.GetRun().GetRunId()}}); err != nil {
+		t.Fatalf("new run after Reset is unreadable: %v", err)
+	}
 }
 
 func TestBeforeCommitAndStateBoundaries(t *testing.T) {
