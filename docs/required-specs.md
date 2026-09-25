@@ -484,6 +484,8 @@ production authentication. The Wails shell has no authenticated attach.
 E12-T1 has accepted the immutable consumer contract and generated tooling
 boundary; later Tasks still own the remaining product behavior. Former
 E12-T2/T3 are Retired without implementation evidence.
+E13-T1 adds an independently tested scenario provider over the frozen port;
+assembled application behavior and a live provider remain future work.
 
 | Requirement | Accepted Current State | Evidence |
 |---|---|---|
@@ -491,6 +493,7 @@ E12-T2/T3 are Retired without implementation evidence.
 | REQ-RUNTIME-011 | Versioned public gRPC inventory, exact semantic-operation ownership, generated clients, descriptor-derived fake server, exhaustive maps, and separate Machine CLI fixture | E0-T7 historical digests recorded in the implementation memo; current live lock paths are E12-T1 evidence; contract validator; fake-server tests |
 | REQ-RUNTIME-022 | Independently typed projection inputs, public enum/event inventory, convergence and fail-closed compatibility fixtures | E0-T7 historical digests recorded in the implementation memo; current live policy maps are E12-T1 evidence; conformance pin |
 | REQ-CONSUMER-001 | Immutable TASK-053 consumer source, 36-method descriptor inventory, explicit 27-required/9-unavailable profile, generated clients/maps/fake transport, and close/sourceability fixtures; no runtime-support claim | E12-T1; dependency/generated locks; additive descriptor check; contract validator |
+| REQ-CONSUMER-002 | Explicit deterministic stateful provider implementing all 27 required port methods with reset, clock, fault and stream controls; no production injection or fallback | E13-T1; `contract/scenario` port assertions and scenario tests; `make test` |
 
 ## 8. Explicit v0.1 non-goals and limitations
 

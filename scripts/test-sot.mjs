@@ -167,15 +167,15 @@ expectFailure('active row mismatch', root => {
 
 expectFailure('next header misses first eligible task', root => {
   write(root, 'docs/roadmap.md', text => text
-    .replace('| Next | E13-T1 |', '| Next | E3 starting at E3-T1 |'));
-}, /Next header must identify first eligible Task E13-T1/);
+    .replace('| Next | E3 starting at E3-T1 after E13 closeout |', '| Next | E4-T1 |'));
+}, /Next header must identify first eligible Task E3-T1/);
 
 expectFailure('pending Epic loses shared dossier', root => {
   write(root, 'docs/roadmap.md', text => text.replace(
-    /^(\| E13 \| Planned \|[^\n]+\|) \[Shared\]\(todo\/GUL-CONSUMER-REBASELINE\.md\) \|$/m,
+    /^(\| E3 \| Planned \|[^\n]+\|) \[Shared\]\(todo\/GUL-CONSUMER-REBASELINE\.md\) \|$/m,
     '$1 None |',
   ));
-}, /Pending Epic E13 must retain the shared implementation dossier link/);
+}, /Pending Epic E3 must retain the shared implementation dossier link/);
 
 expectFailure('architecture retains stale E12 lifecycle', root => {
   write(root, 'docs/architecture.md', text => text.replace(
@@ -222,7 +222,7 @@ expectFailure('E1-T5 required state retains the unauthenticated shell boundary',
 expectFailure('pre-E1-T5 state requires the Wails absence boundary', root => {
   write(root, 'docs/roadmap.md', text => text
     .replace('| E1-T5 | Pre-release | Completed |', '| E1-T5 | Pre-release | Planned |')
-    .replace('| Next | E13-T1 |', '| Next | E1-T5 |'));
+    .replace('| Next | E3 starting at E3-T1 after E13 closeout |', '| Next | E1-T5 |'));
 }, /pre-E1-T5 Wails absence boundary/);
 
 expectFailure('required specs promote E14-owned bundle requirement early', root => {
@@ -274,7 +274,7 @@ expectFailure('pre-E1-T3 state requires ConnectRPC absence', root => {
     .replace('| E1-T3 | Pre-release | Completed |', '| E1-T3 | Pre-release | Planned |')
     .replace('| E1-T4 | Pre-release | Completed |', '| E1-T4 | Pre-release | Planned |')
     .replace('| E1-T5 | Pre-release | Completed |', '| E1-T5 | Pre-release | Planned |')
-    .replace('| Next | E13-T1 |', '| Next | E1 continuing at E1-T3 |'));
+    .replace('| Next | E3 starting at E3-T1 after E13 closeout |', '| Next | E1 continuing at E1-T3 |'));
 }, /pre-E1-T3 ConnectRPC absence boundary/);
 
 expectFailure('E1-T4 storage is not a production database lifecycle', root => {

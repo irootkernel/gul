@@ -986,11 +986,11 @@ The serial command facade is `toolchain-check`, `generate-contract`, `contract-c
 
 ## 19. Current snapshot
 
-**Snapshot date:** 2026-09-24 (E1 epic validation)
+**Snapshot date:** 2026-09-25 (E13-T1 completion)
 
-**Roadmap point:** E0 is `Completed`, E12 is `Completed`, and E1 is `Completed`; E1-T1 is `Completed` and E1-T2/T3/T4/T5 are `Completed`. Former E12-T2/T3 remain Retired. E13 owns the stateful fake harness, and E14 owns pre-release application acceptance. No live-provider or assembled-application acceptance is implied.
+**Roadmap point:** E0 is `Completed`, E12 is `Completed`, and E1 is `Completed`; E1-T1 is `Completed` and E1-T2/T3/T4/T5 are `Completed`. E13-T1 is `Completed` with a stateful scenario provider under `contract/scenario`; E13 closeout is pending. Former E12-T2/T3 remain Retired. E14 owns pre-release application acceptance. No live-provider or assembled-application acceptance is implied.
 
-**Maturity:** delivery-independent Go core, shared React bundle, declared but disabled Gul API, typed provider ports, isolated SQLite repositories, and a Wails shell foundation; provider and assembled storage lifecycle remain pending
+**Maturity:** delivery-independent Go core, shared React bundle, declared but disabled Gul API, typed provider ports and explicit scenario harness, isolated SQLite repositories, and a Wails shell foundation; provider and assembled storage lifecycle remain pending
 
 ### 19.1 Implemented components
 
@@ -1008,8 +1008,10 @@ TypeScript page/content limits. Generated clients are checked for drift. The
 declarations are not registered as routes. `contract/port` defines the exact
 27-method typed consumer interface and a closed provider-error translation
 catalog; the root Go module consumes this checked local module through one
-explicit local replacement. `internal/domain` maps provider dispositions to
-browser enums and holds bounded account/session/query-bound opaque page tokens.
+explicit local replacement. `contract/scenario` supplies a stateful test
+provider over that port without production wiring. `internal/domain` maps
+provider dispositions to browser enums and holds bounded
+account/session/query-bound opaque page tokens.
 Accepted runtime and socket path errors map to `RUNTIME_PATH_UNAVAILABLE` with
 their typed recovery action; `UNSUPPORTED_PATH_ENCODING` remains a distinct
 Gul path-encoding error, not a label for an unsafe provider socket.

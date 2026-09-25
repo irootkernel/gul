@@ -301,13 +301,32 @@ E1 closes only the foundation. Later tasks still own live provider integration,
 authenticated attach, enabled browser routes, and production storage wiring.
 The shared consumer dossier remains for E13 and the other open epics.
 
+## 1.12 E13-T1 stateful scenario provider, 2026-09-25
+
+`contract/scenario` implements the pinned 27-method `port.PublicContractPort` as
+a deterministic test provider. Drivers control the clock and reset, register a
+Controller, inject faults before or after acceptance, fail individual streams,
+append typed events, publish results, and advance aggregate close through
+unknown-outcome recovery. Run operations produce accepted-input and terminal
+timeline items. Tests call every required method through the frozen port and
+cover replay, distinct same-text submissions, captured-head pagination, original
+Unicode content, pending interactions, wrong Controller, durable event variants,
+cursor resume, stream isolation, and close recovery. Drivers can advertise known
+later methods without creating first-release Gul actions. The provider contains
+no Gul UI or coordinator behavior and has no production wiring.
+REQ-CONSUMER-002 is accepted only for this independently tested fake boundary;
+E14 owns assembled Gul acceptance and E2/E9 own released-provider evidence.
+
+`GOTOOLCHAIN=local go test -race ./scenario` passed in `contract/`; the serial
+`make test` gate passed with SOT negative fixtures and contract drift checks.
+
 ## 2. Current development snapshot
 
 | Area | State |
 |---|---|
 | Five Gul SOT documents | E0-T4 completed the consumer alignment and Gate A reproduction; E0-T8 completed toolchain/ADR alignment; E0-T7 completed Gate B |
 | Toolchain and developer-command artifacts | E0-T8 accepted one pin manifest and read-only host checks; E0-T7 adds checked contract generation/drift delegates; E1-T1 adds the root Go module; E1-T2 adds root Bun pin validation and checked frontend generation/drift commands; E1-T3 adds checked Gul API/error-catalog generation; no installer |
-| Contract boundary | E12-T1 pins TASK-053 and regenerates checked clients/maps/fake transport for 36 known, 27 required, and 9 unavailable methods |
+| Contract boundary | E12-T1 pins TASK-053 and regenerates checked clients/maps/fake transport for 36 known, 27 required, and 9 unavailable methods; E13-T1 adds an explicit stateful scenario provider over the 27-method port |
 | Production source | E1-T1 shared Go core under `internal/app`; E1-T2 shared embedded bundle delivery under `internal/delivery/web`; E1-T3 declared browser API, typed 27-method consumer port and page-token boundary; E1-T4 isolated SQLite package under `internal/storage` is complete but unwired to startup; E1-T5 isolated Wails shell under `internal/desktop` is complete |
 | Wails host/frontend | One React foundation bundle and isolated Wails shell foundation implemented; feature UI and authenticated attach not implemented |
 | ConnectRPC schema/services | Gul DirectSession and ArtifactPresentation declarations and generated clients exist; no handler or route enabled |
@@ -315,7 +334,7 @@ The shared consumer dossier remains for E13 and the other open epics.
 | Dolgorae RPC supervisor/provider | Not implemented |
 | Controller credential store | Caller-owned mechanism selected by ADR-0047; not implemented |
 | FileService/auth/PWA/Tailscale integration | Not implemented |
-| Current State promotions | REQ-HOST-005, REQ-RUNTIME-011, REQ-RUNTIME-022, and REQ-CONSUMER-001; E1-T1 through E1-T5 remain foundation evidence and do not promote E14-owned REQ-HOST-001/002 |
+| Current State promotions | REQ-HOST-005, REQ-RUNTIME-011, REQ-RUNTIME-022, REQ-CONSUMER-001, and fake-scoped REQ-CONSUMER-002; E1-T1 through E1-T5 remain foundation evidence and do not promote E14-owned REQ-HOST-001/002 |
 
 The repository contains the shared-core and single-bundle delivery foundations,
 declared but inactive Gul APIs, isolated Gul-owned SQLite repositories, bootstrap
@@ -768,4 +787,4 @@ The initial documentation assumed Gul would manage one Codex App Server, map Ses
 
 ## 12. Handoff
 
-E12 and E1 are complete. The TASK-053 consumer lock and generated contract tooling are authoritative for new implementation, while historical E0 evidence remains scoped to its original pin. E1 delivered the shared core, bundle, declared typed-contract, isolated SQLite, and Wails shell foundations. E13-T1 is next; E2-T0 remains blocked on an accepted compatible Dolgorae executable and live smoke evidence. No later Task or live-provider behavior is activated automatically.
+E12 and E1 are complete. The TASK-053 consumer lock and generated contract tooling are authoritative for new implementation, while historical E0 evidence remains scoped to its original pin. E1 delivered the shared core, bundle, declared typed-contract, isolated SQLite, and Wails shell foundations. E13-T1 completed the fake-scoped REQ-CONSUMER-002 scenario provider; E13 closeout is pending, and E3-T1 is next after closeout. E2-T0 remains blocked on an accepted compatible Dolgorae executable and live smoke evidence. No later Task or live-provider behavior is activated automatically.

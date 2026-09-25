@@ -14,6 +14,7 @@ const command = goSourceFiles(path.join(sourceRoot, "cmd")).map(name => fs.readF
 const app = goSourceFiles(path.join(sourceRoot, "internal/app")).map(name => fs.readFileSync(name, "utf8")).join("\n");
 const domain = goSourceFiles(path.join(sourceRoot, "internal/domain")).map(name => fs.readFileSync(name, "utf8")).join("\n");
 const storage = goSourceFiles(path.join(sourceRoot, "internal/storage")).map(name => fs.readFileSync(name, "utf8")).join("\n");
+const scenarioImport = /"github\.com\/rootkernel\/gul\/contract\/scenario(?:\/[^\"]+)?"/;
 
 function sourceFiles(directory) {
   return fs.readdirSync(directory, {withFileTypes: true}).flatMap(entry => {
@@ -36,12 +37,12 @@ function goSourceFiles(directory) {
 const boundaries = [
   ["frontend", frontend, [/\bfetch\s*\(/, /\bWebSocket\b/, /\bXMLHttpRequest\b/, /\bEventSource\b/, /\bsendBeacon\s*\(/, /\bpostMessage\s*\(/, /\bimport\s*\(/, /\blocalStorage\b/, /\bindexedDB\b/, /contract\/generated/, /from ["'][^"']*wails/i]],
   ["frontend HTML", html, [/\bon[a-z]+\s*=/i, /\b(?:src|href)\s*=\s*["'](?:https?:)?\/\//i, /<script\b[^>]*>[^<]*\S[^<]*<\/script>/i]],
-  ["delivery", delivery, [/\bListenAndServe\b/, /"database\/sql"/, /"github\.com\/wailsapp/]],
-  ["desktop", desktop, [/\bListenAndServe\b/, /"database\/sql"/, /"github\.com\/rootkernel\/gul\/contract\//, /"github\.com\/rootkernel\/gul\/internal\/storage"/, /\bNewService\s*\(/]],
-  ["command", command, [/\bListenAndServe\b/, /"database\/sql"/, /"github\.com\/rootkernel\/gul\/contract\//, /"github\.com\/rootkernel\/gul\/internal\/storage"/, /\bNewService\s*\(/]],
-  ["app", app, [/"github\.com\/rootkernel\/gul\/internal\/(?:delivery|desktop|storage)(?:\/|")/, /"github\.com\/rootkernel\/gul\/(?:contract|api\/generated)(?:\/|")/, /"github\.com\/wailsapp/, /\bListenAndServe\b/]],
-  ["domain", domain, [/"github\.com\/rootkernel\/gul\/internal\//, /"github\.com\/wailsapp/, /"database\/sql"/, /\bListenAndServe\b/]],
-  ["storage", storage, [/"github\.com\/rootkernel\/gul\/internal\/(?:app|delivery|desktop)(?:\/|")/, /"github\.com\/rootkernel\/gul\/(?:contract|api\/generated)(?:\/|")/, /"github\.com\/wailsapp/, /\bListenAndServe\b/]],
+  ["delivery", delivery, [/\bListenAndServe\b/, /"database\/sql"/, /"github\.com\/wailsapp/, scenarioImport]],
+  ["desktop", desktop, [/\bListenAndServe\b/, /"database\/sql"/, /"github\.com\/rootkernel\/gul\/contract\//, /"github\.com\/rootkernel\/gul\/internal\/storage"/, /\bNewService\s*\(/, scenarioImport]],
+  ["command", command, [/\bListenAndServe\b/, /"database\/sql"/, /"github\.com\/rootkernel\/gul\/contract\//, /"github\.com\/rootkernel\/gul\/internal\/storage"/, /\bNewService\s*\(/, scenarioImport]],
+  ["app", app, [/"github\.com\/rootkernel\/gul\/internal\/(?:delivery|desktop|storage)(?:\/|")/, /"github\.com\/rootkernel\/gul\/(?:contract|api\/generated)(?:\/|")/, /"github\.com\/wailsapp/, /\bListenAndServe\b/, scenarioImport]],
+  ["domain", domain, [/"github\.com\/rootkernel\/gul\/internal\//, /"github\.com\/wailsapp/, /"database\/sql"/, /\bListenAndServe\b/, scenarioImport]],
+  ["storage", storage, [/"github\.com\/rootkernel\/gul\/internal\/(?:app|delivery|desktop)(?:\/|")/, /"github\.com\/rootkernel\/gul\/(?:contract|api\/generated)(?:\/|")/, /"github\.com\/wailsapp/, /\bListenAndServe\b/, scenarioImport]],
 ];
 
 for (const [label, source, forbidden] of boundaries) {
@@ -70,6 +71,8 @@ try {
     ["storage", '"github.com/rootkernel/gul/internal/delivery/web"', boundaries[7][2]],
     ["storage", '"github.com/rootkernel/gul/contract/port"', boundaries[7][2]],
     ["storage", '"github.com/rootkernel/gul/api/generated/go/gul/v1"', boundaries[7][2]],
+    ...boundaries.slice(2).map(([label, , forbidden]) => [label, '"github.com/rootkernel/gul/contract/scenario"', forbidden]),
+    ...boundaries.slice(2).map(([label, , forbidden]) => [label, '"github.com/rootkernel/gul/contract/scenario/helper"', forbidden]),
   ]) {
     assert(forbidden.some(pattern => pattern.test(source)), `${label} negative fixture must match a forbidden pattern`);
   }

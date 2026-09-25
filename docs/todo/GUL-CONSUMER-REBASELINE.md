@@ -176,7 +176,9 @@ logic into the fake. Required scenarios include:
 - aggregate status, Specialist observations, and published result pages;
 - closing, confirmed closed, and unresolved close outcomes;
 - wrong Controller, stale revision, foreign cursor, and unknown required enum;
-- reconnect, duplicate events, slow consumers, and projection convergence;
+- provider event-cursor resume, duplicate events, and slow consumers; E4-T1
+  exercises these states in its event bridge, and E5-T2 owns provider/browser
+  reconnect and stamp convergence;
 - optional method presence without a corresponding Gul action.
 
 E14-T1 uses actual Gul core and browser code with these fakes and completed Gul
@@ -212,7 +214,7 @@ state changes. Missing Podway observation cannot block existing functionality.
 - [x] The consumer matrix distinguishes 27 required methods from all 36 methods.
 - [x] Global Profile reads contain no Workspace reference.
 - [x] The fixed carrier-root contract and no-Operator boundary pass fixtures.
-- [ ] E13-T1 stateful fake scenarios pass independently of future Gul features.
+- [x] E13-T1 stateful fake scenarios pass independently of future Gul features.
 - [ ] E14-T1 assembled authenticated pre-release browser proof passes.
 - [ ] Earlier required Epics close before the next Epic starts; no cross-Epic
       Task interleaving is needed.

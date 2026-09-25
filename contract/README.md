@@ -26,6 +26,15 @@ accepted typed provider errors into browser-safe codes and actions. Its
 `port/generate-errors.mjs`; run root `make generate-api` to regenerate it and
 `make api-check` to verify drift.
 
+`scenario/` implements the 27-method port as a stateful test provider. Drivers
+can reset its state, advance its clock, register an orchestration-capable
+Controller, append typed events, drive accepted-input and terminal timeline
+items through Run operations, and inject faults before or after mutation
+acceptance. Scenarios cover accepted identity, pagination, interactions,
+results, session close, recovery, and stream isolation without later Gul
+features. Drivers may advertise known later methods without adding Gul actions.
+Gul has no production adapter or failure fallback to this provider.
+
 Protobuf-ES v2 generates TypeScript message schemas and Connect service
 descriptors in the same checked module. The incompatible Connect-ES v1 plugin
 and its unchecked `_connect.ts` output are deliberately absent. The imported
