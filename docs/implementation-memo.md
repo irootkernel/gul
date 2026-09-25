@@ -329,6 +329,11 @@ scenario suite. The correction does not change production wiring or the frozen
 contract. E13-T1 returned to Completed after focused race and serial facade
 verification; E13 closeout remains separate.
 
+The next whole-Epic review found that `CloseRun` exposed its retained operation
+ID pointer in a terminal replay response. `CloseRun` now copies that optional
+value into its response and pending-error detail. The close test mutates both
+returned values and confirms that the provider's retained ID does not change.
+
 ## 2. Current development snapshot
 
 | Area | State |

@@ -457,7 +457,7 @@ func (h *Harness) CloseRun(_ context.Context, request *publicv1.CloseRunRequest)
 		if r.projection.GetLifecycle() != publicv1.RunLifecycle_RUN_LIFECYCLE_CLOSED {
 			return nil, closePending(r)
 		}
-		return &publicv1.RunMutationResponse{Context: &publicv1.ResponseContext{ProtocolVersion: 1, ServerInstanceId: "scenario-server", OperationId: r.session.CloseOperationId}, Run: copyOf(r.projection)}, nil
+		return &publicv1.RunMutationResponse{Context: &publicv1.ResponseContext{ProtocolVersion: 1, ServerInstanceId: "scenario-server", OperationId: pointer(r.session.GetCloseOperationId())}, Run: copyOf(r.projection)}, nil
 	}
 	if err = checkRevision(r, request.GetExpectedStateRevision()); err != nil {
 		return nil, err
@@ -489,7 +489,7 @@ func closePending(r *run) error {
 		DolgoraeErrorCode: "SESSION_CLOSE_IN_PROGRESS", Action: publicv1.RequiredClientAction_REQUIRED_CLIENT_ACTION_REFRESH_SNAPSHOT,
 		RetryClassification:    publicv1.RetryClassification_RETRY_CLASSIFICATION_FORBIDDEN,
 		RecoveryClassification: publicv1.RecoveryClassification_RECOVERY_CLASSIFICATION_SNAPSHOT_REQUIRED,
-		RunId:                  pointer(r.projection.GetRunId()), OperationId: r.session.CloseOperationId})
+		RunId:                  pointer(r.projection.GetRunId()), OperationId: pointer(r.session.GetCloseOperationId())})
 	err.AddDetail(detail)
 	return err
 }

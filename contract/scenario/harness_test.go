@@ -726,6 +726,12 @@ func TestResultsAndCloseOutcomes(t *testing.T) {
 	if detail, ok := value.(*publicv1.DolgoraeErrorDetail); !ok || detail.GetDolgoraeErrorCode() != "SESSION_CLOSE_IN_PROGRESS" || detail.GetOperationId() != closeOperationID {
 		t.Fatalf("pending close detail = %v", value)
 	}
+	detail := value.(*publicv1.DolgoraeErrorDetail)
+	*detail.OperationId = "forged"
+	state, err = f.h.GetOrchestratedSession(ctx, &publicv1.GetOrchestratedSessionRequest{RootRun: f.run, Controller: f.controller})
+	if err != nil || state.GetSession().GetCloseOperationId() != closeOperationID {
+		t.Fatalf("pending detail mutated retained close identity: %v, %v", state, err)
+	}
 	_, err = f.h.CloseRun(ctx, &publicv1.CloseRunRequest{Run: f.run, Controller: f.controller, Interrupt: true, ExpectedStateRevision: f.revision(t)})
 	requireProviderCode(t, err, "RUN_STATE_CONFLICT")
 	if err := f.h.SetCloseProgress(f.run.GetRunId(), publicv1.SessionCloseProgress_SESSION_CLOSE_PROGRESS_OUTCOME_UNKNOWN); err != nil {
@@ -760,6 +766,11 @@ func TestResultsAndCloseOutcomes(t *testing.T) {
 	repeated, err := f.h.CloseRun(ctx, &publicv1.CloseRunRequest{Run: f.run, Controller: f.controller, ExpectedStateRevision: f.revision(t)})
 	if err != nil || repeated.GetContext().GetOperationId() != closeOperationID {
 		t.Fatalf("repeat close lost retained identity: %v, %v", repeated, err)
+	}
+	*repeated.Context.OperationId = "forged"
+	state, err = f.h.GetOrchestratedSession(ctx, &publicv1.GetOrchestratedSessionRequest{RootRun: f.run, Controller: f.controller})
+	if err != nil || state.GetSession().GetCloseOperationId() != closeOperationID {
+		t.Fatalf("close response mutated retained identity: %v, %v", state, err)
 	}
 	if err := f.h.OpenInteraction(f.run.GetRunId(), &publicv1.ControllerInteraction{Summary: &publicv1.InteractionSummary{InteractionId: "late"}}); err == nil {
 		t.Fatal("closed Run accepted an Interaction")
