@@ -3,7 +3,7 @@
 | Field | Value |
 | --- | --- |
 | Role | Sole authority for task identity, order, status, dependencies, and phase |
-| Revision | 2026-09-25 E13-T1 stateful scenario harness |
+| Revision | 2026-09-25 E13-T1 validation correction |
 | Active Task | None |
 | Next | E3 starting at E3-T1 after E13 closeout |
 | Required provider | Released Dolgorae v0.1.3 implementing `dolgorae.gul-consumer/v1` |

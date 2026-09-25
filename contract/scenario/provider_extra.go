@@ -295,7 +295,7 @@ func (h *Harness) sessionFor(ref *publicv1.RunRef, controller *publicv1.Controll
 		return nil, err
 	}
 	if r.session == nil {
-		return nil, conflict()
+		return nil, invalid()
 	}
 	return r, nil
 }
@@ -322,7 +322,7 @@ func (h *Harness) ListOrchestratedSessionResults(_ context.Context, request *pub
 	if err := h.before("ListOrchestratedSessionResults"); err != nil {
 		return nil, err
 	}
-	if request == nil || request.GetProjectionVersion() != 1 {
+	if request == nil || request.GetProjectionVersion() != 1 || request.GetLimit() > maximumPageLimit {
 		return nil, invalid()
 	}
 	r, err := h.sessionFor(request.GetRootRun(), request.GetController())

@@ -320,6 +320,15 @@ E14 owns assembled Gul acceptance and E2/E9 own released-provider evidence.
 `GOTOOLCHAIN=local go test -race ./scenario` passed in `contract/`; the serial
 `make test` gate passed with SOT negative fixtures and contract drift checks.
 
+Whole-Epic validation reopened E13-T1 to correct four fake-scoped findings:
+stream-receive fault injection now has a one-shot assertion, malformed replay
+bodies fail before identity hashing, limits above the pinned maximum return a
+typed invalid request, and a plain Run is rejected as a non-session target.
+The stable test-command guide and verified-behavior summary now name the
+scenario suite. The correction does not change production wiring or the frozen
+contract. E13-T1 returned to Completed after focused race and serial facade
+verification; E13 closeout remains separate.
+
 ## 2. Current development snapshot
 
 | Area | State |

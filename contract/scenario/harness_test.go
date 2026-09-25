@@ -200,6 +200,55 @@ func TestArtifactBounds(t *testing.T) {
 	}
 }
 
+func TestInvalidReplayBodiesAndPageLimits(t *testing.T) {
+	f := newFixture(t)
+	ctx := context.Background()
+	invalidText := string([]byte{0xff})
+	_, err := f.h.StartRun(ctx, &publicv1.StartRunRequest{Workspace: f.workspace, Controller: f.controller,
+		IdempotencyKey: invalidText, ProfileName: "default", ControlMode: publicv1.ControlMode_CONTROL_MODE_DIRECT_INTERACTIVE,
+		ExecutionLane: publicv1.ExecutionLane_EXECUTION_LANE_DEDICATED, Purpose: publicv1.PurposeKind_PURPOSE_KIND_INTERACTIVE})
+	requireProviderCode(t, err, "INVALID_REQUEST")
+	revision := f.revision(t)
+	_, err = f.h.SubmitTurn(ctx, &publicv1.SubmitTurnRequest{Run: f.run, Controller: f.controller,
+		IdempotencyKey: "invalid-turn", Message: invalidText, ExpectedStateRevision: revision})
+	requireProviderCode(t, err, "INVALID_REQUEST")
+	if got := f.revision(t); got != revision {
+		t.Fatalf("invalid turn changed revision: %d -> %d", revision, got)
+	}
+	_, err = f.h.ListRunTimelineItems(ctx, &publicv1.ListRunTimelineItemsRequest{Run: f.run, Controller: f.controller, TimelineVersion: 1, Limit: maximumPageLimit + 1})
+	requireProviderCode(t, err, "INVALID_REQUEST")
+	_, err = f.h.ListOrchestratedSessionResults(ctx, &publicv1.ListOrchestratedSessionResultsRequest{RootRun: f.run, Controller: f.controller, ProjectionVersion: 1, Limit: maximumPageLimit + 1})
+	requireProviderCode(t, err, "INVALID_REQUEST")
+}
+
+func TestReceiveFaultIsOneShot(t *testing.T) {
+	f := newFixture(t)
+	ctx := context.Background()
+	stream, err := f.h.WatchRunEvents(ctx, &publicv1.WatchRunEventsRequest{Run: f.run})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer stream.Close()
+	event := &publicv1.DurableRunEvent{Event: &publicv1.DurableRunEvent_ReasoningSuppressed{
+		ReasoningSuppressed: &publicv1.ReasoningSuppressed{Method: "safe"}}}
+	if err := f.h.AppendEvent(f.run.GetRunId(), event); err != nil {
+		t.Fatal(err)
+	}
+	if err := f.h.FaultNext("WatchRunEvents.Receive", AfterCommit, errors.New("invalid phase")); err == nil {
+		t.Fatal("accepted post-commit receive fault")
+	}
+	fault := errors.New("injected receive failure")
+	if err := f.h.FaultNext("WatchRunEvents.Receive", BeforeCommit, fault); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := stream.Receive(); !errors.Is(err, fault) {
+		t.Fatalf("receive fault = %v", err)
+	}
+	if envelope, err := stream.Receive(); err != nil || envelope.GetDurableEvent().GetEvent() == nil {
+		t.Fatalf("event after receive fault = %v, %v", envelope, err)
+	}
+}
+
 func TestPinnedMethodsAndExplicitLaunch(t *testing.T) {
 	var provider port.PublicContractPort = New(time.Unix(0, 0))
 	methods := reflect.TypeOf((*port.PublicContractPort)(nil)).Elem()
@@ -222,6 +271,9 @@ func TestPinnedMethodsAndExplicitLaunch(t *testing.T) {
 	var contractProfile struct {
 		RequiredMethods []string `json:"required_methods"`
 		LaterMethods    []string `json:"unavailable_until_later_tasks"`
+		Paging          struct {
+			MaximumLimit uint32 `json:"maximum_limit"`
+		} `json:"paging"`
 	}
 	if err := json.Unmarshal(profileBytes, &contractProfile); err != nil {
 		t.Fatal(err)
@@ -231,6 +283,9 @@ func TestPinnedMethodsAndExplicitLaunch(t *testing.T) {
 	}
 	if !slices.Equal(contractProfile.LaterMethods, laterMethods) {
 		t.Fatal("scenario later-method inventory differs from pinned contract")
+	}
+	if contractProfile.Paging.MaximumLimit != maximumPageLimit {
+		t.Fatalf("scenario maximum page limit differs from pinned contract: %d", contractProfile.Paging.MaximumLimit)
 	}
 	mutationBytes, err := os.ReadFile("../upstream/dolgorae-rpc-mutation-policy-v1.json")
 	if err != nil {
@@ -348,7 +403,7 @@ func TestPinnedMethodsAndExplicitLaunch(t *testing.T) {
 		t.Fatal(err)
 	}
 	_, err = f.h.GetOrchestratedSession(context.Background(), &publicv1.GetOrchestratedSessionRequest{RootRun: &publicv1.RunRef{Workspace: f.workspace, RunId: plain.GetRun().GetRunId()}, Controller: &publicv1.ControllerCarrierRef{AbsoluteFilePath: "/carrier/two", ExpectedControllerId: "controller-2", ExpectedControllerGeneration: 1}})
-	requireProviderCode(t, err, "RUN_STATE_CONFLICT")
+	requireProviderCode(t, err, "INVALID_REQUEST")
 }
 
 func TestAcceptedHistoryCapturedPagesAndProtectedArtifact(t *testing.T) {
@@ -382,6 +437,10 @@ func TestAcceptedHistoryCapturedPagesAndProtectedArtifact(t *testing.T) {
 	firstPage, err := f.h.ListRunTimelineItems(ctx, &publicv1.ListRunTimelineItemsRequest{Run: f.run, Controller: f.controller, TimelineVersion: 1, Limit: 1})
 	if err != nil || len(firstPage.GetItems()) != 1 || firstPage.NextAfterCursor == nil {
 		t.Fatalf("first page = %v, %v", firstPage, err)
+	}
+	maximumPage, err := f.h.ListRunTimelineItems(ctx, &publicv1.ListRunTimelineItemsRequest{Run: f.run, Controller: f.controller, TimelineVersion: 1, Limit: maximumPageLimit})
+	if err != nil || len(maximumPage.GetItems()) != 3 || maximumPage.NextAfterCursor != nil {
+		t.Fatalf("maximum-limit page = %v, %v", maximumPage, err)
 	}
 	artifact := firstPage.GetItems()[0].GetArtifact()
 	if artifact == nil {
@@ -611,6 +670,10 @@ func TestResultsAndCloseOutcomes(t *testing.T) {
 	page, err := f.h.ListOrchestratedSessionResults(ctx, &publicv1.ListOrchestratedSessionResultsRequest{RootRun: f.run, Controller: f.controller, ProjectionVersion: 1, Limit: 1})
 	if err != nil || page.GetCapturedPublicationHead() != 2 || page.NextPageCursor == nil {
 		t.Fatalf("result page = %v, %v", page, err)
+	}
+	maximumPage, err := f.h.ListOrchestratedSessionResults(ctx, &publicv1.ListOrchestratedSessionResultsRequest{RootRun: f.run, Controller: f.controller, ProjectionVersion: 1, Limit: maximumPageLimit})
+	if err != nil || len(maximumPage.GetItems()) != 2 || maximumPage.NextPageCursor != nil {
+		t.Fatalf("maximum-limit result page = %v, %v", maximumPage, err)
 	}
 	if err := f.h.PublishResult(f.run.GetRunId(), &publicv1.OrchestratedSessionResult{ResultId: "result-3", TaskId: "task-3", SpecialistRun: specialist}, []byte("later")); err != nil {
 		t.Fatal(err)

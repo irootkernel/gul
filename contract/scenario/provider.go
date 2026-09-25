@@ -38,6 +38,7 @@ var laterMethods = []string{
 const pinnedDescriptorSHA256 = "28b132842bbeb48123c2b7cc529de689e6e6286b0783cbde8551d17ba4921ed5"
 const maximumArtifactSize = 64 << 20
 const maximumChunkSize = 65536
+const maximumPageLimit = 500
 
 func pointer[T any](value T) *T { return &value }
 
@@ -162,7 +163,10 @@ func (h *Harness) StartRun(_ context.Context, request *publicv1.StartRunRequest)
 	key := w.id + ":" + spec.ID + ":" + request.GetIdempotencyKey()
 	body := copyOf(request)
 	body.Context = nil
-	encoded, _ := proto.MarshalOptions{Deterministic: true}.Marshal(body)
+	encoded, err := proto.MarshalOptions{Deterministic: true}.Marshal(body)
+	if err != nil {
+		return nil, invalid()
+	}
 	if prior := h.startKeys[key]; prior != nil {
 		if h.startBody[key] != digest(encoded) {
 			return nil, conflict()
@@ -278,7 +282,10 @@ func (h *Harness) SubmitTurn(_ context.Context, request *publicv1.SubmitTurnRequ
 	key := request.GetIdempotencyKey()
 	body := copyOf(request)
 	body.Context = nil
-	encoded, _ := proto.MarshalOptions{Deterministic: true}.Marshal(body)
+	encoded, err := proto.MarshalOptions{Deterministic: true}.Marshal(body)
+	if err != nil {
+		return nil, invalid()
+	}
 	if prior := r.turnKeys[key]; prior != nil {
 		if r.turnBodies[key] != digest(encoded) {
 			return nil, conflict()
@@ -583,9 +590,6 @@ func boundedLimit(value uint32) int {
 	if value == 0 {
 		return 100
 	}
-	if value > 500 {
-		return 500
-	}
 	return int(value)
 }
 
@@ -595,7 +599,7 @@ func (h *Harness) ListRunTimelineItems(_ context.Context, request *publicv1.List
 	if err := h.before("ListRunTimelineItems"); err != nil {
 		return nil, err
 	}
-	if request == nil || request.GetTimelineVersion() != 1 {
+	if request == nil || request.GetTimelineVersion() != 1 || request.GetLimit() > maximumPageLimit {
 		return nil, invalid()
 	}
 	_, r, err := h.runFor(request.GetRun())

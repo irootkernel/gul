@@ -1050,7 +1050,9 @@ and Go delivery tests verify fail-closed markup, exact dependency pins,
 byte-reproducible checked output, manifest hashes, SPA fallback, and identical
 browser/shell bytes. Gul schema and port fixtures verify generated client drift,
 the 27-method inventory, provider error/action coverage, page-token scope,
-bounded metadata, and CloseOutcome distinctions. These checks start no real
+bounded metadata, and CloseOutcome distinctions. The stateful `contract/scenario`
+tests verify deterministic replay, captured pages, faults, streams, and close
+recovery through the frozen port. These checks start no real
 provider and do not establish a listener, authenticated client, Wails host, enabled browser API,
 assembled persistence lifecycle, or live compatibility. Isolated SQLite tests
 exercise migration, schema drift, connection settings, typed records, rollback,
