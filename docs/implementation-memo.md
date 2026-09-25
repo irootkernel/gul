@@ -343,6 +343,18 @@ detector, including concurrent scenario streams. Four E13-T1 document headers
 were brought current. These corrections remain fake-scoped; E13 closeout is
 separate.
 
+## 1.13 E13 epic closeout, 2026-09-25
+
+E13-T1 meets the roadmap's independent provider-scenario acceptance over the
+frozen 27-method port. The serial `make test` gate passed with race-enabled
+contract tests, contract drift checks, and SOT fixtures. Six independent review
+roles covered the Epic and confirmed the final correction set. The remaining
+Reset replay assertion was added and checked locally after that review. No
+current Medium-or-higher finding or unresolved Low disposition remains.
+REQ-CONSUMER-002 is complete for the fake provider only; E14 owns assembled
+application acceptance, and E2/E9 own released-provider evidence. The shared
+consumer dossier remains for the other open Epics.
+
 ## 2. Current development snapshot
 
 | Area | State |
@@ -810,4 +822,4 @@ The initial documentation assumed Gul would manage one Codex App Server, map Ses
 
 ## 12. Handoff
 
-E12 and E1 are complete. The TASK-053 consumer lock and generated contract tooling are authoritative for new implementation, while historical E0 evidence remains scoped to its original pin. E1 delivered the shared core, bundle, declared typed-contract, isolated SQLite, and Wails shell foundations. E13-T1 completed the fake-scoped REQ-CONSUMER-002 scenario provider; E13 closeout is pending, and E3-T1 is next after closeout. E2-T0 remains blocked on an accepted compatible Dolgorae executable and live smoke evidence. No later Task or live-provider behavior is activated automatically.
+E12, E1, and E13 are complete. The TASK-053 consumer lock and generated contract tooling are authoritative for new implementation, while historical E0 evidence remains scoped to its original pin. E1 delivered the shared core, bundle, declared typed-contract, isolated SQLite, and Wails shell foundations. E13 delivered the fake-scoped REQ-CONSUMER-002 scenario provider. E3-T1 is next. E2-T0 remains blocked on an accepted compatible Dolgorae executable and live smoke evidence. No later Task or live-provider behavior is activated automatically.
