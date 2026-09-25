@@ -9,6 +9,7 @@ import (
 	"github.com/rootkernel/gul/api/generated/go/gul/v1/gulv1connect"
 	"github.com/rootkernel/gul/internal/app"
 	"github.com/rootkernel/gul/internal/presentation"
+	"github.com/rootkernel/gul/internal/session"
 )
 
 func localAccess(ctx context.Context, core *app.Core, resolve PrincipalResolver, service *presentation.Service) (string, error) {
@@ -75,6 +76,17 @@ func (h *WorkspaceHandler) SetWorkspaceHidden(ctx context.Context, request *conn
 	return connect.NewResponse(&gulv1.WorkspacePresentationResponse{Workspace: browserPresentation(entry)}), nil
 }
 
+func (h *WorkspaceHandler) RemoveWorkspaceEntry(ctx context.Context, request *connect.Request[gulv1.RemoveWorkspaceEntryRequest]) (*connect.Response[gulv1.RemoveWorkspaceEntryResponse], error) {
+	subject, err := h.presentationAccess(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if err := h.Presentation.RemoveWorkspace(ctx, subject, request.Msg.GetWorkspaceId()); err != nil {
+		return nil, presentationError(err)
+	}
+	return connect.NewResponse(&gulv1.RemoveWorkspaceEntryResponse{}), nil
+}
+
 func (h *WorkspaceHandler) GetNavigation(ctx context.Context, _ *connect.Request[gulv1.GetNavigationRequest]) (*connect.Response[gulv1.NavigationResponse], error) {
 	subject, err := h.presentationAccess(ctx)
 	if err != nil {
@@ -99,12 +111,12 @@ func (h *WorkspaceHandler) SetNavigation(ctx context.Context, request *connect.R
 	return connect.NewResponse(&gulv1.NavigationResponse{WorkspaceId: value.WorkspaceID, SessionId: value.SessionID}), nil
 }
 
-// DirectPresentationHandler provides local presentation calls. The other Direct
-// Session calls are implemented by their feature owners before route assembly.
+// DirectPresentationHandler remains unmounted until authenticated route assembly.
 type DirectPresentationHandler struct {
 	gulv1connect.UnimplementedDirectSessionServiceHandler
 	Core         *app.Core
 	Presentation *presentation.Service
+	Sessions     *session.Service
 	Principal    PrincipalResolver
 }
 

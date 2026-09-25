@@ -407,6 +407,40 @@ REQ-DIRECT-007 for local presentation only. E3-T3 owns provider-backed session
 discovery, E8 owns authenticated route assembly, and E2/E9 retain live-provider
 acceptance.
 
+## 1.16 E3-T3 passive session reads, 2026-09-26
+
+`internal/session` binds a Gul Direct Session to one accepted provider Primary
+Run only after Workspace revalidation, trusted Controller-carrier resolution,
+GetRun validation and authorized GetOrchestratedSession validation. Migration 4
+persists the subject-scoped one-to-one binding and a non-authoritative copy of
+Run configuration. Duplicate bind preserves the Gul ID and local presentation;
+it refreshes configuration from GetRun. There is no local draft before an
+accepted provider session and no draft cleanup path. Removing a Workspace Entry
+atomically removes its Gul presentation, navigation and bindings without a
+provider call.
+
+The read path coalesces concurrent requests for one session, bounds the
+authoritative refresh, and returns explicit fresh, stale or unavailable state.
+Aggregate status, policy, revision, counts and recovery come only from
+GetOrchestratedSession. Optional Specialist status uses public parent links as
+an observation, with no child Controller or action. Member observations and
+stale snapshots are capped separately at 256. Gul-owned state versions
+are opaque and separate from provider revisions. The browser contract exposes
+local session IDs and typed state, not provider Run IDs, carrier paths or raw
+close operation IDs. Provider-declared unavailable or recovery-required
+aggregates yield stale state only when this process has a prior fresh read;
+otherwise the state is unavailable. The handler remains unmounted; E5-T1 owns
+closure.
+The adapter classifies transport and deadline failures as unavailable and
+rejects semantic provider errors as invalid projections.
+
+Scenario-backed tests cover three Primary Runs across two Workspaces, wrong
+Controller and non-session rejection, provider configuration changes, restart
+readback, observer-only Specialists, unavailable counts, local removal and
+subject isolation. This promotes fake-scoped REQ-WS-004/008,
+REQ-DIRECT-001/015/019 and REQ-SESSION-003. E2/E9 retain released-provider
+qualification and E8 owns authenticated route assembly.
+
 ## 2. Current development snapshot
 
 | Area | State |
@@ -414,14 +448,14 @@ acceptance.
 | Five Gul SOT documents | E0-T4 completed the consumer alignment and Gate A reproduction; E0-T8 completed toolchain/ADR alignment; E0-T7 completed Gate B |
 | Toolchain and developer-command artifacts | E0-T8 accepted one pin manifest and read-only host checks; E0-T7 adds checked contract generation/drift delegates; E1-T1 adds the root Go module; E1-T2 adds root Bun pin validation and checked frontend generation/drift commands; E1-T3 adds checked Gul API/error-catalog generation; no installer |
 | Contract boundary | E12-T1 pins TASK-053 and regenerates checked clients/maps/fake transport for 36 known, 27 required, and 9 unavailable methods; E13-T1 adds an explicit stateful scenario provider over the 27-method port |
-| Production source | E1 shared core, bundle, API declarations, isolated SQLite and Wails shell; E3-T1 adds isolated Workspace attachment and inspection; E3-T2 adds local presentation service, migration 3, and unmounted typed handlers |
+| Production source | E1 shared core, bundle, API declarations, isolated SQLite and Wails shell; E3-T1 adds Workspace attachment; E3-T2 adds local presentation; E3-T3 adds passive session binding, aggregate reads and unmounted typed handlers |
 | Wails host/frontend | One React foundation bundle and isolated Wails shell foundation implemented; feature UI and authenticated attach not implemented |
-| ConnectRPC schema/services | Gul DirectSession, ArtifactPresentation and WorkspacePresentation declarations and generated clients exist; isolated Workspace and Direct Session presentation handlers remain unmounted |
-| Gul SQLite schema | Gul-owned version 3 schema with Workspace attachment and favorite migrations and isolated repositories implemented; production startup integration pending |
+| ConnectRPC schema/services | Gul DirectSession, ArtifactPresentation and WorkspacePresentation declarations and generated clients exist; isolated Workspace and Direct Session presentation/read handlers remain unmounted |
+| Gul SQLite schema | Gul-owned version 4 schema with Workspace attachment, favorites and Primary binding migrations and isolated repositories implemented; production startup integration pending |
 | Dolgorae RPC supervisor/provider | Not implemented |
 | Controller credential store | Caller-owned mechanism selected by ADR-0047; not implemented |
 | FileService/auth/PWA/Tailscale integration | Not implemented |
-| Current State promotions | REQ-HOST-005, REQ-RUNTIME-011, REQ-RUNTIME-022, REQ-CONSUMER-001/002, fake-scoped REQ-WS-001/006/007/009/010/011/012, and local REQ-WS-003/REQ-DIRECT-007; no assembled-product or released-provider claim |
+| Current State promotions | REQ-HOST-005, REQ-RUNTIME-011, REQ-RUNTIME-022, REQ-CONSUMER-001/002, fake-scoped REQ-WS-001/004/006/007/008/009/010/011/012, REQ-DIRECT-001/015/019, REQ-SESSION-003, and local REQ-WS-003/REQ-DIRECT-007; no assembled-product or released-provider claim |
 
 The repository contains the shared-core and single-bundle delivery foundations,
 declared but inactive Gul APIs, isolated Gul-owned SQLite repositories, bootstrap
@@ -547,7 +581,7 @@ the safe first-release default unless a later accepted ADR changes it.
 |---|---|---|---|
 | Dolgorae executable and live compatibility | Historical E0 contract evidence exists; the new immutable contract starts at TASK-053 and the exact release follows TASK-026 plus RC QA | Complete the pre-release Epic sequence through E14 before E2-T0 pins the released executable, lifecycle, version, binary identity, and smoke evidence. | E2-T0 release-gated; does not block pre-release work |
 | Gorae release scope | Deferred by ADR-0030 | Explicit SOT/ADR approval required to enter v0.1. | Deferred epic |
-| Local draft Direct Session behavior | Unspecified | Decide whether a presentation may exist before Run creation and define cleanup/idempotency. | E3-T3 |
+| Local draft Direct Session behavior | Resolved by E3-T3 | No Gul draft before an accepted provider session; repeat binding reuses the Gul ID and preserves local presentation. | E3-T3 |
 | SVG preview | ADR-0018 Proposed | Select source-only, rasterization, or isolated sanitization. | Active SVG preview |
 
 No unresolved item is silently decided by this memo. Source-only SVG remains the safe fallback, and explicit refresh remains the Release-tier behavior beneath the Recommended-tier watcher.
@@ -874,4 +908,4 @@ The initial documentation assumed Gul would manage one Codex App Server, map Ses
 
 ## 12. Handoff
 
-E12, E1, and E13 are complete. The TASK-053 consumer lock and generated contract tooling remain authoritative. E3-T1 added fake-scoped canonical Workspace attachment and revalidation; E3-T2 added local-only presentation, and E3-T3 is next. E2-T0 remains blocked on an accepted compatible Dolgorae executable and live smoke evidence. No product route or live-provider behavior is activated automatically.
+E12, E1, and E13 are complete. The TASK-053 consumer lock and generated contract tooling remain authoritative. E3-T1 added fake-scoped Workspace attachment, E3-T2 added local-only presentation, and E3-T3 added passive session reads; E3-T4 is next. E2-T0 remains blocked on an accepted compatible Dolgorae executable and live smoke evidence. No product route or live-provider behavior is activated automatically.

@@ -28,6 +28,9 @@ func (p ContractProvider) InspectWorkspace(ctx context.Context, absolutePath str
 	response, err := p.Port.InspectWorkspace(ctx, request)
 	if err != nil {
 		mapped := port.MapProviderError(err)
+		if mapped.Code == "TRANSPORT_UNAVAILABLE" || mapped.Code == "DEADLINE_EXCEEDED" {
+			return workspace.Inspection{}, workspace.ErrProviderUnavailable
+		}
 		if expectedID != nil && mapped.Code == "INVALID_REQUEST" {
 			return workspace.Inspection{}, workspace.ErrReattachRequired
 		}

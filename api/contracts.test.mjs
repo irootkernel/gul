@@ -13,6 +13,8 @@ import {
   ApprovalPolicy,
   CloseProgress,
   RecoveryClass,
+  ObservedMemberLifecycle,
+  ObservedMemberSchema,
   SpecialistResultFormat,
   SpecialistResultSchema,
   GetExecutionStateResponseSchema,
@@ -29,12 +31,12 @@ import {validateArtifactChunkRequest, validateArtifactChunkResponse, validateArt
 
 test("the generated browser surface is explicit and contains no upstream private fields", () => {
   expect(Object.keys(DirectSessionService.method).sort()).toEqual([
-    "closeRuntime", "getDirectSessionPresentation", "getExecutionState", "getPromptHistoryItem", "listPromptHistory", "listSpecialistResults",
+    "closeRuntime", "getDirectSessionPresentation", "getExecutionState", "getPromptHistoryItem", "listDirectSessions", "listPromptHistory", "listSpecialistResults",
     "renameDirectSession", "setDirectSessionArchived", "setDirectSessionFavorite",
   ]);
   expect(Object.keys(WorkspacePresentationService.method).sort()).toEqual([
     "browseRegistrableRoot", "getNavigation", "listRegistrableRoots", "listWorkspaces", "registerFromAllowlistPath",
-    "registerFromHostSelection", "renameWorkspace", "revalidateWorkspace", "setNavigation", "setWorkspaceFavorite", "setWorkspaceHidden",
+    "registerFromHostSelection", "removeWorkspaceEntry", "renameWorkspace", "revalidateWorkspace", "setNavigation", "setWorkspaceFavorite", "setWorkspaceHidden",
   ]);
   const names = file_gul_v1_gul.messages.flatMap(message => message.fields.map(field => field.name));
   for (const forbidden of ["provider_cursor", "run_id", "controller_carrier", "socket_path", "worker_id", "operation_id", "workspace_absolute_path"]) {
@@ -109,12 +111,31 @@ test("execution state preserves typed close semantics and rejects missing author
     sessionId: "session", stateVersion: "version", freshness: Freshness.FRESH,
     lifecycle: SessionLifecycle.CLOSING, composition: SessionComposition.BROKERED_HIERARCHY,
     approvalPolicy: ApprovalPolicy.USER_APPROVAL_REQUIRED, closeProgress: CloseProgress.OUTCOME_UNKNOWN,
-    recovery: RecoveryClass.OUTCOME_UNKNOWN, closeOperationRef: "gul-operation",
+    recovery: RecoveryClass.OUTCOME_UNKNOWN, closeOperationRef: "gul-operation", counts: {nonretiredMembers: 1n},
+    observedMembers: [{observedRef: "observed-1", lifecycle: ObservedMemberLifecycle.RUNNING}],
   });
   expect(fromBinary(GetExecutionStateResponseSchema, validateExecutionState(state)).closeOperationRef).toBe("gul-operation");
   expect(() => validateExecutionState({...state, stateVersion: ""})).toThrow("execution state");
   expect(() => validateExecutionState({...state, lifecycle: SessionLifecycle.UNSPECIFIED})).toThrow("execution state");
   expect(() => validateExecutionState({...state, specialistPolicyName: "x".repeat(270000)})).toThrow("exceeds bound");
+  expect(() => validateExecutionState({...state, counts: undefined})).toThrow("execution state");
+  expect(() => validateExecutionState({...state, observedMembers: [{observedRef: "observed-1", lifecycle: ObservedMemberLifecycle.UNSPECIFIED}]})).toThrow("observed member");
+  const unavailable = create(GetExecutionStateResponseSchema, {sessionId: "session", freshness: Freshness.UNAVAILABLE});
+  expect(() => validateExecutionState(unavailable)).not.toThrow();
+  expect(() => validateExecutionState({...unavailable, sessionId: "x".repeat(270000)})).toThrow("exceeds bound");
+  expect(() => validateExecutionState({...unavailable, counts: {nonretiredMembers: 0n}})).toThrow("unavailable");
+  for (const fields of [
+    {stateVersion: "fabricated"},
+    {observedMembers: state.observedMembers},
+    {observedMembersTruncated: true},
+    {observedAt: {seconds: 1n, nanos: 0}},
+  ]) {
+    expect(() => validateExecutionState({...unavailable, ...fields})).toThrow("unavailable");
+  }
+  expect(() => validateExecutionState({...state, observedMembers: Array.from({length: 257}, (_, i) => ({observedRef: `member-${i}`, lifecycle: ObservedMemberLifecycle.RUNNING}))})).toThrow("observed member");
+  expect(() => validateExecutionState({...state, observedMembersTruncated: true})).toThrow("observed member");
+  const bounded = create(GetExecutionStateResponseSchema, {...state, observedMembers: Array.from({length: 256}, (_, i) => create(ObservedMemberSchema, {observedRef: `member-${i}`, lifecycle: ObservedMemberLifecycle.RUNNING})), observedMembersTruncated: true});
+  expect(() => validateExecutionState(bounded)).not.toThrow();
 });
 
 test("result items retain Gul references and reject malformed integrity fields", () => {

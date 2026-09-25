@@ -143,6 +143,9 @@ func workspaceError(err error) error {
 	connectCode := connect.CodeFailedPrecondition
 	message := "workspace provider blocked"
 	switch {
+	case errors.Is(err, workspace.ErrProviderUnavailable):
+		code, action, connectCode = gulv1.ErrorCode_ERROR_CODE_TRANSPORT_UNAVAILABLE, gulv1.ActionClass_ACTION_CLASS_REFRESH_SNAPSHOT, connect.CodeUnavailable
+		message = "workspace provider unavailable"
 	case errors.Is(err, workspace.ErrHostSelectionUnavailable):
 		code, action, connectCode = gulv1.ErrorCode_ERROR_CODE_WORKSPACE_SELECTION_UNAVAILABLE, gulv1.ActionClass_ACTION_CLASS_OPERATOR_REPAIR, connect.CodeUnavailable
 		message = "host workspace selection unavailable"

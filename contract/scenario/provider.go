@@ -200,14 +200,15 @@ func (h *Harness) StartRun(_ context.Context, request *publicv1.StartRunRequest)
 	if spec.OrchestrationLaunch {
 		r.session = &publicv1.OrchestratedSessionProjection{SessionId: h.next("session"),
 			PrimaryRun: &publicv1.RunRef{Workspace: copyOf(request.GetWorkspace()), RunId: id}, AggregateRevision: 1, SourceRevision: 1,
-			Lifecycle:            publicv1.OrchestratedSessionLifecycle_ORCHESTRATED_SESSION_LIFECYCLE_ACTIVE,
-			Composition:          publicv1.OrchestratedSessionComposition_ORCHESTRATED_SESSION_COMPOSITION_STANDALONE_PRIMARY,
-			ApprovalPolicy:       publicv1.OrchestratedSessionApprovalPolicy_ORCHESTRATED_SESSION_APPROVAL_POLICY_USER_APPROVAL_REQUIRED,
-			SpecialistPolicyName: spec.PolicyName,
-			CloseIntent:          publicv1.SessionCloseIntent_SESSION_CLOSE_INTENT_NONE,
-			CloseProgress:        publicv1.SessionCloseProgress_SESSION_CLOSE_PROGRESS_NONE,
-			Availability:         publicv1.OrchestratedSessionAvailability_ORCHESTRATED_SESSION_AVAILABILITY_AVAILABLE,
-			CapturedAt:           h.timestamp()}
+			Lifecycle:              publicv1.OrchestratedSessionLifecycle_ORCHESTRATED_SESSION_LIFECYCLE_ACTIVE,
+			Composition:            publicv1.OrchestratedSessionComposition_ORCHESTRATED_SESSION_COMPOSITION_STANDALONE_PRIMARY,
+			ApprovalPolicy:         publicv1.OrchestratedSessionApprovalPolicy_ORCHESTRATED_SESSION_APPROVAL_POLICY_USER_APPROVAL_REQUIRED,
+			SpecialistPolicyName:   spec.PolicyName,
+			CloseIntent:            publicv1.SessionCloseIntent_SESSION_CLOSE_INTENT_NONE,
+			CloseProgress:          publicv1.SessionCloseProgress_SESSION_CLOSE_PROGRESS_NONE,
+			RecoveryClassification: publicv1.RecoveryClassification_RECOVERY_CLASSIFICATION_NONE,
+			Availability:           publicv1.OrchestratedSessionAvailability_ORCHESTRATED_SESSION_AVAILABILITY_AVAILABLE,
+			CapturedAt:             h.timestamp()}
 	}
 	w.runs[id] = r
 	response := &publicv1.StartRunResponse{Context: h.response(), Run: copyOf(r.projection), IdempotencyKey: request.GetIdempotencyKey()}

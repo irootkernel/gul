@@ -24,6 +24,7 @@ var (
 	ErrSelectionCancelled       = errors.New("workspace selection cancelled")
 	ErrHostSelectionUnavailable = errors.New("host workspace selection unavailable")
 	ErrWorkspaceBlocked         = errors.New("workspace is not provisioned or compatible")
+	ErrProviderUnavailable      = errors.New("workspace provider unavailable")
 	ErrWorkspaceUninitialized   = errors.New("workspace is not initialized")
 	ErrProfileMissing           = errors.New("workspace profile is missing or incompatible")
 	ErrProfileServerUnavailable = errors.New("profile server unavailable")

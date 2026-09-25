@@ -3,9 +3,9 @@
 | Field | Value |
 | --- | --- |
 | Role | Sole authority for task identity, order, status, dependencies, and phase |
-| Revision | 2026-09-26 E3-T2 local presentation |
+| Revision | 2026-09-26 E3-T3 passive session reads |
 | Active Task | None |
-| Next | E3-T3 after E3-T2 completion |
+| Next | E3-T4 after E3-T3 completion |
 | Required provider | Released Dolgorae v0.1.3 implementing `dolgorae.gul-consumer/v1` |
 
 ## 1. Status and execution rules
@@ -213,7 +213,7 @@ E5. Result/history implementation is owned by E4, not an E3 audit prerequisite.
 | --- | --- | --- | --- | --- |
 | E3-T1 | Pre-release | Completed | E1-T3, E13-T1 | Host/allowlisted Workspace selection and canonical attachment via fake provider; containment/identity tests |
 | E3-T2 | Pre-release | Completed | E3-T1, E1-T4 | Workspace and Direct Session rename/favorite/hide/archive/navigation presentation without runtime mutations |
-| E3-T3 | Pre-release | Planned | E3-T1, E13-T1 | Passive Orchestrated Session model, Primary binding, GetExecutionState implementation and observer-only member status; no close coordinator or executable placeholder |
+| E3-T3 | Pre-release | Completed | E3-T1, E13-T1 | Passive Orchestrated Session model, Primary binding, GetExecutionState implementation and observer-only member status; no close coordinator or executable placeholder |
 | E3-T4 | Pre-release | Planned | E3-T1, E13-T1 | Global Profile/model/lane selection, preprovisioned Policy name and explicit launch configuration |
 
 ### E4: Complete events, interactions, history and action evaluation

@@ -10,6 +10,34 @@ import (
 
 var _ presentation.Repository = PresentationRepository{}
 
+// RemoveWorkspace deletes only Gul-owned rows. It never invokes the provider.
+func (r PresentationRepository) RemoveWorkspace(ctx context.Context, subjectID, workspaceID string) error {
+	tx, err := r.store.writer.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	if _, err := tx.ExecContext(ctx, `UPDATE navigation_state SET workspace_id = NULL, session_id = NULL
+WHERE subject_id = ? AND workspace_id = ?`, subjectID, workspaceID); err != nil {
+		return err
+	}
+	if _, err := tx.ExecContext(ctx, `DELETE FROM direct_session_presentations WHERE subject_id = ? AND workspace_id = ?`, subjectID, workspaceID); err != nil {
+		return err
+	}
+	result, err := tx.ExecContext(ctx, `DELETE FROM workspace_entries WHERE subject_id = ? AND workspace_id = ?`, subjectID, workspaceID)
+	if err != nil {
+		return err
+	}
+	count, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if count != 1 {
+		return presentation.ErrNotFound
+	}
+	return tx.Commit()
+}
+
 func changedOne(result sql.Result, err error) error {
 	if err != nil {
 		return err

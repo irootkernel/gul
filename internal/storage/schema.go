@@ -134,3 +134,20 @@ PRIMARY KEY(subject_id, session_id),
 FOREIGN KEY(subject_id, session_id) REFERENCES direct_session_presentations(subject_id, session_id) ON DELETE CASCADE
 )`,
 }
+
+var sessionStatements = []string{
+	`CREATE TABLE primary_session_bindings (
+subject_id TEXT NOT NULL,
+session_id TEXT NOT NULL,
+workspace_id TEXT NOT NULL,
+run_id TEXT NOT NULL,
+controller_binding_id TEXT NOT NULL,
+provider_session_id TEXT NOT NULL,
+configuration_json TEXT NOT NULL,
+observed_at TEXT,
+PRIMARY KEY(subject_id, session_id),
+UNIQUE(subject_id, workspace_id, run_id),
+FOREIGN KEY(subject_id, session_id) REFERENCES direct_session_presentations(subject_id, session_id) ON DELETE CASCADE,
+FOREIGN KEY(subject_id, workspace_id) REFERENCES workspace_attachments(subject_id, workspace_id) ON DELETE CASCADE
+)`,
+}

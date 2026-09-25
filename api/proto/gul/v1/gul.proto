@@ -18,9 +18,13 @@ service WorkspacePresentationService {
   rpc RenameWorkspace(RenameWorkspaceRequest) returns (WorkspacePresentationResponse);
   rpc SetWorkspaceFavorite(SetWorkspaceFavoriteRequest) returns (WorkspacePresentationResponse);
   rpc SetWorkspaceHidden(SetWorkspaceHiddenRequest) returns (WorkspacePresentationResponse);
+  rpc RemoveWorkspaceEntry(RemoveWorkspaceEntryRequest) returns (RemoveWorkspaceEntryResponse);
   rpc GetNavigation(GetNavigationRequest) returns (NavigationResponse);
   rpc SetNavigation(SetNavigationRequest) returns (NavigationResponse);
 }
+
+message RemoveWorkspaceEntryRequest { string workspace_id = 1; }
+message RemoveWorkspaceEntryResponse {}
 
 message ListRegistrableRootsRequest {}
 
@@ -112,6 +116,7 @@ message ListWorkspacesResponse {
 }
 
 service DirectSessionService {
+  rpc ListDirectSessions(ListDirectSessionsRequest) returns (ListDirectSessionsResponse);
   rpc GetDirectSessionPresentation(GetDirectSessionPresentationRequest) returns (DirectSessionPresentationResponse);
   rpc RenameDirectSession(RenameDirectSessionRequest) returns (DirectSessionPresentationResponse);
   rpc SetDirectSessionFavorite(SetDirectSessionFavoriteRequest) returns (DirectSessionPresentationResponse);
@@ -152,6 +157,14 @@ message SetDirectSessionArchivedRequest {
 
 message DirectSessionPresentationResponse {
   DirectSessionPresentation session = 1;
+}
+
+message ListDirectSessionsRequest {
+  string workspace_id = 1;
+}
+
+message ListDirectSessionsResponse {
+  repeated DirectSessionPresentation sessions = 1;
 }
 
 service ArtifactPresentationService {
@@ -216,16 +229,22 @@ enum SessionLifecycle {
   SESSION_LIFECYCLE_CLOSING = 2;
   SESSION_LIFECYCLE_CLOSED = 3;
   SESSION_LIFECYCLE_RECOVERY_REQUIRED = 4;
+  SESSION_LIFECYCLE_CREATING = 5;
+  SESSION_LIFECYCLE_DEGRADED = 6;
+  SESSION_LIFECYCLE_RECOVERING = 7;
+  SESSION_LIFECYCLE_ABORTED = 8;
 }
 
 enum SessionComposition {
   SESSION_COMPOSITION_UNSPECIFIED = 0;
   SESSION_COMPOSITION_BROKERED_HIERARCHY = 1;
+  SESSION_COMPOSITION_STANDALONE_PRIMARY = 2;
 }
 
 enum ApprovalPolicy {
   APPROVAL_POLICY_UNSPECIFIED = 0;
   APPROVAL_POLICY_USER_APPROVAL_REQUIRED = 1;
+  APPROVAL_POLICY_FULLY_DELEGATED = 2;
 }
 
 enum CloseProgress {
@@ -271,6 +290,26 @@ message GetExecutionStateResponse {
   CloseProgress close_progress = 10;
   RecoveryClass recovery = 11;
   optional string close_operation_ref = 12;
+  repeated ObservedMember observed_members = 13;
+  bool observed_members_truncated = 14;
+}
+
+message ObservedMember {
+  string observed_ref = 1;
+  ObservedMemberLifecycle lifecycle = 2;
+}
+
+enum ObservedMemberLifecycle {
+  OBSERVED_MEMBER_LIFECYCLE_UNSPECIFIED = 0;
+  OBSERVED_MEMBER_LIFECYCLE_STARTING = 1;
+  OBSERVED_MEMBER_LIFECYCLE_IDLE = 2;
+  OBSERVED_MEMBER_LIFECYCLE_RUNNING = 3;
+  OBSERVED_MEMBER_LIFECYCLE_WAITING_INTERACTION = 4;
+  OBSERVED_MEMBER_LIFECYCLE_RECONCILIATION_REQUIRED = 5;
+  OBSERVED_MEMBER_LIFECYCLE_PAUSED = 6;
+  OBSERVED_MEMBER_LIFECYCLE_CLOSED = 7;
+  OBSERVED_MEMBER_LIFECYCLE_START_FAILED = 8;
+  OBSERVED_MEMBER_LIFECYCLE_OUTCOME_UNKNOWN = 9;
 }
 
 message ListSpecialistResultsRequest {

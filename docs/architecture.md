@@ -650,15 +650,15 @@ WorkspacePresentationService
   SetWorkspaceHidden, GetNavigation, SetNavigation,
   RegisterFromHostSelection,
   ListRegistrableRoots, BrowseRegistrableRoot, RegisterFromAllowlistPath,
-  RevalidateWorkspace; Get and RemovePresentation are planned
+  RevalidateWorkspace, RemoveWorkspaceEntry; Get is planned
 
 DirectSessionService
-  GetDirectSessionPresentation, RenameDirectSession,
+  GetDirectSessionPresentation, ListDirectSessions, RenameDirectSession,
   SetDirectSessionFavorite, SetDirectSessionArchived,
   ListPromptHistory, GetPromptHistoryItem, GetExecutionState,
   ListSpecialistResults,
   Submit, Interrupt, PauseRuntime, ResumeRuntime, CloseRuntime,
-  Recover, Reconcile, BeginControllerAdoption; Create and List are planned
+  Recover, Reconcile, BeginControllerAdoption; Create is planned
 
 InteractionPresentationService
   ListSummaries, GetCard, Resolve
@@ -698,7 +698,8 @@ implicitly return complete history or all results.
 | --- | --- | --- |
 | DirectSessionService.ListPromptHistory | session_id, optional page_token, page_size | snapshot_id, ordered PromptHistoryItem summaries, optional next_page_token, traversal_complete, freshness and observed_at. E4-T5. |
 | DirectSessionService.GetPromptHistoryItem | session_id, prompt_item_id | Stable item identity, ordinal, accepted_at, conversation_entry_id and a typed original-content value: exact inline UTF-8 or authorized Gul artifact reference. E4-T5. |
-| DirectSessionService.GetExecutionState | session_id | Gul ExecutionState containing mapped lifecycle/composition/approval policy, safe policy identity, named counts, close progress and recovery classification, optional Gul close_operation_ref, state_version, freshness and observed_at. E3-T3. |
+| DirectSessionService.GetExecutionState | session_id | Gul ExecutionState containing mapped lifecycle/composition/approval policy, safe policy identity, named counts, optional bounded observer-only member status with synthetic Gul references and a truncation flag, close progress and recovery classification, optional Gul close_operation_ref, state_version, freshness and observed_at. E3-T3. |
+| DirectSessionService.ListDirectSessions | workspace_id | Subject-scoped Gul Direct Session presentation references for locally bound Primary Runs. E3-T3. |
 | DirectSessionService.ListSpecialistResults | session_id, optional page_token, page_size | snapshot_id, ordered SpecialistResult summaries, optional next_page_token, traversal_complete, freshness and observed_at. E4-T5. |
 
 PromptHistoryItem contains prompt_item_id, one-based ordinal, accepted_at,
@@ -994,11 +995,11 @@ The serial command facade is `toolchain-check`, `generate-contract`, `contract-c
 
 ## 19. Current snapshot
 
-**Snapshot date:** 2026-09-26 (E3-T2 completion)
+**Snapshot date:** 2026-09-26 (E3-T3 completion)
 
-**Roadmap point:** E0 is `Completed`, E12 is `Completed`, E1 is `Completed`, and E13 is `Completed`; E1-T1 is `Completed` and E1-T2/T3/T4/T5 are `Completed`. E3-T1/T2 are `Completed`; E3-T3 is next and E3 closeout remains pending. Former E12-T2/T3 remain Retired. E14 owns pre-release application acceptance. No live-provider or assembled-application acceptance is implied.
+**Roadmap point:** E0 is `Completed`, E12 is `Completed`, E1 is `Completed`, and E13 is `Completed`; E1-T1 is `Completed` and E1-T2/T3/T4/T5 are `Completed`. E3-T1/T2/T3 are `Completed`; E3-T4 is next and E3 closeout remains pending. Former E12-T2/T3 remain Retired. E14 owns pre-release application acceptance. No live-provider or assembled-application acceptance is implied.
 
-**Maturity:** delivery-independent Go core, shared React bundle, declared but disabled Gul API, typed provider ports and explicit scenario harness, isolated SQLite repositories with fake-scoped Workspace attachment and local presentation, and a Wails shell foundation; provider and assembled storage lifecycle remain pending
+**Maturity:** delivery-independent Go core, shared React bundle, declared but disabled Gul API, typed provider ports and explicit scenario harness, isolated SQLite repositories with fake-scoped Workspace attachment, local presentation and passive session reads, and a Wails shell foundation; provider and assembled storage lifecycle remain pending
 
 ### 19.1 Implemented components
 
@@ -1054,6 +1055,25 @@ Workspace clears its selection; archiving a session clears that session from
 navigation. The typed handlers use the core's local access gate, so an offline
 provider does not block authenticated presentation edits. They remain unmounted.
 
+`internal/session` persists one Gul Direct Session binding per accepted provider
+Primary Run. Its trusted bind hook requires a revalidated Workspace and a
+backend-resolved Controller carrier. The checked adapter reads `GetRun`,
+authorized `GetOrchestratedSession`, and optional `ListRuns` parent links. It
+rejects a wrong Controller or non-session root and refreshes provider-owned
+configuration on bind and reopen. Public
+Run parent links yield optional Specialist status observations only; they do
+not supply aggregate membership or counts. The browser read caps observations
+at 256 and reports truncation; the service retains at most 256 stale snapshots.
+The stale cache is process-local; after a restart an offline provider yields
+unavailable state until a new authoritative observation succeeds.
+Oversized provider snapshots fail validation before persistence. A coalesced
+refresh is bounded independently of any one caller, so cancelling one browser
+read does not cancel another caller's read of the same session.
+The unmounted Direct Session handler
+lists local bindings and maps aggregate reads to Gul-owned browser types.
+Unavailable reads omit counts and close references. Workspace removal clears
+only local presentation, navigation and binding rows.
+
 `internal/storage` requires an owner-only database directory and file, then
 opens the pinned SQLite driver with one writer and at most four read-only
 connections. Versioned migration creates only Gul-owned records;
@@ -1070,6 +1090,9 @@ presentation and verified provider reference commit in one transaction.
 Migration 3 adds subject-scoped favorite tables. Direct Session discovery
 inserts require a bounded display name and preserve existing display metadata,
 so later provider refreshes cannot undo a local rename or archive choice.
+Migration 4 adds one-to-one subject-scoped Primary bindings and a local copy of
+the latest provider Run configuration. The copy is presentation data; GetRun
+remains authoritative on every fresh read and after a restart.
 
 `internal/desktop` starts and stops the same core through its lifecycle boundary,
 then runs a Wails v3 window over the checked bundle's existing asset handler.
@@ -1097,6 +1120,9 @@ exercise migration, schema drift, connection settings, typed records, rollback,
 sequence allocation, cache staleness, and backup publication.
 Workspace tests cover picker and remote registration, canonical aliases, denied
 private/escaping paths, typed provider blockers, moved roots, and changed IDs.
+Session tests cover three Runs across two Workspaces, wrong-Controller and
+non-session rejection, provider configuration refresh, typed Specialist status,
+coalesced passive reads, stale/unavailable state, subject isolation and reopen.
 
 ### 19.3 Existing artifacts
 
@@ -1117,7 +1143,7 @@ One checked React bundle and shared browser/shell asset delivery exist.
 An isolated Wails shell foundation reuses the shared core and checked bundle; authenticated attach is not enabled.
 ConnectRPC services are declared and generated but not registered.
 Gul-only SQLite schema and repositories exist in isolated tests; no production database lifecycle is enabled.
-No Runtime Provider adapter, RPC supervisor, Controller credential store, timeline adapter, or Artifact adapter exists in the assembled product. An isolated Workspace inspection adapter uses the pinned provider port with a scenario fake.
+No Runtime Provider adapter, RPC supervisor, Controller credential store, timeline adapter, or Artifact adapter exists in the assembled product. Isolated Workspace inspection and passive session adapters use the pinned provider port with a scenario fake.
 ```
 
 ### 19.5 Security posture

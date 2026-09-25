@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"connectrpc.com/connect"
 	publicv1 "github.com/rootkernel/gul/contract/generated/go/dolgorae/public/v1"
 	"github.com/rootkernel/gul/contract/port"
 	"github.com/rootkernel/gul/contract/scenario"
@@ -29,14 +30,27 @@ func TestExpectedIdentityRejectedByPinnedPortRequiresReattachment(t *testing.T) 
 type inspectionPort struct {
 	port.RuntimePort
 	blockers []*publicv1.CapabilityBlocker
+	err      error
 }
 
 func (p inspectionPort) InspectWorkspace(context.Context, *publicv1.InspectWorkspaceRequest) (*publicv1.InspectWorkspaceResponse, error) {
+	if p.err != nil {
+		return nil, p.err
+	}
 	return &publicv1.InspectWorkspaceResponse{
 		WorkspaceId: "workspace", Status: publicv1.WorkspaceInspectionStatus_WORKSPACE_INSPECTION_STATUS_BLOCKED,
 		CanonicalPath: &publicv1.PathProjection{Value: &publicv1.PathProjection_Utf8Path{Utf8Path: "/workspace"}},
 		Blockers:      p.blockers,
 	}, nil
+}
+
+func TestTransportFailuresStayUnavailableThroughWorkspaceAdapter(t *testing.T) {
+	for _, code := range []connect.Code{connect.CodeUnavailable, connect.CodeDeadlineExceeded} {
+		provider := contractprovider.ContractProvider{Port: inspectionPort{err: connect.NewError(code, errors.New("transport failed"))}}
+		if _, err := provider.InspectWorkspace(t.Context(), "/workspace", nil); !errors.Is(err, workspace.ErrProviderUnavailable) {
+			t.Fatalf("%s classification = %v", code, err)
+		}
+	}
 }
 
 func TestInspectionScansAllTypedBlockers(t *testing.T) {

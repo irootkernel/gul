@@ -10,6 +10,7 @@ import {
   ApprovalPolicy,
   CloseProgress,
   RecoveryClass,
+  ObservedMemberLifecycle,
   SpecialistResultFormat,
   GetExecutionStateResponseSchema,
   GetPromptHistoryItemResponseSchema,
@@ -88,13 +89,31 @@ export function validatePromptOriginal(response) {
 
 /** @param {import("./generated/ts/gul/v1/gul_pb.ts").GetExecutionStateResponse} response */
 export function validateExecutionState(response) {
-  if (!response.sessionId || !response.stateVersion || response.freshness === Freshness.UNSPECIFIED ||
+  if (!response.sessionId || response.freshness === Freshness.UNSPECIFIED) {
+    throw new Error("invalid Gul execution state");
+  }
+  if (response.freshness === Freshness.UNAVAILABLE) {
+    if (response.counts || response.observedMembers?.length || response.observedMembersTruncated || response.stateVersion || response.observedAt) {
+      throw new Error("invalid Gul unavailable execution state");
+    }
+    const bytes = toBinary(GetExecutionStateResponseSchema, response);
+    if (bytes.length > maximumPageMetadataBytes) throw new Error("Gul execution state exceeds bound");
+    return bytes;
+  }
+  if (!response.stateVersion ||
+      (response.freshness === Freshness.FRESH && !response.counts) ||
       response.lifecycle === SessionLifecycle.UNSPECIFIED ||
       response.composition === SessionComposition.UNSPECIFIED ||
       response.approvalPolicy === ApprovalPolicy.UNSPECIFIED ||
       response.closeProgress === CloseProgress.UNSPECIFIED ||
       response.recovery === RecoveryClass.UNSPECIFIED) {
     throw new Error("invalid Gul execution state");
+  }
+  if ((response.observedMembers?.length || 0) > 256 ||
+      (response.observedMembersTruncated && response.observedMembers?.length !== 256) ||
+      response.observedMembers?.some(member => !member.observedRef ||
+      member.lifecycle === ObservedMemberLifecycle.UNSPECIFIED)) {
+    throw new Error("invalid Gul observed member");
   }
   const bytes = toBinary(GetExecutionStateResponseSchema, response);
   if (bytes.length > maximumPageMetadataBytes) throw new Error("Gul execution state exceeds bound");

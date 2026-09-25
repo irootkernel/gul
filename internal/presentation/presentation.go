@@ -45,6 +45,8 @@ type Repository interface {
 	SetWorkspaceFavorite(context.Context, string, string, bool) error
 	// SetWorkspaceHidden clears navigation for the hidden workspace atomically.
 	SetWorkspaceHidden(context.Context, string, string, bool) error
+	// RemoveWorkspace removes only Gul-owned presentation and bindings.
+	RemoveWorkspace(context.Context, string, string) error
 	RenameDirectSession(context.Context, string, string, string) error
 	SetDirectSessionFavorite(context.Context, string, string, bool) error
 	// SetDirectSessionArchived clears a selected archived session atomically.
@@ -102,6 +104,13 @@ func (s *Service) SetWorkspaceHidden(ctx context.Context, subjectID, workspaceID
 		return Workspace{}, persistenceError(err)
 	}
 	return s.Workspace(ctx, subjectID, workspaceID)
+}
+
+func (s *Service) RemoveWorkspace(ctx context.Context, subjectID, workspaceID string) error {
+	if subjectID == "" || workspaceID == "" || s == nil || s.repo == nil {
+		return ErrInvalid
+	}
+	return persistenceError(s.repo.RemoveWorkspace(ctx, subjectID, workspaceID))
 }
 
 func (s *Service) RenameDirectSession(ctx context.Context, subjectID, sessionID, name string) (DirectSession, error) {
