@@ -134,6 +134,42 @@ func TestAvailabilityFailuresStayTyped(t *testing.T) {
 	}
 }
 
+func TestLocalAccessSkipsProviderAndRequiresPersistence(t *testing.T) {
+	var calls []string
+	core := NewCore(Dependencies{
+		Authorization: recordingAuthorization{calls: &calls},
+		Provider:      recordingReadiness{name: "provider", calls: &calls, err: errors.New("offline")},
+		Persistence:   recordingReadiness{name: "persistence", calls: &calls, err: errors.New("closed")},
+	})
+	if err := core.Start(t.Context()); err != nil {
+		t.Fatal(err)
+	}
+	defer core.Stop(context.Background())
+	if err := core.RequireLocalAccess(t.Context(), Principal{Subject: "fixture"}); !errors.Is(err, ErrPersistenceUnavailable) {
+		t.Fatalf("local persistence error = %v", err)
+	}
+	if want := []string{"authorize:fixture", "persistence"}; !reflect.DeepEqual(calls, want) {
+		t.Fatalf("local access calls = %v, want %v", calls, want)
+	}
+}
+
+type contextReadiness struct{}
+
+func (contextReadiness) Ready(ctx context.Context) error { return ctx.Err() }
+
+func TestLocalAccessPreservesDeadlineCause(t *testing.T) {
+	core := NewCore(Dependencies{Authorization: recordingAuthorization{}, Persistence: contextReadiness{}})
+	if err := core.Start(t.Context()); err != nil {
+		t.Fatal(err)
+	}
+	defer core.Stop(context.Background())
+	ctx, cancel := context.WithDeadline(t.Context(), time.Now().Add(-time.Second))
+	defer cancel()
+	if err := core.RequireLocalAccess(ctx, Principal{Subject: "fixture"}); !errors.Is(err, context.DeadlineExceeded) || !errors.Is(err, ErrPersistenceUnavailable) {
+		t.Fatalf("local deadline error = %v", err)
+	}
+}
+
 func TestLifecycleFailureDoesNotExposeRunningCore(t *testing.T) {
 	startErr := errors.New("bootstrap failed")
 	core := NewCore(Dependencies{Lifecycle: &recordingLifecycle{startErr: startErr}})

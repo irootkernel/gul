@@ -15,6 +15,11 @@ service WorkspacePresentationService {
   rpc RegisterFromAllowlistPath(RegisterFromAllowlistPathRequest) returns (RegisterWorkspaceResponse);
   rpc RevalidateWorkspace(RevalidateWorkspaceRequest) returns (RevalidateWorkspaceResponse);
   rpc ListWorkspaces(ListWorkspacesRequest) returns (ListWorkspacesResponse);
+  rpc RenameWorkspace(RenameWorkspaceRequest) returns (WorkspacePresentationResponse);
+  rpc SetWorkspaceFavorite(SetWorkspaceFavoriteRequest) returns (WorkspacePresentationResponse);
+  rpc SetWorkspaceHidden(SetWorkspaceHiddenRequest) returns (WorkspacePresentationResponse);
+  rpc GetNavigation(GetNavigationRequest) returns (NavigationResponse);
+  rpc SetNavigation(SetNavigationRequest) returns (NavigationResponse);
 }
 
 message ListRegistrableRootsRequest {}
@@ -53,6 +58,38 @@ message WorkspaceEntry {
   string workspace_id = 1;
   string display_name = 2;
   bool hidden = 3;
+  bool favorite = 4;
+}
+
+message RenameWorkspaceRequest {
+  string workspace_id = 1;
+  string display_name = 2;
+}
+
+message SetWorkspaceFavoriteRequest {
+  string workspace_id = 1;
+  bool favorite = 2;
+}
+
+message SetWorkspaceHiddenRequest {
+  string workspace_id = 1;
+  bool hidden = 2;
+}
+
+message WorkspacePresentationResponse {
+  WorkspaceEntry workspace = 1;
+}
+
+message GetNavigationRequest {}
+
+message SetNavigationRequest {
+  string workspace_id = 1;
+  string session_id = 2;
+}
+
+message NavigationResponse {
+  string workspace_id = 1;
+  string session_id = 2;
 }
 
 message RegisterWorkspaceResponse {
@@ -75,11 +112,46 @@ message ListWorkspacesResponse {
 }
 
 service DirectSessionService {
+  rpc GetDirectSessionPresentation(GetDirectSessionPresentationRequest) returns (DirectSessionPresentationResponse);
+  rpc RenameDirectSession(RenameDirectSessionRequest) returns (DirectSessionPresentationResponse);
+  rpc SetDirectSessionFavorite(SetDirectSessionFavoriteRequest) returns (DirectSessionPresentationResponse);
+  rpc SetDirectSessionArchived(SetDirectSessionArchivedRequest) returns (DirectSessionPresentationResponse);
   rpc ListPromptHistory(ListPromptHistoryRequest) returns (ListPromptHistoryResponse);
   rpc GetPromptHistoryItem(GetPromptHistoryItemRequest) returns (GetPromptHistoryItemResponse);
   rpc GetExecutionState(GetExecutionStateRequest) returns (GetExecutionStateResponse);
   rpc ListSpecialistResults(ListSpecialistResultsRequest) returns (ListSpecialistResultsResponse);
   rpc CloseRuntime(CloseRuntimeRequest) returns (CloseRuntimeResponse);
+}
+
+message DirectSessionPresentation {
+  string session_id = 1;
+  string workspace_id = 2;
+  string display_name = 3;
+  bool favorite = 4;
+  bool archived = 5;
+}
+
+message GetDirectSessionPresentationRequest {
+  string session_id = 1;
+}
+
+message RenameDirectSessionRequest {
+  string session_id = 1;
+  string display_name = 2;
+}
+
+message SetDirectSessionFavoriteRequest {
+  string session_id = 1;
+  bool favorite = 2;
+}
+
+message SetDirectSessionArchivedRequest {
+  string session_id = 1;
+  bool archived = 2;
+}
+
+message DirectSessionPresentationResponse {
+  DirectSessionPresentation session = 1;
 }
 
 service ArtifactPresentationService {

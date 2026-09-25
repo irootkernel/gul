@@ -8,6 +8,7 @@ import (
 	gulv1 "github.com/rootkernel/gul/api/generated/go/gul/v1"
 	"github.com/rootkernel/gul/api/generated/go/gul/v1/gulv1connect"
 	"github.com/rootkernel/gul/internal/app"
+	"github.com/rootkernel/gul/internal/presentation"
 	"github.com/rootkernel/gul/internal/workspace"
 )
 
@@ -17,9 +18,10 @@ type PrincipalResolver func(context.Context) (app.Principal, error)
 // WorkspaceHandler is available for explicit composition. E8 owns production
 // authentication and listener registration; neither is installed by this type.
 type WorkspaceHandler struct {
-	Core       *app.Core
-	Workspaces *workspace.Service
-	Principal  PrincipalResolver
+	Core         *app.Core
+	Workspaces   *workspace.Service
+	Presentation *presentation.Service
+	Principal    PrincipalResolver
 }
 
 var _ gulv1connect.WorkspacePresentationServiceHandler = (*WorkspaceHandler)(nil)
@@ -126,7 +128,7 @@ func (h *WorkspaceHandler) ListWorkspaces(ctx context.Context, _ *connect.Reques
 }
 
 func browserWorkspace(entry workspace.Attachment) *gulv1.WorkspaceEntry {
-	return &gulv1.WorkspaceEntry{WorkspaceId: entry.ID, DisplayName: entry.DisplayName, Hidden: entry.Hidden}
+	return &gulv1.WorkspaceEntry{WorkspaceId: entry.ID, DisplayName: entry.DisplayName, Hidden: entry.Hidden, Favorite: entry.Favorite}
 }
 
 func workspaceError(err error) error {
@@ -164,7 +166,11 @@ func workspaceError(err error) error {
 		code = gulv1.ErrorCode_ERROR_CODE_PERSISTENCE_UNAVAILABLE
 		connectCode = connect.CodeUnavailable
 		message = "workspace storage unavailable"
-	case errors.Is(err, app.ErrCoreNotRunning), errors.Is(err, app.ErrProviderUnavailable):
+	case errors.Is(err, app.ErrCoreNotRunning):
+		code = gulv1.ErrorCode_ERROR_CODE_SOURCE_UNAVAILABLE
+		connectCode = connect.CodeUnavailable
+		message = "workspace service unavailable"
+	case errors.Is(err, app.ErrProviderUnavailable):
 		connectCode = connect.CodeUnavailable
 		message = "workspace service unavailable"
 	}

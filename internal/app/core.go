@@ -171,24 +171,35 @@ func (c *Core) Running() bool {
 // handlers. Authorization runs before availability checks so an unauthenticated
 // caller cannot probe provider or persistence health.
 func (c *Core) RequireProductAccess(ctx context.Context, principal Principal) error {
+	return c.requireAccess(ctx, principal, true)
+}
+
+// RequireLocalAccess gates Gul-owned presentation when the runtime is offline.
+func (c *Core) RequireLocalAccess(ctx context.Context, principal Principal) error {
+	return c.requireAccess(ctx, principal, false)
+}
+
+func (c *Core) requireAccess(ctx context.Context, principal Principal, providerRequired bool) error {
 	if !c.beginAccess() {
 		return ErrCoreNotRunning
 	}
 	defer c.endAccess()
 	if err := c.authorization.Authorize(ctx, principal); err != nil {
-		return fmt.Errorf("%w: %v", ErrAccessDenied, err)
+		return fmt.Errorf("%w: %w", ErrAccessDenied, err)
 	}
 	if !c.Running() {
 		return ErrCoreNotRunning
 	}
-	if err := c.provider.Ready(ctx); err != nil {
-		return fmt.Errorf("%w: %v", ErrProviderUnavailable, err)
+	if providerRequired {
+		if err := c.provider.Ready(ctx); err != nil {
+			return fmt.Errorf("%w: %w", ErrProviderUnavailable, err)
+		}
 	}
 	if !c.Running() {
 		return ErrCoreNotRunning
 	}
 	if err := c.persistence.Ready(ctx); err != nil {
-		return fmt.Errorf("%w: %v", ErrPersistenceUnavailable, err)
+		return fmt.Errorf("%w: %w", ErrPersistenceUnavailable, err)
 	}
 	if !c.Running() {
 		return ErrCoreNotRunning

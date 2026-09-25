@@ -386,6 +386,27 @@ REQ-WS-006/007, and REQ-WS-009..012; E6 still owns FileService use of the
 verified root, E3-T4 owns launch Policy selection, E8 owns authenticated route
 assembly, and E2/E9 own released-provider compatibility.
 
+## 1.15 E3-T2 local presentation, 2026-09-26
+
+`internal/presentation` exposes local Workspace and Direct Session changes over
+the subject-scoped SQLite repository. Migration 3 stores favorites separately
+from the earlier tables, preserving migration digests. Attached Workspace
+rename, favorite and hide actions do not change canonical roots or provider
+IDs. Direct Session rename, favorite and archive actions leave provider state
+untouched. Repeated Direct Session discovery preserves existing local metadata.
+Navigation accepts only visible attached Workspaces and sessions in the selected
+Workspace. Hiding a Workspace clears its selection; archiving a session clears
+the selected session. The local core access gate checks authorization and
+persistence without requiring provider readiness. The generated browser
+declarations and unmounted handlers expose these operations with typed request
+errors; no production route is enabled.
+
+SQLite reopen, separate subject, invalid name, hidden navigation and offline
+provider fixtures passed with `make test`. This promotes REQ-WS-003 and
+REQ-DIRECT-007 for local presentation only. E3-T3 owns provider-backed session
+discovery, E8 owns authenticated route assembly, and E2/E9 retain live-provider
+acceptance.
+
 ## 2. Current development snapshot
 
 | Area | State |
@@ -393,14 +414,14 @@ assembly, and E2/E9 own released-provider compatibility.
 | Five Gul SOT documents | E0-T4 completed the consumer alignment and Gate A reproduction; E0-T8 completed toolchain/ADR alignment; E0-T7 completed Gate B |
 | Toolchain and developer-command artifacts | E0-T8 accepted one pin manifest and read-only host checks; E0-T7 adds checked contract generation/drift delegates; E1-T1 adds the root Go module; E1-T2 adds root Bun pin validation and checked frontend generation/drift commands; E1-T3 adds checked Gul API/error-catalog generation; no installer |
 | Contract boundary | E12-T1 pins TASK-053 and regenerates checked clients/maps/fake transport for 36 known, 27 required, and 9 unavailable methods; E13-T1 adds an explicit stateful scenario provider over the 27-method port |
-| Production source | E1 shared core, bundle, API declarations, isolated SQLite and Wails shell; E3-T1 adds isolated Workspace attachment, schema migration 2, inspection adapter, and unmounted typed handler |
+| Production source | E1 shared core, bundle, API declarations, isolated SQLite and Wails shell; E3-T1 adds isolated Workspace attachment and inspection; E3-T2 adds local presentation service, migration 3, and unmounted typed handlers |
 | Wails host/frontend | One React foundation bundle and isolated Wails shell foundation implemented; feature UI and authenticated attach not implemented |
-| ConnectRPC schema/services | Gul DirectSession, ArtifactPresentation and WorkspacePresentation declarations and generated clients exist; only an isolated Workspace handler exists, with no product route enabled |
-| Gul SQLite schema | Gul-owned version 2 schema with Workspace attachment migration and isolated repositories implemented; production startup integration pending |
+| ConnectRPC schema/services | Gul DirectSession, ArtifactPresentation and WorkspacePresentation declarations and generated clients exist; isolated Workspace and Direct Session presentation handlers remain unmounted |
+| Gul SQLite schema | Gul-owned version 3 schema with Workspace attachment and favorite migrations and isolated repositories implemented; production startup integration pending |
 | Dolgorae RPC supervisor/provider | Not implemented |
 | Controller credential store | Caller-owned mechanism selected by ADR-0047; not implemented |
 | FileService/auth/PWA/Tailscale integration | Not implemented |
-| Current State promotions | REQ-HOST-005, REQ-RUNTIME-011, REQ-RUNTIME-022, REQ-CONSUMER-001/002 and fake-scoped REQ-WS-001/006/007/009/010/011/012; no assembled-product or released-provider claim |
+| Current State promotions | REQ-HOST-005, REQ-RUNTIME-011, REQ-RUNTIME-022, REQ-CONSUMER-001/002, fake-scoped REQ-WS-001/006/007/009/010/011/012, and local REQ-WS-003/REQ-DIRECT-007; no assembled-product or released-provider claim |
 
 The repository contains the shared-core and single-bundle delivery foundations,
 declared but inactive Gul APIs, isolated Gul-owned SQLite repositories, bootstrap
@@ -853,4 +874,4 @@ The initial documentation assumed Gul would manage one Codex App Server, map Ses
 
 ## 12. Handoff
 
-E12, E1, and E13 are complete. The TASK-053 consumer lock and generated contract tooling remain authoritative. E3-T1 added fake-scoped canonical Workspace attachment and revalidation; E3-T2 is next. E2-T0 remains blocked on an accepted compatible Dolgorae executable and live smoke evidence. No product route or live-provider behavior is activated automatically.
+E12, E1, and E13 are complete. The TASK-053 consumer lock and generated contract tooling remain authoritative. E3-T1 added fake-scoped canonical Workspace attachment and revalidation; E3-T2 added local-only presentation, and E3-T3 is next. E2-T0 remains blocked on an accepted compatible Dolgorae executable and live smoke evidence. No product route or live-provider behavior is activated automatically.

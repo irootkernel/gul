@@ -66,7 +66,7 @@ func TestOpenMigratesAndRejectsDrift(t *testing.T) {
 		}
 		count++
 	}
-	if err := rows.Err(); err != nil || count != len(schemaStatements)+len(attachmentStatements) {
+	if err := rows.Err(); err != nil || count != len(schemaStatements)+len(attachmentStatements)+len(presentationStatements) {
 		t.Fatalf("schema inventory = %d, %v", count, err)
 	}
 	rows.Close()
@@ -104,7 +104,7 @@ func TestOpenMigratesAndRejectsDrift(t *testing.T) {
 func TestOpenRejectsMigrationAndSchemaObjectDrift(t *testing.T) {
 	for name, mutation := range map[string]string{
 		"digest":                "UPDATE schema_migrations SET digest = 'wrong'",
-		"version":               "PRAGMA user_version = 3",
+		"version":               "PRAGMA user_version = 4",
 		"missing migration row": "DELETE FROM schema_migrations",
 		"missing":               "DROP TABLE navigation_state",
 		"trigger":               "CREATE TRIGGER unexpected AFTER INSERT ON app_account BEGIN DELETE FROM app_account; END",
@@ -213,6 +213,93 @@ func TestFailedSecondMigrationPreservesVersionOne(t *testing.T) {
 	}
 	if version != 1 || migrationCount != 1 {
 		t.Fatalf("failed migration committed version %d, rows %d", version, migrationCount)
+	}
+}
+
+func TestFailedThirdMigrationPreservesVersionTwo(t *testing.T) {
+	filename, db := versionTwoDatabase(t)
+	if _, err := db.ExecContext(t.Context(), "CREATE TABLE direct_session_favorites(unexpected TEXT)"); err != nil {
+		t.Fatal(err)
+	}
+	if err := db.Close(); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := Open(t.Context(), filename); err == nil || !strings.Contains(err.Error(), "Gul migration 3") {
+		t.Fatalf("conflicting third migration = %v", err)
+	}
+	db, err := sql.Open("sqlite", databaseURL(filename, false))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer db.Close()
+	var version, migrationCount, firstTableCount int
+	if err := db.QueryRowContext(t.Context(), "PRAGMA user_version").Scan(&version); err != nil {
+		t.Fatal(err)
+	}
+	if err := db.QueryRowContext(t.Context(), "SELECT COUNT(*) FROM schema_migrations").Scan(&migrationCount); err != nil {
+		t.Fatal(err)
+	}
+	if err := db.QueryRowContext(t.Context(), "SELECT COUNT(*) FROM sqlite_master WHERE type = 'table' AND name = 'workspace_favorites'").Scan(&firstTableCount); err != nil {
+		t.Fatal(err)
+	}
+	if version != 2 || migrationCount != 2 || firstTableCount != 0 {
+		t.Fatalf("failed migration committed version %d, rows %d, first table %d", version, migrationCount, firstTableCount)
+	}
+}
+
+func versionTwoDatabase(t *testing.T) (string, *sql.DB) {
+	t.Helper()
+	filename, db := versionOneDatabase(t)
+	tx, err := db.BeginTx(t.Context(), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, statement := range attachmentStatements {
+		if _, err := tx.ExecContext(t.Context(), statement); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if _, err := tx.ExecContext(t.Context(), "INSERT INTO schema_migrations(version, digest, applied_at) VALUES (2, ?, '2026-09-25')", digestStatements(attachmentStatements)); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := tx.ExecContext(t.Context(), "PRAGMA user_version = 2"); err != nil {
+		t.Fatal(err)
+	}
+	if err := tx.Commit(); err != nil {
+		t.Fatal(err)
+	}
+	return filename, db
+}
+
+func TestOpenMigratesPopulatedVersionTwoDatabase(t *testing.T) {
+	filename, db := versionTwoDatabase(t)
+	if _, err := db.ExecContext(t.Context(), "INSERT INTO app_account(subject_id, created_at) VALUES ('owner', '2026-09-25')"); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := db.ExecContext(t.Context(), "INSERT INTO workspace_entries(subject_id, workspace_id, display_name, hidden) VALUES ('owner', 'workspace', 'Custom name', 1)"); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := db.ExecContext(t.Context(), "INSERT INTO workspace_attachments(subject_id, workspace_id, canonical_root, provider_workspace_id, file_device, file_inode) VALUES ('owner', 'workspace', '/tmp/workspace', 'provider-id', '1', '2')"); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := db.ExecContext(t.Context(), "INSERT INTO direct_session_presentations(subject_id, session_id, workspace_id, display_name, hidden) VALUES ('owner', 'session', 'workspace', 'Custom session', 1)"); err != nil {
+		t.Fatal(err)
+	}
+	if err := db.Close(); err != nil {
+		t.Fatal(err)
+	}
+	store, err := Open(t.Context(), filename)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer store.Close()
+	workspace, err := store.Presentation().Workspace(t.Context(), "owner", "workspace")
+	if err != nil || workspace.DisplayName != "Custom name" || !workspace.Hidden || workspace.Favorite {
+		t.Fatalf("migrated workspace = %+v, %v", workspace, err)
+	}
+	session, err := store.Presentation().DirectSession(t.Context(), "owner", "session")
+	if err != nil || session.DisplayName != "Custom session" || !session.Archived || session.Favorite {
+		t.Fatalf("migrated session = %+v, %v", session, err)
 	}
 }
 

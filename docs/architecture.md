@@ -646,18 +646,19 @@ RuntimeService
   ListRuntimeProfiles, CheckCompatibility
 
 WorkspacePresentationService
-  ListWorkspaces, Get, Rename, SetFavorite,
-  UpdateNavigation, RemovePresentation,
+  ListWorkspaces, RenameWorkspace, SetWorkspaceFavorite,
+  SetWorkspaceHidden, GetNavigation, SetNavigation,
   RegisterFromHostSelection,
   ListRegistrableRoots, BrowseRegistrableRoot, RegisterFromAllowlistPath,
-  RevalidateWorkspace
+  RevalidateWorkspace; Get and RemovePresentation are planned
 
 DirectSessionService
-  Create, List, Get, RenamePresentation, ArchivePresentation,
+  GetDirectSessionPresentation, RenameDirectSession,
+  SetDirectSessionFavorite, SetDirectSessionArchived,
   ListPromptHistory, GetPromptHistoryItem, GetExecutionState,
   ListSpecialistResults,
   Submit, Interrupt, PauseRuntime, ResumeRuntime, CloseRuntime,
-  Recover, Reconcile, BeginControllerAdoption
+  Recover, Reconcile, BeginControllerAdoption; Create and List are planned
 
 InteractionPresentationService
   ListSummaries, GetCard, Resolve
@@ -825,7 +826,9 @@ web_sessions
 runtime_attachments
 workspace_entries
 workspace_attachments
+workspace_favorites
 direct_session_presentations
+direct_session_favorites
 controller_binding_references
 navigation_state
 client_delivery_counter
@@ -838,8 +841,8 @@ provider_operation_attempts
 schema_migrations
 ```
 
-`workspace_attachments` was added by migration 2; the other tables were created
-by the initial migration.
+`workspace_attachments` was added by migration 2. Migration 3 adds the two
+favorite tables; the remaining tables were created by the initial migration.
 
 Prohibited authoritative tables/aggregates include Codex threads, Turns, workspace writer locks, writer generations, pending runtime interactions, native subagents, background processes, and runtime recovery state. A projection table is named and documented as a cache.
 
@@ -991,11 +994,11 @@ The serial command facade is `toolchain-check`, `generate-contract`, `contract-c
 
 ## 19. Current snapshot
 
-**Snapshot date:** 2026-09-25 (E3-T1 completion)
+**Snapshot date:** 2026-09-26 (E3-T2 completion)
 
-**Roadmap point:** E0 is `Completed`, E12 is `Completed`, E1 is `Completed`, and E13 is `Completed`; E1-T1 is `Completed` and E1-T2/T3/T4/T5 are `Completed`. E3-T1 is `Completed`; E3-T2 is next and E3 closeout remains pending. Former E12-T2/T3 remain Retired. E14 owns pre-release application acceptance. No live-provider or assembled-application acceptance is implied.
+**Roadmap point:** E0 is `Completed`, E12 is `Completed`, E1 is `Completed`, and E13 is `Completed`; E1-T1 is `Completed` and E1-T2/T3/T4/T5 are `Completed`. E3-T1/T2 are `Completed`; E3-T3 is next and E3 closeout remains pending. Former E12-T2/T3 remain Retired. E14 owns pre-release application acceptance. No live-provider or assembled-application acceptance is implied.
 
-**Maturity:** delivery-independent Go core, shared React bundle, declared but disabled Gul API, typed provider ports and explicit scenario harness, isolated SQLite repositories with fake-scoped Workspace attachment, and a Wails shell foundation; provider and assembled storage lifecycle remain pending
+**Maturity:** delivery-independent Go core, shared React bundle, declared but disabled Gul API, typed provider ports and explicit scenario harness, isolated SQLite repositories with fake-scoped Workspace attachment and local presentation, and a Wails shell foundation; provider and assembled storage lifecycle remain pending
 
 ### 19.1 Implemented components
 
@@ -1007,7 +1010,8 @@ availability is not implied. The core does not import Wails; the desktop
 foundation hosts it, while assembled headless and authenticated delivery remain
 future work.
 
-`api/proto` declares Gul-owned DirectSession and ArtifactPresentation browser
+`api/proto` declares Gul-owned WorkspacePresentation, DirectSession and
+ArtifactPresentation browser
 contracts. Its `bounds.json` is the shared authority for generated Go and
 TypeScript page/content limits. Generated clients are checked for drift. The
 declarations are not registered as routes. `contract/port` defines the exact
@@ -1035,10 +1039,20 @@ An explicit registration can reattach a moved or replaced workspace after
 inspection while retaining its Gul presentation ID and metadata. The pinned
 inspection adapter lives in `internal/workspace/contractprovider`, keeping the
 Workspace service and SQLite adapter independent of generated provider types.
-`internal/delivery/api` exposes the typed Workspace handler only for explicit
-authenticated composition; no production route is registered. The macOS shell
+`internal/delivery/api` exposes typed Workspace and Direct Session presentation
+handlers for explicit authenticated composition; no production route is
+registered. The macOS shell
 has a directory-picker adapter, but no attached product binding. Dismissing the
 host picker returns a typed cancelled registration result with no Workspace.
+
+`internal/presentation` changes only subject-scoped Gul metadata. Attached
+Workspace names, favorites and hidden state are independent of their directory
+paths. Direct Session names, favorites and archive state retain the existing
+provider reference without invoking it. Navigation points only to a visible
+attached Workspace and, when selected, its visible Direct Session. Hiding a
+Workspace clears its selection; archiving a session clears that session from
+navigation. The typed handlers use the core's local access gate, so an offline
+provider does not block authenticated presentation edits. They remain unmounted.
 
 `internal/storage` requires an owner-only database directory and file, then
 opens the pinned SQLite driver with one writer and at most four read-only
@@ -1053,6 +1067,9 @@ immediate transaction. Backup checkpoints WAL and publishes an owner-only
 unwired to production startup after E1-T4 completion.
 Its second migration adds a subject-scoped Workspace attachment record; local
 presentation and verified provider reference commit in one transaction.
+Migration 3 adds subject-scoped favorite tables. Direct Session discovery
+inserts require a bounded display name and preserve existing display metadata,
+so later provider refreshes cannot undo a local rename or archive choice.
 
 `internal/desktop` starts and stops the same core through its lifecycle boundary,
 then runs a Wails v3 window over the checked bundle's existing asset handler.

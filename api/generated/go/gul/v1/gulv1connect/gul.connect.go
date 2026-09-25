@@ -57,6 +57,33 @@ const (
 	// WorkspacePresentationServiceListWorkspacesProcedure is the fully-qualified name of the
 	// WorkspacePresentationService's ListWorkspaces RPC.
 	WorkspacePresentationServiceListWorkspacesProcedure = "/gul.v1.WorkspacePresentationService/ListWorkspaces"
+	// WorkspacePresentationServiceRenameWorkspaceProcedure is the fully-qualified name of the
+	// WorkspacePresentationService's RenameWorkspace RPC.
+	WorkspacePresentationServiceRenameWorkspaceProcedure = "/gul.v1.WorkspacePresentationService/RenameWorkspace"
+	// WorkspacePresentationServiceSetWorkspaceFavoriteProcedure is the fully-qualified name of the
+	// WorkspacePresentationService's SetWorkspaceFavorite RPC.
+	WorkspacePresentationServiceSetWorkspaceFavoriteProcedure = "/gul.v1.WorkspacePresentationService/SetWorkspaceFavorite"
+	// WorkspacePresentationServiceSetWorkspaceHiddenProcedure is the fully-qualified name of the
+	// WorkspacePresentationService's SetWorkspaceHidden RPC.
+	WorkspacePresentationServiceSetWorkspaceHiddenProcedure = "/gul.v1.WorkspacePresentationService/SetWorkspaceHidden"
+	// WorkspacePresentationServiceGetNavigationProcedure is the fully-qualified name of the
+	// WorkspacePresentationService's GetNavigation RPC.
+	WorkspacePresentationServiceGetNavigationProcedure = "/gul.v1.WorkspacePresentationService/GetNavigation"
+	// WorkspacePresentationServiceSetNavigationProcedure is the fully-qualified name of the
+	// WorkspacePresentationService's SetNavigation RPC.
+	WorkspacePresentationServiceSetNavigationProcedure = "/gul.v1.WorkspacePresentationService/SetNavigation"
+	// DirectSessionServiceGetDirectSessionPresentationProcedure is the fully-qualified name of the
+	// DirectSessionService's GetDirectSessionPresentation RPC.
+	DirectSessionServiceGetDirectSessionPresentationProcedure = "/gul.v1.DirectSessionService/GetDirectSessionPresentation"
+	// DirectSessionServiceRenameDirectSessionProcedure is the fully-qualified name of the
+	// DirectSessionService's RenameDirectSession RPC.
+	DirectSessionServiceRenameDirectSessionProcedure = "/gul.v1.DirectSessionService/RenameDirectSession"
+	// DirectSessionServiceSetDirectSessionFavoriteProcedure is the fully-qualified name of the
+	// DirectSessionService's SetDirectSessionFavorite RPC.
+	DirectSessionServiceSetDirectSessionFavoriteProcedure = "/gul.v1.DirectSessionService/SetDirectSessionFavorite"
+	// DirectSessionServiceSetDirectSessionArchivedProcedure is the fully-qualified name of the
+	// DirectSessionService's SetDirectSessionArchived RPC.
+	DirectSessionServiceSetDirectSessionArchivedProcedure = "/gul.v1.DirectSessionService/SetDirectSessionArchived"
 	// DirectSessionServiceListPromptHistoryProcedure is the fully-qualified name of the
 	// DirectSessionService's ListPromptHistory RPC.
 	DirectSessionServiceListPromptHistoryProcedure = "/gul.v1.DirectSessionService/ListPromptHistory"
@@ -89,6 +116,11 @@ type WorkspacePresentationServiceClient interface {
 	RegisterFromAllowlistPath(context.Context, *connect.Request[v1.RegisterFromAllowlistPathRequest]) (*connect.Response[v1.RegisterWorkspaceResponse], error)
 	RevalidateWorkspace(context.Context, *connect.Request[v1.RevalidateWorkspaceRequest]) (*connect.Response[v1.RevalidateWorkspaceResponse], error)
 	ListWorkspaces(context.Context, *connect.Request[v1.ListWorkspacesRequest]) (*connect.Response[v1.ListWorkspacesResponse], error)
+	RenameWorkspace(context.Context, *connect.Request[v1.RenameWorkspaceRequest]) (*connect.Response[v1.WorkspacePresentationResponse], error)
+	SetWorkspaceFavorite(context.Context, *connect.Request[v1.SetWorkspaceFavoriteRequest]) (*connect.Response[v1.WorkspacePresentationResponse], error)
+	SetWorkspaceHidden(context.Context, *connect.Request[v1.SetWorkspaceHiddenRequest]) (*connect.Response[v1.WorkspacePresentationResponse], error)
+	GetNavigation(context.Context, *connect.Request[v1.GetNavigationRequest]) (*connect.Response[v1.NavigationResponse], error)
+	SetNavigation(context.Context, *connect.Request[v1.SetNavigationRequest]) (*connect.Response[v1.NavigationResponse], error)
 }
 
 // NewWorkspacePresentationServiceClient constructs a client for the
@@ -138,6 +170,36 @@ func NewWorkspacePresentationServiceClient(httpClient connect.HTTPClient, baseUR
 			connect.WithSchema(workspacePresentationServiceMethods.ByName("ListWorkspaces")),
 			connect.WithClientOptions(opts...),
 		),
+		renameWorkspace: connect.NewClient[v1.RenameWorkspaceRequest, v1.WorkspacePresentationResponse](
+			httpClient,
+			baseURL+WorkspacePresentationServiceRenameWorkspaceProcedure,
+			connect.WithSchema(workspacePresentationServiceMethods.ByName("RenameWorkspace")),
+			connect.WithClientOptions(opts...),
+		),
+		setWorkspaceFavorite: connect.NewClient[v1.SetWorkspaceFavoriteRequest, v1.WorkspacePresentationResponse](
+			httpClient,
+			baseURL+WorkspacePresentationServiceSetWorkspaceFavoriteProcedure,
+			connect.WithSchema(workspacePresentationServiceMethods.ByName("SetWorkspaceFavorite")),
+			connect.WithClientOptions(opts...),
+		),
+		setWorkspaceHidden: connect.NewClient[v1.SetWorkspaceHiddenRequest, v1.WorkspacePresentationResponse](
+			httpClient,
+			baseURL+WorkspacePresentationServiceSetWorkspaceHiddenProcedure,
+			connect.WithSchema(workspacePresentationServiceMethods.ByName("SetWorkspaceHidden")),
+			connect.WithClientOptions(opts...),
+		),
+		getNavigation: connect.NewClient[v1.GetNavigationRequest, v1.NavigationResponse](
+			httpClient,
+			baseURL+WorkspacePresentationServiceGetNavigationProcedure,
+			connect.WithSchema(workspacePresentationServiceMethods.ByName("GetNavigation")),
+			connect.WithClientOptions(opts...),
+		),
+		setNavigation: connect.NewClient[v1.SetNavigationRequest, v1.NavigationResponse](
+			httpClient,
+			baseURL+WorkspacePresentationServiceSetNavigationProcedure,
+			connect.WithSchema(workspacePresentationServiceMethods.ByName("SetNavigation")),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
@@ -149,6 +211,11 @@ type workspacePresentationServiceClient struct {
 	registerFromAllowlistPath *connect.Client[v1.RegisterFromAllowlistPathRequest, v1.RegisterWorkspaceResponse]
 	revalidateWorkspace       *connect.Client[v1.RevalidateWorkspaceRequest, v1.RevalidateWorkspaceResponse]
 	listWorkspaces            *connect.Client[v1.ListWorkspacesRequest, v1.ListWorkspacesResponse]
+	renameWorkspace           *connect.Client[v1.RenameWorkspaceRequest, v1.WorkspacePresentationResponse]
+	setWorkspaceFavorite      *connect.Client[v1.SetWorkspaceFavoriteRequest, v1.WorkspacePresentationResponse]
+	setWorkspaceHidden        *connect.Client[v1.SetWorkspaceHiddenRequest, v1.WorkspacePresentationResponse]
+	getNavigation             *connect.Client[v1.GetNavigationRequest, v1.NavigationResponse]
+	setNavigation             *connect.Client[v1.SetNavigationRequest, v1.NavigationResponse]
 }
 
 // ListRegistrableRoots calls gul.v1.WorkspacePresentationService.ListRegistrableRoots.
@@ -181,6 +248,31 @@ func (c *workspacePresentationServiceClient) ListWorkspaces(ctx context.Context,
 	return c.listWorkspaces.CallUnary(ctx, req)
 }
 
+// RenameWorkspace calls gul.v1.WorkspacePresentationService.RenameWorkspace.
+func (c *workspacePresentationServiceClient) RenameWorkspace(ctx context.Context, req *connect.Request[v1.RenameWorkspaceRequest]) (*connect.Response[v1.WorkspacePresentationResponse], error) {
+	return c.renameWorkspace.CallUnary(ctx, req)
+}
+
+// SetWorkspaceFavorite calls gul.v1.WorkspacePresentationService.SetWorkspaceFavorite.
+func (c *workspacePresentationServiceClient) SetWorkspaceFavorite(ctx context.Context, req *connect.Request[v1.SetWorkspaceFavoriteRequest]) (*connect.Response[v1.WorkspacePresentationResponse], error) {
+	return c.setWorkspaceFavorite.CallUnary(ctx, req)
+}
+
+// SetWorkspaceHidden calls gul.v1.WorkspacePresentationService.SetWorkspaceHidden.
+func (c *workspacePresentationServiceClient) SetWorkspaceHidden(ctx context.Context, req *connect.Request[v1.SetWorkspaceHiddenRequest]) (*connect.Response[v1.WorkspacePresentationResponse], error) {
+	return c.setWorkspaceHidden.CallUnary(ctx, req)
+}
+
+// GetNavigation calls gul.v1.WorkspacePresentationService.GetNavigation.
+func (c *workspacePresentationServiceClient) GetNavigation(ctx context.Context, req *connect.Request[v1.GetNavigationRequest]) (*connect.Response[v1.NavigationResponse], error) {
+	return c.getNavigation.CallUnary(ctx, req)
+}
+
+// SetNavigation calls gul.v1.WorkspacePresentationService.SetNavigation.
+func (c *workspacePresentationServiceClient) SetNavigation(ctx context.Context, req *connect.Request[v1.SetNavigationRequest]) (*connect.Response[v1.NavigationResponse], error) {
+	return c.setNavigation.CallUnary(ctx, req)
+}
+
 // WorkspacePresentationServiceHandler is an implementation of the
 // gul.v1.WorkspacePresentationService service.
 type WorkspacePresentationServiceHandler interface {
@@ -190,6 +282,11 @@ type WorkspacePresentationServiceHandler interface {
 	RegisterFromAllowlistPath(context.Context, *connect.Request[v1.RegisterFromAllowlistPathRequest]) (*connect.Response[v1.RegisterWorkspaceResponse], error)
 	RevalidateWorkspace(context.Context, *connect.Request[v1.RevalidateWorkspaceRequest]) (*connect.Response[v1.RevalidateWorkspaceResponse], error)
 	ListWorkspaces(context.Context, *connect.Request[v1.ListWorkspacesRequest]) (*connect.Response[v1.ListWorkspacesResponse], error)
+	RenameWorkspace(context.Context, *connect.Request[v1.RenameWorkspaceRequest]) (*connect.Response[v1.WorkspacePresentationResponse], error)
+	SetWorkspaceFavorite(context.Context, *connect.Request[v1.SetWorkspaceFavoriteRequest]) (*connect.Response[v1.WorkspacePresentationResponse], error)
+	SetWorkspaceHidden(context.Context, *connect.Request[v1.SetWorkspaceHiddenRequest]) (*connect.Response[v1.WorkspacePresentationResponse], error)
+	GetNavigation(context.Context, *connect.Request[v1.GetNavigationRequest]) (*connect.Response[v1.NavigationResponse], error)
+	SetNavigation(context.Context, *connect.Request[v1.SetNavigationRequest]) (*connect.Response[v1.NavigationResponse], error)
 }
 
 // NewWorkspacePresentationServiceHandler builds an HTTP handler from the service implementation. It
@@ -235,6 +332,36 @@ func NewWorkspacePresentationServiceHandler(svc WorkspacePresentationServiceHand
 		connect.WithSchema(workspacePresentationServiceMethods.ByName("ListWorkspaces")),
 		connect.WithHandlerOptions(opts...),
 	)
+	workspacePresentationServiceRenameWorkspaceHandler := connect.NewUnaryHandler(
+		WorkspacePresentationServiceRenameWorkspaceProcedure,
+		svc.RenameWorkspace,
+		connect.WithSchema(workspacePresentationServiceMethods.ByName("RenameWorkspace")),
+		connect.WithHandlerOptions(opts...),
+	)
+	workspacePresentationServiceSetWorkspaceFavoriteHandler := connect.NewUnaryHandler(
+		WorkspacePresentationServiceSetWorkspaceFavoriteProcedure,
+		svc.SetWorkspaceFavorite,
+		connect.WithSchema(workspacePresentationServiceMethods.ByName("SetWorkspaceFavorite")),
+		connect.WithHandlerOptions(opts...),
+	)
+	workspacePresentationServiceSetWorkspaceHiddenHandler := connect.NewUnaryHandler(
+		WorkspacePresentationServiceSetWorkspaceHiddenProcedure,
+		svc.SetWorkspaceHidden,
+		connect.WithSchema(workspacePresentationServiceMethods.ByName("SetWorkspaceHidden")),
+		connect.WithHandlerOptions(opts...),
+	)
+	workspacePresentationServiceGetNavigationHandler := connect.NewUnaryHandler(
+		WorkspacePresentationServiceGetNavigationProcedure,
+		svc.GetNavigation,
+		connect.WithSchema(workspacePresentationServiceMethods.ByName("GetNavigation")),
+		connect.WithHandlerOptions(opts...),
+	)
+	workspacePresentationServiceSetNavigationHandler := connect.NewUnaryHandler(
+		WorkspacePresentationServiceSetNavigationProcedure,
+		svc.SetNavigation,
+		connect.WithSchema(workspacePresentationServiceMethods.ByName("SetNavigation")),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/gul.v1.WorkspacePresentationService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case WorkspacePresentationServiceListRegistrableRootsProcedure:
@@ -249,6 +376,16 @@ func NewWorkspacePresentationServiceHandler(svc WorkspacePresentationServiceHand
 			workspacePresentationServiceRevalidateWorkspaceHandler.ServeHTTP(w, r)
 		case WorkspacePresentationServiceListWorkspacesProcedure:
 			workspacePresentationServiceListWorkspacesHandler.ServeHTTP(w, r)
+		case WorkspacePresentationServiceRenameWorkspaceProcedure:
+			workspacePresentationServiceRenameWorkspaceHandler.ServeHTTP(w, r)
+		case WorkspacePresentationServiceSetWorkspaceFavoriteProcedure:
+			workspacePresentationServiceSetWorkspaceFavoriteHandler.ServeHTTP(w, r)
+		case WorkspacePresentationServiceSetWorkspaceHiddenProcedure:
+			workspacePresentationServiceSetWorkspaceHiddenHandler.ServeHTTP(w, r)
+		case WorkspacePresentationServiceGetNavigationProcedure:
+			workspacePresentationServiceGetNavigationHandler.ServeHTTP(w, r)
+		case WorkspacePresentationServiceSetNavigationProcedure:
+			workspacePresentationServiceSetNavigationHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -282,8 +419,32 @@ func (UnimplementedWorkspacePresentationServiceHandler) ListWorkspaces(context.C
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("gul.v1.WorkspacePresentationService.ListWorkspaces is not implemented"))
 }
 
+func (UnimplementedWorkspacePresentationServiceHandler) RenameWorkspace(context.Context, *connect.Request[v1.RenameWorkspaceRequest]) (*connect.Response[v1.WorkspacePresentationResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("gul.v1.WorkspacePresentationService.RenameWorkspace is not implemented"))
+}
+
+func (UnimplementedWorkspacePresentationServiceHandler) SetWorkspaceFavorite(context.Context, *connect.Request[v1.SetWorkspaceFavoriteRequest]) (*connect.Response[v1.WorkspacePresentationResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("gul.v1.WorkspacePresentationService.SetWorkspaceFavorite is not implemented"))
+}
+
+func (UnimplementedWorkspacePresentationServiceHandler) SetWorkspaceHidden(context.Context, *connect.Request[v1.SetWorkspaceHiddenRequest]) (*connect.Response[v1.WorkspacePresentationResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("gul.v1.WorkspacePresentationService.SetWorkspaceHidden is not implemented"))
+}
+
+func (UnimplementedWorkspacePresentationServiceHandler) GetNavigation(context.Context, *connect.Request[v1.GetNavigationRequest]) (*connect.Response[v1.NavigationResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("gul.v1.WorkspacePresentationService.GetNavigation is not implemented"))
+}
+
+func (UnimplementedWorkspacePresentationServiceHandler) SetNavigation(context.Context, *connect.Request[v1.SetNavigationRequest]) (*connect.Response[v1.NavigationResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("gul.v1.WorkspacePresentationService.SetNavigation is not implemented"))
+}
+
 // DirectSessionServiceClient is a client for the gul.v1.DirectSessionService service.
 type DirectSessionServiceClient interface {
+	GetDirectSessionPresentation(context.Context, *connect.Request[v1.GetDirectSessionPresentationRequest]) (*connect.Response[v1.DirectSessionPresentationResponse], error)
+	RenameDirectSession(context.Context, *connect.Request[v1.RenameDirectSessionRequest]) (*connect.Response[v1.DirectSessionPresentationResponse], error)
+	SetDirectSessionFavorite(context.Context, *connect.Request[v1.SetDirectSessionFavoriteRequest]) (*connect.Response[v1.DirectSessionPresentationResponse], error)
+	SetDirectSessionArchived(context.Context, *connect.Request[v1.SetDirectSessionArchivedRequest]) (*connect.Response[v1.DirectSessionPresentationResponse], error)
 	ListPromptHistory(context.Context, *connect.Request[v1.ListPromptHistoryRequest]) (*connect.Response[v1.ListPromptHistoryResponse], error)
 	GetPromptHistoryItem(context.Context, *connect.Request[v1.GetPromptHistoryItemRequest]) (*connect.Response[v1.GetPromptHistoryItemResponse], error)
 	GetExecutionState(context.Context, *connect.Request[v1.GetExecutionStateRequest]) (*connect.Response[v1.GetExecutionStateResponse], error)
@@ -302,6 +463,30 @@ func NewDirectSessionServiceClient(httpClient connect.HTTPClient, baseURL string
 	baseURL = strings.TrimRight(baseURL, "/")
 	directSessionServiceMethods := v1.File_gul_v1_gul_proto.Services().ByName("DirectSessionService").Methods()
 	return &directSessionServiceClient{
+		getDirectSessionPresentation: connect.NewClient[v1.GetDirectSessionPresentationRequest, v1.DirectSessionPresentationResponse](
+			httpClient,
+			baseURL+DirectSessionServiceGetDirectSessionPresentationProcedure,
+			connect.WithSchema(directSessionServiceMethods.ByName("GetDirectSessionPresentation")),
+			connect.WithClientOptions(opts...),
+		),
+		renameDirectSession: connect.NewClient[v1.RenameDirectSessionRequest, v1.DirectSessionPresentationResponse](
+			httpClient,
+			baseURL+DirectSessionServiceRenameDirectSessionProcedure,
+			connect.WithSchema(directSessionServiceMethods.ByName("RenameDirectSession")),
+			connect.WithClientOptions(opts...),
+		),
+		setDirectSessionFavorite: connect.NewClient[v1.SetDirectSessionFavoriteRequest, v1.DirectSessionPresentationResponse](
+			httpClient,
+			baseURL+DirectSessionServiceSetDirectSessionFavoriteProcedure,
+			connect.WithSchema(directSessionServiceMethods.ByName("SetDirectSessionFavorite")),
+			connect.WithClientOptions(opts...),
+		),
+		setDirectSessionArchived: connect.NewClient[v1.SetDirectSessionArchivedRequest, v1.DirectSessionPresentationResponse](
+			httpClient,
+			baseURL+DirectSessionServiceSetDirectSessionArchivedProcedure,
+			connect.WithSchema(directSessionServiceMethods.ByName("SetDirectSessionArchived")),
+			connect.WithClientOptions(opts...),
+		),
 		listPromptHistory: connect.NewClient[v1.ListPromptHistoryRequest, v1.ListPromptHistoryResponse](
 			httpClient,
 			baseURL+DirectSessionServiceListPromptHistoryProcedure,
@@ -337,11 +522,35 @@ func NewDirectSessionServiceClient(httpClient connect.HTTPClient, baseURL string
 
 // directSessionServiceClient implements DirectSessionServiceClient.
 type directSessionServiceClient struct {
-	listPromptHistory     *connect.Client[v1.ListPromptHistoryRequest, v1.ListPromptHistoryResponse]
-	getPromptHistoryItem  *connect.Client[v1.GetPromptHistoryItemRequest, v1.GetPromptHistoryItemResponse]
-	getExecutionState     *connect.Client[v1.GetExecutionStateRequest, v1.GetExecutionStateResponse]
-	listSpecialistResults *connect.Client[v1.ListSpecialistResultsRequest, v1.ListSpecialistResultsResponse]
-	closeRuntime          *connect.Client[v1.CloseRuntimeRequest, v1.CloseRuntimeResponse]
+	getDirectSessionPresentation *connect.Client[v1.GetDirectSessionPresentationRequest, v1.DirectSessionPresentationResponse]
+	renameDirectSession          *connect.Client[v1.RenameDirectSessionRequest, v1.DirectSessionPresentationResponse]
+	setDirectSessionFavorite     *connect.Client[v1.SetDirectSessionFavoriteRequest, v1.DirectSessionPresentationResponse]
+	setDirectSessionArchived     *connect.Client[v1.SetDirectSessionArchivedRequest, v1.DirectSessionPresentationResponse]
+	listPromptHistory            *connect.Client[v1.ListPromptHistoryRequest, v1.ListPromptHistoryResponse]
+	getPromptHistoryItem         *connect.Client[v1.GetPromptHistoryItemRequest, v1.GetPromptHistoryItemResponse]
+	getExecutionState            *connect.Client[v1.GetExecutionStateRequest, v1.GetExecutionStateResponse]
+	listSpecialistResults        *connect.Client[v1.ListSpecialistResultsRequest, v1.ListSpecialistResultsResponse]
+	closeRuntime                 *connect.Client[v1.CloseRuntimeRequest, v1.CloseRuntimeResponse]
+}
+
+// GetDirectSessionPresentation calls gul.v1.DirectSessionService.GetDirectSessionPresentation.
+func (c *directSessionServiceClient) GetDirectSessionPresentation(ctx context.Context, req *connect.Request[v1.GetDirectSessionPresentationRequest]) (*connect.Response[v1.DirectSessionPresentationResponse], error) {
+	return c.getDirectSessionPresentation.CallUnary(ctx, req)
+}
+
+// RenameDirectSession calls gul.v1.DirectSessionService.RenameDirectSession.
+func (c *directSessionServiceClient) RenameDirectSession(ctx context.Context, req *connect.Request[v1.RenameDirectSessionRequest]) (*connect.Response[v1.DirectSessionPresentationResponse], error) {
+	return c.renameDirectSession.CallUnary(ctx, req)
+}
+
+// SetDirectSessionFavorite calls gul.v1.DirectSessionService.SetDirectSessionFavorite.
+func (c *directSessionServiceClient) SetDirectSessionFavorite(ctx context.Context, req *connect.Request[v1.SetDirectSessionFavoriteRequest]) (*connect.Response[v1.DirectSessionPresentationResponse], error) {
+	return c.setDirectSessionFavorite.CallUnary(ctx, req)
+}
+
+// SetDirectSessionArchived calls gul.v1.DirectSessionService.SetDirectSessionArchived.
+func (c *directSessionServiceClient) SetDirectSessionArchived(ctx context.Context, req *connect.Request[v1.SetDirectSessionArchivedRequest]) (*connect.Response[v1.DirectSessionPresentationResponse], error) {
+	return c.setDirectSessionArchived.CallUnary(ctx, req)
 }
 
 // ListPromptHistory calls gul.v1.DirectSessionService.ListPromptHistory.
@@ -371,6 +580,10 @@ func (c *directSessionServiceClient) CloseRuntime(ctx context.Context, req *conn
 
 // DirectSessionServiceHandler is an implementation of the gul.v1.DirectSessionService service.
 type DirectSessionServiceHandler interface {
+	GetDirectSessionPresentation(context.Context, *connect.Request[v1.GetDirectSessionPresentationRequest]) (*connect.Response[v1.DirectSessionPresentationResponse], error)
+	RenameDirectSession(context.Context, *connect.Request[v1.RenameDirectSessionRequest]) (*connect.Response[v1.DirectSessionPresentationResponse], error)
+	SetDirectSessionFavorite(context.Context, *connect.Request[v1.SetDirectSessionFavoriteRequest]) (*connect.Response[v1.DirectSessionPresentationResponse], error)
+	SetDirectSessionArchived(context.Context, *connect.Request[v1.SetDirectSessionArchivedRequest]) (*connect.Response[v1.DirectSessionPresentationResponse], error)
 	ListPromptHistory(context.Context, *connect.Request[v1.ListPromptHistoryRequest]) (*connect.Response[v1.ListPromptHistoryResponse], error)
 	GetPromptHistoryItem(context.Context, *connect.Request[v1.GetPromptHistoryItemRequest]) (*connect.Response[v1.GetPromptHistoryItemResponse], error)
 	GetExecutionState(context.Context, *connect.Request[v1.GetExecutionStateRequest]) (*connect.Response[v1.GetExecutionStateResponse], error)
@@ -385,6 +598,30 @@ type DirectSessionServiceHandler interface {
 // and JSON codecs. They also support gzip compression.
 func NewDirectSessionServiceHandler(svc DirectSessionServiceHandler, opts ...connect.HandlerOption) (string, http.Handler) {
 	directSessionServiceMethods := v1.File_gul_v1_gul_proto.Services().ByName("DirectSessionService").Methods()
+	directSessionServiceGetDirectSessionPresentationHandler := connect.NewUnaryHandler(
+		DirectSessionServiceGetDirectSessionPresentationProcedure,
+		svc.GetDirectSessionPresentation,
+		connect.WithSchema(directSessionServiceMethods.ByName("GetDirectSessionPresentation")),
+		connect.WithHandlerOptions(opts...),
+	)
+	directSessionServiceRenameDirectSessionHandler := connect.NewUnaryHandler(
+		DirectSessionServiceRenameDirectSessionProcedure,
+		svc.RenameDirectSession,
+		connect.WithSchema(directSessionServiceMethods.ByName("RenameDirectSession")),
+		connect.WithHandlerOptions(opts...),
+	)
+	directSessionServiceSetDirectSessionFavoriteHandler := connect.NewUnaryHandler(
+		DirectSessionServiceSetDirectSessionFavoriteProcedure,
+		svc.SetDirectSessionFavorite,
+		connect.WithSchema(directSessionServiceMethods.ByName("SetDirectSessionFavorite")),
+		connect.WithHandlerOptions(opts...),
+	)
+	directSessionServiceSetDirectSessionArchivedHandler := connect.NewUnaryHandler(
+		DirectSessionServiceSetDirectSessionArchivedProcedure,
+		svc.SetDirectSessionArchived,
+		connect.WithSchema(directSessionServiceMethods.ByName("SetDirectSessionArchived")),
+		connect.WithHandlerOptions(opts...),
+	)
 	directSessionServiceListPromptHistoryHandler := connect.NewUnaryHandler(
 		DirectSessionServiceListPromptHistoryProcedure,
 		svc.ListPromptHistory,
@@ -417,6 +654,14 @@ func NewDirectSessionServiceHandler(svc DirectSessionServiceHandler, opts ...con
 	)
 	return "/gul.v1.DirectSessionService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
+		case DirectSessionServiceGetDirectSessionPresentationProcedure:
+			directSessionServiceGetDirectSessionPresentationHandler.ServeHTTP(w, r)
+		case DirectSessionServiceRenameDirectSessionProcedure:
+			directSessionServiceRenameDirectSessionHandler.ServeHTTP(w, r)
+		case DirectSessionServiceSetDirectSessionFavoriteProcedure:
+			directSessionServiceSetDirectSessionFavoriteHandler.ServeHTTP(w, r)
+		case DirectSessionServiceSetDirectSessionArchivedProcedure:
+			directSessionServiceSetDirectSessionArchivedHandler.ServeHTTP(w, r)
 		case DirectSessionServiceListPromptHistoryProcedure:
 			directSessionServiceListPromptHistoryHandler.ServeHTTP(w, r)
 		case DirectSessionServiceGetPromptHistoryItemProcedure:
@@ -435,6 +680,22 @@ func NewDirectSessionServiceHandler(svc DirectSessionServiceHandler, opts ...con
 
 // UnimplementedDirectSessionServiceHandler returns CodeUnimplemented from all methods.
 type UnimplementedDirectSessionServiceHandler struct{}
+
+func (UnimplementedDirectSessionServiceHandler) GetDirectSessionPresentation(context.Context, *connect.Request[v1.GetDirectSessionPresentationRequest]) (*connect.Response[v1.DirectSessionPresentationResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("gul.v1.DirectSessionService.GetDirectSessionPresentation is not implemented"))
+}
+
+func (UnimplementedDirectSessionServiceHandler) RenameDirectSession(context.Context, *connect.Request[v1.RenameDirectSessionRequest]) (*connect.Response[v1.DirectSessionPresentationResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("gul.v1.DirectSessionService.RenameDirectSession is not implemented"))
+}
+
+func (UnimplementedDirectSessionServiceHandler) SetDirectSessionFavorite(context.Context, *connect.Request[v1.SetDirectSessionFavoriteRequest]) (*connect.Response[v1.DirectSessionPresentationResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("gul.v1.DirectSessionService.SetDirectSessionFavorite is not implemented"))
+}
+
+func (UnimplementedDirectSessionServiceHandler) SetDirectSessionArchived(context.Context, *connect.Request[v1.SetDirectSessionArchivedRequest]) (*connect.Response[v1.DirectSessionPresentationResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("gul.v1.DirectSessionService.SetDirectSessionArchived is not implemented"))
+}
 
 func (UnimplementedDirectSessionServiceHandler) ListPromptHistory(context.Context, *connect.Request[v1.ListPromptHistoryRequest]) (*connect.Response[v1.ListPromptHistoryResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("gul.v1.DirectSessionService.ListPromptHistory is not implemented"))

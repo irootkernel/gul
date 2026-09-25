@@ -11,6 +11,8 @@ import (
 	"regexp"
 	"strings"
 	"time"
+
+	"github.com/rootkernel/gul/internal/presentation"
 )
 
 var sha256Hex = regexp.MustCompile(`^[0-9a-f]{64}$`)
@@ -71,66 +73,44 @@ func (r AuthRepository) RevokeSession(ctx context.Context, tokenSHA256 string, a
 	return nil
 }
 
-type WorkspaceEntry struct {
-	SubjectID   string
-	WorkspaceID string
-	DisplayName string
-	Hidden      bool
-}
+type WorkspaceEntry = presentation.Workspace
 
-type DirectSessionPresentation struct {
-	SubjectID   string
-	SessionID   string
-	WorkspaceID string
-	DisplayName string
-	Hidden      bool
-}
-
-// PutWorkspace changes local presentation only for a verified attachment.
-// CreateAttachment owns creation of the entry and provider reference together.
-func (r PresentationRepository) PutWorkspace(ctx context.Context, entry WorkspaceEntry) error {
-	if entry.SubjectID == "" || entry.WorkspaceID == "" || entry.DisplayName == "" {
-		return errors.New("invalid workspace entry")
-	}
-	result, err := r.store.writer.ExecContext(ctx, `UPDATE workspace_entries SET display_name = ?, hidden = ?
-WHERE subject_id = ? AND workspace_id = ? AND EXISTS (
-  SELECT 1 FROM workspace_attachments WHERE subject_id = ? AND workspace_id = ?)`,
-		entry.DisplayName, entry.Hidden, entry.SubjectID, entry.WorkspaceID, entry.SubjectID, entry.WorkspaceID)
-	if err != nil {
-		return err
-	}
-	count, err := result.RowsAffected()
-	if err != nil {
-		return err
-	}
-	if count != 1 {
-		return sql.ErrNoRows
-	}
-	return nil
-}
+type DirectSessionPresentation = presentation.DirectSession
 
 func (r PresentationRepository) Workspace(ctx context.Context, subjectID, workspaceID string) (WorkspaceEntry, error) {
 	var entry WorkspaceEntry
-	var hidden bool
-	err := r.store.reader.QueryRowContext(ctx, "SELECT display_name, hidden FROM workspace_entries WHERE subject_id = ? AND workspace_id = ?", subjectID, workspaceID).Scan(&entry.DisplayName, &hidden)
-	entry.SubjectID, entry.WorkspaceID, entry.Hidden = subjectID, workspaceID, hidden
+	err := r.store.reader.QueryRowContext(ctx, `SELECT e.display_name, e.hidden, f.workspace_id IS NOT NULL
+FROM workspace_entries AS e JOIN workspace_attachments AS a USING(subject_id, workspace_id)
+LEFT JOIN workspace_favorites AS f USING(subject_id, workspace_id)
+WHERE e.subject_id = ? AND e.workspace_id = ?`, subjectID, workspaceID).
+		Scan(&entry.DisplayName, &entry.Hidden, &entry.Favorite)
+	entry.SubjectID, entry.WorkspaceID = subjectID, workspaceID
+	if errors.Is(err, sql.ErrNoRows) {
+		return WorkspaceEntry{}, presentation.ErrNotFound
+	}
 	return entry, err
 }
 
-func (r PresentationRepository) PutDirectSession(ctx context.Context, entry DirectSessionPresentation) error {
-	if entry.SubjectID == "" || entry.SessionID == "" || entry.WorkspaceID == "" || entry.DisplayName == "" {
-		return errors.New("invalid Direct Session presentation")
+// InsertDirectSessionIfAbsent preserves Gul-local metadata on rediscovery.
+func (r PresentationRepository) InsertDirectSessionIfAbsent(ctx context.Context, entry DirectSessionPresentation) error {
+	if entry.SubjectID == "" || entry.SessionID == "" || entry.WorkspaceID == "" || !presentation.ValidName(entry.DisplayName) {
+		return presentation.ErrInvalid
 	}
 	_, err := r.store.writer.ExecContext(ctx, `INSERT INTO direct_session_presentations(subject_id, session_id, workspace_id, display_name, hidden)
-VALUES (?, ?, ?, ?, ?) ON CONFLICT(subject_id, session_id) DO UPDATE SET workspace_id = excluded.workspace_id, display_name = excluded.display_name, hidden = excluded.hidden`,
-		entry.SubjectID, entry.SessionID, entry.WorkspaceID, entry.DisplayName, entry.Hidden)
+VALUES (?, ?, ?, ?, ?) ON CONFLICT(subject_id, session_id) DO NOTHING`,
+		entry.SubjectID, entry.SessionID, entry.WorkspaceID, entry.DisplayName, entry.Archived)
 	return err
 }
 
 func (r PresentationRepository) DirectSession(ctx context.Context, subjectID, sessionID string) (DirectSessionPresentation, error) {
 	entry := DirectSessionPresentation{SubjectID: subjectID, SessionID: sessionID}
-	err := r.store.reader.QueryRowContext(ctx, "SELECT workspace_id, display_name, hidden FROM direct_session_presentations WHERE subject_id = ? AND session_id = ?", subjectID, sessionID).
-		Scan(&entry.WorkspaceID, &entry.DisplayName, &entry.Hidden)
+	err := r.store.reader.QueryRowContext(ctx, `SELECT d.workspace_id, d.display_name, d.hidden, f.session_id IS NOT NULL
+FROM direct_session_presentations AS d LEFT JOIN direct_session_favorites AS f USING(subject_id, session_id)
+WHERE d.subject_id = ? AND d.session_id = ?`, subjectID, sessionID).
+		Scan(&entry.WorkspaceID, &entry.DisplayName, &entry.Archived, &entry.Favorite)
+	if errors.Is(err, sql.ErrNoRows) {
+		return DirectSessionPresentation{}, presentation.ErrNotFound
+	}
 	return entry, err
 }
 

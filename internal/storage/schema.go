@@ -119,3 +119,18 @@ UNIQUE(subject_id, provider_workspace_id),
 FOREIGN KEY(subject_id, workspace_id) REFERENCES workspace_entries(subject_id, workspace_id) ON DELETE CASCADE
 )`,
 }
+
+var presentationStatements = []string{
+	`CREATE TABLE workspace_favorites (
+subject_id TEXT NOT NULL,
+workspace_id TEXT NOT NULL,
+PRIMARY KEY(subject_id, workspace_id),
+FOREIGN KEY(subject_id, workspace_id) REFERENCES workspace_attachments(subject_id, workspace_id) ON DELETE CASCADE
+)`,
+	`CREATE TABLE direct_session_favorites (
+subject_id TEXT NOT NULL,
+session_id TEXT NOT NULL,
+PRIMARY KEY(subject_id, session_id),
+FOREIGN KEY(subject_id, session_id) REFERENCES direct_session_presentations(subject_id, session_id) ON DELETE CASCADE
+)`,
+}

@@ -19,6 +19,8 @@ const workspace = goSourceFiles(path.join(sourceRoot, "internal/workspace"))
   .map(name => fs.readFileSync(name, "utf8")).join("\n");
 const workspaceAdapter = goSourceFiles(path.join(sourceRoot, "internal/workspace/contractprovider"))
   .map(name => fs.readFileSync(name, "utf8")).join("\n");
+const presentation = goSourceFiles(path.join(sourceRoot, "internal/presentation"))
+  .map(name => fs.readFileSync(name, "utf8")).join("\n");
 const scenarioImport = /"github\.com\/rootkernel\/gul\/contract\/scenario(?:\/[^\"]+)?"/;
 
 function sourceFiles(directory) {
@@ -50,6 +52,7 @@ const boundaries = [
   ["storage", storage, [/"github\.com\/rootkernel\/gul\/internal\/(?:app|delivery|desktop)(?:\/|")/, /"github\.com\/rootkernel\/gul\/(?:contract|api\/generated)(?:\/|")/, /"github\.com\/wailsapp/, /\bListenAndServe\b/, scenarioImport]],
   ["workspace", workspace, [/"github\.com\/rootkernel\/gul\/internal\/(?:app|delivery|desktop|storage)(?:\/|")/, /"github\.com\/rootkernel\/gul\/(?:contract|api\/generated)(?:\/|")/, /"github\.com\/wailsapp/, /"database\/sql"/, /\bListenAndServe\b/, scenarioImport]],
   ["workspace adapter", workspaceAdapter, [/"github\.com\/rootkernel\/gul\/internal\/(?:app|delivery|desktop|storage)(?:\/|")/, /"github\.com\/rootkernel\/gul\/api\/generated(?:\/|")/, /"github\.com\/wailsapp/, /"database\/sql"/, /\bListenAndServe\b/, scenarioImport]],
+  ["presentation", presentation, [/"github\.com\/rootkernel\/gul\/internal\/(?:app|delivery|desktop|storage)(?:\/|")/, /"github\.com\/rootkernel\/gul\/(?:contract|api\/generated)(?:\/|")/, /"github\.com\/wailsapp/, /"database\/sql"/, /\bListenAndServe\b/, scenarioImport]],
 ];
 
 for (const [label, source, forbidden] of boundaries) {
@@ -81,6 +84,7 @@ try {
     ["workspace", '"github.com/rootkernel/gul/internal/storage"', boundaries[8][2]],
     ["workspace", '"github.com/rootkernel/gul/contract/port"', boundaries[8][2]],
     ["workspace adapter", '"github.com/rootkernel/gul/internal/storage"', boundaries[9][2]],
+    ["presentation", '"github.com/rootkernel/gul/internal/storage"', boundaries[10][2]],
     ...boundaries.slice(2).map(([label, , forbidden]) => [label, '"github.com/rootkernel/gul/contract/scenario"', forbidden]),
     ...boundaries.slice(2).map(([label, , forbidden]) => [label, '"github.com/rootkernel/gul/contract/scenario/helper"', forbidden]),
   ]) {
@@ -90,4 +94,4 @@ try {
   fs.rmSync(fixture, {recursive: true, force: true});
 }
 
-console.log("frontend, delivery, desktop, command, app, domain, storage, and workspace foundation boundaries passed");
+console.log("frontend, delivery, desktop, command, app, domain, storage, workspace, and presentation foundation boundaries passed");

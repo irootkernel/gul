@@ -67,8 +67,11 @@ func TestWorkspaceHandlerRequiresTrustedPrincipalAndKeepsProviderIdentityPrivate
 		t.Fatalf("registration = %+v, %v", registered, err)
 	}
 	entryID := registered.Msg.GetWorkspace().GetWorkspaceId()
+	if err := store.Presentation().SetWorkspaceFavorite(t.Context(), "owner", entryID, true); err != nil {
+		t.Fatal(err)
+	}
 	listed, err := handler.ListWorkspaces(t.Context(), connect.NewRequest(&gulv1.ListWorkspacesRequest{}))
-	if err != nil || len(listed.Msg.GetWorkspaces()) != 1 || listed.Msg.GetWorkspaces()[0].GetWorkspaceId() != entryID {
+	if err != nil || len(listed.Msg.GetWorkspaces()) != 1 || listed.Msg.GetWorkspaces()[0].GetWorkspaceId() != entryID || !listed.Msg.GetWorkspaces()[0].GetFavorite() {
 		t.Fatalf("list = %+v, %v", listed, err)
 	}
 	if _, err := handler.RevalidateWorkspace(t.Context(), connect.NewRequest(&gulv1.RevalidateWorkspaceRequest{WorkspaceId: entryID})); err != nil {

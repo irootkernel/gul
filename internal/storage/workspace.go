@@ -63,10 +63,11 @@ WHERE subject_id = ? AND workspace_id = ?`, entry.CanonicalRoot, entry.ProviderI
 func (r PresentationRepository) Attachment(ctx context.Context, subjectID, entryID string) (workspace.Attachment, error) {
 	entry := workspace.Attachment{SubjectID: subjectID, ID: entryID}
 	var hidden bool
-	err := r.store.reader.QueryRowContext(ctx, `SELECT a.canonical_root, a.provider_workspace_id, a.file_device, a.file_inode, e.display_name, e.hidden
+	err := r.store.reader.QueryRowContext(ctx, `SELECT a.canonical_root, a.provider_workspace_id, a.file_device, a.file_inode, e.display_name, e.hidden, f.workspace_id IS NOT NULL
 FROM workspace_attachments AS a JOIN workspace_entries AS e USING(subject_id, workspace_id)
+LEFT JOIN workspace_favorites AS f USING(subject_id, workspace_id)
 WHERE a.subject_id = ? AND a.workspace_id = ?`, subjectID, entryID).
-		Scan(&entry.CanonicalRoot, &entry.ProviderID, &entry.FileDevice, &entry.FileInode, &entry.DisplayName, &hidden)
+		Scan(&entry.CanonicalRoot, &entry.ProviderID, &entry.FileDevice, &entry.FileInode, &entry.DisplayName, &hidden, &entry.Favorite)
 	if errors.Is(err, sql.ErrNoRows) {
 		return workspace.Attachment{}, workspace.ErrAttachmentNotFound
 	}
@@ -75,8 +76,9 @@ WHERE a.subject_id = ? AND a.workspace_id = ?`, subjectID, entryID).
 }
 
 func (r PresentationRepository) ListAttachments(ctx context.Context, subjectID string) ([]workspace.Attachment, error) {
-	rows, err := r.store.reader.QueryContext(ctx, `SELECT a.workspace_id, a.canonical_root, a.provider_workspace_id, a.file_device, a.file_inode, e.display_name, e.hidden
+	rows, err := r.store.reader.QueryContext(ctx, `SELECT a.workspace_id, a.canonical_root, a.provider_workspace_id, a.file_device, a.file_inode, e.display_name, e.hidden, f.workspace_id IS NOT NULL
 FROM workspace_attachments AS a JOIN workspace_entries AS e USING(subject_id, workspace_id)
+LEFT JOIN workspace_favorites AS f USING(subject_id, workspace_id)
 WHERE a.subject_id = ? ORDER BY a.workspace_id`, subjectID)
 	if err != nil {
 		return nil, err
@@ -86,7 +88,7 @@ WHERE a.subject_id = ? ORDER BY a.workspace_id`, subjectID)
 	for rows.Next() {
 		entry := workspace.Attachment{SubjectID: subjectID}
 		var hidden bool
-		if err := rows.Scan(&entry.ID, &entry.CanonicalRoot, &entry.ProviderID, &entry.FileDevice, &entry.FileInode, &entry.DisplayName, &hidden); err != nil {
+		if err := rows.Scan(&entry.ID, &entry.CanonicalRoot, &entry.ProviderID, &entry.FileDevice, &entry.FileInode, &entry.DisplayName, &hidden, &entry.Favorite); err != nil {
 			return nil, err
 		}
 		entry.Hidden = hidden

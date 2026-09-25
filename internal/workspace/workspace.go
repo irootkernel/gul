@@ -41,6 +41,7 @@ type Attachment struct {
 	FileDevice    string
 	FileInode     string
 	DisplayName   string
+	Favorite      bool
 	Hidden        bool
 }
 

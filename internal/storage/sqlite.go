@@ -16,7 +16,7 @@ import (
 	_ "modernc.org/sqlite"
 )
 
-const schemaVersion = 2
+const schemaVersion = 3
 
 var ErrSchemaDrift = errors.New("Gul SQLite schema drift")
 
@@ -197,6 +197,8 @@ func migrationStatements(version int) []string {
 		return schemaStatements
 	case 2:
 		return attachmentStatements
+	case 3:
+		return presentationStatements
 	default:
 		return nil
 	}

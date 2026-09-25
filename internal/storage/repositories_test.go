@@ -10,6 +10,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/rootkernel/gul/internal/presentation"
 	"github.com/rootkernel/gul/internal/workspace"
 )
 
@@ -66,7 +67,7 @@ func TestAuthPresentationAndCache(t *testing.T) {
 	if err := store.Presentation().CreateAttachment(t.Context(), workspace.Attachment{SubjectID: "account-1", ID: "workspace-1", DisplayName: "Workspace", CanonicalRoot: filepath.Join(t.TempDir(), "workspace"), ProviderID: "provider-1", FileDevice: "1", FileInode: "1"}); err != nil {
 		t.Fatal(err)
 	}
-	if err := store.Presentation().PutWorkspace(t.Context(), WorkspaceEntry{SubjectID: "account-1", WorkspaceID: "workspace-1", DisplayName: "Workspace", Hidden: true}); err != nil {
+	if err := store.Presentation().SetWorkspaceHidden(t.Context(), "account-1", "workspace-1", true); err != nil {
 		t.Fatal(err)
 	}
 	entry, err := store.Presentation().Workspace(t.Context(), "account-1", "workspace-1")
@@ -74,7 +75,7 @@ func TestAuthPresentationAndCache(t *testing.T) {
 		t.Fatalf("workspace = %+v, %v", entry, err)
 	}
 	direct := DirectSessionPresentation{SubjectID: "account-1", SessionID: "direct-1", WorkspaceID: "workspace-1", DisplayName: "Session"}
-	if err := store.Presentation().PutDirectSession(t.Context(), direct); err != nil {
+	if err := store.Presentation().InsertDirectSessionIfAbsent(t.Context(), direct); err != nil {
 		t.Fatal(err)
 	}
 	if got, err := store.Presentation().DirectSession(t.Context(), "account-1", "direct-1"); err != nil || got != direct {
@@ -145,36 +146,39 @@ func TestAuthRejectsNonDigestTokens(t *testing.T) {
 	}
 }
 
-func TestRepositoryUpsertsReplaceExistingRows(t *testing.T) {
+func TestPresentationWritesPreserveSessionMetadata(t *testing.T) {
 	store, _ := openTestStore(t)
 	ctx := t.Context()
 	if err := store.Auth().CreateAccount(ctx, "subject", time.Now()); err != nil {
 		t.Fatal(err)
 	}
 	workspace := WorkspaceEntry{SubjectID: "subject", WorkspaceID: "workspace", DisplayName: "Before"}
-	if err := store.Presentation().PutWorkspace(ctx, workspace); !errors.Is(err, sql.ErrNoRows) {
+	if err := store.Presentation().RenameWorkspace(ctx, workspace.SubjectID, workspace.WorkspaceID, workspace.DisplayName); !errors.Is(err, presentation.ErrNotFound) {
 		t.Fatalf("unattached presentation update = %v", err)
 	}
 	if err := store.Presentation().CreateAttachment(ctx, workspaceAttachment(workspace, filepath.Join(t.TempDir(), "workspace"))); err != nil {
 		t.Fatal(err)
 	}
 	workspace.DisplayName, workspace.Hidden = "After", true
-	if err := store.Presentation().PutWorkspace(ctx, workspace); err != nil {
+	if err := store.Presentation().RenameWorkspace(ctx, workspace.SubjectID, workspace.WorkspaceID, workspace.DisplayName); err != nil {
+		t.Fatal(err)
+	}
+	if err := store.Presentation().SetWorkspaceHidden(ctx, workspace.SubjectID, workspace.WorkspaceID, true); err != nil {
 		t.Fatal(err)
 	}
 	if got, err := store.Presentation().Workspace(ctx, "subject", "workspace"); err != nil || got != workspace {
 		t.Fatalf("updated workspace = %+v, %v", got, err)
 	}
 	direct := DirectSessionPresentation{SubjectID: "subject", SessionID: "session", WorkspaceID: "workspace", DisplayName: "Before"}
-	if err := store.Presentation().PutDirectSession(ctx, direct); err != nil {
+	if err := store.Presentation().InsertDirectSessionIfAbsent(ctx, direct); err != nil {
 		t.Fatal(err)
 	}
-	direct.WorkspaceID, direct.DisplayName, direct.Hidden = "workspace-updated", "After", true
-	if err := store.Presentation().PutDirectSession(ctx, direct); err != nil {
+	direct.WorkspaceID, direct.DisplayName, direct.Archived = "workspace-updated", "After", true
+	if err := store.Presentation().InsertDirectSessionIfAbsent(ctx, direct); err != nil {
 		t.Fatal(err)
 	}
-	if got, err := store.Presentation().DirectSession(ctx, "subject", "session"); err != nil || got != direct {
-		t.Fatalf("updated Direct Session = %+v, %v", got, err)
+	if got, err := store.Presentation().DirectSession(ctx, "subject", "session"); err != nil || got != (DirectSessionPresentation{SubjectID: "subject", SessionID: "session", WorkspaceID: "workspace", DisplayName: "Before"}) {
+		t.Fatalf("existing Direct Session presentation replaced = %+v, %v", got, err)
 	}
 	binding := BindingReference{BindingID: "binding", SubjectID: "subject", CredentialKey: "controller/first", ExpectedControllerID: "controller-1", Health: "unknown"}
 	if err := store.Presentation().PutBinding(ctx, binding); err != nil {

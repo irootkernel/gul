@@ -29,11 +29,12 @@ import {validateArtifactChunkRequest, validateArtifactChunkResponse, validateArt
 
 test("the generated browser surface is explicit and contains no upstream private fields", () => {
   expect(Object.keys(DirectSessionService.method).sort()).toEqual([
-    "closeRuntime", "getExecutionState", "getPromptHistoryItem", "listPromptHistory", "listSpecialistResults",
+    "closeRuntime", "getDirectSessionPresentation", "getExecutionState", "getPromptHistoryItem", "listPromptHistory", "listSpecialistResults",
+    "renameDirectSession", "setDirectSessionArchived", "setDirectSessionFavorite",
   ]);
   expect(Object.keys(WorkspacePresentationService.method).sort()).toEqual([
-    "browseRegistrableRoot", "listRegistrableRoots", "listWorkspaces", "registerFromAllowlistPath",
-    "registerFromHostSelection", "revalidateWorkspace",
+    "browseRegistrableRoot", "getNavigation", "listRegistrableRoots", "listWorkspaces", "registerFromAllowlistPath",
+    "registerFromHostSelection", "renameWorkspace", "revalidateWorkspace", "setNavigation", "setWorkspaceFavorite", "setWorkspaceHidden",
   ]);
   const names = file_gul_v1_gul.messages.flatMap(message => message.fields.map(field => field.name));
   for (const forbidden of ["provider_cursor", "run_id", "controller_carrier", "socket_path", "worker_id", "operation_id", "workspace_absolute_path"]) {

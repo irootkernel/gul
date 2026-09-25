@@ -489,6 +489,8 @@ assembled application behavior and a live provider remain future work.
 E3-T1 adds fake-scoped Workspace registration and revalidation through an
 unmounted authenticated handler; it does not enable a product route or qualify
 the released provider.
+E3-T2 adds subject-scoped Workspace and Direct Session display metadata and
+navigation with local-only mutations. Its typed handlers remain unmounted.
 
 | Requirement | Accepted Current State | Evidence |
 |---|---|---|
@@ -498,12 +500,14 @@ the released provider.
 | REQ-CONSUMER-001 | Immutable TASK-053 consumer source, 36-method descriptor inventory, explicit 27-required/9-unavailable profile, generated clients/maps/fake transport, and close/sourceability fixtures; no runtime-support claim | E12-T1; dependency/generated locks; additive descriptor check; contract validator |
 | REQ-CONSUMER-002 | Explicit deterministic stateful provider implementing all 27 required port methods with reset, clock, fault and stream controls; no production injection or fallback | E13-T1; `contract/scenario` port assertions and scenario tests; `make test` |
 | REQ-WS-001 | Host picker and allowlist-relative remote registration reach one canonical attachment; no browser absolute-path input | E3-T1; `internal/workspace` and `internal/delivery/api` tests; `make test` |
+| REQ-WS-003 | Attached Workspaces retain editable display names independent of directory basenames; favorite and hidden state persist locally | E3-T2; `internal/storage` and `internal/delivery/api` presentation tests; `make test` |
 | REQ-WS-006 | Attachment revalidation verifies stored canonical root, inode, and provider identity before scoped use | E3-T1; moved-root and changed-ID fixtures; `make test` |
 | REQ-WS-007 | Bootstrap inspection omits expected provider ID; subsequent revalidation sends the stored path and ID; no initialization call | E3-T1; recording fake provider fixture; `make test` |
 | REQ-WS-009 | Registration accepts a compatible inspected workspace and returns typed unavailable-workspace, profile, and Profile Server blockers without provisioning | E3-T1 fake-scoped blocker fixtures; launch Policy selection remains E3-T4; `make test` |
 | REQ-WS-010 | Symlink aliases collapse to one attachment; moved or replaced identity fails closed | E3-T1 canonicalization and revalidation fixtures; `make test` |
 | REQ-WS-011 | Registration invokes inspection only and creates no Git worktree | E3-T1; inspected `internal/workspace` provider port and registration call graph |
 | REQ-WS-012 | Host-loaded canonical allowlist bounds browsing; outside, traversal, symlink, and private-subtree probes fail with one typed selection error | E3-T1 containment fixtures; `make test` |
+| REQ-DIRECT-007 | Direct Session name, favorite, archive and last navigation selection are subject-scoped SQLite presentation; offline actions invoke no provider method | E3-T2; restart, isolation and offline handler tests; `make test` |
 
 ## 8. Explicit v0.1 non-goals and limitations
 
