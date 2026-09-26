@@ -98,9 +98,9 @@ func TestPresentationHandlersUseOnlyLocalState(t *testing.T) {
 		t.Fatalf("invalid name = %v", err)
 	}
 	directHandler.Principal = nil
-	if _, err := directHandler.GetDirectSessionPresentation(t.Context(), connect.NewRequest(&gulv1.GetDirectSessionPresentationRequest{SessionId: "session"})); connect.CodeOf(err) != connect.CodeUnauthenticated {
-		t.Fatalf("missing principal = %v", err)
-	}
+	_, err = directHandler.GetDirectSessionPresentation(t.Context(), connect.NewRequest(&gulv1.GetDirectSessionPresentationRequest{SessionId: "session"}))
+	assertWorkspaceError(t, err, connect.CodeUnauthenticated, gulv1.ErrorCode_ERROR_CODE_UNAUTHORIZED,
+		gulv1.ActionClass_ACTION_CLASS_ABORT)
 	workspaceHandler.Principal = func(context.Context) (app.Principal, error) { return app.Principal{Subject: "other"}, nil }
 	if _, err := workspaceHandler.SetWorkspaceHidden(t.Context(), connect.NewRequest(&gulv1.SetWorkspaceHiddenRequest{WorkspaceId: "workspace", Hidden: true})); connect.CodeOf(err) != connect.CodeNotFound {
 		t.Fatalf("foreign workspace = %v", err)
@@ -111,9 +111,9 @@ func TestPresentationHandlersUseOnlyLocalState(t *testing.T) {
 		t.Fatal(err)
 	}
 	workspaceHandler.Core = deniedCore
-	if _, err := workspaceHandler.SetWorkspaceFavorite(t.Context(), connect.NewRequest(&gulv1.SetWorkspaceFavoriteRequest{WorkspaceId: "workspace", Favorite: false})); connect.CodeOf(err) != connect.CodePermissionDenied {
-		t.Fatalf("denied local access = %v", err)
-	}
+	_, err = workspaceHandler.SetWorkspaceFavorite(t.Context(), connect.NewRequest(&gulv1.SetWorkspaceFavoriteRequest{WorkspaceId: "workspace", Favorite: false}))
+	assertWorkspaceError(t, err, connect.CodePermissionDenied, gulv1.ErrorCode_ERROR_CODE_UNAUTHORIZED,
+		gulv1.ActionClass_ACTION_CLASS_ABORT)
 	if err := deniedCore.Stop(context.Background()); err != nil {
 		t.Fatal(err)
 	}

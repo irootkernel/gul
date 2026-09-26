@@ -24,15 +24,15 @@ var _ gulv1connect.RuntimeServiceHandler = (*RuntimeHandler)(nil)
 
 func (h *RuntimeHandler) access(ctx context.Context) error {
 	if h == nil || h.Core == nil || h.Launch == nil || h.Principal == nil {
-		return connect.NewError(connect.CodeUnauthenticated, errors.New("product access unavailable"))
+		return accessError(connect.CodeUnauthenticated, "product access unavailable")
 	}
 	principal, err := h.Principal(ctx)
 	if err != nil || principal.Subject == "" {
-		return connect.NewError(connect.CodeUnauthenticated, errors.New("authentication required"))
+		return accessError(connect.CodeUnauthenticated, "authentication required")
 	}
 	if err := h.Core.RequireProductAccess(ctx, principal); err != nil {
 		if errors.Is(err, app.ErrAccessDenied) {
-			return connect.NewError(connect.CodePermissionDenied, errors.New("product access denied"))
+			return accessError(connect.CodePermissionDenied, "product access denied")
 		}
 		return launchError(err)
 	}

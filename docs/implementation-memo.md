@@ -485,6 +485,12 @@ checked requirement ownership, persistence, provider and browser boundaries,
 subject isolation, refresh concurrency and documentation against the completed
 tasks. The six-role review and its correction assessment are complete.
 
+The unmounted feature handlers return `UNAUTHORIZED` with `ABORT` for
+authentication and authorization rejections. They preserve the ConnectRPC
+status and expose only local error messages. Handler tests verify the typed
+detail for missing composition, missing principals, resolver failures and
+access denial.
+
 Review corrections bound the entire refresh, including its local binding read,
 to five seconds, pinned browser lifecycle and composition mappings, and completed
 the schema inventory. The final Low findings added timeout recovery coverage and

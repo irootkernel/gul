@@ -1055,7 +1055,9 @@ inspection adapter lives in `internal/workspace/contractprovider`, keeping the
 Workspace service and SQLite adapter independent of generated provider types.
 `internal/delivery/api` exposes typed Runtime, Workspace and Direct Session presentation
 handlers for explicit authenticated composition; no production route is
-registered. The macOS shell
+registered. Their authentication and authorization rejections preserve the
+ConnectRPC status and include `UNAUTHORIZED` with the closed `ABORT` action.
+The macOS shell
 has a directory-picker adapter, but no attached product binding. Dismissing the
 host picker returns a typed cancelled registration result with no Workspace.
 

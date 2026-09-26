@@ -80,9 +80,9 @@ func TestRuntimeProfileBrowserBoundaryRequiresExplicitSharedChoice(t *testing.T)
 	assertWorkspaceError(t, err, connect.CodeFailedPrecondition, gulv1.ErrorCode_ERROR_CODE_PROVIDER_BLOCKED,
 		gulv1.ActionClass_ACTION_CLASS_USE_SUPPORTED_PROFILE)
 	handler.Principal = func(context.Context) (app.Principal, error) { return app.Principal{}, nil }
-	if _, err := handler.ListRuntimeProfiles(ctx, connect.NewRequest(&gulv1.ListRuntimeProfilesRequest{})); connect.CodeOf(err) != connect.CodeUnauthenticated {
-		t.Fatalf("unauthenticated profile catalog = %v", err)
-	}
+	_, err = handler.ListRuntimeProfiles(ctx, connect.NewRequest(&gulv1.ListRuntimeProfilesRequest{}))
+	assertWorkspaceError(t, err, connect.CodeUnauthenticated, gulv1.ErrorCode_ERROR_CODE_UNAUTHORIZED,
+		gulv1.ActionClass_ACTION_CLASS_ABORT)
 }
 
 func TestLaunchErrorMapping(t *testing.T) {
@@ -110,13 +110,13 @@ func TestLaunchErrorMapping(t *testing.T) {
 	defer core.Stop(context.Background())
 	handler := &RuntimeHandler{Core: core, Launch: launch.NewService(runtimeProfiles{}, nil),
 		Principal: func(context.Context) (app.Principal, error) { return app.Principal{Subject: "owner"}, nil }}
-	if _, err := handler.ListRuntimeProfiles(t.Context(), connect.NewRequest(&gulv1.ListRuntimeProfilesRequest{})); connect.CodeOf(err) != connect.CodePermissionDenied {
-		t.Fatalf("access denial = %v", err)
-	}
+	_, err := handler.ListRuntimeProfiles(t.Context(), connect.NewRequest(&gulv1.ListRuntimeProfilesRequest{}))
+	assertWorkspaceError(t, err, connect.CodePermissionDenied, gulv1.ErrorCode_ERROR_CODE_UNAUTHORIZED,
+		gulv1.ActionClass_ACTION_CLASS_ABORT)
 	handler.Principal = func(context.Context) (app.Principal, error) { return app.Principal{}, errors.New("unavailable") }
-	if _, err := handler.ListRuntimeProfiles(t.Context(), connect.NewRequest(&gulv1.ListRuntimeProfilesRequest{})); connect.CodeOf(err) != connect.CodeUnauthenticated {
-		t.Fatalf("principal error = %v", err)
-	}
+	_, err = handler.ListRuntimeProfiles(t.Context(), connect.NewRequest(&gulv1.ListRuntimeProfilesRequest{}))
+	assertWorkspaceError(t, err, connect.CodeUnauthenticated, gulv1.ErrorCode_ERROR_CODE_UNAUTHORIZED,
+		gulv1.ActionClass_ACTION_CLASS_ABORT)
 }
 
 func TestRuntimeCatalogRejectsOversizeLocalPolicyList(t *testing.T) {

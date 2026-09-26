@@ -14,15 +14,15 @@ import (
 
 func localAccess(ctx context.Context, core *app.Core, resolve PrincipalResolver, service *presentation.Service) (string, error) {
 	if core == nil || resolve == nil || service == nil {
-		return "", connect.NewError(connect.CodeUnauthenticated, errors.New("product access unavailable"))
+		return "", accessError(connect.CodeUnauthenticated, "product access unavailable")
 	}
 	principal, err := resolve(ctx)
 	if err != nil || principal.Subject == "" {
-		return "", connect.NewError(connect.CodeUnauthenticated, errors.New("authentication required"))
+		return "", accessError(connect.CodeUnauthenticated, "authentication required")
 	}
 	if err := core.RequireLocalAccess(ctx, principal); err != nil {
 		if errors.Is(err, app.ErrAccessDenied) {
-			return "", connect.NewError(connect.CodePermissionDenied, errors.New("product access denied"))
+			return "", accessError(connect.CodePermissionDenied, "product access denied")
 		}
 		return "", presentationError(err)
 	}
@@ -31,7 +31,7 @@ func localAccess(ctx context.Context, core *app.Core, resolve PrincipalResolver,
 
 func (h *WorkspaceHandler) presentationAccess(ctx context.Context) (string, error) {
 	if h == nil {
-		return "", connect.NewError(connect.CodeUnauthenticated, errors.New("product access unavailable"))
+		return "", accessError(connect.CodeUnauthenticated, "product access unavailable")
 	}
 	return localAccess(ctx, h.Core, h.Principal, h.Presentation)
 }
@@ -124,7 +124,7 @@ var _ gulv1connect.DirectSessionServiceHandler = (*DirectPresentationHandler)(ni
 
 func (h *DirectPresentationHandler) access(ctx context.Context) (string, error) {
 	if h == nil {
-		return "", connect.NewError(connect.CodeUnauthenticated, errors.New("product access unavailable"))
+		return "", accessError(connect.CodeUnauthenticated, "product access unavailable")
 	}
 	return localAccess(ctx, h.Core, h.Principal, h.Presentation)
 }

@@ -15,6 +15,16 @@ import (
 // PrincipalResolver is supplied by the authenticated host, never a browser field.
 type PrincipalResolver func(context.Context) (app.Principal, error)
 
+func accessError(status connect.Code, message string) error {
+	result := connect.NewError(status, errors.New(message))
+	if detail, err := connect.NewErrorDetail(&gulv1.DomainError{
+		Code: gulv1.ErrorCode_ERROR_CODE_UNAUTHORIZED, Action: gulv1.ActionClass_ACTION_CLASS_ABORT,
+	}); err == nil {
+		result.AddDetail(detail)
+	}
+	return result
+}
+
 // WorkspaceHandler is available for explicit composition. E8 owns production
 // authentication and listener registration; neither is installed by this type.
 type WorkspaceHandler struct {
@@ -28,15 +38,15 @@ var _ gulv1connect.WorkspacePresentationServiceHandler = (*WorkspaceHandler)(nil
 
 func (h *WorkspaceHandler) access(ctx context.Context) (string, error) {
 	if h == nil || h.Core == nil || h.Workspaces == nil || h.Principal == nil {
-		return "", connect.NewError(connect.CodeUnauthenticated, errors.New("product access unavailable"))
+		return "", accessError(connect.CodeUnauthenticated, "product access unavailable")
 	}
 	principal, err := h.Principal(ctx)
 	if err != nil || principal.Subject == "" {
-		return "", connect.NewError(connect.CodeUnauthenticated, errors.New("authentication required"))
+		return "", accessError(connect.CodeUnauthenticated, "authentication required")
 	}
 	if err := h.Core.RequireProductAccess(ctx, principal); err != nil {
 		if errors.Is(err, app.ErrAccessDenied) {
-			return "", connect.NewError(connect.CodePermissionDenied, errors.New("product access denied"))
+			return "", accessError(connect.CodePermissionDenied, "product access denied")
 		}
 		return "", workspaceError(err)
 	}

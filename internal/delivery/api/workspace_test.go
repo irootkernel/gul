@@ -127,9 +127,9 @@ func TestWorkspaceHandlerRequiresTrustedPrincipalAndKeepsProviderIdentityPrivate
 	handler.Principal = func(context.Context) (app.Principal, error) {
 		return app.Principal{}, errors.New("resolver unavailable")
 	}
-	if _, err := handler.ListWorkspaces(t.Context(), connect.NewRequest(&gulv1.ListWorkspacesRequest{})); connect.CodeOf(err) != connect.CodeUnauthenticated {
-		t.Fatalf("resolver failure = %v", err)
-	}
+	_, err = handler.ListWorkspaces(t.Context(), connect.NewRequest(&gulv1.ListWorkspacesRequest{}))
+	assertWorkspaceError(t, err, connect.CodeUnauthenticated, gulv1.ErrorCode_ERROR_CODE_UNAUTHORIZED,
+		gulv1.ActionClass_ACTION_CLASS_ABORT)
 	handler.Principal = func(context.Context) (app.Principal, error) { return app.Principal{Subject: "owner"}, nil }
 	deniedCore := app.NewCore(app.Dependencies{Provider: ready{}, Persistence: ready{}, Authorization: deny{}})
 	if err := deniedCore.Start(t.Context()); err != nil {
@@ -137,9 +137,9 @@ func TestWorkspaceHandlerRequiresTrustedPrincipalAndKeepsProviderIdentityPrivate
 	}
 	defer deniedCore.Stop(context.Background())
 	handler.Core = deniedCore
-	if _, err := handler.ListWorkspaces(t.Context(), connect.NewRequest(&gulv1.ListWorkspacesRequest{})); connect.CodeOf(err) != connect.CodePermissionDenied {
-		t.Fatalf("access denial = %v", err)
-	}
+	_, err = handler.ListWorkspaces(t.Context(), connect.NewRequest(&gulv1.ListWorkspacesRequest{}))
+	assertWorkspaceError(t, err, connect.CodePermissionDenied, gulv1.ErrorCode_ERROR_CODE_UNAUTHORIZED,
+		gulv1.ActionClass_ACTION_CLASS_ABORT)
 	handler.Core = core
 	for _, test := range []struct {
 		name string
@@ -195,6 +195,21 @@ func (deadlinePicker) PickDirectory(context.Context) (string, error) {
 
 func (p blockedProvider) InspectWorkspace(context.Context, string, *string) (workspace.Inspection, error) {
 	return workspace.Inspection{Blocker: p.blocker}, nil
+}
+
+func TestUnconfiguredHandlersReturnTypedAccessErrors(t *testing.T) {
+	_, workspaceErr := (*WorkspaceHandler)(nil).ListWorkspaces(t.Context(), connect.NewRequest(&gulv1.ListWorkspacesRequest{}))
+	_, localErr := (*WorkspaceHandler)(nil).RenameWorkspace(t.Context(), connect.NewRequest(&gulv1.RenameWorkspaceRequest{}))
+	_, sessionErr := (*DirectPresentationHandler)(nil).GetDirectSessionPresentation(t.Context(), connect.NewRequest(&gulv1.GetDirectSessionPresentationRequest{}))
+	_, runtimeErr := (*RuntimeHandler)(nil).ListRuntimeProfiles(t.Context(), connect.NewRequest(&gulv1.ListRuntimeProfilesRequest{}))
+	for name, err := range map[string]error{
+		"workspace": workspaceErr, "local workspace": localErr, "session": sessionErr, "runtime": runtimeErr,
+	} {
+		t.Run(name, func(t *testing.T) {
+			assertWorkspaceError(t, err, connect.CodeUnauthenticated, gulv1.ErrorCode_ERROR_CODE_UNAUTHORIZED,
+				gulv1.ActionClass_ACTION_CLASS_ABORT)
+		})
+	}
 }
 
 func assertWorkspaceError(t *testing.T, err error, code connect.Code, domainCode gulv1.ErrorCode, action gulv1.ActionClass) {
