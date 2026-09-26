@@ -380,7 +380,9 @@ a provider workspace, provisions a Profile or Policy, or creates a Git worktree.
 
 Focused Go tests cover the scenario provider, picker aliases, relative browsing,
 outside and private path denial, duplicate attachment, typed blockers, provider
-identity changes, reattachment, and migration from the prior schema. `make test` and the
+identity changes, missing roots, reattachment, and migration from the prior schema.
+Registration and revalidation fixtures also verify that workspace contents,
+Git metadata, and the surrounding directory remain unchanged. `make test` and the
 generated API drift check passed. This is fake-scoped evidence for REQ-WS-001,
 REQ-WS-006/007, and REQ-WS-009..012; E6 still owns FileService use of the
 verified root, E3-T4 owns launch Policy selection, E8 owns authenticated route

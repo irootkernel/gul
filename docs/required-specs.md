@@ -512,7 +512,7 @@ no Run or Controller carrier.
 | REQ-WS-008 | Removing a Workspace Entry deletes only Gul presentation, navigation and local bindings; provider Runs remain untouched | E3-T3 local removal and API tests; `make test` |
 | REQ-WS-009 | Registration accepts a compatible inspected workspace and returns typed unavailable-workspace, profile, and Profile Server blockers without provisioning | E3-T1 fake-scoped blocker fixtures; E3-T4 fake-scoped launch Policy selection; `make test` |
 | REQ-WS-010 | Symlink aliases collapse to one attachment; moved or replaced identity fails closed | E3-T1 canonicalization and revalidation fixtures; `make test` |
-| REQ-WS-011 | Registration invokes inspection only and creates no Git worktree | E3-T1; inspected `internal/workspace` provider port and registration call graph |
+| REQ-WS-011 | Registration invokes inspection only and creates no Git worktree | E3-T1; inspected provider port and registration call graph; workspace and Git-metadata non-mutation fixture; `make test` |
 | REQ-WS-012 | Host-loaded canonical allowlist bounds browsing; outside, traversal, symlink, and private-subtree probes fail with one typed selection error | E3-T1 containment fixtures; `make test` |
 | REQ-DIRECT-001 | Each locally accepted Primary Run has one persisted subject-scoped Direct Session binding; three Runs list and reopen without a Codex thread field | E3-T3 scenario-backed binding and SQLite reopen test; `make test` |
 | REQ-DIRECT-003 | Permanent shared read-only launch requires an explicit lane choice, visible warning and acknowledgement before configuration check | E3-T4 React selection, authenticated handler and domain tests; `make test` |

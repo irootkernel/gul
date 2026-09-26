@@ -153,6 +153,9 @@ func TestAllowlistPickerAndCanonicalRevalidation(t *testing.T) {
 	if err := os.Remove(moved); err != nil {
 		t.Fatal(err)
 	}
+	if _, err := service.Revalidate(t.Context(), "owner", entry.ID); !errors.Is(err, workspace.ErrReattachRequired) {
+		t.Fatalf("missing canonical root = %v", err)
+	}
 	if err := os.Mkdir(moved, 0700); err != nil {
 		t.Fatal(err)
 	}
@@ -163,6 +166,71 @@ func TestAllowlistPickerAndCanonicalRevalidation(t *testing.T) {
 	}
 	if _, err := service.Revalidate(t.Context(), "owner", entry.ID); err != nil {
 		t.Fatalf("replacement workspace = %v", err)
+	}
+}
+
+func TestRegistrationDoesNotCreateWorktreesOrModifyWorkspace(t *testing.T) {
+	root := t.TempDir()
+	project := filepath.Join(root, "project")
+	if err := os.MkdirAll(filepath.Join(project, ".git", "refs", "heads"), 0700); err != nil {
+		t.Fatal(err)
+	}
+	for name, content := range map[string]string{
+		"README.md":   "existing workspace\n",
+		".git/HEAD":   "ref: refs/heads/main\n",
+		".git/config": "[core]\n\tbare = false\n",
+	} {
+		if err := os.WriteFile(filepath.Join(project, name), []byte(content), 0600); err != nil {
+			t.Fatal(err)
+		}
+	}
+	type fileState struct {
+		mode     os.FileMode
+		modified time.Time
+		content  string
+	}
+	snapshot := func() map[string]fileState {
+		t.Helper()
+		files := make(map[string]fileState)
+		err := filepath.WalkDir(root, func(path string, entry os.DirEntry, err error) error {
+			if err != nil {
+				return err
+			}
+			info, err := entry.Info()
+			if err != nil {
+				return err
+			}
+			state := fileState{mode: info.Mode(), modified: info.ModTime()}
+			if !entry.IsDir() {
+				content, err := os.ReadFile(path)
+				if err != nil {
+					return err
+				}
+				state.content = string(content)
+			}
+			files[path] = state
+			return nil
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+		return files
+	}
+	before := snapshot()
+	service := workspace.NewService(contractprovider.ContractProvider{Port: scenario.New(time.Now())},
+		testRepository(t), picker{path: project}, []string{root})
+	entry, err := service.RegisterFromAllowlistPath(t.Context(), "owner", "root-1", "project")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := service.RegisterFromHostSelection(t.Context(), "owner"); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := service.Revalidate(t.Context(), "owner", entry.ID); err != nil {
+		t.Fatal(err)
+	}
+	if after := snapshot(); !reflect.DeepEqual(after, before) {
+		t.Fatalf("registration or revalidation changed the workspace tree, Git metadata, or surrounding directory:\nbefore: %+v\nafter: %+v", before, after)
 	}
 }
 
