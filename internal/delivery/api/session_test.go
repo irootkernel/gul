@@ -102,6 +102,12 @@ func TestExecutionStateHandlerKeepsProviderIdentityPrivateAndUnavailableCountsAb
 	defer core.Stop(context.Background())
 	handler := &DirectPresentationHandler{Core: core, Presentation: presentation.NewService(store.Presentation()), Sessions: svc,
 		Principal: func(context.Context) (app.Principal, error) { return app.Principal{Subject: "owner"}, nil }}
+	_, err = handler.ListDirectSessions(ctx, connect.NewRequest(&gulv1.ListDirectSessionsRequest{}))
+	assertWorkspaceError(t, err, connect.CodeInvalidArgument, gulv1.ErrorCode_ERROR_CODE_INVALID_REQUEST,
+		gulv1.ActionClass_ACTION_CLASS_FIX_REQUEST)
+	_, err = handler.GetExecutionState(ctx, connect.NewRequest(&gulv1.GetExecutionStateRequest{}))
+	assertWorkspaceError(t, err, connect.CodeInvalidArgument, gulv1.ErrorCode_ERROR_CODE_INVALID_REQUEST,
+		gulv1.ActionClass_ACTION_CLASS_FIX_REQUEST)
 	listed, err := handler.ListDirectSessions(ctx, connect.NewRequest(&gulv1.ListDirectSessionsRequest{WorkspaceId: "workspace"}))
 	if err != nil || len(listed.Msg.GetSessions()) != 1 || listed.Msg.GetSessions()[0].GetSessionId() != binding.ID {
 		t.Fatalf("listed sessions = %+v, %v", listed, err)

@@ -189,7 +189,7 @@ func sessionError(err error) error {
 	code, action, status, message := gulv1.ErrorCode_ERROR_CODE_SOURCE_UNAVAILABLE, gulv1.ActionClass_ACTION_CLASS_REFRESH_SNAPSHOT, connect.CodeUnavailable, "session unavailable"
 	switch {
 	case errors.Is(err, session.ErrInvalid):
-		status, message = connect.CodeInvalidArgument, "invalid session request"
+		code, action, status, message = gulv1.ErrorCode_ERROR_CODE_INVALID_REQUEST, gulv1.ActionClass_ACTION_CLASS_FIX_REQUEST, connect.CodeInvalidArgument, "invalid session request"
 	case errors.Is(err, session.ErrNotFound), errors.Is(err, presentation.ErrNotFound):
 		status, message = connect.CodeNotFound, "session not found"
 	case errors.Is(err, session.ErrInvalidProjection):

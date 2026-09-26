@@ -435,6 +435,8 @@ otherwise the state is unavailable. The handler remains unmounted; E5-T1 owns
 closure.
 The adapter classifies transport and deadline failures as unavailable and
 rejects semantic provider errors as invalid projections.
+Session reads with missing local identifiers return `INVALID_REQUEST` with
+`FIX_REQUEST` through the browser error contract.
 
 Scenario-backed tests cover three Primary Runs across two Workspaces, wrong
 Controller and non-session rejection, provider configuration changes, restart
