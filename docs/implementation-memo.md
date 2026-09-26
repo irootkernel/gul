@@ -469,6 +469,29 @@ cover the catalog, unsupported choices and consent, promoting fake-scoped
 REQ-DIRECT-003/009. E2-T3 owns fresh launch revalidation and StartRun; E8 owns
 authenticated route assembly, and E9 retains released-provider acceptance.
 
+## 1.18 E3 epic closeout, 2026-09-26
+
+E3-T1 through E3-T4 satisfy their local and fake-provider acceptance criteria.
+Workspace attachment, local presentation, passive Primary session reads and
+prospective global Profile selection are implemented. The final cross-task audit
+checked requirement ownership, persistence, provider and browser boundaries,
+subject isolation, refresh concurrency and documentation against the completed
+tasks. The six-role review and its correction assessment are complete.
+
+Review corrections bound the entire refresh, including its local binding read,
+to five seconds, pinned browser lifecycle and composition mappings, and completed
+the schema inventory. The final Low findings added timeout recovery coverage and
+reconciled the Current State promotion summary. Those last test and documentation
+changes postdate the review and passed local verification. No confirmed
+Medium-or-higher finding, pending Low disposition or unmet acceptance criterion
+remains. The full `make test` gate, focused session/API race tests and SOT checks
+passed on the corrected implementation; focused SOT checks also cover closeout.
+
+E4-T1 is next. E5 owns session close, E8 owns authenticated route assembly, and
+E2/E9 retain released-provider qualification. E3 does not establish mounted-route,
+assembled-product or released-provider acceptance. The shared consumer dossier
+remains for its other roadmap consumers; E3 now links to its canonical outcomes.
+
 ## 2. Current development snapshot
 
 | Area | State |
@@ -936,4 +959,4 @@ The initial documentation assumed Gul would manage one Codex App Server, map Ses
 
 ## 12. Handoff
 
-E12, E1, and E13 are complete. The TASK-053 consumer lock and generated contract tooling remain authoritative. E3-T1 added fake-scoped Workspace attachment, E3-T2 added local-only presentation, E3-T3 added passive session reads, and E3-T4 added prospective global Profile launch selection. E3 closeout remains pending. E2-T0 remains blocked on an accepted compatible Dolgorae executable and live smoke evidence. No product route or live-provider behavior is activated automatically.
+E12, E1, E13, and E3 are complete. The TASK-053 consumer lock and generated contract tooling remain authoritative. E3-T1 added fake-scoped Workspace attachment, E3-T2 added local-only presentation, E3-T3 added passive session reads, and E3-T4 added prospective global Profile launch selection. E4-T1 is next. E2-T0 remains blocked on an accepted compatible Dolgorae executable and live smoke evidence. No product route or live-provider behavior is activated automatically.

@@ -3,9 +3,9 @@
 | Field | Value |
 | --- | --- |
 | Role | Sole authority for task identity, order, status, dependencies, and phase |
-| Revision | 2026-09-26 E3-T3 review correction |
+| Revision | 2026-09-26 E3 epic closeout |
 | Active Task | None |
-| Next | E4-T1 after E3 closeout |
+| Next | E4-T1 |
 | Required provider | Released Dolgorae v0.1.3 implementing `dolgorae.gul-consumer/v1` |
 
 ## 1. Status and execution rules
@@ -128,7 +128,7 @@ second owner of membership, order or status.
 | E12 | Completed | Immutable consumer contract pin only; E12-T1 | [Roadmap](#e12-pin-the-immutable-consumer-contract); [Memo](implementation-memo.md#15-e12-epic-closeout-2026-09-22) |
 | E1 | Completed | Core, typed APIs, persistence, one frontend and desktop-shell foundation | [Roadmap](#e1-build-the-application-foundation); [Memo](implementation-memo.md#111-e1-epic-closeout-2026-09-23) |
 | E13 | Completed | Stateful consumer fake provider and reusable scenario harness; E13-T1 | [Roadmap](#e13-supply-stateful-consumer-fakes); [Memo](implementation-memo.md#113-e13-epic-closeout-2026-09-25) |
-| E3 | In Progress | Workspace/session presentation and global Profile selection | [Shared](todo/GUL-CONSUMER-REBASELINE.md) |
+| E3 | Completed | Workspace/session presentation and global Profile selection | [Roadmap](#e3-complete-workspace-and-session-presentation); [Memo](implementation-memo.md#118-e3-epic-closeout-2026-09-26) |
 | E4 | Planned | Events, interactions, writer evaluator, complete timeline and artifacts; excludes E4-T4 | [Shared](todo/GUL-CONSUMER-REBASELINE.md) |
 | E5 | Planned | Safe whole-session close, projection convergence and ambiguous-outcome handling | [Shared](todo/GUL-CONSUMER-REBASELINE.md) |
 | E6 | Planned | Read-only FileService and bounded preview/review | [Shared](todo/GUL-CONSUMER-REBASELINE.md) |
