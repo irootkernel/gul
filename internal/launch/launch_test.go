@@ -72,6 +72,47 @@ func TestScenarioGlobalProfileAndExplicitProspectiveLaunch(t *testing.T) {
 	if _, err := svc.Check(t.Context(), selected); !errors.Is(err, launch.ErrUnsupported) {
 		t.Fatalf("unsupported scenario lane = %v", err)
 	}
+	selected.ProfileName = "removed"
+	if _, err := svc.Check(t.Context(), selected); !errors.Is(err, launch.ErrInvalidChoice) {
+		t.Fatalf("unknown scenario profile = %v", err)
+	}
+}
+
+func TestSelectedProfileErrorActions(t *testing.T) {
+	typedError := func(code string, action publicv1.RequiredClientAction, version uint32) error {
+		err := connect.NewError(connect.CodeFailedPrecondition, errors.New("provider detail stays private"))
+		detail, detailErr := connect.NewErrorDetail(&publicv1.DolgoraeErrorDetail{
+			DetailVersion: version, DolgoraeErrorCode: code, Action: action,
+			RetryClassification:    publicv1.RetryClassification_RETRY_CLASSIFICATION_FORBIDDEN,
+			RecoveryClassification: publicv1.RecoveryClassification_RECOVERY_CLASSIFICATION_NONE,
+		})
+		if detailErr != nil {
+			t.Fatal(detailErr)
+		}
+		err.AddDetail(detail)
+		return err
+	}
+	for _, test := range []struct {
+		name string
+		err  error
+		want error
+	}{
+		{"removed profile", typedError("PROFILE_NOT_FOUND", publicv1.RequiredClientAction_REQUIRED_CLIENT_ACTION_USE_SUPPORTED_PROFILE, 1), launch.ErrUnsupported},
+		{"invalid choice", typedError("INVALID_ARGUMENT", publicv1.RequiredClientAction_REQUIRED_CLIENT_ACTION_FIX_REQUEST, 1), launch.ErrInvalidChoice},
+		{"unknown detail version", typedError("PROFILE_NOT_FOUND", publicv1.RequiredClientAction_REQUIRED_CLIENT_ACTION_USE_SUPPORTED_PROFILE, 2), launch.ErrInvalidProjection},
+		{"unknown error code", typedError("FUTURE_PROFILE_ERROR", publicv1.RequiredClientAction_REQUIRED_CLIENT_ACTION_USE_SUPPORTED_PROFILE, 1), launch.ErrInvalidProjection},
+		{"missing typed detail", connect.NewError(connect.CodeInvalidArgument, errors.New("PROFILE_NOT_FOUND")), launch.ErrInvalidProjection},
+		{"transport unavailable", connect.NewError(connect.CodeUnavailable, errors.New("offline")), launch.ErrProviderUnavailable},
+		{"cancelled", context.Canceled, context.Canceled},
+		{"deadline", context.DeadlineExceeded, context.DeadlineExceeded},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			svc := launch.NewService(contractprovider.Provider{Port: profilePort{err: test.err}}, []string{"preprovisioned"})
+			if _, err := svc.Check(t.Context(), choice()); !errors.Is(err, test.want) {
+				t.Fatalf("selected profile error = %v, want %v", err, test.want)
+			}
+		})
+	}
 }
 
 func TestUnsupportedChoicesAndSharedReadOnlyConsent(t *testing.T) {

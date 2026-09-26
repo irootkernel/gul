@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"slices"
 	"testing"
 
 	"connectrpc.com/connect"
@@ -31,7 +32,8 @@ func TestRuntimeProfileBrowserBoundaryRequiresExplicitSharedChoice(t *testing.T)
 	profile := launch.Profile{Name: "profile", Compatibility: "compatible", RuntimeVersion: "runtime-1",
 		Models:         []launch.Model{{ID: "model", Default: true, SupportedEfforts: []string{"medium"}}},
 		SupportedLanes: []string{"dedicated", "shared_readonly"}, MaximumAssurance: "best_effort_personal_alpha",
-		FeatureFlags: []string{"safe_client_projection"}, AccessPolicyTransition: "unverified", BackgroundExecution: "unavailable"}
+		FeatureFlags: []string{"safe_client_projection"}, AccessPolicyTransition: "unverified", BackgroundExecution: "unavailable",
+		SupportedInteractions: []string{"INTERACTION_KIND_USER_INPUT"}, NativeSubagentsEnabled: true}
 	handler := &RuntimeHandler{Core: core, Launch: launch.NewService(runtimeProfiles{profile: profile}, []string{"named-policy"}),
 		Principal: func(context.Context) (app.Principal, error) { return app.Principal{Subject: "owner"}, nil }}
 	listed, err := handler.ListRuntimeProfiles(ctx, connect.NewRequest(&gulv1.ListRuntimeProfilesRequest{}))
@@ -41,6 +43,13 @@ func TestRuntimeProfileBrowserBoundaryRequiresExplicitSharedChoice(t *testing.T)
 		listed.Msg.GetPreprovisionedPolicyNames()[0] != "named-policy" ||
 		listed.Msg.GetSharedReadonlyWarning() != "Shared read-only access is permanent for this session. It cannot be changed to dedicated access." {
 		t.Fatalf("browser profile catalog = %+v, %v", listed, err)
+	}
+	item := listed.Msg.GetProfiles()[0]
+	if item.GetCompatibility() != gulv1.RuntimeProfileCompatibility_RUNTIME_PROFILE_COMPATIBILITY_COMPATIBLE ||
+		!slices.Equal(item.GetFeatureFlags(), profile.FeatureFlags) ||
+		!slices.Equal(item.GetSupportedInteractions(), profile.SupportedInteractions) || !item.GetNativeSubagentsEnabled() ||
+		item.GetAccessPolicyTransition() != "unverified" || item.GetBackgroundExecution() != "unavailable" {
+		t.Fatalf("browser profile capabilities = %+v", item)
 	}
 	request := &gulv1.CheckCompatibilityRequest{ProfileName: "profile", ModelId: "model", Effort: "medium",
 		Lane:              gulv1.LaunchExecutionLane_LAUNCH_EXECUTION_LANE_SHARED_READONLY,
@@ -56,6 +65,17 @@ func TestRuntimeProfileBrowserBoundaryRequiresExplicitSharedChoice(t *testing.T)
 		t.Fatalf("acknowledged browser configuration = %+v, %v", checked, err)
 	}
 	request.ModelId = "unsupported"
+	_, err = handler.CheckCompatibility(ctx, connect.NewRequest(request))
+	assertWorkspaceError(t, err, connect.CodeFailedPrecondition, gulv1.ErrorCode_ERROR_CODE_PROVIDER_BLOCKED,
+		gulv1.ActionClass_ACTION_CLASS_USE_SUPPORTED_PROFILE)
+	profile.Compatibility = "incompatible"
+	handler.Launch = launch.NewService(runtimeProfiles{profile: profile}, []string{"named-policy"})
+	listed, err = handler.ListRuntimeProfiles(ctx, connect.NewRequest(&gulv1.ListRuntimeProfilesRequest{}))
+	if err != nil || len(listed.Msg.GetProfiles()) != 1 ||
+		listed.Msg.GetProfiles()[0].GetCompatibility() != gulv1.RuntimeProfileCompatibility_RUNTIME_PROFILE_COMPATIBILITY_INCOMPATIBLE {
+		t.Fatalf("browser incompatible profile = %+v, %v", listed, err)
+	}
+	request.ModelId = "model"
 	_, err = handler.CheckCompatibility(ctx, connect.NewRequest(request))
 	assertWorkspaceError(t, err, connect.CodeFailedPrecondition, gulv1.ErrorCode_ERROR_CODE_PROVIDER_BLOCKED,
 		gulv1.ActionClass_ACTION_CLASS_USE_SUPPORTED_PROFILE)

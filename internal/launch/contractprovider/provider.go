@@ -54,6 +54,13 @@ func (p Provider) GetProfile(ctx context.Context, name string) (launch.Profile, 
 	}
 	response, err := p.Port.GetProfile(ctx, &publicv1.GetProfileRequest{ProfileName: name})
 	if err != nil {
+		mapped := port.MapProviderError(err)
+		if mapped.Action == "USE_SUPPORTED_PROFILE" {
+			return launch.Profile{}, launch.ErrUnsupported
+		}
+		if mapped.Code == "INVALID_REQUEST" && mapped.Action == "FIX_REQUEST" {
+			return launch.Profile{}, launch.ErrInvalidChoice
+		}
 		return launch.Profile{}, readError(err)
 	}
 	if response == nil || proto.Size(response) > maximumProfileProjectionBytes {

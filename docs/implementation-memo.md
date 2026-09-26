@@ -461,13 +461,16 @@ Compatible projections require a runtime version and known capability
 fields; malformed and transport responses fail closed. The result is a
 prospective Direct Interactive configuration with an explicit orchestration
 intent. It does not create a provider Run or credential carrier.
+Accepted semantic errors from GetProfile retain `FIX_REQUEST` or
+`USE_SUPPORTED_PROFILE`. Other semantic errors require operator repair.
 
 The unmounted RuntimeService handler and React selector expose the catalog and
 configuration check without enabling a route. The selector displays Profile
 compatibility, runtime version, models, lanes, maximum assurance and capability
 summary. Shared read-only needs an explicit lane choice, visible permanent-use
 warning and acknowledgement in both the UI and API. Scenario and browser tests
-cover the catalog, unsupported choices and consent, promoting fake-scoped
+cover the catalog's compatibility and capability fields, typed Profile errors,
+unsupported choices and consent, promoting fake-scoped
 REQ-DIRECT-003/009. E2-T3 owns fresh launch revalidation and StartRun; E8 owns
 authenticated route assembly, and E9 retains released-provider acceptance.
 

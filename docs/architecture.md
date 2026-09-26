@@ -1092,6 +1092,8 @@ ListProfiles/GetProfile adapter and checks explicit launch choices against a
 fresh selected Profile. It checks the Policy name against trusted local
 preprovisioning. The unmounted Runtime handler returns a bounded browser
 catalog and prospective configuration, including the shared read-only warning.
+Accepted semantic errors from GetProfile retain `FIX_REQUEST` or
+`USE_SUPPORTED_PROFILE`. Other semantic errors require operator repair.
 It creates no Run or Controller carrier.
 
 `internal/storage` requires an owner-only database directory and file, then
