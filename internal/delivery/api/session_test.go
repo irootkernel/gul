@@ -110,6 +110,7 @@ func TestExecutionStateHandlerKeepsProviderIdentityPrivateAndUnavailableCountsAb
 	if err != nil || result.Msg.GetFreshness() != gulv1.Freshness_FRESHNESS_FRESH ||
 		result.Msg.GetComposition() != gulv1.SessionComposition_SESSION_COMPOSITION_STANDALONE_PRIMARY ||
 		result.Msg.GetCounts().GetNonretiredMembers() != 1 || len(result.Msg.GetObservedMembers()) != 1 ||
+		result.Msg.GetObservedMembers()[0].GetLifecycle() != gulv1.ObservedMemberLifecycle_OBSERVED_MEMBER_LIFECYCLE_RUNNING ||
 		result.Msg.GetObservedMembers()[0].GetObservedRef() == "private-specialist-id" || result.Msg.CloseOperationRef != nil {
 		t.Fatalf("execution state = %+v, %v", result, err)
 	}
@@ -171,7 +172,10 @@ func TestExecutionStateHandlerKeepsProviderIdentityPrivateAndUnavailableCountsAb
 }
 
 func TestExecutionStateBrowserEnumMappings(t *testing.T) {
-	if browserLifecycle("recovering") != gulv1.SessionLifecycle_SESSION_LIFECYCLE_RECOVERING ||
+	if browserMemberLifecycle("waiting_interaction") != gulv1.ObservedMemberLifecycle_OBSERVED_MEMBER_LIFECYCLE_WAITING_INTERACTION ||
+		browserMemberLifecycle("start_failed") != gulv1.ObservedMemberLifecycle_OBSERVED_MEMBER_LIFECYCLE_START_FAILED ||
+		browserComposition("brokered_hierarchy") != gulv1.SessionComposition_SESSION_COMPOSITION_BROKERED_HIERARCHY ||
+		browserLifecycle("recovering") != gulv1.SessionLifecycle_SESSION_LIFECYCLE_RECOVERING ||
 		browserApproval("fully_delegated") != gulv1.ApprovalPolicy_APPROVAL_POLICY_FULLY_DELEGATED ||
 		browserCloseProgress("outcome_unknown") != gulv1.CloseProgress_CLOSE_PROGRESS_OUTCOME_UNKNOWN ||
 		browserRecovery("reconcile_required") != gulv1.RecoveryClass_RECOVERY_CLASS_RECONCILE_REQUIRED {

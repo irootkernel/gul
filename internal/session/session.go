@@ -240,12 +240,12 @@ func (s *Service) GetExecutionState(ctx context.Context, subjectID, sessionID st
 }
 
 func (s *Service) refresh(ctx context.Context, subjectID, sessionID, key string) (ExecutionState, error) {
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
 	binding, err := s.repo.Binding(ctx, subjectID, sessionID)
 	if err != nil {
 		return ExecutionState{}, repositoryError(err)
 	}
-	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
-	defer cancel()
 	attachment, carrier, err := s.authority(ctx, subjectID, binding.WorkspaceID, binding.ControllerBindingID)
 	if err == nil {
 		var snapshot Snapshot

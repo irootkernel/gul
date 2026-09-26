@@ -841,6 +841,7 @@ workspace_attachments
 workspace_favorites
 direct_session_presentations
 direct_session_favorites
+primary_session_bindings
 controller_binding_references
 navigation_state
 client_delivery_counter
@@ -854,7 +855,8 @@ schema_migrations
 ```
 
 `workspace_attachments` was added by migration 2. Migration 3 adds the two
-favorite tables; the remaining tables were created by the initial migration.
+favorite tables, and migration 4 adds `primary_session_bindings`. The remaining
+tables were created by the initial migration.
 
 Prohibited authoritative tables/aggregates include Codex threads, Turns, workspace writer locks, writer generations, pending runtime interactions, native subagents, background processes, and runtime recovery state. A projection table is named and documented as a cache.
 

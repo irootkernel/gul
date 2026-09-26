@@ -441,6 +441,14 @@ subject isolation. This promotes fake-scoped REQ-WS-004/008,
 REQ-DIRECT-001/015/019 and REQ-SESSION-003. E2/E9 retain released-provider
 qualification and E8 owns authenticated route assembly.
 
+The E3 review correction starts the five-second refresh deadline before the
+local binding read, so a blocked context-aware repository read cannot hold a
+session's refresh flight indefinitely. Focused tests check the five-second
+binding deadline and that a timed-out read releases the refresh flight. Browser
+tests also pin the observed-member lifecycle
+and brokered composition mappings. The architecture's schema inventory now
+includes migration 4's `primary_session_bindings` table.
+
 ## 1.17 E3-T4 Profile and launch selection, 2026-09-26
 
 `internal/launch` reads the user-global ListProfiles and GetProfile projections
@@ -475,7 +483,7 @@ authenticated route assembly, and E9 retains released-provider acceptance.
 | Dolgorae RPC supervisor/provider | Not implemented |
 | Controller credential store | Caller-owned mechanism selected by ADR-0047; not implemented |
 | FileService/auth/PWA/Tailscale integration | Not implemented |
-| Current State promotions | REQ-HOST-005, REQ-RUNTIME-011, REQ-RUNTIME-022, REQ-CONSUMER-001/002, fake-scoped REQ-WS-001/004/006/007/008/009/010/011/012, REQ-DIRECT-001/015/019, REQ-SESSION-003, and local REQ-WS-003/REQ-DIRECT-007; no assembled-product or released-provider claim |
+| Current State promotions | REQ-HOST-005, REQ-RUNTIME-011, REQ-RUNTIME-022, REQ-CONSUMER-001/002, fake-scoped REQ-WS-001/004/006/007/008/009/010/011/012, REQ-DIRECT-001/003/009/015/019, REQ-SESSION-003, and local REQ-WS-003/REQ-DIRECT-007; no assembled-product or released-provider claim |
 
 The repository contains the shared-core and single-bundle delivery foundations,
 declared but inactive Gul APIs, isolated Gul-owned SQLite repositories, bootstrap

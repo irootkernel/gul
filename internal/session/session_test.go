@@ -71,6 +71,29 @@ func (failedRepository) Binding(context.Context, string, string) (session.Bindin
 	return session.Binding{}, errors.New("local storage failed")
 }
 
+type deadlineRepository struct{ *memoryRepository }
+
+func (r deadlineRepository) Binding(ctx context.Context, subject, id string) (session.Binding, error) {
+	deadline, ok := ctx.Deadline()
+	if !ok || time.Until(deadline) > 5*time.Second {
+		return session.Binding{}, errors.New("binding read exceeds refresh deadline")
+	}
+	return r.memoryRepository.Binding(ctx, subject, id)
+}
+
+type blockingBindingRepository struct {
+	*memoryRepository
+	calls atomic.Int32
+}
+
+func (r *blockingBindingRepository) Binding(ctx context.Context, subject, id string) (session.Binding, error) {
+	if r.calls.Add(1) == 1 {
+		<-ctx.Done()
+		return session.Binding{}, ctx.Err()
+	}
+	return r.memoryRepository.Binding(ctx, subject, id)
+}
+
 type canceledProvider struct{}
 
 func (canceledProvider) Snapshot(ctx context.Context, _ workspace.Attachment, _ string, _ session.Carrier) (session.Snapshot, error) {
@@ -469,6 +492,39 @@ func TestRepositoryFailureIsPersistenceClass(t *testing.T) {
 	svc := session.NewService(workspaces{}, failedRepository{}, &fixedProvider{}, carriers{})
 	if _, err := svc.GetExecutionState(t.Context(), "owner", "session"); !errors.Is(err, session.ErrPersistenceUnavailable) {
 		t.Fatalf("repository failure = %v", err)
+	}
+}
+
+func TestRefreshDeadlineIncludesBindingRead(t *testing.T) {
+	entry := workspace.Attachment{SubjectID: "owner", ID: "workspace", ProviderID: "provider-workspace"}
+	repo := deadlineRepository{&memoryRepository{bindings: map[string]session.Binding{
+		"owner/session": {SubjectID: "owner", ID: "session", WorkspaceID: "workspace", RunID: "run",
+			ControllerBindingID: "controller", ProviderSessionID: "provider-session"},
+	}}}
+	svc := session.NewService(workspaces{"owner/workspace": entry}, repo, &fixedProvider{},
+		carriers{"owner/controller": {AbsolutePath: "/carrier", ControllerID: "controller", Generation: 1}})
+	state, err := svc.GetExecutionState(t.Context(), "owner", "session")
+	if err != nil || state.Freshness != "fresh" {
+		t.Fatalf("binding read outside refresh deadline = %+v, %v", state, err)
+	}
+}
+
+func TestTimedOutBindingReadReleasesRefreshFlight(t *testing.T) {
+	entry := workspace.Attachment{SubjectID: "owner", ID: "workspace", ProviderID: "provider-workspace"}
+	repo := &blockingBindingRepository{memoryRepository: &memoryRepository{bindings: map[string]session.Binding{
+		"owner/session": {SubjectID: "owner", ID: "session", WorkspaceID: "workspace", RunID: "run",
+			ControllerBindingID: "controller", ProviderSessionID: "provider-session"},
+	}}}
+	svc := session.NewService(workspaces{"owner/workspace": entry}, repo, &fixedProvider{},
+		carriers{"owner/controller": {AbsolutePath: "/carrier", ControllerID: "controller", Generation: 1}})
+	ctx, cancel := context.WithTimeout(t.Context(), 7*time.Second)
+	defer cancel()
+	if _, err := svc.GetExecutionState(ctx, "owner", "session"); !errors.Is(err, context.DeadlineExceeded) {
+		t.Fatalf("blocked binding read = %v", err)
+	}
+	state, err := svc.GetExecutionState(t.Context(), "owner", "session")
+	if err != nil || state.Freshness != "fresh" || repo.calls.Load() != 2 {
+		t.Fatalf("refresh after timed-out binding = %+v, %v; binding calls = %d", state, err, repo.calls.Load())
 	}
 }
 
