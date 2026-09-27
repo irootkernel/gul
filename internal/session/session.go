@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"sync"
 	"time"
+	"unicode/utf8"
 
 	"github.com/rootkernel/gul/internal/workspace"
 )
@@ -19,6 +20,9 @@ var (
 	ErrInvalid                = errors.New("invalid session request")
 	ErrNotFound               = errors.New("session not found")
 	ErrUnavailable            = errors.New("session provider unavailable")
+	ErrIncompatible           = errors.New("session provider incompatible")
+	ErrBusy                   = errors.New("session provider busy")
+	ErrDegraded               = errors.New("session provider degraded")
 	ErrCarrierUnavailable     = errors.New("session controller carrier unavailable")
 	ErrInvalidProjection      = errors.New("invalid provider session projection")
 	ErrBindingConflict        = errors.New("primary run already bound")
@@ -90,6 +94,7 @@ type Snapshot struct {
 	SpecialistPolicyName string
 	Counts               Counts
 	CloseProgress        string
+	CloseOperationID     string // Backend-only provider correlation; never render directly.
 	Recovery             string
 	AggregateRevision    uint64
 	RunRevision          uint64
@@ -99,18 +104,34 @@ type Snapshot struct {
 }
 
 type ExecutionState struct {
-	SessionID    string
-	Freshness    string
-	ObservedAt   time.Time
-	StateVersion string
-	Snapshot     *Snapshot
+	SessionID         string
+	CloseOperationRef string
+	ProviderState     ProviderState
+	Freshness         string
+	ObservedAt        time.Time
+	StateVersion      string
+	Snapshot          *Snapshot
 }
+
+// ProviderState describes observation health, never the Run's lifecycle or
+// permission to mutate it. Freshness independently describes the snapshot.
+type ProviderState uint8
+
+const (
+	ProviderUnknown ProviderState = iota
+	ProviderReady
+	ProviderDisconnected
+	ProviderIncompatible
+	ProviderBusy
+	ProviderDegraded
+)
 
 type Repository interface {
 	InsertBinding(context.Context, Binding) (Binding, error)
 	Binding(context.Context, string, string) (Binding, error)
 	ListBindings(context.Context, string, string) ([]Binding, error)
 	UpdateSnapshot(context.Context, Binding, Snapshot) error
+	OperationReference(context.Context, Binding, string) (string, error)
 }
 
 type Provider interface {
@@ -259,7 +280,16 @@ func (s *Service) refresh(ctx context.Context, subjectID, sessionID, key string)
 			}
 		}
 		if err == nil {
-			state := ExecutionState{SessionID: sessionID, Freshness: "fresh", ObservedAt: snapshot.ObservedAt, Snapshot: &snapshot}
+			state := ExecutionState{SessionID: sessionID, ProviderState: ProviderReady, Freshness: "fresh", ObservedAt: snapshot.ObservedAt, Snapshot: &snapshot}
+			if snapshot.Lifecycle == "degraded" || snapshot.Lifecycle == "recovering" || snapshot.Recovery != "none" {
+				state.ProviderState = ProviderDegraded
+			}
+			if snapshot.CloseOperationID != "" {
+				state.CloseOperationRef, err = s.repo.OperationReference(ctx, binding, snapshot.CloseOperationID)
+				if err != nil {
+					return ExecutionState{}, repositoryError(err)
+				}
+			}
 			withoutTime := snapshot
 			withoutTime.ObservedAt = time.Time{}
 			encoded, marshalErr := json.Marshal(withoutTime)
@@ -293,7 +323,8 @@ func (s *Service) refresh(ctx context.Context, subjectID, sessionID, key string)
 			return state, nil
 		}
 	}
-	if !errors.Is(err, ErrUnavailable) {
+	providerState := failedProviderState(err)
+	if providerState == ProviderUnknown {
 		return ExecutionState{}, err
 	}
 	s.mu.Lock()
@@ -301,9 +332,25 @@ func (s *Service) refresh(ctx context.Context, subjectID, sessionID, key string)
 	s.mu.Unlock()
 	if ok {
 		cached.Freshness = "stale"
+		cached.ProviderState = providerState
 		return cached, nil
 	}
-	return ExecutionState{SessionID: sessionID, Freshness: "unavailable"}, nil
+	return ExecutionState{SessionID: sessionID, ProviderState: providerState, Freshness: "unavailable"}, nil
+}
+
+func failedProviderState(err error) ProviderState {
+	switch {
+	case errors.Is(err, ErrIncompatible):
+		return ProviderIncompatible
+	case errors.Is(err, ErrBusy):
+		return ProviderBusy
+	case errors.Is(err, ErrDegraded):
+		return ProviderDegraded
+	case errors.Is(err, ErrUnavailable):
+		return ProviderDisconnected
+	default:
+		return ProviderUnknown
+	}
 }
 
 func (s *Service) authority(ctx context.Context, subjectID, workspaceID, bindingID string) (workspace.Attachment, Carrier, error) {
@@ -333,7 +380,7 @@ func (s *Service) authority(ctx context.Context, subjectID, workspaceID, binding
 func (s *Service) snapshot(ctx context.Context, attachment workspace.Attachment, runID string, carrier Carrier) (Snapshot, error) {
 	snapshot, err := s.provider.Snapshot(ctx, attachment, runID, carrier)
 	if err != nil {
-		if errors.Is(err, ErrInvalidProjection) {
+		if errors.Is(err, ErrInvalidProjection) || errors.Is(err, ErrCarrierUnavailable) || errors.Is(err, ErrInvalid) || failedProviderState(err) != ProviderUnknown {
 			return Snapshot{}, err
 		}
 		return Snapshot{}, fmt.Errorf("%w: %w", ErrUnavailable, err)
@@ -347,11 +394,22 @@ func (s *Service) snapshot(ctx context.Context, attachment workspace.Attachment,
 	if len(snapshot.Members) > MaximumObservedMembers || (snapshot.MembersTruncated && len(snapshot.Members) != MaximumObservedMembers) {
 		return Snapshot{}, ErrInvalidProjection
 	}
+	if snapshot.CloseOperationID != "" && !ValidCloseOperationID(snapshot.CloseOperationID) {
+		return Snapshot{}, ErrInvalidProjection
+	}
 	encoded, err := json.Marshal(snapshot)
 	if err != nil || len(encoded) > maximumSnapshotBytes {
 		return Snapshot{}, ErrInvalidProjection
 	}
 	return snapshot, nil
+}
+
+// ValidID bounds Gul-owned session, request and attempt identities.
+func ValidID(value string) bool { return value != "" && len(value) <= 256 && utf8.ValidString(value) }
+
+// ValidCloseOperationID bounds backend-only provider correlation before storage.
+func ValidCloseOperationID(value string) bool {
+	return value != "" && len(value) <= 1024 && utf8.ValidString(value)
 }
 
 func newID() (string, error) {

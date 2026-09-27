@@ -174,3 +174,32 @@ session_id TEXT NOT NULL,
 correlation_id TEXT NOT NULL
 )`,
 }
+
+var closeStatements = []string{
+	`CREATE TABLE session_close_attempts (
+attempt_id TEXT PRIMARY KEY REFERENCES provider_operation_attempts(operation_id) ON DELETE CASCADE,
+subject_id TEXT NOT NULL,
+session_id TEXT NOT NULL,
+request_id TEXT NOT NULL,
+request_sha256 TEXT NOT NULL,
+operation_kind TEXT NOT NULL CHECK(operation_kind IN ('CloseRun', 'RecoverRun', 'ReconcileRun')),
+interrupt INTEGER NOT NULL CHECK(interrupt IN (0, 1)),
+created_at TEXT NOT NULL,
+dispatch_finished INTEGER NOT NULL CHECK(dispatch_finished IN (0, 1)),
+outcome_status TEXT NOT NULL CHECK(outcome_status IN ('rejected', 'in_progress', 'confirmed', 'outcome_unknown', 'recovery_required')),
+operation_ref TEXT NOT NULL,
+code TEXT NOT NULL,
+next_action TEXT NOT NULL,
+UNIQUE(subject_id, session_id, request_id),
+FOREIGN KEY(subject_id, session_id) REFERENCES primary_session_bindings(subject_id, session_id) ON DELETE CASCADE
+)`,
+	`CREATE TABLE session_close_operations (
+subject_id TEXT NOT NULL,
+session_id TEXT NOT NULL,
+controller_binding_id TEXT NOT NULL,
+provider_operation_id TEXT NOT NULL,
+operation_ref TEXT NOT NULL UNIQUE,
+PRIMARY KEY(subject_id, session_id, controller_binding_id, provider_operation_id),
+FOREIGN KEY(subject_id, session_id) REFERENCES primary_session_bindings(subject_id, session_id) ON DELETE CASCADE
+)`,
+}

@@ -69,11 +69,12 @@ func (h *Harness) GetCapabilities(_ context.Context, request *publicv1.GetCapabi
 		Artifacts: &publicv1.ArtifactCapabilities{MaximumArtifactSize: maximumArtifactSize, MaximumChunkSize: maximumChunkSize,
 			DigestVerificationRequired: true, ExactByteLengthReported: true,
 			VisibilityClasses: []publicv1.ArtifactVisibility{publicv1.ArtifactVisibility_ARTIFACT_VISIBILITY_CONTROLLER_ONLY}},
-		SupportedMethods:      append(slices.Clone(requiredMethods), h.laterMethods...),
-		DescriptorSha256:      pinnedDescriptorSHA256,
-		SupportedControlModes: []publicv1.ControlMode{publicv1.ControlMode_CONTROL_MODE_DIRECT_INTERACTIVE},
-		SupportedTransports:   []publicv1.PublicTransport{publicv1.PublicTransport_PUBLIC_TRANSPORT_LOCAL_GRPC},
-		ProfileLaunchMode:     publicv1.ProfileLaunchMode_PROFILE_LAUNCH_MODE_DOLGORAE_OWNED_DIRECT_EXECUTABLE,
+		SupportedMethods:       append(slices.Clone(requiredMethods), h.laterMethods...),
+		AccessPolicyTransition: publicv1.SupportState_SUPPORT_STATE_UNAVAILABLE,
+		DescriptorSha256:       pinnedDescriptorSHA256,
+		SupportedControlModes:  []publicv1.ControlMode{publicv1.ControlMode_CONTROL_MODE_DIRECT_INTERACTIVE},
+		SupportedTransports:    []publicv1.PublicTransport{publicv1.PublicTransport_PUBLIC_TRANSPORT_LOCAL_GRPC},
+		ProfileLaunchMode:      publicv1.ProfileLaunchMode_PROFILE_LAUNCH_MODE_DOLGORAE_OWNED_DIRECT_EXECUTABLE,
 	}, nil
 }
 
@@ -93,7 +94,7 @@ func (h *Harness) InspectWorkspace(_ context.Context, request *publicv1.InspectW
 	if w == nil {
 		w = &workspace{id: h.next("workspace"), path: request.GetAbsolutePath(), runs: make(map[string]*run)}
 		w.writer = &publicv1.WriterState{Context: h.response(), WorkspaceId: w.id,
-			AuthorityState: publicv1.WriterAuthorityState_WRITER_AUTHORITY_STATE_NONE, StateRevision: 1}
+			AuthorityState: publicv1.WriterAuthorityState_WRITER_AUTHORITY_STATE_NONE, ReconciliationAction: publicv1.ReconciliationAction_RECONCILIATION_ACTION_NONE, StateRevision: 1}
 		h.workspaces[w.path] = w
 	}
 	return &publicv1.InspectWorkspaceResponse{Context: h.response(), WorkspaceId: w.id,
@@ -180,16 +181,19 @@ func (h *Harness) StartRun(_ context.Context, request *publicv1.StartRunRequest)
 		ControlMode: request.GetControlMode(), ExecutionLane: request.GetExecutionLane(),
 		Controller: &publicv1.ControllerProjection{ControllerId: spec.ID, Generation: spec.Generation,
 			Kind: publicv1.ControllerKind_CONTROLLER_KIND_INTERACTIVE_CLIENT, InstanceId: "scenario-client"},
-		StateRevision: 1, StateVariant: publicv1.RunStateVariant_RUN_STATE_VARIANT_DEDICATED_READER,
+		StateRevision: 1, StateVariant: publicv1.RunStateVariant_RUN_STATE_VARIANT_DEDICATED_UNSTARTED,
 		Recovery: &publicv1.RecoveryProjection{State: publicv1.RecoveryState_RECOVERY_STATE_NOT_REQUIRED, RequiredAction: publicv1.RecoveryAction_RECOVERY_ACTION_NONE},
 		EffectivePolicy: &publicv1.EffectivePolicyProjection{Access: publicv1.EffectiveAccess_EFFECTIVE_ACCESS_READ,
 			Verification: publicv1.PolicyVerification_POLICY_VERIFICATION_VERIFIED},
-		WriterAuthority:     &publicv1.WriterAuthorityProjection{State: publicv1.WriterAuthorityState_WRITER_AUTHORITY_STATE_NONE},
+		WriterAuthority:     &publicv1.WriterAuthorityProjection{State: publicv1.WriterAuthorityState_WRITER_AUTHORITY_STATE_NONE, ReconciliationAction: publicv1.ReconciliationAction_RECONCILIATION_ACTION_NONE},
 		ServerLane:          &publicv1.ServerLaneProjection{Kind: request.GetExecutionLane(), State: publicv1.ServerLaneState_SERVER_LANE_STATE_READY},
 		BackgroundExecution: &publicv1.BackgroundExecutionProjection{State: publicv1.BackgroundExecutionState_BACKGROUND_EXECUTION_STATE_VERIFIED_ABSENT},
 		RequestedAssurance:  publicv1.AssuranceLevel_ASSURANCE_LEVEL_BEST_EFFORT_PERSONAL_ALPHA,
 		AchievedAssurance:   publicv1.AssuranceLevel_ASSURANCE_LEVEL_BEST_EFFORT_PERSONAL_ALPHA,
 		Configuration:       &publicv1.RunConfigurationProjection{ProfileName: request.GetProfileName(), Purpose: request.GetPurpose()},
+	}
+	if request.GetExecutionLane() == publicv1.ExecutionLane_EXECUTION_LANE_SHARED_READONLY {
+		r.projection.StateVariant = publicv1.RunStateVariant_RUN_STATE_VARIANT_SHARED_READONLY
 	}
 	r.ledgerLifecycle = r.projection.GetLifecycle()
 	if spec.OrchestrationLaunch {
@@ -202,6 +206,7 @@ func (h *Harness) StartRun(_ context.Context, request *publicv1.StartRunRequest)
 			CloseIntent:            publicv1.SessionCloseIntent_SESSION_CLOSE_INTENT_NONE,
 			CloseProgress:          publicv1.SessionCloseProgress_SESSION_CLOSE_PROGRESS_NONE,
 			RecoveryClassification: publicv1.RecoveryClassification_RECOVERY_CLASSIFICATION_NONE,
+			RequiredAction:         publicv1.RequiredClientAction_REQUIRED_CLIENT_ACTION_NONE,
 			Availability:           publicv1.OrchestratedSessionAvailability_ORCHESTRATED_SESSION_AVAILABILITY_AVAILABLE,
 			CapturedAt:             h.timestamp()}
 	}

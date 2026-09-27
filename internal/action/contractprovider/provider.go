@@ -141,7 +141,7 @@ func (p *Provider) Read(ctx context.Context, b action.Bound) (action.Input, erro
 		return action.Input{}, action.ErrBlocked
 	}
 	freshness := action.Fresh
-	if a.Availability != publicv1.OrchestratedSessionAvailability_ORCHESTRATED_SESSION_AVAILABILITY_AVAILABLE || time.Since(a.CapturedAt.AsTime()) > 10*time.Second || a.CapturedAt.AsTime().After(time.Now().Add(time.Minute)) {
+	if (a.Availability != publicv1.OrchestratedSessionAvailability_ORCHESTRATED_SESSION_AVAILABILITY_AVAILABLE && a.Availability != publicv1.OrchestratedSessionAvailability_ORCHESTRATED_SESSION_AVAILABILITY_RECOVERY_REQUIRED) || time.Since(a.CapturedAt.AsTime()) > 10*time.Second || a.CapturedAt.AsTime().After(time.Now().Add(time.Minute)) {
 		freshness = action.Stale
 	}
 	in.Aggregate = action.Aggregate{Directive: aggregateDirective(a.RequiredAction), Freshness: freshness, Revision: a.AggregateRevision, Lifecycle: action.SessionLifecycle(a.Lifecycle), CloseProgress: action.CloseProgress(a.CloseProgress), Recovery: action.AggregateRecovery(a.RecoveryClassification), CloseIntent: action.CloseIntent(a.CloseIntent), NonretiredMembers: a.NonretiredMemberCount, NonterminalSpawns: a.NonterminalSpawnCount, PendingApprovals: a.PendingApprovalCount, AcceptedUnfinishedTasks: a.AcceptedUnfinishedTaskCount, UnknownOutcomeTasks: a.UnknownOutcomeTaskCount}

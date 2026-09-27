@@ -435,6 +435,15 @@ message GetExecutionStateRequest {
   string session_id = 1;
 }
 
+enum ProviderState {
+  PROVIDER_STATE_UNSPECIFIED = 0;
+  PROVIDER_STATE_READY = 1;
+  PROVIDER_STATE_DISCONNECTED = 2;
+  PROVIDER_STATE_INCOMPATIBLE = 3;
+  PROVIDER_STATE_BUSY = 4;
+  PROVIDER_STATE_DEGRADED = 5;
+}
+
 message GetExecutionStateResponse {
   string session_id = 1;
   Freshness freshness = 2;
@@ -450,6 +459,7 @@ message GetExecutionStateResponse {
   optional string close_operation_ref = 12;
   repeated ObservedMember observed_members = 13;
   bool observed_members_truncated = 14;
+  ProviderState provider_state = 15;
 }
 
 message ObservedMember {

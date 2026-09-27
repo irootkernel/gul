@@ -499,8 +499,11 @@ no Run or Controller carrier.
 E4 adds typed event delivery, Controller Interaction handling, shared action
 eligibility and bounded history/result/artifact reads. Its 41 requirements are
 accepted against checked provider fakes and isolated browser components; live
-provider qualification, reconnect/close coordination and authenticated product
-assembly remain with their named later owners.
+provider qualification, reconnect and authenticated product assembly remain with
+their named later owners. E5-T1 adds whole-session close, explicit recovery,
+typed provider health and bounded restart policy against injected components.
+Its nine requirements are accepted at the same fake/component boundary;
+startup convergence, general replay policy and assembled UI remain future work.
 
 | Requirement | Accepted Current State | Evidence |
 |---|---|---|
@@ -567,6 +570,15 @@ assembly remain with their named later owners.
 | REQ-INTERACT-011 | Event summaries never substitute for a fresh Controller-authorized decision payload; fake/component scope, unmounted | E4-T2; interaction, checked provider, storage, API and React behavior and race tests; serial `make test`; implementation memo |
 | REQ-INTERACT-012 | Selected payloads and outgoing responses honor negotiated limits plus exact local 8 MiB and 64 KiB caps; fake/component scope, unmounted | E4-T2; interaction, checked provider, storage, API and React behavior and race tests; serial `make test`; implementation memo |
 | REQ-PROJ-013 | Independent bounded observer polling covers every non-live Run and publishes invalidations without advancing event checkpoints; fake/component scope, unmounted | E4-T2; interaction, checked provider, storage, API and React behavior and race tests; serial `make test`; implementation memo |
+| REQ-RUNTIME-009 | Typed provider health preserves disconnected, incompatible, busy and degraded states with explicit stale snapshots; fake/component scope, unmounted | E5-T1; session, checked provider, API and ProviderStatus tests; serial `make test`; implementation memo |
+| REQ-RUNTIME-012 | Recover/Reconcile require advertised methods and a matching typed provider instruction; fake/component scope, unmounted | E5-T1; capability, evaluator and close-coordinator tests; serial `make test`; implementation memo |
+| REQ-RUNTIME-018 | Injected supervisor enforces jittered backoff, rolling start budget, stable reset and terminal blockers; fake/component scope, unmounted | E5-T1; fake-clock restart tests; serial `make test`; implementation memo |
+| REQ-CTRL-008 | Missing or invalid backend Controller binding remains a typed blocker before dispatch; fake/component scope, unmounted | E5-T1; credential and authorization tests; serial `make test`; implementation memo |
+| REQ-WRITER-006 | Independent Writer refresh preserves retained owner/generation and native stamp on uncertainty; fake/component scope, unmounted | E5-T1; Writer adapter and refresh-cache failure tests; serial `make test`; implementation memo |
+| REQ-REC-005 | Uncertain compatibility, identity, credential, policy or state blocks mutation admission; fake/component scope, unmounted | E5-T1; checked adapter and evaluator failure tests; serial `make test`; implementation memo |
+| REQ-REC-007 | Retained unknown attempts resolve only through agreeing authoritative observations without retransmission; fake/component scope, unmounted | E5-T1; loss, cancellation, persistence-failure and reopen tests; serial `make test`; implementation memo |
+| REQ-REC-010 | Recovery consumes only the immediate Run; each dependent aggregate requires its own read and bounded artifact verification; fake/component scope, unmounted | E5-T1; refresh, transaction rollback and invalidation-race tests; serial `make test`; implementation memo |
+| REQ-SESSION-002 | Root-only whole-session close requires interrupt consent, stable opaque correlation and whole-aggregate confirmation; fake/component scope, unmounted | E5-T1; checked scenario, concurrent attempt, storage and API tests; serial `make test`; implementation memo |
 
 ## 8. Explicit v0.1 non-goals and limitations
 

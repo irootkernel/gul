@@ -69,8 +69,10 @@ type SourceEntry struct {
 	Images                                            []Image
 }
 type Snapshot struct {
-	Stamp observation.Stamp
-	State string
+	Stamp            observation.Stamp
+	State            string
+	Final            *Content
+	FinalUnavailable bool
 }
 type Timeline struct {
 	Items      []SourceEntry

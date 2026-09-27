@@ -88,6 +88,14 @@ func (s *Service) Evaluate(ctx context.Context, subject, id string, request Requ
 	}
 	return Evaluate(in), nil
 }
+
+// ReadState exposes the same backend-bound inputs used by action admission to
+// coordinators that must also pass the exact revision to a provider mutation.
+func (s *Service) ReadState(ctx context.Context, subject, id string, request Request) (Bound, Input, error) {
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+	return s.state(ctx, subject, id, request)
+}
 func (s *Service) InteractionActions(ctx context.Context, subject, id string) (Evaluation, error) {
 	return s.Evaluate(ctx, subject, id, Request{Intent: IntentRead, CloseIntent: NoCloseIntent})
 }

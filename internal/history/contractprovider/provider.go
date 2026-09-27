@@ -102,7 +102,30 @@ func (p *Provider) Snapshot(ctx context.Context, b history.Bound) (history.Snaps
 	if r.Controller.ControllerId != b.Carrier.ControllerID || r.Controller.Generation != b.Carrier.Generation {
 		return history.Snapshot{}, history.ErrAuthority
 	}
-	return history.Snapshot{Stamp: stamp(r.Stamp), State: strings.ToLower(strings.TrimPrefix(r.Lifecycle.String(), "RUN_LIFECYCLE_"))}, nil
+	out := history.Snapshot{Stamp: stamp(r.Stamp), State: strings.ToLower(strings.TrimPrefix(r.Lifecycle.String(), "RUN_LIFECYCLE_"))}
+	if r.LastFinalResponse != nil {
+		switch final := r.LastFinalResponse.Value.(type) {
+		case *publicv1.FinalResponse_InlineUtf8:
+			if !utf8.ValidString(final.InlineUtf8) || len(final.InlineUtf8) > int(p.maxInline) {
+				return history.Snapshot{}, history.ErrLimit
+			}
+			out.Final = &history.Content{Inline: &final.InlineUtf8}
+		case *publicv1.FinalResponse_Artifact:
+			a, err := p.artifact(final.Artifact)
+			if err != nil {
+				return history.Snapshot{}, err
+			}
+			if a.Kind != uint32(publicv1.ArtifactKind_ARTIFACT_KIND_FINAL_RESPONSE) {
+				return history.Snapshot{}, history.ErrBlocked
+			}
+			out.Final = &history.Content{Artifact: &a}
+		case *publicv1.FinalResponse_Unavailable:
+			out.FinalUnavailable = true
+		default:
+			return history.Snapshot{}, history.ErrBlocked
+		}
+	}
+	return out, nil
 }
 func (p *Provider) artifact(a *publicv1.ArtifactRef) (history.Artifact, error) {
 	if a == nil || !known(a.ProtoReflect()) || !id(a.ArtifactId) || a.Kind == 0 || !p.visibility[a.Visibility] || !sha(a.Sha256) {

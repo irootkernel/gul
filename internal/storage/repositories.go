@@ -266,7 +266,7 @@ type ControllerReference struct {
 
 func validateAttempt(attempt OperationAttempt) error {
 	if attempt.OperationID == "" || attempt.SubjectID == "" || attempt.Kind == "" ||
-		(attempt.Kind != "StartRun" && attempt.Kind != "SubmitTurn" && attempt.Kind != "ResolveInteraction" && attempt.Kind != "CloseRun") ||
+		(attempt.Kind != "StartRun" && attempt.Kind != "SubmitTurn" && attempt.Kind != "ResolveInteraction" && attempt.Kind != "CloseRun" && attempt.Kind != "RecoverRun" && attempt.Kind != "ReconcileRun") ||
 		!sha256Hex.MatchString(attempt.RequestSHA256) || attempt.CreatedAt.IsZero() ||
 		attempt.State != "pending" ||
 		(attempt.ReplayKey != "" && (attempt.Kind != "StartRun" || !validLogicalKey(attempt.ReplayKey))) ||

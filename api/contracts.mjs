@@ -11,6 +11,7 @@ import {
   CloseStatus,
   ErrorCode,
   Freshness,
+  ProviderState,
   SessionLifecycle,
   SessionComposition,
   ApprovalPolicy,
@@ -154,7 +155,9 @@ export function validatePromptOriginal(response) {
 
 /** @param {import("./generated/ts/gul/v1/gul_pb.ts").GetExecutionStateResponse} response */
 export function validateExecutionState(response) {
-  if (!response.sessionId || response.freshness === Freshness.UNSPECIFIED) {
+  if (!response.sessionId || ![Freshness.FRESH, Freshness.STALE, Freshness.UNAVAILABLE].includes(response.freshness) ||
+      ![ProviderState.READY, ProviderState.DISCONNECTED, ProviderState.INCOMPATIBLE, ProviderState.BUSY, ProviderState.DEGRADED].includes(response.providerState) ||
+      (response.freshness === Freshness.FRESH && response.providerState !== ProviderState.READY && response.providerState !== ProviderState.DEGRADED)) {
     throw new Error("invalid Gul execution state");
   }
   if (response.freshness === Freshness.UNAVAILABLE) {

@@ -61,6 +61,7 @@ const (
 	Artifacts
 	Files
 	Profile
+	Session
 )
 const AllAggregates = Run | Writer | Interaction | Timeline
 

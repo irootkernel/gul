@@ -141,6 +141,8 @@ func (h *Harness) Reset() {
 			Models:                  []*publicv1.ModelCapability{{ModelId: "scenario-model", IsDefault: true, SupportedEfforts: []string{"low", "medium", "high"}}},
 			SupportedExecutionLanes: []publicv1.ExecutionLane{publicv1.ExecutionLane_EXECUTION_LANE_DEDICATED},
 			MaximumAssurance:        publicv1.AssuranceLevel_ASSURANCE_LEVEL_BEST_EFFORT_PERSONAL_ALPHA,
+			AccessPolicyTransition:  publicv1.SupportState_SUPPORT_STATE_UNAVAILABLE,
+			BackgroundExecution:     &publicv1.BackgroundExecutionCapabilities{Support: publicv1.SupportState_SUPPORT_STATE_SUPPORTED},
 		},
 	}
 	h.controllers = make(map[string]ControllerSpec)

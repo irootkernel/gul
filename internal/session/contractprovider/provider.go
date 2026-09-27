@@ -8,6 +8,7 @@ import (
 	"sort"
 	"time"
 
+	"connectrpc.com/connect"
 	publicv1 "github.com/rootkernel/gul/contract/generated/go/dolgorae/public/v1"
 	"github.com/rootkernel/gul/contract/port"
 	"github.com/rootkernel/gul/internal/session"
@@ -51,15 +52,19 @@ func (p Provider) Snapshot(ctx context.Context, attachment workspace.Attachment,
 		return session.Snapshot{}, session.ErrInvalidProjection
 	}
 	aggregate := aggregateResponse.GetSession()
-	if aggregate != nil && (aggregate.GetAvailability() == publicv1.OrchestratedSessionAvailability_ORCHESTRATED_SESSION_AVAILABILITY_UNAVAILABLE ||
-		aggregate.GetAvailability() == publicv1.OrchestratedSessionAvailability_ORCHESTRATED_SESSION_AVAILABILITY_RECOVERY_REQUIRED) {
-		return session.Snapshot{}, session.ErrUnavailable
-	}
 	if aggregate == nil || aggregate.GetPrimaryRun().GetRunId() != runID ||
 		aggregate.GetPrimaryRun().GetWorkspace().GetExpectedWorkspaceId() != attachment.ProviderID ||
 		aggregate.GetPrimaryRun().GetWorkspace().GetAbsolutePath() != attachment.CanonicalRoot ||
-		aggregate.GetAvailability() != publicv1.OrchestratedSessionAvailability_ORCHESTRATED_SESSION_AVAILABILITY_AVAILABLE ||
-		aggregate.GetCapturedAt() == nil || !aggregate.GetCapturedAt().IsValid() {
+		aggregate.GetCapturedAt() == nil || !aggregate.GetCapturedAt().IsValid() ||
+		(aggregate.CloseOperationId != nil && !session.ValidCloseOperationID(aggregate.GetCloseOperationId())) {
+		return session.Snapshot{}, session.ErrInvalidProjection
+	}
+	switch aggregate.GetAvailability() {
+	case publicv1.OrchestratedSessionAvailability_ORCHESTRATED_SESSION_AVAILABILITY_UNAVAILABLE:
+		return session.Snapshot{}, session.ErrDegraded
+	case publicv1.OrchestratedSessionAvailability_ORCHESTRATED_SESSION_AVAILABILITY_AVAILABLE,
+		publicv1.OrchestratedSessionAvailability_ORCHESTRATED_SESSION_AVAILABILITY_RECOVERY_REQUIRED:
+	default:
 		return session.Snapshot{}, session.ErrInvalidProjection
 	}
 	lifecycle, composition, approval, closeProgress, recovery :=
@@ -68,12 +73,15 @@ func (p Provider) Snapshot(ctx context.Context, attachment workspace.Attachment,
 	if lifecycle == "" || composition == "" || approval == "" || closeProgress == "" || recovery == "" {
 		return session.Snapshot{}, session.ErrInvalidProjection
 	}
+	if aggregate.GetAvailability() == publicv1.OrchestratedSessionAvailability_ORCHESTRATED_SESSION_AVAILABILITY_RECOVERY_REQUIRED && recovery == "none" {
+		return session.Snapshot{}, session.ErrInvalidProjection
+	}
 	configuration := run.GetConfiguration()
 	snapshot := session.Snapshot{ProviderSessionID: aggregate.GetSessionId(), PrimaryRunID: runID,
 		ProviderWorkspaceID: attachment.ProviderID, AggregateRevision: aggregate.GetAggregateRevision(),
 		RunRevision: run.GetStateRevision(), ObservedAt: aggregate.GetCapturedAt().AsTime().UTC(),
 		Lifecycle: lifecycle, Composition: composition, ApprovalPolicy: approval,
-		SpecialistPolicyName: aggregate.GetSpecialistPolicyName(), CloseProgress: closeProgress, Recovery: recovery,
+		SpecialistPolicyName: aggregate.GetSpecialistPolicyName(), CloseProgress: closeProgress, Recovery: recovery, CloseOperationID: aggregate.GetCloseOperationId(),
 		Counts: session.Counts{NonretiredMembers: aggregate.GetNonretiredMemberCount(), NonterminalSpawns: aggregate.GetNonterminalSpawnCount(),
 			PendingApprovals: aggregate.GetPendingApprovalCount(), AcceptedUnfinishedTasks: aggregate.GetAcceptedUnfinishedTaskCount(),
 			UnknownOutcomeTasks: aggregate.GetUnknownOutcomeTaskCount(), PublishedResults: aggregate.GetPublishedResultCount()},
@@ -117,9 +125,29 @@ func readError(err error) error {
 	if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
 		return err
 	}
+	// A rejected identity or credential must not disclose cached session state,
+	// including when a provider omitted the required typed error detail.
+	if connect.CodeOf(err) == connect.CodeUnauthenticated || connect.CodeOf(err) == connect.CodePermissionDenied {
+		return session.ErrInvalidProjection
+	}
 	mapped := port.MapProviderError(err)
-	if mapped.Code == "TRANSPORT_UNAVAILABLE" || mapped.Code == "DEADLINE_EXCEEDED" {
+	switch mapped.Code {
+	case "TRANSPORT_UNAVAILABLE", "DEADLINE_EXCEEDED":
 		return session.ErrUnavailable
+	case "PROTOCOL_INCOMPATIBLE":
+		return session.ErrIncompatible
+	case "RECOVERY_REQUIRED", "OUTCOME_UNKNOWN":
+		return session.ErrDegraded
+	case "CONTROLLER_MISMATCH", "WRITE_CONTINUATION_CONTROLLER_INVALID", "INVALID_REQUEST", "OPERATOR_ACTION_REQUIRED":
+		return session.ErrInvalidProjection
+	}
+	switch mapped.Action {
+	case "WAIT":
+		return session.ErrBusy
+	case "REFRESH_CAPABILITIES":
+		return session.ErrIncompatible
+	case "RECONCILE_RUN", "RECOVER_RUN":
+		return session.ErrDegraded
 	}
 	return session.ErrInvalidProjection
 }

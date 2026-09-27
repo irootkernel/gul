@@ -24,6 +24,7 @@ import {
   WorkspacePresentationService,
   ErrorCode,
   Freshness,
+  ProviderState,
   SessionLifecycle,
   SessionComposition,
   ApprovalPolicy,
@@ -166,19 +167,23 @@ test("empty continuation is not completion and page bounds fail closed", () => {
 
 test("execution state preserves typed close semantics and rejects missing authority", () => {
   const state = create(GetExecutionStateResponseSchema, {
-    sessionId: "session", stateVersion: "version", freshness: Freshness.FRESH,
+    sessionId: "session", stateVersion: "version", freshness: Freshness.FRESH, providerState: ProviderState.DEGRADED,
     lifecycle: SessionLifecycle.CLOSING, composition: SessionComposition.BROKERED_HIERARCHY,
     approvalPolicy: ApprovalPolicy.USER_APPROVAL_REQUIRED, closeProgress: CloseProgress.OUTCOME_UNKNOWN,
     recovery: RecoveryClass.OUTCOME_UNKNOWN, closeOperationRef: "gul-operation", counts: {nonretiredMembers: 1n},
     observedMembers: [{observedRef: "observed-1", lifecycle: ObservedMemberLifecycle.RUNNING}],
   });
   expect(fromBinary(GetExecutionStateResponseSchema, validateExecutionState(state)).closeOperationRef).toBe("gul-operation");
+  expect(fromBinary(GetExecutionStateResponseSchema, validateExecutionState(state)).providerState).toBe(ProviderState.DEGRADED);
+  expect(() => validateExecutionState({...state, providerState: ProviderState.UNSPECIFIED})).toThrow("execution state");
+  expect(() => validateExecutionState({...state, providerState: 999})).toThrow("execution state");
+  expect(() => validateExecutionState({...state, providerState: ProviderState.DISCONNECTED})).toThrow("execution state");
   expect(() => validateExecutionState({...state, stateVersion: ""})).toThrow("execution state");
   expect(() => validateExecutionState({...state, lifecycle: SessionLifecycle.UNSPECIFIED})).toThrow("execution state");
   expect(() => validateExecutionState({...state, specialistPolicyName: "x".repeat(270000)})).toThrow("exceeds bound");
   expect(() => validateExecutionState({...state, counts: undefined})).toThrow("execution state");
   expect(() => validateExecutionState({...state, observedMembers: [{observedRef: "observed-1", lifecycle: ObservedMemberLifecycle.UNSPECIFIED}]})).toThrow("observed member");
-  const unavailable = create(GetExecutionStateResponseSchema, {sessionId: "session", freshness: Freshness.UNAVAILABLE});
+  const unavailable = create(GetExecutionStateResponseSchema, {sessionId: "session", freshness: Freshness.UNAVAILABLE, providerState: ProviderState.DISCONNECTED});
   expect(() => validateExecutionState(unavailable)).not.toThrow();
   expect(() => validateExecutionState({...unavailable, sessionId: "x".repeat(270000)})).toThrow("exceeds bound");
   expect(() => validateExecutionState({...unavailable, counts: {nonretiredMembers: 0n}})).toThrow("unavailable");

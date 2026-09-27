@@ -11,6 +11,7 @@ import (
 	"github.com/rootkernel/gul/internal/history"
 	"github.com/rootkernel/gul/internal/presentation"
 	"github.com/rootkernel/gul/internal/session"
+	"github.com/rootkernel/gul/internal/sessionclose"
 )
 
 func localAccess(ctx context.Context, core *app.Core, resolve PrincipalResolver) (string, error) {
@@ -118,6 +119,7 @@ type DirectPresentationHandler struct {
 	Core         *app.Core
 	Presentation *presentation.Service
 	Sessions     *session.Service
+	Close        *sessionclose.Service
 	History      *history.Service
 	Principal    PrincipalResolver
 }

@@ -740,7 +740,7 @@ implicitly return complete history or all results.
 | --- | --- | --- |
 | DirectSessionService.ListPromptHistory | session_id, optional page_token, page_size | snapshot_id, ordered PromptHistoryItem summaries, optional next_page_token, traversal_complete, freshness and observed_at. E4-T5. |
 | DirectSessionService.GetPromptHistoryItem | session_id, prompt_item_id | Stable item identity, ordinal, accepted_at, conversation_entry_id and a typed original-content value: exact inline UTF-8 or authorized Gul artifact reference. E4-T5. |
-| DirectSessionService.GetExecutionState | session_id | Gul ExecutionState containing mapped lifecycle/composition/approval policy, safe policy identity, named counts, optional bounded observer-only member status with synthetic Gul references and a truncation flag, close progress and recovery classification, optional Gul close_operation_ref, state_version, freshness and observed_at. E3-T3. |
+| DirectSessionService.GetExecutionState | session_id | Gul ExecutionState containing mapped lifecycle/composition/approval policy, safe policy identity, named counts, optional bounded observer-only member status with synthetic Gul references and a truncation flag, close progress and recovery classification, optional Gul close_operation_ref, typed provider_state, state_version, freshness and observed_at. E3-T3 and E5-T1. |
 | DirectSessionService.ListDirectSessions | workspace_id | Subject-scoped Gul Direct Session presentation references for locally bound Primary Runs. E3-T3. |
 | DirectSessionService.ListSpecialistResults | session_id, optional page_token, page_size | snapshot_id, ordered SpecialistResult summaries, optional next_page_token, traversal_complete, freshness and observed_at. E4-T5. |
 
@@ -885,14 +885,17 @@ observation_checkpoint_stamps
 observation_refreshes
 client_projection_notifications
 provider_operation_attempts
+session_close_attempts
+session_close_operations
 schema_migrations
 ```
 
 `workspace_attachments` was added by migration 2. Migration 3 adds the two
 favorite tables, and migration 4 adds `primary_session_bindings`. Migration 5
 adds `observation_checkpoint_stamps`, `observation_refreshes`, and
-`client_projection_notifications`. The remaining tables were created by the
-initial migration.
+`client_projection_notifications`. Migration 6 adds `session_close_attempts`
+and `session_close_operations`. The remaining tables were created by the initial
+migration.
 
 Prohibited authoritative tables/aggregates include Codex threads, Turns, workspace writer locks, writer generations, pending runtime interactions, native subagents, background processes, and runtime recovery state. A projection table is named and documented as a cache.
 
@@ -1044,11 +1047,11 @@ The serial command facade is `toolchain-check`, `generate-contract`, `contract-c
 
 ## 19. Current snapshot
 
-**Snapshot date:** 2026-09-27 (E4 epic closeout)
+**Snapshot date:** 2026-09-28 (E5-T1 completion)
 
-**Roadmap point:** E0 is `Completed`, E12 is `Completed`, E1 is `Completed`, and E13 is `Completed`; E1-T1 is `Completed` and E1-T2/T3/T4/T5 are `Completed`. E3 and E3-T1/T2/T3/T4 are `Completed`. E4 and E4-T1/T2/T3/T5 are `Completed`. E4-T4 remains Deferred outside the current epic, and E5-T1 is next. Former E12-T2/T3 remain Retired. E14 owns pre-release application acceptance. No live-provider or assembled-application acceptance is implied.
+**Roadmap point:** E0 is `Completed`, E12 is `Completed`, E1 is `Completed`, and E13 is `Completed`; E1-T1 is `Completed` and E1-T2/T3/T4/T5 are `Completed`. E3 and E3-T1/T2/T3/T4 are `Completed`. E4 and E4-T1/T2/T3/T5 are `Completed`. E4-T4 remains Deferred outside the current epic. E5-T1 is `Completed`; E5-T2/T3 remain Planned. Former E12-T2/T3 remain Retired. E14 owns pre-release application acceptance. No live-provider or assembled-application acceptance is implied.
 
-**Maturity:** delivery-independent Go core, shared React bundle, declared but disabled Gul API, typed provider ports and explicit scenario harness, isolated SQLite repositories with fake-scoped Workspace attachment, local presentation and passive session reads, and a Wails shell foundation. E4 adds typed event observation, Interaction cards, shared action eligibility and bounded history/result/artifact reads with explicit fakes and isolated browser components. Provider and assembled storage lifecycle remain pending.
+**Maturity:** delivery-independent Go core, shared React bundle, declared but disabled Gul API, typed provider ports and explicit scenario harness, isolated SQLite repositories with fake-scoped Workspace attachment, local presentation and passive session reads, and a Wails shell foundation. E4 adds typed event observation, Interaction cards, shared action eligibility and bounded history/result/artifact reads with explicit fakes and isolated browser components. E5-T1 adds whole-session close and explicit recovery, provider health, and an injected restart supervisor at the same fake/component boundary. Provider and assembled storage lifecycle remain pending.
 
 ### 19.1 Implemented components
 
@@ -1229,6 +1232,32 @@ remains authoritative on every fresh read and after a restart.
 Migration 5 adds checkpoint stamps, pending refresh metadata, and Gul-only
 notification references. Projection updates, checkpoint advancement, and
 notification delivery commit in one immediate transaction.
+
+E5-T1 adds `internal/sessionclose` and migration 6. A Close request
+passes the shared action evaluator and records its attempt atomically before
+the checked adapter sends one root mutation. Duplicate requests share a stable
+attempt; opaque operation references survive a database reopen. The coordinator
+distinguishes rejection, progress, uncertainty, required recovery and confirmed
+whole-session closure. Independent reads must agree on the Run and aggregate
+revision, all owned work must be settled, and the Primary must hold no Writer
+authority before closure is confirmed. Completed Specialist history remains
+available. State reads never resend a mutation.
+
+Explicit Recover/Reconcile use the provider's advertised methods and typed
+eligibility. A recovery response supplies only the Run. `AggregateRefresher`
+invalidates dependent caches, reads Session/Writer/Interaction/timeline
+independently and verifies referenced final and timeline artifacts within the
+existing bounds. A failed artifact read retains the prior timeline head so a
+later refresh cannot skip it. Recovering an idle session resolves that recovery
+attempt without claiming that the session closed or resolving an older close.
+
+Provider health is a separate typed `GetExecutionState` field. Disconnected,
+incompatible, busy and degraded observations retain the last snapshot as stale;
+identity and credential failures remain blocked. The isolated `ProviderStatus`
+component displays health and snapshot freshness without deriving actions.
+`internal/recovery.Supervisor` uses an injected gateway lifecycle, clock and
+random source for the bounded restart policy. Product route registration,
+process startup and live-provider evidence remain with their later owners.
 
 `internal/desktop` starts and stops the same core through its lifecycle boundary,
 then runs a Wails v3 window over the checked bundle's existing asset handler.

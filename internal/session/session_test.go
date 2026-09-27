@@ -43,14 +43,21 @@ func (c carriers) Resolve(_ context.Context, subject, bindingID string) (session
 
 type changingProvider struct {
 	*scenario.Harness
-	profile      string
-	availability publicv1.OrchestratedSessionAvailability
+	profile          string
+	availability     publicv1.OrchestratedSessionAvailability
+	recovery         publicv1.RecoveryClassification
+	closeOperationID string
 }
 
 func (p *changingProvider) GetOrchestratedSession(ctx context.Context, request *publicv1.GetOrchestratedSessionRequest) (*publicv1.GetOrchestratedSessionResponse, error) {
 	response, err := p.Harness.GetOrchestratedSession(ctx, request)
 	if err == nil && p.availability != publicv1.OrchestratedSessionAvailability_ORCHESTRATED_SESSION_AVAILABILITY_UNSPECIFIED {
 		response.Session.Availability = p.availability
+		response.Session.RecoveryClassification = p.recovery
+		response.Session.CloseOperationId = nil
+		if p.closeOperationID != "" {
+			response.Session.CloseOperationId = &p.closeOperationID
+		}
 	}
 	return response, err
 }
@@ -326,7 +333,6 @@ func TestPrimaryBindingsAndAuthoritativeState(t *testing.T) {
 	}
 	for _, availability := range []publicv1.OrchestratedSessionAvailability{
 		publicv1.OrchestratedSessionAvailability_ORCHESTRATED_SESSION_AVAILABILITY_UNAVAILABLE,
-		publicv1.OrchestratedSessionAvailability_ORCHESTRATED_SESSION_AVAILABILITY_RECOVERY_REQUIRED,
 	} {
 		provider.availability = availability
 		degraded, err := svc.GetExecutionState(ctx, "owner", bindings[0].ID)
@@ -339,6 +345,23 @@ func TestPrimaryBindingsAndAuthoritativeState(t *testing.T) {
 			t.Fatalf("provider availability without cache %s = %+v, %v", availability, unavailable, err)
 		}
 	}
+	provider.availability = publicv1.OrchestratedSessionAvailability_ORCHESTRATED_SESSION_AVAILABILITY_RECOVERY_REQUIRED
+	provider.recovery = publicv1.RecoveryClassification_RECOVERY_CLASSIFICATION_OUTCOME_UNKNOWN
+	provider.closeOperationID = "provider-close-operation"
+	recovered, err := svc.GetExecutionState(ctx, "owner", bindings[0].ID)
+	if err != nil || recovered.Freshness != "fresh" || recovered.Snapshot == nil || recovered.Snapshot.Recovery != "outcome_unknown" || recovered.CloseOperationRef == "" || recovered.CloseOperationRef == provider.closeOperationID {
+		t.Fatalf("typed recovery snapshot = %+v, %v", recovered, err)
+	}
+	restarted := session.NewService(ws, store.Presentation(), contractprovider.Provider{Port: provider}, cs)
+	again, err := restarted.GetExecutionState(ctx, "owner", bindings[0].ID)
+	if err != nil || again.CloseOperationRef != recovered.CloseOperationRef {
+		t.Fatalf("operation reference after restart = %+v, %v", again, err)
+	}
+	provider.recovery = publicv1.RecoveryClassification_RECOVERY_CLASSIFICATION_NONE
+	if _, err := svc.GetExecutionState(ctx, "owner", bindings[0].ID); !errors.Is(err, session.ErrInvalidProjection) {
+		t.Fatalf("contradictory recovery availability = %v", err)
+	}
+	provider.closeOperationID = ""
 	provider.availability = publicv1.OrchestratedSessionAvailability_ORCHESTRATED_SESSION_AVAILABILITY_UNSPECIFIED
 	if err := h.FaultNext("GetOrchestratedSession", scenario.BeforeCommit,
 		connect.NewError(connect.CodePermissionDenied, errors.New("unauthorized"))); err != nil {
@@ -553,4 +576,8 @@ func (p *fixedProvider) Snapshot(ctx context.Context, attachment workspace.Attac
 	return session.Snapshot{ProviderSessionID: id, PrimaryRunID: runID, ProviderWorkspaceID: attachment.ProviderID,
 		Lifecycle: "active", Composition: "standalone_primary", ApprovalPolicy: "user_approval_required", CloseProgress: "none", Recovery: "none",
 		AggregateRevision: 1, RunRevision: 1, ObservedAt: time.Now().UTC()}, nil
+}
+
+func (r *memoryRepository) OperationReference(_ context.Context, b session.Binding, providerID string) (string, error) {
+	return "opaque-" + b.ID, nil
 }

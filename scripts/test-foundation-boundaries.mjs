@@ -51,6 +51,10 @@ const history = goSourceFiles(path.join(sourceRoot, "internal/history"))
   .map(name => fs.readFileSync(name, "utf8")).join("\n");
 const historyAdapter = goSourceFiles(path.join(sourceRoot, "internal/history/contractprovider"))
   .map(name => fs.readFileSync(name, "utf8")).join("\n");
+const sessionclose = goSourceFiles(path.join(sourceRoot, "internal/sessionclose"))
+  .map(name => fs.readFileSync(name, "utf8")).join("\n");
+const recovery = goSourceFiles(path.join(sourceRoot, "internal/recovery"))
+  .map(name => fs.readFileSync(name, "utf8")).join("\n");
 const scenarioImport = /"github\.com\/rootkernel\/gul\/contract\/scenario(?:\/[^\"]+)?"/;
 
 function sourceFiles(directory) {
@@ -95,6 +99,8 @@ const boundaries = [
   ["action adapter", actionAdapter, [/"github\.com\/rootkernel\/gul\/internal\/(?:app|delivery|desktop|storage)(?:\/|")/, /"github\.com\/rootkernel\/gul\/api\/generated(?:\/|")/, /"github\.com\/wailsapp/, /"database\/sql"/, /\bListenAndServe\b/, scenarioImport]],
   ["history", history, [/"github\.com\/rootkernel\/gul\/internal\/(?:app|delivery|desktop|storage)(?:\/|")/, /"github\.com\/rootkernel\/gul\/(?:contract|api\/generated)(?:\/|")/, /"github\.com\/wailsapp/, /"database\/sql"/, /\bListenAndServe\b/, scenarioImport]],
   ["history adapter", historyAdapter, [/"github\.com\/rootkernel\/gul\/internal\/(?:app|delivery|desktop|storage)(?:\/|")/, /"github\.com\/rootkernel\/gul\/api\/generated(?:\/|")/, /"github\.com\/wailsapp/, /"database\/sql"/, /\bListenAndServe\b/, scenarioImport]],
+  ["sessionclose", sessionclose, [/"github\.com\/rootkernel\/gul\/internal\/(?:app|delivery|desktop|storage)(?:\/|")/, /"github\.com\/rootkernel\/gul\/(?:contract|api\/generated)(?:\/|")/, /"github\.com\/wailsapp/, /"database\/sql"/, /\bListenAndServe\b/, scenarioImport]],
+  ["recovery", recovery, [/"github\.com\/rootkernel\/gul\/internal\/(?:app|delivery|desktop|storage)(?:\/|")/, /"github\.com\/rootkernel\/gul\/(?:contract|api\/generated)(?:\/|")/, /"github\.com\/wailsapp/, /"database\/sql"/, /\bListenAndServe\b/, scenarioImport]],
 ];
 
 for (const [label, source, forbidden] of boundaries) {
@@ -142,4 +148,4 @@ try {
   fs.rmSync(fixture, {recursive: true, force: true});
 }
 
-console.log("frontend, delivery, desktop, command, app, domain, storage, workspace, presentation, session, launch, observation, interaction, action, and history foundation boundaries passed");
+console.log("frontend, delivery, desktop, command, app, domain, storage, workspace, presentation, session, launch, observation, interaction, action, history, sessionclose, and recovery foundation boundaries passed");

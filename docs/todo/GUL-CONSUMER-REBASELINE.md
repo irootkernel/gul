@@ -99,7 +99,7 @@ continuation implementation.
 - [x] E3-T4 selects a global Profile, model, lane, assurance and preprovisioned Policy with an explicit shared read-only warning; it does not start a Run.
 - [x] E4-T3 completes the shared close-eligibility and interrupt-confirmation evaluator.
 - [x] E4-T5 implements browser history/item/result reads, empty-but-continuable pages, complete original text, fixed traversal scope, token expiry and authorization.
-- [ ] E5-T1 uses those completed predecessors for whole-session close, stable operation correlation and pending/confirmed/unknown/recovery handling. E7-T2 integrates UI; E2/E9 prove the real provider.
+- [x] E5-T1 uses those completed predecessors for whole-session close, stable operation correlation and pending/confirmed/unknown/recovery handling. E7-T2 integrates UI; E2/E9 prove the real provider.
 - [ ] Documentation checks reject mismatched Active Task pointers, removed retired/reserved permanent IDs, interleaved Epic blocks, summary/Task-order disagreement, invalid dependencies/owners and cross-ledger duplicates. Negative fixtures never alter the live worktree.
 - [ ] Check shell syntax and staged/unstaged whitespace. Run contract-check only with the pinned toolchain, or report the exact mismatch without rewriting generated output.
 

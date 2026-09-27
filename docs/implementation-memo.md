@@ -754,6 +754,73 @@ dossier remains for the other epics. E5-T1 is next and owns whole-session close
 coordination. E5 also owns reconnect convergence, E7 the integrated UI, E8 the
 protected route assembly, and E2/E9 live-provider qualification.
 
+### E5-T1 safe close and explicit recovery (2026-09-28)
+
+`internal/sessionclose` coordinates whole-session Close through the Primary's
+checked Controller binding. It reuses the action evaluator, persists a
+non-secret attempt before transmission, and invokes the root once with the
+fresh Run revision. Active owned work requires explicit interrupt consent.
+The checked adapter applies the 10-second Close and 60-second Recover/Reconcile
+limits. It accepts only complete typed responses and recognized pre-acceptance
+rejections; transport loss remains unresolved.
+
+SQLite retains request digests and Gul-owned attempt/operation references across
+reopen. Concurrent copies of one request share one dispatch, and a changed
+request with the same key fails. The provider operation ID stays in the backend.
+An accepted or pending response cannot establish closure. Fresh aggregate, Run,
+Writer, Interaction and timeline observations must agree, all owned work must
+settle, and required artifact reads must succeed. Browser state reads reconcile
+stored attempts without resending Close or starting recovery. History and
+unrelated execution remain provider-owned.
+
+Recovery consumes the immediate Run separately from the follow-up projections.
+Each affected cache remains stale until its own authoritative read succeeds.
+Missing credentials and uncertain policy block mutations without inventing
+writer release or changing retained owner/generation. Provider status preserves
+disconnected, incompatible, busy and degraded distinctions independently from
+the retained execution snapshot.
+
+`internal/recovery.Supervisor` applies jittered exponential restart delays,
+the rolling five-start budget, a five-minute stable reset and terminal
+incompatibility/exhaustion blockers through an injected gateway lifecycle.
+It never changes durable Run state. Actual process ownership belongs to E2;
+reconnect and startup convergence belong to E5-T2, and the general replay store
+and operation policy belong to E5-T3. This includes a dispatcher that exits,
+or cannot persist its result, between `Begin` and `Save`: its retained pending
+blocker stays closed to conflicting mutations. E5-T2/T3 must identify that
+orphan and make it available to authoritative observation without resending
+the tokenless operation before product startup is enabled.
+
+The checked scenario test connects the coordinator, SQLite, action/session
+adapters and concrete refresher. The scenario now supplies explicit policy
+support and reconciliation values and the correct threadless Run variant.
+Negotiation fixtures provide the artifact and Interaction limits omitted by
+its generic catalog.
+
+Focused Go race checks and serial `make test` pass, including both Go modules,
+frontend/API contracts, generation drift, migration, SOT and toolchain failure
+fixtures. The final of three six-role completion reviews assessed all nine
+requirements as met at this boundary. Review corrections preserve binding-query error classes,
+concurrent WAIT receipts and bounded provider identities. The final local Low
+pass moved the unchanged Gul identity predicate to the session owner and added
+capability, browser health and post-transmission storage-failure checks; it
+changed no product behavior. No blocking or undispositioned finding remains.
+This evidence covers explicit fakes, reusable components and unmounted handlers. E7 owns the assembled session
+UI; no live provider or authenticated product route is enabled. Release notes:
+`not-enrolled`.
+
+| Requirement | Accepted implementation and verification |
+| --- | --- |
+| REQ-RUNTIME-009 | Typed provider status in session/API and `ProviderStatus`; stale-retention, error mapping, schema and component tests |
+| REQ-RUNTIME-012 | Checked capability and evaluator admission for explicit Recover/Reconcile; unsupported and missing-instruction tests |
+| REQ-RUNTIME-018 | Injected gateway restart supervisor; fake-clock jitter, rolling budget, reset, cancellation and terminal-blocker tests |
+| REQ-CTRL-008 | Backend credential resolution before admission; missing credential and foreign-subject tests never dispatch |
+| REQ-WRITER-006 | Recovery invalidates freshness without fabricating owner/generation; ownerless/external Writer stamp and failure tests |
+| REQ-REC-005 | Shared typed eligibility and checked identities, revisions, policy and compatibility; fail-closed adapter/service tests |
+| REQ-REC-007 | Retained unknown attempts, independent outcome observation and distinct typed browser statuses; loss/cancellation/reopen tests |
+| REQ-REC-010 | Concrete per-aggregate refresher and bounded artifact verification; independent failures, rollback and invalidation-race tests |
+| REQ-SESSION-002 | Root-only Close, stable opaque correlation, explicit interrupt consent and whole-aggregate confirmation; checked scenario and API tests |
+
 ## 2. Current development snapshot
 
 | Area | State |
@@ -761,14 +828,14 @@ protected route assembly, and E2/E9 live-provider qualification.
 | Five Gul SOT documents | E0-T4 completed the consumer alignment and Gate A reproduction; E0-T8 completed toolchain/ADR alignment; E0-T7 completed Gate B |
 | Toolchain and developer-command artifacts | E0-T8 accepted one pin manifest and read-only host checks; E0-T7 adds checked contract generation/drift delegates; E1-T1 adds the root Go module; E1-T2 adds root Bun pin validation and checked frontend generation/drift commands; E1-T3 adds checked Gul API/error-catalog generation; no installer |
 | Contract boundary | E12-T1 pins TASK-053 and regenerates checked clients/maps/fake transport for 36 known, 27 required, and 9 unavailable methods; E13-T1 adds an explicit stateful scenario provider over the 27-method port |
-| Production source | E1 shared core, bundle, API declarations, isolated SQLite and Wails shell; E3-T1 adds Workspace attachment; E3-T2 adds local presentation; E3-T3 adds passive session binding and aggregate reads; E3-T4 adds global Profile launch selection; E4 adds typed observation, Interaction cards, shared action eligibility and history/result/artifact adapters; handlers remain unmounted |
+| Production source | E1 shared core, bundle, API declarations, isolated SQLite and Wails shell; E3-T1 adds Workspace attachment; E3-T2 adds local presentation; E3-T3 adds passive session binding and aggregate reads; E3-T4 adds global Profile launch selection; E4 adds typed observation, Interaction cards, shared action eligibility and history/result/artifact adapters; E5-T1 adds whole-session close, explicit recovery, provider health and an injected restart supervisor; handlers remain unmounted |
 | Wails host/frontend | One React foundation bundle and isolated Wails shell foundation implemented; E3-T4 launch selector is unmounted and authenticated attach is not implemented |
 | ConnectRPC schema/services | Gul Runtime, DirectSession, ArtifactPresentation and WorkspacePresentation declarations and generated clients exist; isolated handlers remain unmounted |
-| Gul SQLite schema | Gul-owned version 5 schema with Workspace attachment, favorites Primary binding and event metadata migrations and isolated repositories implemented; production startup integration pending |
-| Dolgorae RPC supervisor/provider | Not implemented |
+| Gul SQLite schema | Gul-owned version 6 schema with Workspace attachment, favorites, Primary binding, event metadata and session-close attempt/operation migrations and isolated repositories implemented; production startup integration pending |
+| Dolgorae RPC supervisor/provider | Bounded restart policy implemented against an injected lifecycle; production process ownership and live provider remain pending |
 | Controller credential store | Caller-owned mechanism selected by ADR-0047; not implemented |
 | FileService/auth/PWA/Tailscale integration | Not implemented |
-| Current State promotions | REQ-HOST-005, REQ-RUNTIME-011, REQ-RUNTIME-022, REQ-CONSUMER-001/002, fake-scoped REQ-WS-001/004/006/007/008/009/010/011/012, REQ-DIRECT-001/003/009/015/019, REQ-SESSION-003, local REQ-WS-003/REQ-DIRECT-007, and all 41 E4-owned requirements in the Current State ledger; no assembled-product or released-provider claim |
+| Current State promotions | REQ-HOST-005, REQ-RUNTIME-011, REQ-RUNTIME-022, REQ-CONSUMER-001/002, fake-scoped REQ-WS-001/004/006/007/008/009/010/011/012, REQ-DIRECT-001/003/009/015/019, REQ-SESSION-003, local REQ-WS-003/REQ-DIRECT-007, all 41 E4-owned requirements, and the nine fake/component-scoped E5-T1 requirements in the Current State ledger; no assembled-product or released-provider claim |
 
 The repository contains the shared-core and single-bundle delivery foundations,
 declared but inactive Gul APIs, isolated Gul-owned SQLite repositories, bootstrap
@@ -1221,4 +1288,4 @@ The initial documentation assumed Gul would manage one Codex App Server, map Ses
 
 ## 12. Handoff
 
-E12, E1, E13, E3 and E4 are complete. The TASK-053 consumer lock and generated contract tooling remain authoritative. E3-T1 added fake-scoped Workspace attachment, E3-T2 added local-only presentation, E3-T3 added passive session reads, and E3-T4 added prospective global Profile launch selection. E5-T1 is next. E2-T0 remains blocked on an accepted compatible Dolgorae executable and live smoke evidence. No product route or live-provider behavior is activated automatically.
+E12, E1, E13, E3 and E4 are complete. The TASK-053 consumer lock and generated contract tooling remain authoritative. E3-T1 added fake-scoped Workspace attachment, E3-T2 added local-only presentation, E3-T3 added passive session reads, and E3-T4 added prospective global Profile launch selection. E5-T1 is complete; E5-T2 is next and E5-T3 remains planned. E2-T0 remains blocked on an accepted compatible Dolgorae executable and live smoke evidence. No product route or live-provider behavior is activated automatically.

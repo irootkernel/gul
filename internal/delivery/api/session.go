@@ -9,6 +9,7 @@ import (
 	gulv1 "github.com/rootkernel/gul/api/generated/go/gul/v1"
 	"github.com/rootkernel/gul/internal/presentation"
 	"github.com/rootkernel/gul/internal/session"
+	"github.com/rootkernel/gul/internal/sessionclose"
 	"github.com/rootkernel/gul/internal/workspace"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
@@ -44,11 +45,22 @@ func (h *DirectPresentationHandler) GetExecutionState(ctx context.Context, reque
 	if h.Sessions == nil {
 		return nil, sessionError(session.ErrUnavailable)
 	}
+	if request == nil || request.Msg == nil || !session.ValidID(request.Msg.GetSessionId()) {
+		return nil, sessionError(session.ErrInvalid)
+	}
+	if h.Close != nil {
+		// Observe existing attempts only; reads never dispatch Close or recovery.
+		_ = h.Close.ObservePending(ctx, subject, request.Msg.GetSessionId())
+	}
 	state, err := h.Sessions.GetExecutionState(ctx, subject, request.Msg.GetSessionId())
 	if err != nil {
 		return nil, sessionError(err)
 	}
 	response := &gulv1.GetExecutionStateResponse{SessionId: state.SessionID, StateVersion: state.StateVersion}
+	response.ProviderState = browserProviderState(state.ProviderState)
+	if state.CloseOperationRef != "" {
+		response.CloseOperationRef = &state.CloseOperationRef
+	}
 	switch state.Freshness {
 	case "fresh":
 		response.Freshness = gulv1.Freshness_FRESHNESS_FRESH
@@ -77,6 +89,96 @@ func (h *DirectPresentationHandler) GetExecutionState(ctx context.Context, reque
 		}
 	}
 	return connect.NewResponse(response), nil
+}
+
+func (h *DirectPresentationHandler) CloseRuntime(ctx context.Context, request *connect.Request[gulv1.CloseRuntimeRequest]) (*connect.Response[gulv1.CloseRuntimeResponse], error) {
+	subject, err := h.access(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if request == nil || request.Msg == nil || !session.ValidID(request.Msg.GetSessionId()) || !session.ValidID(request.Msg.GetAttemptId()) || len(request.Msg.ProtoReflect().GetUnknown()) != 0 {
+		return nil, sessionError(session.ErrInvalid)
+	}
+	if h.Close == nil {
+		return nil, sessionError(session.ErrUnavailable)
+	}
+	outcome, err := h.Close.Close(ctx, subject, request.Msg.SessionId, request.Msg.AttemptId, request.Msg.Interrupt)
+	if err != nil {
+		return nil, closeError(err)
+	}
+	result, err := browserCloseOutcome(outcome)
+	if err != nil {
+		return nil, err
+	}
+	return connect.NewResponse(&gulv1.CloseRuntimeResponse{Outcome: result}), nil
+}
+
+func browserProviderState(value session.ProviderState) gulv1.ProviderState {
+	switch value {
+	case session.ProviderReady:
+		return gulv1.ProviderState_PROVIDER_STATE_READY
+	case session.ProviderDisconnected:
+		return gulv1.ProviderState_PROVIDER_STATE_DISCONNECTED
+	case session.ProviderIncompatible:
+		return gulv1.ProviderState_PROVIDER_STATE_INCOMPATIBLE
+	case session.ProviderBusy:
+		return gulv1.ProviderState_PROVIDER_STATE_BUSY
+	case session.ProviderDegraded:
+		return gulv1.ProviderState_PROVIDER_STATE_DEGRADED
+	default:
+		return gulv1.ProviderState_PROVIDER_STATE_UNSPECIFIED
+	}
+}
+
+func browserCloseOutcome(value sessionclose.Outcome) (*gulv1.CloseOutcome, error) {
+	out := &gulv1.CloseOutcome{CloseAttemptId: value.AttemptID}
+	switch value.Status {
+	case sessionclose.Rejected:
+		out.Status = gulv1.CloseStatus_CLOSE_STATUS_REJECTED
+	case sessionclose.InProgress:
+		out.Status = gulv1.CloseStatus_CLOSE_STATUS_IN_PROGRESS
+	case sessionclose.Confirmed:
+		out.Status = gulv1.CloseStatus_CLOSE_STATUS_CONFIRMED
+	case sessionclose.OutcomeUnknown:
+		out.Status = gulv1.CloseStatus_CLOSE_STATUS_OUTCOME_UNKNOWN
+	case sessionclose.RecoveryRequired:
+		out.Status = gulv1.CloseStatus_CLOSE_STATUS_RECOVERY_REQUIRED
+	default:
+		return nil, sessionError(session.ErrInvalidProjection)
+	}
+	if value.Status != sessionclose.Rejected && !session.ValidID(value.AttemptID) {
+		return nil, sessionError(session.ErrInvalidProjection)
+	}
+	if value.OperationRef != "" {
+		out.CloseOperationRef = &value.OperationRef
+	}
+	action, ok := gulv1.ActionClass_value["ACTION_CLASS_"+value.NextAction]
+	if !ok || action == 0 {
+		action = int32(gulv1.ActionClass_ACTION_CLASS_OPERATOR_REPAIR)
+	}
+	out.NextAction = gulv1.ActionClass(action)
+	if value.Status == sessionclose.Rejected {
+		number, ok := gulv1.ErrorCode_value["ERROR_CODE_"+value.Code]
+		if !ok || number == 0 {
+			number = int32(gulv1.ErrorCode_ERROR_CODE_PROVIDER_BLOCKED)
+		}
+		out.Rejection = &gulv1.DomainError{Code: gulv1.ErrorCode(number), Action: out.NextAction}
+	}
+	return out, nil
+}
+
+func closeError(err error) error {
+	if errors.Is(err, sessionclose.ErrInvalid) {
+		return sessionError(session.ErrInvalid)
+	}
+	if errors.Is(err, sessionclose.ErrConflict) {
+		out := connect.NewError(connect.CodeAborted, errors.New("conflicting session operation"))
+		if detail, e := connect.NewErrorDetail(&gulv1.DomainError{Code: gulv1.ErrorCode_ERROR_CODE_RUN_STATE_CONFLICT, Action: gulv1.ActionClass_ACTION_CLASS_REFRESH_SNAPSHOT}); e == nil {
+			out.AddDetail(detail)
+		}
+		return out
+	}
+	return sessionError(err)
 }
 
 func browserMemberLifecycle(value string) gulv1.ObservedMemberLifecycle {
