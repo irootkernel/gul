@@ -1273,7 +1273,7 @@ One checked React bundle and shared browser/shell asset delivery exist.
 An isolated Wails shell foundation reuses the shared core and checked bundle; authenticated attach is not enabled.
 ConnectRPC services are declared and generated but not registered.
 Gul-only SQLite schema and repositories exist in isolated tests; no production database lifecycle is enabled.
-No Runtime Provider adapter, RPC supervisor, Controller credential store, timeline adapter, or Artifact adapter exists in the assembled product. Isolated Workspace inspection, passive session and launch selection adapters use the pinned provider port with a scenario fake.
+No Runtime Provider adapter, RPC supervisor, Controller credential store, timeline adapter, or Artifact adapter exists in the assembled product. Isolated Workspace, session, launch, observation, Interaction, action and history/artifact adapters use the pinned provider port with explicit fakes.
 ```
 
 ### 19.5 Security posture

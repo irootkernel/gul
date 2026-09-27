@@ -735,6 +735,25 @@ failures use the established `UNAUTHORIZED`/`ABORT` contract. Focused race check
 serial `make test` and the isolated Chrome fixture passed. No unresolved finding
 or unmet criterion remains. E4-wide validation precedes E5-T1.
 
+### E4 epic closeout (2026-09-27)
+
+E4-T1, E4-T2, E4-T3 and E4-T5 are complete. The final audit traced all 41 owned
+requirements through implementation, behavior tests and canonical documentation.
+Independent whole-epic review covered event-to-storage delivery, observer-to-card
+refresh, shared action guards, protected response handling and both artifact
+read paths. No unresolved finding or unmet completion criterion remains.
+
+Serial `make test`, focused race checks and isolated Chrome Interaction/action/
+artifact scenarios passed. These checks cover the pinned provider fakes and
+reusable components. They do not qualify a live provider, authenticated product
+route or real provider process restart. E4-T4 remains Deferred outside this epic.
+
+The Current State ledger now includes the previously documented T1/T2 outcomes
+as well as T3/T5. E4 links to these canonical outcomes; the shared consumer
+dossier remains for the other epics. E5-T1 is next and owns whole-session close
+coordination. E5 also owns reconnect convergence, E7 the integrated UI, E8 the
+protected route assembly, and E2/E9 live-provider qualification.
+
 ## 2. Current development snapshot
 
 | Area | State |
@@ -742,14 +761,14 @@ or unmet criterion remains. E4-wide validation precedes E5-T1.
 | Five Gul SOT documents | E0-T4 completed the consumer alignment and Gate A reproduction; E0-T8 completed toolchain/ADR alignment; E0-T7 completed Gate B |
 | Toolchain and developer-command artifacts | E0-T8 accepted one pin manifest and read-only host checks; E0-T7 adds checked contract generation/drift delegates; E1-T1 adds the root Go module; E1-T2 adds root Bun pin validation and checked frontend generation/drift commands; E1-T3 adds checked Gul API/error-catalog generation; no installer |
 | Contract boundary | E12-T1 pins TASK-053 and regenerates checked clients/maps/fake transport for 36 known, 27 required, and 9 unavailable methods; E13-T1 adds an explicit stateful scenario provider over the 27-method port |
-| Production source | E1 shared core, bundle, API declarations, isolated SQLite and Wails shell; E3-T1 adds Workspace attachment; E3-T2 adds local presentation; E3-T3 adds passive session binding and aggregate reads; E3-T4 adds global Profile launch selection and unmounted typed handler |
+| Production source | E1 shared core, bundle, API declarations, isolated SQLite and Wails shell; E3-T1 adds Workspace attachment; E3-T2 adds local presentation; E3-T3 adds passive session binding and aggregate reads; E3-T4 adds global Profile launch selection; E4 adds typed observation, Interaction cards, shared action eligibility and history/result/artifact adapters; handlers remain unmounted |
 | Wails host/frontend | One React foundation bundle and isolated Wails shell foundation implemented; E3-T4 launch selector is unmounted and authenticated attach is not implemented |
 | ConnectRPC schema/services | Gul Runtime, DirectSession, ArtifactPresentation and WorkspacePresentation declarations and generated clients exist; isolated handlers remain unmounted |
 | Gul SQLite schema | Gul-owned version 5 schema with Workspace attachment, favorites Primary binding and event metadata migrations and isolated repositories implemented; production startup integration pending |
 | Dolgorae RPC supervisor/provider | Not implemented |
 | Controller credential store | Caller-owned mechanism selected by ADR-0047; not implemented |
 | FileService/auth/PWA/Tailscale integration | Not implemented |
-| Current State promotions | REQ-HOST-005, REQ-RUNTIME-011, REQ-RUNTIME-022, REQ-CONSUMER-001/002, fake-scoped REQ-WS-001/004/006/007/008/009/010/011/012, REQ-DIRECT-001/003/009/015/019, REQ-SESSION-003, and local REQ-WS-003/REQ-DIRECT-007; no assembled-product or released-provider claim |
+| Current State promotions | REQ-HOST-005, REQ-RUNTIME-011, REQ-RUNTIME-022, REQ-CONSUMER-001/002, fake-scoped REQ-WS-001/004/006/007/008/009/010/011/012, REQ-DIRECT-001/003/009/015/019, REQ-SESSION-003, local REQ-WS-003/REQ-DIRECT-007, and all 41 E4-owned requirements in the Current State ledger; no assembled-product or released-provider claim |
 
 The repository contains the shared-core and single-bundle delivery foundations,
 declared but inactive Gul APIs, isolated Gul-owned SQLite repositories, bootstrap
@@ -905,7 +924,7 @@ these archived rows adds a first-release requirement.
 | RISK-022 | `.dolgorae` data leaks through symlink aliases, Markdown/images, or ancestor Git aggregation. | Medium | Critical | Fully resolved denial at every surface, negative tests, hard-link deployment prohibition; E6/E9. |
 | RISK-023 | Dolgorae's retained `gomchi` checkout name, an upstream obsolete client name, or a mutable request in `prompt.md` is mistaken for current product identity or SOT. | Medium | High | ADR-0042 records identity history; promote accepted request changes into all five SOT documents; bind dependency evidence to URL/path/commit and check bundle, binary, persistence, docs, and release names; E0-T7/E0-T8/E9-T3. |
 | RISK-024 | Dolgorae's implementation programme is unstarted, so Gul's sole provider does not exist as software and E2 through E5 cannot produce live evidence for an extended period. | High | High | Generate inventory and fakes from upstream checked artifacts, pin the commit pair, keep fake and live evidence classes distinct, and sequence work that does not need the executable; E0-T7/E2-T0. |
-| RISK-025 | Gul offers Acquire before the first write on a threadless Run or mishandles unsupported transition. | Medium | High | ADR-0044 action matrix, explicit threadless rejection, SubmitTurn(WRITE), CreateWriteContinuation branch; E4-T3/T4. |
+| RISK-025 | Gul offers Acquire before the first write on a threadless Run or mishandles unsupported transition. | Medium | High | ADR-0044 action matrix, explicit threadless Acquire rejection, first SubmitTurn(WRITE), and a typed unsupported-transition blocker; E4-T3. Future continuation remains with Deferred E4-T4. |
 | RISK-026 | Wire decoding succeeds despite an unsupported API, missing capability, unknown required enum, or malformed typed error. | High | High | Handshake allowlist, generated-version decoders, required-capability matrix, typed blocker and drift checks; E0-T7/E2-T1/E9-T1. |
 | RISK-027 | Protected interaction input supplied by the user leaks through the delivery journal, projection cache, logs, diagnostics, or browser storage. | Medium | Critical | Second-secret rules, one bounded ResolveInteraction body, no carrier/metadata/retry queue, state refresh after response loss, canary tests; E4-T2/E9-T2. |
 | RISK-028 | Eight-stream saturation or a slow consumer hides a pending interaction or blocks mutations. | Medium | High | Deterministic priority/hysteresis, 10-second polling guarantee, bounded per-stream queues, unary isolation; E4-T1/E4-T2. |
@@ -1202,4 +1221,4 @@ The initial documentation assumed Gul would manage one Codex App Server, map Ses
 
 ## 12. Handoff
 
-E12, E1, E13, and E3 are complete. The TASK-053 consumer lock and generated contract tooling remain authoritative. E3-T1 added fake-scoped Workspace attachment, E3-T2 added local-only presentation, E3-T3 added passive session reads, and E3-T4 added prospective global Profile launch selection. E4-wide validation is next. E2-T0 remains blocked on an accepted compatible Dolgorae executable and live smoke evidence. No product route or live-provider behavior is activated automatically.
+E12, E1, E13, E3 and E4 are complete. The TASK-053 consumer lock and generated contract tooling remain authoritative. E3-T1 added fake-scoped Workspace attachment, E3-T2 added local-only presentation, E3-T3 added passive session reads, and E3-T4 added prospective global Profile launch selection. E5-T1 is next. E2-T0 remains blocked on an accepted compatible Dolgorae executable and live smoke evidence. No product route or live-provider behavior is activated automatically.
