@@ -343,6 +343,21 @@ detector, including concurrent scenario streams. Four E13-T1 document headers
 were brought current. These corrections remain fake-scoped; E13 closeout is
 separate.
 
+E4 prerequisite inspection reopened E13-T1 on 2026-09-27. Normal events now
+capture their complete Run stamp after the event cursor and state revision
+advance, so delayed reads and replay retain the original observation. Each
+subscriber receives its requested supported projection; omitted settings use
+`minimal` version 1 only as a documented fixture default. Acquire/release update
+the workspace writer stamp from its state revision. Fresh Run, Interaction and
+timeline snapshots read that same writer revision, including when another Run
+changed the writer. Writer generation remains a separate field, and a
+workspace-only writer query does not invent per-Run stamp components.
+Regression tests cover all durable variants, delayed Interaction events,
+projection selection and rejection, replay, returned-message isolation, repeated
+writer acquisition/release, and reads across two Runs. The focused scenario race
+suite and serial `make test` passed. Production wiring and the pinned contract
+remain unchanged. E13-T1 returned to Completed after this verification.
+
 ## 1.13 E13 epic closeout, 2026-09-25
 
 E13-T1 meets the roadmap's independent provider-scenario acceptance over the

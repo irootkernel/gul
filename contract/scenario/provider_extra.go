@@ -20,7 +20,7 @@ func (h *Harness) ListPendingInteractions(_ context.Context, request *publicv1.L
 	if err != nil {
 		return nil, err
 	}
-	response := &publicv1.ListPendingInteractionsResponse{Context: h.response(), Stamp: copyOf(r.projection.GetStamp())}
+	response := &publicv1.ListPendingInteractionsResponse{Context: h.response(), Stamp: r.stamp()}
 	ids := make([]string, 0, len(r.interactions))
 	for id := range r.interactions {
 		ids = append(ids, id)
@@ -100,7 +100,6 @@ func (h *Harness) ResolveInteraction(_ context.Context, request *publicv1.Resolv
 		r.projection.Lifecycle = lifecycleFromWork(r)
 	}
 	h.emit(r, &publicv1.DurableRunEvent{Event: &publicv1.DurableRunEvent_InteractionResolved{InteractionResolved: &publicv1.InteractionResolvedEvent{InteractionId: request.GetInteractionId(), Outcome: publicv1.InteractionOutcome_INTERACTION_OUTCOME_ANSWERED}}})
-	h.changed(r)
 	response := &publicv1.ResolveInteractionResponse{Context: h.response(), InteractionId: request.GetInteractionId(),
 		Status: publicv1.InteractionStatus_INTERACTION_STATUS_RESOLVED, ResolutionReceipt: h.next("interaction-receipt")}
 	r.interactionKeys[key] = copyOf(response)
@@ -156,6 +155,7 @@ func (h *Harness) AcquireWriter(_ context.Context, request *publicv1.AcquireWrit
 	w.writer.OwnerRunId = pointer(r.projection.GetRunId())
 	w.writer.WriterGeneration++
 	w.writer.StateRevision++
+	w.writer.Stamp = w.stamp()
 	w.writer.EffectiveAccess = publicv1.EffectiveAccess_EFFECTIVE_ACCESS_WRITE
 	r.projection.WriterAuthority.State = w.writer.AuthorityState
 	r.projection.WriterAuthority.WriterGeneration = w.writer.WriterGeneration
@@ -195,6 +195,7 @@ func (h *Harness) ReleaseWriter(_ context.Context, request *publicv1.ReleaseWrit
 	w.writer.OwnerRunId = nil
 	w.writer.WriterGeneration++
 	w.writer.StateRevision++
+	w.writer.Stamp = w.stamp()
 	w.writer.EffectiveAccess = publicv1.EffectiveAccess_EFFECTIVE_ACCESS_READ
 	r.projection.WriterAuthority.State = w.writer.AuthorityState
 	r.projection.WriterAuthority.WriterGeneration = w.writer.WriterGeneration

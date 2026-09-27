@@ -97,8 +97,8 @@ func (h *Harness) InspectWorkspace(_ context.Context, request *publicv1.InspectW
 			EffectiveAccess:    publicv1.EffectiveAccess_EFFECTIVE_ACCESS_READ,
 			PolicyVerification: publicv1.PolicyVerification_POLICY_VERIFICATION_VERIFIED,
 			ExecutionLane:      publicv1.ExecutionLane_EXECUTION_LANE_DEDICATED, StateRevision: 1,
-			Stamp: &publicv1.ProjectionStamp{WriterStateRevision: 1},
 		}
+		w.writer.Stamp = w.stamp()
 		h.workspaces[w.path] = w
 	}
 	return &publicv1.InspectWorkspaceResponse{Context: h.response(), WorkspaceId: w.id,
@@ -179,7 +179,7 @@ func (h *Harness) StartRun(_ context.Context, request *publicv1.StartRunRequest)
 		return nil, invalid()
 	}
 	id := h.next("run")
-	r := newRun(controller, "")
+	r := newRun(w, controller, "")
 	r.projection = &publicv1.RunProjection{
 		WorkspaceId: w.id, RunId: id, Lifecycle: publicv1.RunLifecycle_RUN_LIFECYCLE_IDLE,
 		ControlMode: request.GetControlMode(), ExecutionLane: request.GetExecutionLane(),
@@ -196,7 +196,6 @@ func (h *Harness) StartRun(_ context.Context, request *publicv1.StartRunRequest)
 		AchievedAssurance:   publicv1.AssuranceLevel_ASSURANCE_LEVEL_BEST_EFFORT_PERSONAL_ALPHA,
 		Configuration:       &publicv1.RunConfigurationProjection{ProfileName: request.GetProfileName(), Purpose: request.GetPurpose()},
 	}
-	r.projection.Stamp = &publicv1.ProjectionStamp{RunStateRevision: 1}
 	if spec.OrchestrationLaunch {
 		r.session = &publicv1.OrchestratedSessionProjection{SessionId: h.next("session"),
 			PrimaryRun: &publicv1.RunRef{Workspace: copyOf(request.GetWorkspace()), RunId: id}, AggregateRevision: 1, SourceRevision: 1,
@@ -211,7 +210,7 @@ func (h *Harness) StartRun(_ context.Context, request *publicv1.StartRunRequest)
 			CapturedAt:             h.timestamp()}
 	}
 	w.runs[id] = r
-	response := &publicv1.StartRunResponse{Context: h.response(), Run: copyOf(r.projection), IdempotencyKey: request.GetIdempotencyKey()}
+	response := &publicv1.StartRunResponse{Context: h.response(), Run: r.snapshot(), IdempotencyKey: request.GetIdempotencyKey()}
 	h.startKeys[key] = copyOf(response)
 	h.startBody[key] = digest(encoded)
 	if err := h.after("StartRun"); err != nil {
@@ -242,7 +241,7 @@ func (h *Harness) ListRuns(_ context.Context, request *publicv1.ListRunsRequest)
 	for _, id := range ids {
 		r := w.runs[id]
 		if request.ControllerId == nil || request.GetControllerId() == r.projection.GetController().GetControllerId() {
-			response.Items = append(response.Items, copyOf(r.projection))
+			response.Items = append(response.Items, r.snapshot())
 		}
 	}
 	return response, nil
@@ -261,7 +260,7 @@ func (h *Harness) GetRun(_ context.Context, request *publicv1.GetRunRequest) (*p
 	if err != nil {
 		return nil, err
 	}
-	return &publicv1.GetRunResponse{Context: h.response(), Run: copyOf(r.projection)}, nil
+	return &publicv1.GetRunResponse{Context: h.response(), Run: r.snapshot()}, nil
 }
 
 func (h *Harness) SubmitTurn(_ context.Context, request *publicv1.SubmitTurnRequest) (*publicv1.SubmitTurnAccepted, error) {
@@ -323,8 +322,7 @@ func (h *Harness) SubmitTurn(_ context.Context, request *publicv1.SubmitTurnRequ
 	r.timeline = append(r.timeline, item)
 	h.emit(r, &publicv1.DurableRunEvent{TurnId: pointer(turnID), Event: &publicv1.DurableRunEvent_TurnStateChanged{
 		TurnStateChanged: &publicv1.TurnStateChanged{Current: publicv1.TurnStatus_TURN_STATUS_RUNNING}}})
-	h.changed(r)
-	response := &publicv1.SubmitTurnAccepted{Context: h.response(), AcceptedTurn: copyOf(turn), Run: copyOf(r.projection),
+	response := &publicv1.SubmitTurnAccepted{Context: h.response(), AcceptedTurn: copyOf(turn), Run: r.snapshot(),
 		Writer: copyOf(w.writer), IdempotencyKey: key, CorrelationId: h.next("correlation")}
 	r.turnKeys[key] = copyOf(response)
 	r.turnBodies[key] = digest(encoded)
@@ -360,7 +358,7 @@ func (h *Harness) InterruptTurn(_ context.Context, request *publicv1.InterruptTu
 	if err := h.after("InterruptTurn"); err != nil {
 		return nil, err
 	}
-	return &publicv1.RunMutationResponse{Context: h.response(), Run: copyOf(r.projection)}, nil
+	return &publicv1.RunMutationResponse{Context: h.response(), Run: r.snapshot()}, nil
 }
 
 func (h *Harness) PauseRun(_ context.Context, request *publicv1.PauseRunRequest) (*publicv1.RunMutationResponse, error) {
@@ -393,7 +391,7 @@ func (h *Harness) PauseRun(_ context.Context, request *publicv1.PauseRunRequest)
 	if err := h.after("PauseRun"); err != nil {
 		return nil, err
 	}
-	return &publicv1.RunMutationResponse{Context: h.response(), Run: copyOf(r.projection)}, nil
+	return &publicv1.RunMutationResponse{Context: h.response(), Run: r.snapshot()}, nil
 }
 
 func (h *Harness) ResumeRun(_ context.Context, request *publicv1.ResumeRunRequest) (*publicv1.RunMutationResponse, error) {
@@ -423,7 +421,7 @@ func (h *Harness) ResumeRun(_ context.Context, request *publicv1.ResumeRunReques
 	if err := h.after("ResumeRun"); err != nil {
 		return nil, err
 	}
-	return &publicv1.RunMutationResponse{Context: h.response(), Run: copyOf(r.projection)}, nil
+	return &publicv1.RunMutationResponse{Context: h.response(), Run: r.snapshot()}, nil
 }
 
 func (h *Harness) CloseRun(_ context.Context, request *publicv1.CloseRunRequest) (*publicv1.RunMutationResponse, error) {
@@ -452,7 +450,7 @@ func (h *Harness) CloseRun(_ context.Context, request *publicv1.CloseRunRequest)
 		if r.projection.GetLifecycle() != publicv1.RunLifecycle_RUN_LIFECYCLE_CLOSED {
 			return nil, closePending(r)
 		}
-		return &publicv1.RunMutationResponse{Context: &publicv1.ResponseContext{ProtocolVersion: 1, ServerInstanceId: "scenario-server", OperationId: pointer(r.session.GetCloseOperationId())}, Run: copyOf(r.projection)}, nil
+		return &publicv1.RunMutationResponse{Context: &publicv1.ResponseContext{ProtocolVersion: 1, ServerInstanceId: "scenario-server", OperationId: pointer(r.session.GetCloseOperationId())}, Run: r.snapshot()}, nil
 	}
 	if err = checkRevision(r, request.GetExpectedStateRevision()); err != nil {
 		return nil, err
@@ -524,7 +522,7 @@ func (h *Harness) RecoverRun(_ context.Context, request *publicv1.RecoverRunRequ
 	if err := h.after("RecoverRun"); err != nil {
 		return nil, err
 	}
-	return &publicv1.RunMutationResponse{Context: h.response(), Run: copyOf(r.projection)}, nil
+	return &publicv1.RunMutationResponse{Context: h.response(), Run: r.snapshot()}, nil
 }
 
 func (h *Harness) ReconcileRun(_ context.Context, request *publicv1.ReconcileRunRequest) (*publicv1.RunMutationResponse, error) {
@@ -554,7 +552,7 @@ func (h *Harness) ReconcileRun(_ context.Context, request *publicv1.ReconcileRun
 	if err := h.after("ReconcileRun"); err != nil {
 		return nil, err
 	}
-	return &publicv1.RunMutationResponse{Context: h.response(), Run: copyOf(r.projection)}, nil
+	return &publicv1.RunMutationResponse{Context: h.response(), Run: r.snapshot()}, nil
 }
 
 func pageCursor(kind, runID string, head, offset int) string {
@@ -614,7 +612,7 @@ func (h *Harness) ListRunTimelineItems(_ context.Context, request *publicv1.List
 	end := min(offset+boundedLimit(request.GetLimit()), head)
 	response := &publicv1.ListRunTimelineItemsResponse{Context: h.response(),
 		CapturedHeadCursor: pageCursor("timeline-head", r.projection.GetRunId(), head, head),
-		Stamp:              copyOf(r.projection.GetStamp())}
+		Stamp:              r.stamp()}
 	for _, item := range r.timeline[offset:end] {
 		response.Items = append(response.Items, copyOf(item))
 	}
@@ -625,11 +623,12 @@ func (h *Harness) ListRunTimelineItems(_ context.Context, request *publicv1.List
 }
 
 type eventStream struct {
-	ctx    context.Context
-	h      *Harness
-	r      *run
-	index  int
-	closed bool
+	ctx        context.Context
+	h          *Harness
+	r          *run
+	index      int
+	closed     bool
+	projection publicv1.ProjectionProfile
 }
 
 func (s *eventStream) Receive() (*publicv1.RunEventEnvelope, error) {
@@ -650,6 +649,10 @@ func (s *eventStream) Receive() (*publicv1.RunEventEnvelope, error) {
 		}
 		if s.index < len(s.r.events) {
 			item := copyOf(s.r.events[s.index])
+			if event := item.GetDurableEvent(); event != nil {
+				event.Projection = s.projection
+				event.ProjectionVersion = 1
+			}
 			s.index++
 			if item.GetStreamEnd() != nil {
 				s.closed = true
@@ -684,6 +687,16 @@ func (h *Harness) WatchRunEvents(ctx context.Context, request *publicv1.WatchRun
 	if request == nil {
 		return nil, invalid()
 	}
+	// Omitted settings are a fixture convenience: minimal, version 1.
+	// Explicit unsupported values must not silently select another contract.
+	projection := request.GetProjection()
+	if projection == publicv1.ProjectionProfile_PROJECTION_PROFILE_UNSPECIFIED {
+		projection = publicv1.ProjectionProfile_PROJECTION_PROFILE_MINIMAL
+	}
+	if (projection != publicv1.ProjectionProfile_PROJECTION_PROFILE_MINIMAL &&
+		projection != publicv1.ProjectionProfile_PROJECTION_PROFILE_OPERATIONAL) || request.GetProjectionVersion() > 1 {
+		return nil, invalid()
+	}
 	_, r, err := h.runFor(request.GetRun())
 	if err != nil {
 		return nil, err
@@ -701,5 +714,5 @@ func (h *Harness) WatchRunEvents(ctx context.Context, request *publicv1.WatchRun
 			return nil, invalidCursor()
 		}
 	}
-	return &eventStream{ctx: ctx, h: h, r: r, index: index}, nil
+	return &eventStream{ctx: ctx, h: h, r: r, index: index, projection: projection}, nil
 }

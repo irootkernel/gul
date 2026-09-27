@@ -872,7 +872,7 @@ func TestEventsFaultsClockAndReset(t *testing.T) {
 	f := newFixture(t)
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	stream, err := f.h.WatchRunEvents(ctx, &publicv1.WatchRunEventsRequest{Run: f.run})
+	stream, err := f.h.WatchRunEvents(ctx, &publicv1.WatchRunEventsRequest{Run: f.run, Projection: publicv1.ProjectionProfile_PROJECTION_PROFILE_OPERATIONAL, ProjectionVersion: 1})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -913,6 +913,9 @@ func TestEventsFaultsClockAndReset(t *testing.T) {
 			event.GetProjection() != publicv1.ProjectionProfile_PROJECTION_PROFILE_OPERATIONAL || event.GetProjectionVersion() != 1 ||
 			event.GetOccurredAt() == nil || event.GetCursor() == "" || event.GetEventId() == "" {
 			t.Fatalf("event %d lost envelope identity: %v", i, event)
+		}
+		if event.GetStamp().GetCapturedHeadCursor() != event.GetCursor() || event.GetStamp().GetRunStateRevision() != uint64(i+2) || event.GetStamp().GetWriterStateRevision() != 1 {
+			t.Fatalf("event %d lost its commit stamp: %v", i, event)
 		}
 		lastCursor, lastEventID = event.GetCursor(), event.GetEventId()
 	}
@@ -1070,7 +1073,11 @@ func TestBeforeCommitAndStateBoundaries(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	before := f.h.findRun(f.run.GetRunId()).projection.GetStamp().GetInteractionStateRevision()
+	state, err = f.h.GetRun(ctx, &publicv1.GetRunRequest{Run: f.run})
+	if err != nil {
+		t.Fatal(err)
+	}
+	before := state.GetRun().GetStamp().GetInteractionStateRevision()
 	_, err = f.h.ResolveInteraction(ctx, &publicv1.ResolveInteractionRequest{Run: f.run, Controller: f.controller, InteractionId: "one", IdempotencyKey: "answer-one", ResponseJson: []byte(`{"answer":1}`)})
 	if err != nil {
 		t.Fatal(err)

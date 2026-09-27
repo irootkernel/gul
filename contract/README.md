@@ -35,6 +35,18 @@ results, session close, recovery, and stream isolation without later Gul
 features. Drivers may advertise known later methods without adding Gul actions.
 Gul has no production adapter or failure fallback to this provider.
 
+Durable scenario events retain the stamp captured at their commit, including on
+replay. Each subscription selects `minimal` or `operational` version 1 without
+changing another subscriber's event. An omitted profile defaults to
+`minimal`; an omitted version defaults to 1 and preserves an explicit profile.
+These are fixture conveniences, not guarantees of the released provider's
+handling of omitted fields. Unknown profiles and unsupported versions
+are rejected. Run, Interaction and timeline snapshots observe the current
+workspace writer state revision, independently of writer generation. The
+workspace-only Writer stamp records that writer revision without inventing a
+Run cursor or Run/Interaction revision. These tests do not establish Gul's
+cross-aggregate convergence or live-provider acceptance.
+
 Protobuf-ES v2 generates TypeScript message schemas and Connect service
 descriptors in the same checked module. The incompatible Connect-ES v1 plugin
 and its unchecked `_connect.ts` output are deliberately absent. The imported

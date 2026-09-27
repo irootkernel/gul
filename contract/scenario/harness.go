@@ -52,6 +52,7 @@ type interactionRequestKey struct {
 }
 
 type run struct {
+	workspace           *workspace
 	projection          *publicv1.RunProjection
 	controller          *publicv1.ControllerCarrierRef
 	timeline            []*publicv1.TimelineItem
@@ -100,8 +101,8 @@ type Harness struct {
 	laterMethods []string
 }
 
-func newRun(controller *publicv1.ControllerCarrierRef, parentID string) *run {
-	return &run{controller: copyOf(controller), parentID: parentID,
+func newRun(w *workspace, controller *publicv1.ControllerCarrierRef, parentID string) *run {
+	return &run{workspace: w, controller: copyOf(controller), parentID: parentID,
 		interactions: make(map[string]*publicv1.ControllerInteraction),
 		turnKeys:     make(map[string]*publicv1.SubmitTurnAccepted), turnBodies: make(map[string]string),
 		interactionKeys: make(map[interactionRequestKey]*publicv1.ResolveInteractionResponse), interactionBodies: make(map[interactionRequestKey]string),
@@ -376,14 +377,27 @@ func checkRevision(r *run, revision uint64) error {
 	return nil
 }
 
-func (h *Harness) changed(r *run) {
-	r.projection.StateRevision++
-	r.projection.Stamp = &publicv1.ProjectionStamp{
+func (w *workspace) stamp() *publicv1.ProjectionStamp {
+	return &publicv1.ProjectionStamp{WriterStateRevision: w.writer.GetStateRevision()}
+}
+
+func (r *run) stamp() *publicv1.ProjectionStamp {
+	return &publicv1.ProjectionStamp{
 		CapturedHeadCursor:       r.projection.GetEventCursor(),
 		RunStateRevision:         r.projection.GetStateRevision(),
-		WriterStateRevision:      r.projection.GetWriterAuthority().GetWriterGeneration(),
+		WriterStateRevision:      r.workspace.writer.GetStateRevision(),
 		InteractionStateRevision: r.interactionRevision,
 	}
+}
+
+func (r *run) snapshot() *publicv1.RunProjection {
+	projection := copyOf(r.projection)
+	projection.Stamp = r.stamp()
+	return projection
+}
+
+func (h *Harness) changed(r *run) {
+	r.projection.StateRevision++
 	if r.session != nil {
 		r.session.AggregateRevision++
 		r.session.SourceRevision = r.session.AggregateRevision
@@ -400,9 +414,9 @@ func (h *Harness) emit(r *run, event *publicv1.DurableRunEvent) {
 	event.RunId = r.projection.GetRunId()
 	event.ServerKey = "scenario-server"
 	event.ServerEpoch = 1
-	event.Projection = publicv1.ProjectionProfile_PROJECTION_PROFILE_OPERATIONAL
-	event.ProjectionVersion = 1
 	r.projection.EventCursor = event.Cursor
+	h.changed(r)
+	event.Stamp = r.stamp()
 	r.events = append(r.events, &publicv1.RunEventEnvelope{Item: &publicv1.RunEventEnvelope_DurableEvent{DurableEvent: event}})
 	h.signal(r)
 }
@@ -424,7 +438,6 @@ func (h *Harness) AppendEvent(runID string, event *publicv1.DurableRunEvent) err
 		return invalid()
 	}
 	h.emit(r, event)
-	h.changed(r)
 	return nil
 }
 
@@ -504,7 +517,6 @@ func (h *Harness) completeTurn(r *run, status publicv1.TurnStatus) {
 		r.projection.Lifecycle = lifecycleFromWork(r)
 	}
 	h.emit(r, &publicv1.DurableRunEvent{Event: &publicv1.DurableRunEvent_TurnStateChanged{TurnStateChanged: &publicv1.TurnStateChanged{Current: status}}})
-	h.changed(r)
 }
 
 func lifecycleFromWork(r *run) publicv1.RunLifecycle {
@@ -554,7 +566,6 @@ func (h *Harness) OpenInteraction(runID string, interaction *publicv1.Controller
 		r.projection.Lifecycle = publicv1.RunLifecycle_RUN_LIFECYCLE_WAITING_INTERACTION
 	}
 	h.emit(r, &publicv1.DurableRunEvent{Event: &publicv1.DurableRunEvent_InteractionOpened{InteractionOpened: &publicv1.InteractionOpenedEvent{InteractionId: item.Summary.GetInteractionId(), Kind: item.Summary.GetKind()}}})
-	h.changed(r)
 	return nil
 }
 
@@ -573,12 +584,12 @@ func (h *Harness) SpawnSpecialist(rootID, role string) (*publicv1.RunRef, error)
 	w := h.workspaces[h.workspacePath(root.projection.GetWorkspaceId())]
 	id := h.next("specialist")
 	ref := &publicv1.RunRef{Workspace: &publicv1.WorkspaceRef{AbsolutePath: w.path, ExpectedWorkspaceId: w.id}, RunId: id}
-	child := newRun(&publicv1.ControllerCarrierRef{}, rootID)
+	child := newRun(w, &publicv1.ControllerCarrierRef{}, rootID)
 	child.projection = &publicv1.RunProjection{WorkspaceId: w.id, RunId: id,
 		Lifecycle:     publicv1.RunLifecycle_RUN_LIFECYCLE_RUNNING,
 		ControlMode:   publicv1.ControlMode_CONTROL_MODE_MANAGED_AGENT,
 		ExecutionLane: publicv1.ExecutionLane_EXECUTION_LANE_DEDICATED,
-		StateRevision: 1, Stamp: &publicv1.ProjectionStamp{RunStateRevision: 1},
+		StateRevision: 1,
 		Configuration: &publicv1.RunConfigurationProjection{Purpose: publicv1.PurposeKind_PURPOSE_KIND_WORKFLOW_STAGE,
 			PurposeLabel: pointer(role), Parent: &publicv1.ParentRefProjection{Namespace: "run", Kind: "primary", Id: rootID}}}
 	w.runs[id] = child
