@@ -1,0 +1,518 @@
+package observation
+
+import (
+	"context"
+	"errors"
+	"fmt"
+	"io"
+	"sync"
+	"testing"
+	"time"
+)
+
+type memoryRepo struct {
+	mu        sync.Mutex
+	cp        Checkpoint
+	commits   []Invalidation
+	fail      bool
+	validated chan struct{}
+	block     <-chan struct{}
+}
+
+func (r *memoryRepo) Checkpoint(context.Context, Binding) (Checkpoint, error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	return r.cp, nil
+}
+func (r *memoryRepo) Validate(ctx context.Context, _ Binding, c Cursor) error {
+	if r.validated != nil {
+		select {
+		case r.validated <- struct{}{}:
+		default:
+		}
+	}
+	if r.block != nil {
+		select {
+		case <-r.block:
+		case <-ctx.Done():
+			return ctx.Err()
+		}
+	}
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	r.cp.Validated = c
+	return nil
+}
+func (r *memoryRepo) Commit(_ context.Context, in Invalidation) (Notification, error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	if r.fail {
+		return Notification{}, errors.New("disk fault")
+	}
+	r.commits = append(r.commits, in)
+	r.cp.Committed = in.Cursor
+	r.cp.Stamp = in.Floor
+	return Notification{Sequence: Sequence(len(r.commits)), SessionID: in.Binding.SessionID, CorrelationID: in.CorrelationID, Kind: "projection_invalidated", CreatedAt: in.At}, nil
+}
+
+type testStream struct {
+	ctx    context.Context
+	events chan Envelope
+	fail   chan error
+}
+
+func (s *testStream) Receive() (Envelope, error) {
+	select {
+	case e := <-s.events:
+		return e, nil
+	case err := <-s.fail:
+		return Envelope{}, err
+	case <-s.ctx.Done():
+		return Envelope{}, s.ctx.Err()
+	}
+}
+func (s *testStream) Close() error { return nil }
+
+type testProvider struct {
+	s     *testStream
+	after chan Cursor
+}
+
+func (p testProvider) Watch(ctx context.Context, _ Binding, after Cursor) (Stream, error) {
+	p.s.ctx = ctx
+	p.after <- after
+	return p.s, nil
+}
+
+type testRefresh struct {
+	mu    sync.Mutex
+	masks []Refresh
+}
+
+func (r *testRefresh) Refresh(_ context.Context, _ Binding, mask Refresh, _ Stamp) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	r.masks = append(r.masks, mask)
+	return nil
+}
+func testBinding() Binding {
+	return Binding{SubjectID: "owner", SessionID: "session", ProviderID: "dolgorae", RunID: "run", WorkspaceID: "workspace", AbsoluteRoot: "/workspace"}
+}
+func testEvent(n int) Envelope {
+	c := Cursor(fmt.Sprint(n))
+	return Envelope{Event: &Event{Kind: "TurnStateChanged", Cursor: c, ID: fmt.Sprintf("event-%d", n), RunID: "run", WorkspaceID: "workspace", Stamp: Stamp{Head: c, Run: uint64(n)}, At: time.Now(), Refresh: Run | Timeline}}
+}
+func bridgeFixture(t *testing.T, r *memoryRepo) (*Bridge, *testStream, context.CancelFunc, <-chan error, *testRefresh) {
+	t.Helper()
+	ctx, cancel := context.WithCancel(t.Context())
+	t.Cleanup(cancel)
+	stream := &testStream{events: make(chan Envelope, QueueLimit*4), fail: make(chan error, 1)}
+	provider := testProvider{s: stream, after: make(chan Cursor, 1)}
+	refresh := &testRefresh{}
+	b, err := NewBridge(r, provider, refresh, testBinding())
+	if err != nil {
+		t.Fatal(err)
+	}
+	done := make(chan error, 1)
+	go func() { done <- b.Run(ctx) }()
+	select {
+	case <-provider.after:
+	case <-time.After(time.Second):
+		t.Fatal("no subscription")
+	}
+	return b, stream, cancel, done, refresh
+}
+func receiveNotification(t *testing.T, b *Bridge) Notification {
+	t.Helper()
+	select {
+	case n := <-b.Notifications():
+		return n
+	case <-time.After(2 * time.Second):
+		t.Fatal("no notification")
+		return Notification{}
+	}
+}
+func receiveDone(t *testing.T, done <-chan error) error {
+	t.Helper()
+	select {
+	case err := <-done:
+		return err
+	case <-time.After(2 * time.Second):
+		t.Fatal("bridge did not stop")
+		return nil
+	}
+}
+func TestCommitBeforeDeliveryCoalescesAndDeduplicates(t *testing.T) {
+	repo := &memoryRepo{}
+	b, s, cancel, done, refresh := bridgeFixture(t, repo)
+	s.events <- testEvent(2)
+	s.events <- testEvent(4)
+	replay := testEvent(4)
+	replay.Event.Replay = true
+	s.events <- replay
+	n := receiveNotification(t, b)
+	cp, _ := repo.Checkpoint(t.Context(), testBinding())
+	if cp.Committed != "4" || n.Sequence != 1 || n.CorrelationID == "event-4" {
+		t.Fatalf("delivery preceded safe commit: %+v %+v", n, cp)
+	}
+	s.events <- replay
+	select {
+	case n := <-b.Notifications():
+		t.Fatalf("duplicate delivery: %+v", n)
+	case <-time.After(2 * CoalesceInterval):
+	}
+	if state := b.State(); state.Committed != "4" || state.Validated != "4" || state.Generation != 1 || state.LastSnapshot.IsZero() {
+		t.Fatalf("state %+v", state)
+	}
+	refresh.mu.Lock()
+	if len(refresh.masks) != 1 || refresh.masks[0] != (Run|Timeline) {
+		t.Errorf("refreshes %v", refresh.masks)
+	}
+	refresh.mu.Unlock()
+	cancel()
+	if !errors.Is(receiveDone(t, done), context.Canceled) {
+		t.Fatal("cancel result")
+	}
+}
+func TestStorageFailureKeepsReplayBoundaryAndNoDelivery(t *testing.T) {
+	repo := &memoryRepo{fail: true}
+	b, s, _, done, _ := bridgeFixture(t, repo)
+	s.events <- testEvent(3)
+	if receiveDone(t, done) == nil {
+		t.Fatal("fault lost")
+	}
+	cp, _ := repo.Checkpoint(t.Context(), testBinding())
+	if cp.Validated != "3" || cp.Committed != "" {
+		t.Fatalf("unsafe checkpoint %+v", cp)
+	}
+	select {
+	case <-b.Notifications():
+		t.Fatal("emitted uncommitted event")
+	default:
+	}
+}
+func TestBoundedQueueOnlyStopsAffectedRun(t *testing.T) {
+	release := make(chan struct{})
+	repo := &memoryRepo{block: release, validated: make(chan struct{}, 1)}
+	b, s, _, done, _ := bridgeFixture(t, repo)
+	s.events <- testEvent(2)
+	<-repo.validated
+	for i := 3; i < QueueLimit+8; i++ {
+		s.events <- testEvent(i)
+	}
+	select {
+	case <-s.ctx.Done():
+	case <-time.After(time.Second):
+		t.Fatal("queue did not overflow")
+	}
+	close(release)
+	if !errors.Is(receiveDone(t, done), ErrSlowConsumer) {
+		t.Fatal("overflow not classified")
+	}
+	if b.State().Connection != "slow_consumer" {
+		t.Fatal(b.State())
+	}
+	other, otherStream, cancel, otherDone, _ := bridgeFixture(t, &memoryRepo{})
+	otherStream.events <- testEvent(2)
+	receiveNotification(t, other)
+	cancel()
+	receiveDone(t, otherDone)
+}
+func TestAdvisoriesAndInvalidEnvelopesDoNotAdvanceCursors(t *testing.T) {
+	for _, kind := range []string{"heartbeat", "terminal", "shutdown", "foreign", "rewind", "unknown"} {
+		t.Run(kind, func(t *testing.T) {
+			repo := &memoryRepo{cp: Checkpoint{Validated: "4", Committed: "4", Stamp: Stamp{Head: "4", Run: 4}}}
+			b, s, cancel, done, _ := bridgeFixture(t, repo)
+			e := Envelope{RunID: "run", Head: "4"}
+			switch kind {
+			case "heartbeat":
+				e.Heartbeat = time.Now()
+			case "terminal":
+				e.End = "terminal"
+			case "shutdown":
+				e.End = "shutdown"
+			case "foreign":
+				e.RunID = "foreign"
+				e.Heartbeat = time.Now()
+			case "rewind":
+				e = testEvent(2)
+			case "unknown":
+				e.End = "unknown"
+			}
+			s.events <- e
+			if kind == "heartbeat" {
+				time.Sleep(CoalesceInterval)
+				cancel()
+			}
+			err := receiveDone(t, done)
+			if kind == "terminal" && err != nil {
+				t.Fatal(err)
+			}
+			if kind != "terminal" && err == nil {
+				t.Fatal("missing failure")
+			}
+			cp, _ := repo.Checkpoint(t.Context(), testBinding())
+			if cp.Committed != "4" || cp.Validated != "4" {
+				t.Fatal(cp)
+			}
+			select {
+			case <-b.Notifications():
+				t.Fatal("advisory delivered as semantic update")
+			default:
+			}
+		})
+	}
+}
+func TestCrashUncertaintyRefreshesBeforeCommittedResume(t *testing.T) {
+	repo := &memoryRepo{cp: Checkpoint{Validated: "9", Committed: "4", Stamp: Stamp{Head: "4", Run: 4}}}
+	b, _, cancel, done, refresh := bridgeFixture(t, repo)
+	refresh.mu.Lock()
+	if len(refresh.masks) != 1 || refresh.masks[0] != AllAggregates {
+		t.Errorf("repair %v", refresh.masks)
+	}
+	refresh.mu.Unlock()
+	if b.State().Committed != "4" {
+		t.Fatal(b.State())
+	}
+	cancel()
+	receiveDone(t, done)
+}
+func TestWindowCapPriorityAndHysteresis(t *testing.T) {
+	now := time.Now()
+	var runs []Candidate
+	for i := 0; i < 10; i++ {
+		runs = append(runs, Candidate{RunID: fmt.Sprint(i)})
+	}
+	w := &Window{}
+	modes := w.Select(now, runs)
+	for i := 0; i < 10; i++ {
+		if (modes[fmt.Sprint(i)] == "live") != (i < 8) {
+			t.Fatal(modes)
+		}
+	}
+	runs[9].Visible = true
+	modes = w.Select(now.Add(time.Second), runs)
+	if modes["9"] != "polling" {
+		t.Fatal("ordinary churn", modes)
+	}
+	runs[8].PendingInteraction = true
+	modes = w.Select(now.Add(2*time.Second), runs)
+	if modes["8"] != "live" {
+		t.Fatal("safety not admitted", modes)
+	}
+	modes = w.Select(now.Add(31*time.Second), runs)
+	if modes["9"] != "live" {
+		t.Fatal("hysteresis never expired", modes)
+	}
+	count := 0
+	for _, mode := range modes {
+		if mode == "live" {
+			count++
+		}
+	}
+	if count != LiveLimit {
+		t.Fatal(count)
+	}
+}
+
+type countingProvider struct {
+	mu        sync.Mutex
+	live, max int
+	started   chan struct{}
+}
+type countingStream struct {
+	ctx  context.Context
+	p    *countingProvider
+	once sync.Once
+}
+
+func (p *countingProvider) Watch(ctx context.Context, _ Binding, _ Cursor) (Stream, error) {
+	p.mu.Lock()
+	p.live++
+	if p.live > p.max {
+		p.max = p.live
+	}
+	p.mu.Unlock()
+	p.started <- struct{}{}
+	return &countingStream{ctx: ctx, p: p}, nil
+}
+func (s *countingStream) Receive() (Envelope, error) { <-s.ctx.Done(); return Envelope{}, s.ctx.Err() }
+func (s *countingStream) Close() error {
+	s.once.Do(func() { s.p.mu.Lock(); s.p.live--; s.p.mu.Unlock() })
+	return nil
+}
+func TestManagerNeverExceedsPhysicalStreamCap(t *testing.T) {
+	p := &countingProvider{started: make(chan struct{}, 32)}
+	m := NewManager(&memoryRepo{}, p, &testRefresh{})
+	defer m.Stop()
+	now := time.Now()
+	var runs []WatchedRun
+	for i := 0; i < 10; i++ {
+		id := fmt.Sprint(i)
+		b := testBinding()
+		b.RunID = id
+		runs = append(runs, WatchedRun{Candidate: Candidate{RunID: id}, Binding: b})
+	}
+	if _, err := m.Update(t.Context(), now, runs); err != nil {
+		t.Fatal(err)
+	}
+	for i := 0; i < LiveLimit; i++ {
+		select {
+		case <-p.started:
+		case <-time.After(time.Second):
+			t.Fatal("stream not started")
+		}
+	}
+	runs[9].PendingInteraction = true
+	if modes, err := m.Update(t.Context(), now.Add(time.Second), runs); err != nil || modes["9"] != "live" {
+		t.Fatal(modes, err)
+	}
+	select {
+	case <-p.started:
+	case <-time.After(time.Second):
+		t.Fatal("priority stream not started")
+	}
+	p.mu.Lock()
+	if p.max > LiveLimit {
+		t.Errorf("physical streams %d", p.max)
+	}
+	p.mu.Unlock()
+	m.Stop()
+	p.mu.Lock()
+	if p.live != 0 {
+		t.Error("streams survived stop")
+	}
+	p.mu.Unlock()
+}
+
+type finiteProvider struct {
+	envelopes []Envelope
+	err       error
+}
+type finiteStream struct{ envelopes []Envelope }
+
+func (p finiteProvider) Watch(context.Context, Binding, Cursor) (Stream, error) {
+	if p.err != nil {
+		return nil, p.err
+	}
+	return &finiteStream{envelopes: append([]Envelope(nil), p.envelopes...)}, nil
+}
+func (s *finiteStream) Receive() (Envelope, error) {
+	if len(s.envelopes) == 0 {
+		return Envelope{}, io.EOF
+	}
+	e := s.envelopes[0]
+	s.envelopes = s.envelopes[1:]
+	return e, nil
+}
+func (s *finiteStream) Close() error { return nil }
+func TestTypedEndCannotBeOvertakenByEOF(t *testing.T) {
+	for _, end := range []string{"terminal", "shutdown"} {
+		t.Run(end, func(t *testing.T) {
+			repo := &memoryRepo{}
+			refresh := &testRefresh{}
+			b, err := NewBridge(repo, finiteProvider{envelopes: []Envelope{testEvent(2), {RunID: "run", Head: "2", End: end}}}, refresh, testBinding())
+			if err != nil {
+				t.Fatal(err)
+			}
+			err = b.Run(t.Context())
+			want := "terminal"
+			if end == "shutdown" {
+				want = "restarting"
+				if !errors.Is(err, ErrRefresh) {
+					t.Fatal(err)
+				}
+			} else if err != nil {
+				t.Fatal(err)
+			}
+			if state := b.State(); state.Connection != want || state.Committed != "2" {
+				t.Fatalf("lost ordered end: %+v", state)
+			}
+			if end == "terminal" && refresh.masks[len(refresh.masks)-1] != (Run|Timeline|Artifacts) {
+				t.Fatal(refresh.masks)
+			}
+		})
+	}
+}
+func TestRestoredStampRejectsRevisionRegression(t *testing.T) {
+	for _, stamp := range []Stamp{{Head: "13", Run: 13, Writer: 3, Interaction: 10}, {Head: "13", Run: 13, Writer: 4, Interaction: 9}} {
+		repo := &memoryRepo{cp: Checkpoint{Validated: "12", Committed: "12", Stamp: Stamp{Head: "12", Run: 12, Writer: 4, Interaction: 10}}}
+		b, s, _, done, _ := bridgeFixture(t, repo)
+		event := testEvent(13)
+		event.Event.Stamp = stamp
+		s.events <- event
+		if !errors.Is(receiveDone(t, done), ErrInvalid) {
+			t.Fatal("regression accepted")
+		}
+		if b.State().Committed != "12" {
+			t.Fatal(b.State())
+		}
+		select {
+		case <-b.Notifications():
+			t.Fatal("regression delivered")
+		default:
+		}
+	}
+}
+
+type failingRefresh struct{}
+
+func (failingRefresh) Refresh(context.Context, Binding, Refresh, Stamp) error { return ErrRefresh }
+func TestStartupFailuresAreDisconnected(t *testing.T) {
+	for _, stage := range []string{"watch", "refresh"} {
+		t.Run(stage, func(t *testing.T) {
+			repo := &memoryRepo{}
+			var refresh Refresher = &testRefresh{}
+			if stage == "refresh" {
+				repo.cp = Checkpoint{Validated: "2", Committed: "0"}
+				refresh = failingRefresh{}
+			}
+			b, err := NewBridge(repo, finiteProvider{err: ErrRefresh}, refresh, testBinding())
+			if err != nil {
+				t.Fatal(err)
+			}
+			if b.Run(t.Context()) == nil || b.State().Connection != "disconnected" {
+				t.Fatal(b.State())
+			}
+		})
+	}
+}
+func TestManagerPreservesMetadataAcrossDemotion(t *testing.T) {
+	p := &countingProvider{started: make(chan struct{}, 32)}
+	m := NewManager(&memoryRepo{}, p, &testRefresh{})
+	defer m.Stop()
+	now := time.Now()
+	var runs []WatchedRun
+	for i := 0; i < 9; i++ {
+		id := fmt.Sprint(i)
+		b := testBinding()
+		b.RunID = id
+		runs = append(runs, WatchedRun{Candidate: Candidate{RunID: id}, Binding: b})
+	}
+	if _, err := m.Update(t.Context(), now, runs); err != nil {
+		t.Fatal(err)
+	}
+	for i := 0; i < 8; i++ {
+		<-p.started
+	}
+	m.bridges["7"].update(func(s *SubscriptionState) { s.LastHeartbeat = now; s.LastSnapshot = now })
+	runs[8].ActiveTurn = true
+	if _, err := m.Update(t.Context(), now.Add(time.Second), runs); err != nil {
+		t.Fatal(err)
+	}
+	<-p.started
+	demoted, ok := m.State("7")
+	if !ok || demoted.Connection != "polling" || demoted.Generation != 1 || demoted.LastHeartbeat != now {
+		t.Fatalf("demoted %+v %v", demoted, ok)
+	}
+	runs[7].PendingInteraction = true
+	runs[8].ActiveTurn = false
+	if _, err := m.Update(t.Context(), now.Add(31*time.Second), runs); err != nil {
+		t.Fatal(err)
+	}
+	<-p.started
+	promoted, ok := m.State("7")
+	if !ok || promoted.Generation != 2 || promoted.ReconnectAttempts != 1 || promoted.LastHeartbeat != now || promoted.LastSnapshot != now {
+		t.Fatalf("promoted %+v", promoted)
+	}
+}

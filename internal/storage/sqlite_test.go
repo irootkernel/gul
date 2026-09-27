@@ -66,7 +66,7 @@ func TestOpenMigratesAndRejectsDrift(t *testing.T) {
 		}
 		count++
 	}
-	if err := rows.Err(); err != nil || count != len(schemaStatements)+len(attachmentStatements)+len(presentationStatements)+len(sessionStatements) {
+	if err := rows.Err(); err != nil || count != len(schemaStatements)+len(attachmentStatements)+len(presentationStatements)+len(sessionStatements)+len(observationStatements) {
 		t.Fatalf("schema inventory = %d, %v", count, err)
 	}
 	rows.Close()
@@ -104,7 +104,7 @@ func TestOpenMigratesAndRejectsDrift(t *testing.T) {
 func TestOpenRejectsMigrationAndSchemaObjectDrift(t *testing.T) {
 	for name, mutation := range map[string]string{
 		"digest":                "UPDATE schema_migrations SET digest = 'wrong'",
-		"version":               "PRAGMA user_version = 5",
+		"version":               "PRAGMA user_version = 999",
 		"missing migration row": "DELETE FROM schema_migrations",
 		"missing":               "DROP TABLE navigation_state",
 		"trigger":               "CREATE TRIGGER unexpected AFTER INSERT ON app_account BEGIN DELETE FROM app_account; END",

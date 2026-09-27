@@ -31,6 +31,8 @@ const (
 	// ArtifactPresentationServiceName is the fully-qualified name of the ArtifactPresentationService
 	// service.
 	ArtifactPresentationServiceName = "gul.v1.ArtifactPresentationService"
+	// ClientEventServiceName is the fully-qualified name of the ClientEventService service.
+	ClientEventServiceName = "gul.v1.ClientEventService"
 )
 
 // These constants are the fully-qualified names of the RPCs defined in this package. They're
@@ -119,6 +121,9 @@ const (
 	// ArtifactPresentationServiceReadChunkProcedure is the fully-qualified name of the
 	// ArtifactPresentationService's ReadChunk RPC.
 	ArtifactPresentationServiceReadChunkProcedure = "/gul.v1.ArtifactPresentationService/ReadChunk"
+	// ClientEventServiceWatchClientEventsProcedure is the fully-qualified name of the
+	// ClientEventService's WatchClientEvents RPC.
+	ClientEventServiceWatchClientEventsProcedure = "/gul.v1.ClientEventService/WatchClientEvents"
 )
 
 // RuntimeServiceClient is a client for the gul.v1.RuntimeService service.
@@ -974,4 +979,74 @@ func (UnimplementedArtifactPresentationServiceHandler) GetMetadata(context.Conte
 
 func (UnimplementedArtifactPresentationServiceHandler) ReadChunk(context.Context, *connect.Request[v1.ReadChunkRequest]) (*connect.Response[v1.ReadChunkResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("gul.v1.ArtifactPresentationService.ReadChunk is not implemented"))
+}
+
+// ClientEventServiceClient is a client for the gul.v1.ClientEventService service.
+type ClientEventServiceClient interface {
+	WatchClientEvents(context.Context, *connect.Request[v1.WatchClientEventsRequest]) (*connect.ServerStreamForClient[v1.ClientEvent], error)
+}
+
+// NewClientEventServiceClient constructs a client for the gul.v1.ClientEventService service. By
+// default, it uses the Connect protocol with the binary Protobuf Codec, asks for gzipped responses,
+// and sends uncompressed requests. To use the gRPC or gRPC-Web protocols, supply the
+// connect.WithGRPC() or connect.WithGRPCWeb() options.
+//
+// The URL supplied here should be the base URL for the Connect or gRPC server (for example,
+// http://api.acme.com or https://acme.com/grpc).
+func NewClientEventServiceClient(httpClient connect.HTTPClient, baseURL string, opts ...connect.ClientOption) ClientEventServiceClient {
+	baseURL = strings.TrimRight(baseURL, "/")
+	clientEventServiceMethods := v1.File_gul_v1_gul_proto.Services().ByName("ClientEventService").Methods()
+	return &clientEventServiceClient{
+		watchClientEvents: connect.NewClient[v1.WatchClientEventsRequest, v1.ClientEvent](
+			httpClient,
+			baseURL+ClientEventServiceWatchClientEventsProcedure,
+			connect.WithSchema(clientEventServiceMethods.ByName("WatchClientEvents")),
+			connect.WithClientOptions(opts...),
+		),
+	}
+}
+
+// clientEventServiceClient implements ClientEventServiceClient.
+type clientEventServiceClient struct {
+	watchClientEvents *connect.Client[v1.WatchClientEventsRequest, v1.ClientEvent]
+}
+
+// WatchClientEvents calls gul.v1.ClientEventService.WatchClientEvents.
+func (c *clientEventServiceClient) WatchClientEvents(ctx context.Context, req *connect.Request[v1.WatchClientEventsRequest]) (*connect.ServerStreamForClient[v1.ClientEvent], error) {
+	return c.watchClientEvents.CallServerStream(ctx, req)
+}
+
+// ClientEventServiceHandler is an implementation of the gul.v1.ClientEventService service.
+type ClientEventServiceHandler interface {
+	WatchClientEvents(context.Context, *connect.Request[v1.WatchClientEventsRequest], *connect.ServerStream[v1.ClientEvent]) error
+}
+
+// NewClientEventServiceHandler builds an HTTP handler from the service implementation. It returns
+// the path on which to mount the handler and the handler itself.
+//
+// By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf
+// and JSON codecs. They also support gzip compression.
+func NewClientEventServiceHandler(svc ClientEventServiceHandler, opts ...connect.HandlerOption) (string, http.Handler) {
+	clientEventServiceMethods := v1.File_gul_v1_gul_proto.Services().ByName("ClientEventService").Methods()
+	clientEventServiceWatchClientEventsHandler := connect.NewServerStreamHandler(
+		ClientEventServiceWatchClientEventsProcedure,
+		svc.WatchClientEvents,
+		connect.WithSchema(clientEventServiceMethods.ByName("WatchClientEvents")),
+		connect.WithHandlerOptions(opts...),
+	)
+	return "/gul.v1.ClientEventService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case ClientEventServiceWatchClientEventsProcedure:
+			clientEventServiceWatchClientEventsHandler.ServeHTTP(w, r)
+		default:
+			http.NotFound(w, r)
+		}
+	})
+}
+
+// UnimplementedClientEventServiceHandler returns CodeUnimplemented from all methods.
+type UnimplementedClientEventServiceHandler struct{}
+
+func (UnimplementedClientEventServiceHandler) WatchClientEvents(context.Context, *connect.Request[v1.WatchClientEventsRequest], *connect.ServerStream[v1.ClientEvent]) error {
+	return connect.NewError(connect.CodeUnimplemented, errors.New("gul.v1.ClientEventService.WatchClientEvents is not implemented"))
 }

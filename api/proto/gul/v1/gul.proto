@@ -544,3 +544,33 @@ message ReadChunkResponse {
   uint64 total_length = 2;
   string sha256 = 3;
 }
+
+service ClientEventService {
+  rpc WatchClientEvents(WatchClientEventsRequest) returns (stream ClientEvent);
+}
+
+message WatchClientEventsRequest {
+  string session_id = 1;
+  uint64 after_delivery_sequence = 2;
+}
+
+enum ClientEventKind {
+  CLIENT_EVENT_KIND_UNSPECIFIED = 0;
+  CLIENT_EVENT_KIND_PROJECTION_INVALIDATED = 1;
+  CLIENT_EVENT_KIND_SNAPSHOT_REQUIRED = 2;
+}
+
+message ClientEvent {
+  uint64 delivery_sequence = 1;
+  string session_id = 2;
+  string correlation_id = 3;
+  ClientEventKind kind = 4;
+  google.protobuf.Timestamp created_at = 5;
+}
+
+enum WriterAccessMode {
+  WRITER_ACCESS_MODE_UNSPECIFIED = 0;
+  WRITER_ACCESS_MODE_READ_ONLY = 1;
+  WRITER_ACCESS_MODE_WRITE = 2;
+  WRITER_ACCESS_MODE_BLOCKED = 3;
+}

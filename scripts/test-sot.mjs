@@ -12,6 +12,14 @@ Historical allocations: E0-T1..T3, E2-T4..T5, E5-T4, E6-T4, E7-T4..T7,
 E9-T4, E10-T1..T5, and E11-T1..T3.`;
 const baselineRegistry = JSON.parse(fs.readFileSync(path.join(sourceRoot, 'docs', 'task-identities.json'), 'utf8'));
 
+// Lifecycle-negative fixtures must isolate their selected task even while a
+// real task is active. Positive fixtures still validate the repository as-is.
+function clearActiveTask(text) {
+  return text
+    .replace(/^(\| E\d+-T\d+ \| [^|]+ \|) (?:In Progress|In Review) \|/gm, '$1 Planned |')
+    .replace(/^\| Active Task \|[^\n]+$/m, '| Active Task | None |');
+}
+
 function fixture() {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'gul-sot-'));
   fs.cpSync(path.join(sourceRoot, 'docs'), path.join(root, 'docs'), {recursive: true});
@@ -143,7 +151,7 @@ expectFailure('duplicate requirement is not normalized away', root => {
 }, /Missing or duplicate active requirement definitions/);
 
 expectFailure('pre-E1-T2 state requires the frontend absence boundary', root => {
-  write(root, 'docs/roadmap.md', text => text
+  write(root, 'docs/roadmap.md', text => clearActiveTask(text)
     .replace('| Active Task | None |', '| Active Task | E1-T2 |')
     .replace('| E1-T2 | Pre-release | Completed |', '| E1-T2 | Pre-release | In Review |')
     .replace('| E1-T3 | Pre-release | Completed |', '| E1-T3 | Pre-release | Planned |')
@@ -158,24 +166,24 @@ expectFailure('multiple active rows', root => {
 }, /Multiple active Tasks/);
 
 expectFailure('active header mismatch', root => {
-  write(root, 'docs/roadmap.md', text => text.replace('| E1-T5 | Pre-release | Completed |', '| E1-T5 | Pre-release | In Progress |'));
+  write(root, 'docs/roadmap.md', text => clearActiveTask(text).replace('| E1-T5 | Pre-release | Completed |', '| E1-T5 | Pre-release | In Progress |'));
 }, /Active Task header must be exactly E1-T5/);
 
 expectFailure('active row mismatch', root => {
-  write(root, 'docs/roadmap.md', text => text.replace('| Active Task | None |', '| Active Task | E1-T5 |'));
+  write(root, 'docs/roadmap.md', text => clearActiveTask(text).replace('| Active Task | None |', '| Active Task | E1-T5 |'));
 }, /Active Task header must be exactly None/);
 
 expectFailure('next header misses first eligible task', root => {
-  write(root, 'docs/roadmap.md', text => text
-    .replace('| Next | E4-T1 |', '| Next | E5-T1 |'));
-}, /Next header must identify first eligible Task E4-T1/);
+  write(root, 'docs/roadmap.md', text => clearActiveTask(text)
+    .replace(/^\| Next \|[^\n]+$/m, '| Next | E0-T1 |'));
+}, /Next header must identify first eligible Task E[0-9]+-T[0-9]+/);
 
 expectFailure('pending Epic loses shared dossier', root => {
   write(root, 'docs/roadmap.md', text => text.replace(
-    /^(\| E4 \| Planned \|[^\n]+\|) \[Shared\]\(todo\/GUL-CONSUMER-REBASELINE\.md\) \|$/m,
+    /^(\| E[0-9]+ \| (?:Planned|In Progress|In Review) \|[^\n]+\|) \[Shared\]\(todo\/GUL-CONSUMER-REBASELINE\.md\) \|$/m,
     '$1 None |',
   ));
-}, /Pending Epic E4 must retain the shared implementation dossier link/);
+}, /Pending Epic E[0-9]+ must retain the shared implementation dossier link/);
 
 expectFailure('architecture retains stale E12 lifecycle', root => {
   write(root, 'docs/architecture.md', text => text.replace(
@@ -222,7 +230,7 @@ expectFailure('E1-T5 required state retains the unauthenticated shell boundary',
 expectFailure('pre-E1-T5 state requires the Wails absence boundary', root => {
   write(root, 'docs/roadmap.md', text => text
     .replace('| E1-T5 | Pre-release | Completed |', '| E1-T5 | Pre-release | Planned |')
-    .replace('| Next | E4-T1 |', '| Next | E1-T5 |'));
+    .replace(/^\| Next \|[^\n]+$/m, '| Next | E1-T5 |'));
 }, /pre-E1-T5 Wails absence boundary/);
 
 expectFailure('required specs promote E14-owned bundle requirement early', root => {
@@ -274,7 +282,7 @@ expectFailure('pre-E1-T3 state requires ConnectRPC absence', root => {
     .replace('| E1-T3 | Pre-release | Completed |', '| E1-T3 | Pre-release | Planned |')
     .replace('| E1-T4 | Pre-release | Completed |', '| E1-T4 | Pre-release | Planned |')
     .replace('| E1-T5 | Pre-release | Completed |', '| E1-T5 | Pre-release | Planned |')
-    .replace('| Next | E4-T1 |', '| Next | E1 continuing at E1-T3 |'));
+    .replace(/^\| Next \|[^\n]+$/m, '| Next | E1 continuing at E1-T3 |'));
 }, /pre-E1-T3 ConnectRPC absence boundary/);
 
 expectFailure('E1-T4 storage is not a production database lifecycle', root => {

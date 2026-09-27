@@ -1098,6 +1098,27 @@ Accepted semantic errors from GetProfile retain `FIX_REQUEST` or
 `USE_SUPPORTED_PROFILE`. Other semantic errors require operator repair.
 It creates no Run or Controller carrier.
 
+`internal/observation` translates the pinned typed event envelopes into
+payload-free invalidations. Its per-Run bridge keeps validated and committed
+provider cursors separate from browser delivery sequences, coalesces updates,
+and calls a required refresh port with the complete invalidation set. SQLite
+commits invalidation floors and the checkpoint before allocating delivery in the
+same `BEGIN IMMEDIATE` transaction, which revalidates the binding under the
+writer lock. A checkpoint companion retains the committed comparison stamp;
+a failed transaction leaves both stamp and cursor unchanged.
+The shared manager admits at most eight streams with safety priority and
+30-second ordinary demotion hysteresis. Browser notifications retain only Gul
+session/correlation references; slow clients receive the latest invalidation.
+The unmounted ClientEvent handler uses generated ConnectRPC server streaming,
+bounded journal replay, and snapshot-required notifications when replay exceeds
+256 entries. It checks the subject and session on each read. The shared writer
+rule displays WRITE only for fresh active owner authority with verified write
+policy; only an explicit write intent sets the upstream write flag. The writer
+status component renders the backend mode. These components are tested against
+explicit fakes and remain unmounted.
+E4-T2 owns non-live Interaction polling; E5 owns reconnect coordination and
+fresh aggregate convergence.
+
 `internal/storage` requires an owner-only database directory and file, then
 opens the pinned SQLite driver with one writer and at most four read-only
 connections. Versioned migration creates only Gul-owned records;

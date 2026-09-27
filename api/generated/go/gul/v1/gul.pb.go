@@ -922,6 +922,107 @@ func (CloseStatus) EnumDescriptor() ([]byte, []int) {
 	return file_gul_v1_gul_proto_rawDescGZIP(), []int{13}
 }
 
+type ClientEventKind int32
+
+const (
+	ClientEventKind_CLIENT_EVENT_KIND_UNSPECIFIED            ClientEventKind = 0
+	ClientEventKind_CLIENT_EVENT_KIND_PROJECTION_INVALIDATED ClientEventKind = 1
+	ClientEventKind_CLIENT_EVENT_KIND_SNAPSHOT_REQUIRED      ClientEventKind = 2
+)
+
+// Enum value maps for ClientEventKind.
+var (
+	ClientEventKind_name = map[int32]string{
+		0: "CLIENT_EVENT_KIND_UNSPECIFIED",
+		1: "CLIENT_EVENT_KIND_PROJECTION_INVALIDATED",
+		2: "CLIENT_EVENT_KIND_SNAPSHOT_REQUIRED",
+	}
+	ClientEventKind_value = map[string]int32{
+		"CLIENT_EVENT_KIND_UNSPECIFIED":            0,
+		"CLIENT_EVENT_KIND_PROJECTION_INVALIDATED": 1,
+		"CLIENT_EVENT_KIND_SNAPSHOT_REQUIRED":      2,
+	}
+)
+
+func (x ClientEventKind) Enum() *ClientEventKind {
+	p := new(ClientEventKind)
+	*p = x
+	return p
+}
+
+func (x ClientEventKind) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (ClientEventKind) Descriptor() protoreflect.EnumDescriptor {
+	return file_gul_v1_gul_proto_enumTypes[14].Descriptor()
+}
+
+func (ClientEventKind) Type() protoreflect.EnumType {
+	return &file_gul_v1_gul_proto_enumTypes[14]
+}
+
+func (x ClientEventKind) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use ClientEventKind.Descriptor instead.
+func (ClientEventKind) EnumDescriptor() ([]byte, []int) {
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{14}
+}
+
+type WriterAccessMode int32
+
+const (
+	WriterAccessMode_WRITER_ACCESS_MODE_UNSPECIFIED WriterAccessMode = 0
+	WriterAccessMode_WRITER_ACCESS_MODE_READ_ONLY   WriterAccessMode = 1
+	WriterAccessMode_WRITER_ACCESS_MODE_WRITE       WriterAccessMode = 2
+	WriterAccessMode_WRITER_ACCESS_MODE_BLOCKED     WriterAccessMode = 3
+)
+
+// Enum value maps for WriterAccessMode.
+var (
+	WriterAccessMode_name = map[int32]string{
+		0: "WRITER_ACCESS_MODE_UNSPECIFIED",
+		1: "WRITER_ACCESS_MODE_READ_ONLY",
+		2: "WRITER_ACCESS_MODE_WRITE",
+		3: "WRITER_ACCESS_MODE_BLOCKED",
+	}
+	WriterAccessMode_value = map[string]int32{
+		"WRITER_ACCESS_MODE_UNSPECIFIED": 0,
+		"WRITER_ACCESS_MODE_READ_ONLY":   1,
+		"WRITER_ACCESS_MODE_WRITE":       2,
+		"WRITER_ACCESS_MODE_BLOCKED":     3,
+	}
+)
+
+func (x WriterAccessMode) Enum() *WriterAccessMode {
+	p := new(WriterAccessMode)
+	*p = x
+	return p
+}
+
+func (x WriterAccessMode) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (WriterAccessMode) Descriptor() protoreflect.EnumDescriptor {
+	return file_gul_v1_gul_proto_enumTypes[15].Descriptor()
+}
+
+func (WriterAccessMode) Type() protoreflect.EnumType {
+	return &file_gul_v1_gul_proto_enumTypes[15]
+}
+
+func (x WriterAccessMode) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use WriterAccessMode.Descriptor instead.
+func (WriterAccessMode) EnumDescriptor() ([]byte, []int) {
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{15}
+}
+
 type RuntimeModelChoice struct {
 	state            protoimpl.MessageState `protogen:"open.v1"`
 	ModelId          string                 `protobuf:"bytes,1,opt,name=model_id,json=modelId,proto3" json:"model_id,omitempty"`
@@ -4446,6 +4547,134 @@ func (x *ReadChunkResponse) GetSha256() string {
 	return ""
 }
 
+type WatchClientEventsRequest struct {
+	state                 protoimpl.MessageState `protogen:"open.v1"`
+	SessionId             string                 `protobuf:"bytes,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
+	AfterDeliverySequence uint64                 `protobuf:"varint,2,opt,name=after_delivery_sequence,json=afterDeliverySequence,proto3" json:"after_delivery_sequence,omitempty"`
+	unknownFields         protoimpl.UnknownFields
+	sizeCache             protoimpl.SizeCache
+}
+
+func (x *WatchClientEventsRequest) Reset() {
+	*x = WatchClientEventsRequest{}
+	mi := &file_gul_v1_gul_proto_msgTypes[59]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *WatchClientEventsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*WatchClientEventsRequest) ProtoMessage() {}
+
+func (x *WatchClientEventsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_gul_v1_gul_proto_msgTypes[59]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use WatchClientEventsRequest.ProtoReflect.Descriptor instead.
+func (*WatchClientEventsRequest) Descriptor() ([]byte, []int) {
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{59}
+}
+
+func (x *WatchClientEventsRequest) GetSessionId() string {
+	if x != nil {
+		return x.SessionId
+	}
+	return ""
+}
+
+func (x *WatchClientEventsRequest) GetAfterDeliverySequence() uint64 {
+	if x != nil {
+		return x.AfterDeliverySequence
+	}
+	return 0
+}
+
+type ClientEvent struct {
+	state            protoimpl.MessageState `protogen:"open.v1"`
+	DeliverySequence uint64                 `protobuf:"varint,1,opt,name=delivery_sequence,json=deliverySequence,proto3" json:"delivery_sequence,omitempty"`
+	SessionId        string                 `protobuf:"bytes,2,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
+	CorrelationId    string                 `protobuf:"bytes,3,opt,name=correlation_id,json=correlationId,proto3" json:"correlation_id,omitempty"`
+	Kind             ClientEventKind        `protobuf:"varint,4,opt,name=kind,proto3,enum=gul.v1.ClientEventKind" json:"kind,omitempty"`
+	CreatedAt        *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
+}
+
+func (x *ClientEvent) Reset() {
+	*x = ClientEvent{}
+	mi := &file_gul_v1_gul_proto_msgTypes[60]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ClientEvent) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ClientEvent) ProtoMessage() {}
+
+func (x *ClientEvent) ProtoReflect() protoreflect.Message {
+	mi := &file_gul_v1_gul_proto_msgTypes[60]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ClientEvent.ProtoReflect.Descriptor instead.
+func (*ClientEvent) Descriptor() ([]byte, []int) {
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{60}
+}
+
+func (x *ClientEvent) GetDeliverySequence() uint64 {
+	if x != nil {
+		return x.DeliverySequence
+	}
+	return 0
+}
+
+func (x *ClientEvent) GetSessionId() string {
+	if x != nil {
+		return x.SessionId
+	}
+	return ""
+}
+
+func (x *ClientEvent) GetCorrelationId() string {
+	if x != nil {
+		return x.CorrelationId
+	}
+	return ""
+}
+
+func (x *ClientEvent) GetKind() ClientEventKind {
+	if x != nil {
+		return x.Kind
+	}
+	return ClientEventKind_CLIENT_EVENT_KIND_UNSPECIFIED
+}
+
+func (x *ClientEvent) GetCreatedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return nil
+}
+
 var File_gul_v1_gul_proto protoreflect.FileDescriptor
 
 const file_gul_v1_gul_proto_rawDesc = "" +
@@ -4732,7 +4961,19 @@ const file_gul_v1_gul_proto_rawDesc = "" +
 	"\x11ReadChunkResponse\x12\x12\n" +
 	"\x04data\x18\x01 \x01(\fR\x04data\x12!\n" +
 	"\ftotal_length\x18\x02 \x01(\x04R\vtotalLength\x12\x16\n" +
-	"\x06sha256\x18\x03 \x01(\tR\x06sha256*\x87\x02\n" +
+	"\x06sha256\x18\x03 \x01(\tR\x06sha256\"q\n" +
+	"\x18WatchClientEventsRequest\x12\x1d\n" +
+	"\n" +
+	"session_id\x18\x01 \x01(\tR\tsessionId\x126\n" +
+	"\x17after_delivery_sequence\x18\x02 \x01(\x04R\x15afterDeliverySequence\"\xe8\x01\n" +
+	"\vClientEvent\x12+\n" +
+	"\x11delivery_sequence\x18\x01 \x01(\x04R\x10deliverySequence\x12\x1d\n" +
+	"\n" +
+	"session_id\x18\x02 \x01(\tR\tsessionId\x12%\n" +
+	"\x0ecorrelation_id\x18\x03 \x01(\tR\rcorrelationId\x12+\n" +
+	"\x04kind\x18\x04 \x01(\x0e2\x17.gul.v1.ClientEventKindR\x04kind\x129\n" +
+	"\n" +
+	"created_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt*\x87\x02\n" +
 	"\x1bRuntimeProfileCompatibility\x12-\n" +
 	")RUNTIME_PROFILE_COMPATIBILITY_UNSPECIFIED\x10\x00\x12,\n" +
 	"(RUNTIME_PROFILE_COMPATIBILITY_COMPATIBLE\x10\x01\x12.\n" +
@@ -4861,7 +5102,16 @@ const file_gul_v1_gul_proto_rawDesc = "" +
 	"\x18CLOSE_STATUS_IN_PROGRESS\x10\x02\x12\x1a\n" +
 	"\x16CLOSE_STATUS_CONFIRMED\x10\x03\x12 \n" +
 	"\x1cCLOSE_STATUS_OUTCOME_UNKNOWN\x10\x04\x12\"\n" +
-	"\x1eCLOSE_STATUS_RECOVERY_REQUIRED\x10\x052\xcd\x01\n" +
+	"\x1eCLOSE_STATUS_RECOVERY_REQUIRED\x10\x05*\x8b\x01\n" +
+	"\x0fClientEventKind\x12!\n" +
+	"\x1dCLIENT_EVENT_KIND_UNSPECIFIED\x10\x00\x12,\n" +
+	"(CLIENT_EVENT_KIND_PROJECTION_INVALIDATED\x10\x01\x12'\n" +
+	"#CLIENT_EVENT_KIND_SNAPSHOT_REQUIRED\x10\x02*\x96\x01\n" +
+	"\x10WriterAccessMode\x12\"\n" +
+	"\x1eWRITER_ACCESS_MODE_UNSPECIFIED\x10\x00\x12 \n" +
+	"\x1cWRITER_ACCESS_MODE_READ_ONLY\x10\x01\x12\x1c\n" +
+	"\x18WRITER_ACCESS_MODE_WRITE\x10\x02\x12\x1e\n" +
+	"\x1aWRITER_ACCESS_MODE_BLOCKED\x10\x032\xcd\x01\n" +
 	"\x0eRuntimeService\x12^\n" +
 	"\x13ListRuntimeProfiles\x12\".gul.v1.ListRuntimeProfilesRequest\x1a#.gul.v1.ListRuntimeProfilesResponse\x12[\n" +
 	"\x12CheckCompatibility\x12!.gul.v1.CheckCompatibilityRequest\x1a\".gul.v1.CheckCompatibilityResponse2\x83\t\n" +
@@ -4891,7 +5141,9 @@ const file_gul_v1_gul_proto_rawDesc = "" +
 	"\fCloseRuntime\x12\x1b.gul.v1.CloseRuntimeRequest\x1a\x1c.gul.v1.CloseRuntimeResponse2\xa7\x01\n" +
 	"\x1bArtifactPresentationService\x12F\n" +
 	"\vGetMetadata\x12\x1a.gul.v1.GetMetadataRequest\x1a\x1b.gul.v1.GetMetadataResponse\x12@\n" +
-	"\tReadChunk\x12\x18.gul.v1.ReadChunkRequest\x1a\x19.gul.v1.ReadChunkResponseB9Z7github.com/rootkernel/gul/api/generated/go/gul/v1;gulv1b\x06proto3"
+	"\tReadChunk\x12\x18.gul.v1.ReadChunkRequest\x1a\x19.gul.v1.ReadChunkResponse2b\n" +
+	"\x12ClientEventService\x12L\n" +
+	"\x11WatchClientEvents\x12 .gul.v1.WatchClientEventsRequest\x1a\x13.gul.v1.ClientEvent0\x01B9Z7github.com/rootkernel/gul/api/generated/go/gul/v1;gulv1b\x06proto3"
 
 var (
 	file_gul_v1_gul_proto_rawDescOnce sync.Once
@@ -4905,8 +5157,8 @@ func file_gul_v1_gul_proto_rawDescGZIP() []byte {
 	return file_gul_v1_gul_proto_rawDescData
 }
 
-var file_gul_v1_gul_proto_enumTypes = make([]protoimpl.EnumInfo, 14)
-var file_gul_v1_gul_proto_msgTypes = make([]protoimpl.MessageInfo, 59)
+var file_gul_v1_gul_proto_enumTypes = make([]protoimpl.EnumInfo, 16)
+var file_gul_v1_gul_proto_msgTypes = make([]protoimpl.MessageInfo, 61)
 var file_gul_v1_gul_proto_goTypes = []any{
 	(RuntimeProfileCompatibility)(0),            // 0: gul.v1.RuntimeProfileCompatibility
 	(LaunchExecutionLane)(0),                    // 1: gul.v1.LaunchExecutionLane
@@ -4922,170 +5174,178 @@ var file_gul_v1_gul_proto_goTypes = []any{
 	(ErrorCode)(0),                              // 11: gul.v1.ErrorCode
 	(ActionClass)(0),                            // 12: gul.v1.ActionClass
 	(CloseStatus)(0),                            // 13: gul.v1.CloseStatus
-	(*RuntimeModelChoice)(nil),                  // 14: gul.v1.RuntimeModelChoice
-	(*RuntimeProfileChoice)(nil),                // 15: gul.v1.RuntimeProfileChoice
-	(*ListRuntimeProfilesRequest)(nil),          // 16: gul.v1.ListRuntimeProfilesRequest
-	(*ListRuntimeProfilesResponse)(nil),         // 17: gul.v1.ListRuntimeProfilesResponse
-	(*CheckCompatibilityRequest)(nil),           // 18: gul.v1.CheckCompatibilityRequest
-	(*ProspectiveLaunchConfiguration)(nil),      // 19: gul.v1.ProspectiveLaunchConfiguration
-	(*CheckCompatibilityResponse)(nil),          // 20: gul.v1.CheckCompatibilityResponse
-	(*RemoveWorkspaceEntryRequest)(nil),         // 21: gul.v1.RemoveWorkspaceEntryRequest
-	(*RemoveWorkspaceEntryResponse)(nil),        // 22: gul.v1.RemoveWorkspaceEntryResponse
-	(*ListRegistrableRootsRequest)(nil),         // 23: gul.v1.ListRegistrableRootsRequest
-	(*RegistrableRoot)(nil),                     // 24: gul.v1.RegistrableRoot
-	(*ListRegistrableRootsResponse)(nil),        // 25: gul.v1.ListRegistrableRootsResponse
-	(*BrowseRegistrableRootRequest)(nil),        // 26: gul.v1.BrowseRegistrableRootRequest
-	(*RegistrableDirectory)(nil),                // 27: gul.v1.RegistrableDirectory
-	(*BrowseRegistrableRootResponse)(nil),       // 28: gul.v1.BrowseRegistrableRootResponse
-	(*RegisterFromHostSelectionRequest)(nil),    // 29: gul.v1.RegisterFromHostSelectionRequest
-	(*RegisterFromAllowlistPathRequest)(nil),    // 30: gul.v1.RegisterFromAllowlistPathRequest
-	(*WorkspaceEntry)(nil),                      // 31: gul.v1.WorkspaceEntry
-	(*RenameWorkspaceRequest)(nil),              // 32: gul.v1.RenameWorkspaceRequest
-	(*SetWorkspaceFavoriteRequest)(nil),         // 33: gul.v1.SetWorkspaceFavoriteRequest
-	(*SetWorkspaceHiddenRequest)(nil),           // 34: gul.v1.SetWorkspaceHiddenRequest
-	(*WorkspacePresentationResponse)(nil),       // 35: gul.v1.WorkspacePresentationResponse
-	(*GetNavigationRequest)(nil),                // 36: gul.v1.GetNavigationRequest
-	(*SetNavigationRequest)(nil),                // 37: gul.v1.SetNavigationRequest
-	(*NavigationResponse)(nil),                  // 38: gul.v1.NavigationResponse
-	(*RegisterWorkspaceResponse)(nil),           // 39: gul.v1.RegisterWorkspaceResponse
-	(*RevalidateWorkspaceRequest)(nil),          // 40: gul.v1.RevalidateWorkspaceRequest
-	(*RevalidateWorkspaceResponse)(nil),         // 41: gul.v1.RevalidateWorkspaceResponse
-	(*ListWorkspacesRequest)(nil),               // 42: gul.v1.ListWorkspacesRequest
-	(*ListWorkspacesResponse)(nil),              // 43: gul.v1.ListWorkspacesResponse
-	(*DirectSessionPresentation)(nil),           // 44: gul.v1.DirectSessionPresentation
-	(*GetDirectSessionPresentationRequest)(nil), // 45: gul.v1.GetDirectSessionPresentationRequest
-	(*RenameDirectSessionRequest)(nil),          // 46: gul.v1.RenameDirectSessionRequest
-	(*SetDirectSessionFavoriteRequest)(nil),     // 47: gul.v1.SetDirectSessionFavoriteRequest
-	(*SetDirectSessionArchivedRequest)(nil),     // 48: gul.v1.SetDirectSessionArchivedRequest
-	(*DirectSessionPresentationResponse)(nil),   // 49: gul.v1.DirectSessionPresentationResponse
-	(*ListDirectSessionsRequest)(nil),           // 50: gul.v1.ListDirectSessionsRequest
-	(*ListDirectSessionsResponse)(nil),          // 51: gul.v1.ListDirectSessionsResponse
-	(*ListPromptHistoryRequest)(nil),            // 52: gul.v1.ListPromptHistoryRequest
-	(*PromptHistoryItem)(nil),                   // 53: gul.v1.PromptHistoryItem
-	(*ListPromptHistoryResponse)(nil),           // 54: gul.v1.ListPromptHistoryResponse
-	(*GetPromptHistoryItemRequest)(nil),         // 55: gul.v1.GetPromptHistoryItemRequest
-	(*PromptOriginal)(nil),                      // 56: gul.v1.PromptOriginal
-	(*GetPromptHistoryItemResponse)(nil),        // 57: gul.v1.GetPromptHistoryItemResponse
-	(*ExecutionCounts)(nil),                     // 58: gul.v1.ExecutionCounts
-	(*GetExecutionStateRequest)(nil),            // 59: gul.v1.GetExecutionStateRequest
-	(*GetExecutionStateResponse)(nil),           // 60: gul.v1.GetExecutionStateResponse
-	(*ObservedMember)(nil),                      // 61: gul.v1.ObservedMember
-	(*ListSpecialistResultsRequest)(nil),        // 62: gul.v1.ListSpecialistResultsRequest
-	(*SpecialistResult)(nil),                    // 63: gul.v1.SpecialistResult
-	(*ListSpecialistResultsResponse)(nil),       // 64: gul.v1.ListSpecialistResultsResponse
-	(*DomainError)(nil),                         // 65: gul.v1.DomainError
-	(*CloseRuntimeRequest)(nil),                 // 66: gul.v1.CloseRuntimeRequest
-	(*CloseOutcome)(nil),                        // 67: gul.v1.CloseOutcome
-	(*CloseRuntimeResponse)(nil),                // 68: gul.v1.CloseRuntimeResponse
-	(*GetMetadataRequest)(nil),                  // 69: gul.v1.GetMetadataRequest
-	(*GetMetadataResponse)(nil),                 // 70: gul.v1.GetMetadataResponse
-	(*ReadChunkRequest)(nil),                    // 71: gul.v1.ReadChunkRequest
-	(*ReadChunkResponse)(nil),                   // 72: gul.v1.ReadChunkResponse
-	(*timestamppb.Timestamp)(nil),               // 73: google.protobuf.Timestamp
+	(ClientEventKind)(0),                        // 14: gul.v1.ClientEventKind
+	(WriterAccessMode)(0),                       // 15: gul.v1.WriterAccessMode
+	(*RuntimeModelChoice)(nil),                  // 16: gul.v1.RuntimeModelChoice
+	(*RuntimeProfileChoice)(nil),                // 17: gul.v1.RuntimeProfileChoice
+	(*ListRuntimeProfilesRequest)(nil),          // 18: gul.v1.ListRuntimeProfilesRequest
+	(*ListRuntimeProfilesResponse)(nil),         // 19: gul.v1.ListRuntimeProfilesResponse
+	(*CheckCompatibilityRequest)(nil),           // 20: gul.v1.CheckCompatibilityRequest
+	(*ProspectiveLaunchConfiguration)(nil),      // 21: gul.v1.ProspectiveLaunchConfiguration
+	(*CheckCompatibilityResponse)(nil),          // 22: gul.v1.CheckCompatibilityResponse
+	(*RemoveWorkspaceEntryRequest)(nil),         // 23: gul.v1.RemoveWorkspaceEntryRequest
+	(*RemoveWorkspaceEntryResponse)(nil),        // 24: gul.v1.RemoveWorkspaceEntryResponse
+	(*ListRegistrableRootsRequest)(nil),         // 25: gul.v1.ListRegistrableRootsRequest
+	(*RegistrableRoot)(nil),                     // 26: gul.v1.RegistrableRoot
+	(*ListRegistrableRootsResponse)(nil),        // 27: gul.v1.ListRegistrableRootsResponse
+	(*BrowseRegistrableRootRequest)(nil),        // 28: gul.v1.BrowseRegistrableRootRequest
+	(*RegistrableDirectory)(nil),                // 29: gul.v1.RegistrableDirectory
+	(*BrowseRegistrableRootResponse)(nil),       // 30: gul.v1.BrowseRegistrableRootResponse
+	(*RegisterFromHostSelectionRequest)(nil),    // 31: gul.v1.RegisterFromHostSelectionRequest
+	(*RegisterFromAllowlistPathRequest)(nil),    // 32: gul.v1.RegisterFromAllowlistPathRequest
+	(*WorkspaceEntry)(nil),                      // 33: gul.v1.WorkspaceEntry
+	(*RenameWorkspaceRequest)(nil),              // 34: gul.v1.RenameWorkspaceRequest
+	(*SetWorkspaceFavoriteRequest)(nil),         // 35: gul.v1.SetWorkspaceFavoriteRequest
+	(*SetWorkspaceHiddenRequest)(nil),           // 36: gul.v1.SetWorkspaceHiddenRequest
+	(*WorkspacePresentationResponse)(nil),       // 37: gul.v1.WorkspacePresentationResponse
+	(*GetNavigationRequest)(nil),                // 38: gul.v1.GetNavigationRequest
+	(*SetNavigationRequest)(nil),                // 39: gul.v1.SetNavigationRequest
+	(*NavigationResponse)(nil),                  // 40: gul.v1.NavigationResponse
+	(*RegisterWorkspaceResponse)(nil),           // 41: gul.v1.RegisterWorkspaceResponse
+	(*RevalidateWorkspaceRequest)(nil),          // 42: gul.v1.RevalidateWorkspaceRequest
+	(*RevalidateWorkspaceResponse)(nil),         // 43: gul.v1.RevalidateWorkspaceResponse
+	(*ListWorkspacesRequest)(nil),               // 44: gul.v1.ListWorkspacesRequest
+	(*ListWorkspacesResponse)(nil),              // 45: gul.v1.ListWorkspacesResponse
+	(*DirectSessionPresentation)(nil),           // 46: gul.v1.DirectSessionPresentation
+	(*GetDirectSessionPresentationRequest)(nil), // 47: gul.v1.GetDirectSessionPresentationRequest
+	(*RenameDirectSessionRequest)(nil),          // 48: gul.v1.RenameDirectSessionRequest
+	(*SetDirectSessionFavoriteRequest)(nil),     // 49: gul.v1.SetDirectSessionFavoriteRequest
+	(*SetDirectSessionArchivedRequest)(nil),     // 50: gul.v1.SetDirectSessionArchivedRequest
+	(*DirectSessionPresentationResponse)(nil),   // 51: gul.v1.DirectSessionPresentationResponse
+	(*ListDirectSessionsRequest)(nil),           // 52: gul.v1.ListDirectSessionsRequest
+	(*ListDirectSessionsResponse)(nil),          // 53: gul.v1.ListDirectSessionsResponse
+	(*ListPromptHistoryRequest)(nil),            // 54: gul.v1.ListPromptHistoryRequest
+	(*PromptHistoryItem)(nil),                   // 55: gul.v1.PromptHistoryItem
+	(*ListPromptHistoryResponse)(nil),           // 56: gul.v1.ListPromptHistoryResponse
+	(*GetPromptHistoryItemRequest)(nil),         // 57: gul.v1.GetPromptHistoryItemRequest
+	(*PromptOriginal)(nil),                      // 58: gul.v1.PromptOriginal
+	(*GetPromptHistoryItemResponse)(nil),        // 59: gul.v1.GetPromptHistoryItemResponse
+	(*ExecutionCounts)(nil),                     // 60: gul.v1.ExecutionCounts
+	(*GetExecutionStateRequest)(nil),            // 61: gul.v1.GetExecutionStateRequest
+	(*GetExecutionStateResponse)(nil),           // 62: gul.v1.GetExecutionStateResponse
+	(*ObservedMember)(nil),                      // 63: gul.v1.ObservedMember
+	(*ListSpecialistResultsRequest)(nil),        // 64: gul.v1.ListSpecialistResultsRequest
+	(*SpecialistResult)(nil),                    // 65: gul.v1.SpecialistResult
+	(*ListSpecialistResultsResponse)(nil),       // 66: gul.v1.ListSpecialistResultsResponse
+	(*DomainError)(nil),                         // 67: gul.v1.DomainError
+	(*CloseRuntimeRequest)(nil),                 // 68: gul.v1.CloseRuntimeRequest
+	(*CloseOutcome)(nil),                        // 69: gul.v1.CloseOutcome
+	(*CloseRuntimeResponse)(nil),                // 70: gul.v1.CloseRuntimeResponse
+	(*GetMetadataRequest)(nil),                  // 71: gul.v1.GetMetadataRequest
+	(*GetMetadataResponse)(nil),                 // 72: gul.v1.GetMetadataResponse
+	(*ReadChunkRequest)(nil),                    // 73: gul.v1.ReadChunkRequest
+	(*ReadChunkResponse)(nil),                   // 74: gul.v1.ReadChunkResponse
+	(*WatchClientEventsRequest)(nil),            // 75: gul.v1.WatchClientEventsRequest
+	(*ClientEvent)(nil),                         // 76: gul.v1.ClientEvent
+	(*timestamppb.Timestamp)(nil),               // 77: google.protobuf.Timestamp
 }
 var file_gul_v1_gul_proto_depIdxs = []int32{
 	0,  // 0: gul.v1.RuntimeProfileChoice.compatibility:type_name -> gul.v1.RuntimeProfileCompatibility
-	14, // 1: gul.v1.RuntimeProfileChoice.models:type_name -> gul.v1.RuntimeModelChoice
+	16, // 1: gul.v1.RuntimeProfileChoice.models:type_name -> gul.v1.RuntimeModelChoice
 	1,  // 2: gul.v1.RuntimeProfileChoice.supported_lanes:type_name -> gul.v1.LaunchExecutionLane
 	2,  // 3: gul.v1.RuntimeProfileChoice.maximum_assurance:type_name -> gul.v1.LaunchAssurance
-	15, // 4: gul.v1.ListRuntimeProfilesResponse.profiles:type_name -> gul.v1.RuntimeProfileChoice
+	17, // 4: gul.v1.ListRuntimeProfilesResponse.profiles:type_name -> gul.v1.RuntimeProfileChoice
 	1,  // 5: gul.v1.CheckCompatibilityRequest.lane:type_name -> gul.v1.LaunchExecutionLane
 	2,  // 6: gul.v1.CheckCompatibilityRequest.required_assurance:type_name -> gul.v1.LaunchAssurance
 	1,  // 7: gul.v1.ProspectiveLaunchConfiguration.lane:type_name -> gul.v1.LaunchExecutionLane
 	2,  // 8: gul.v1.ProspectiveLaunchConfiguration.required_assurance:type_name -> gul.v1.LaunchAssurance
-	19, // 9: gul.v1.CheckCompatibilityResponse.configuration:type_name -> gul.v1.ProspectiveLaunchConfiguration
-	24, // 10: gul.v1.ListRegistrableRootsResponse.roots:type_name -> gul.v1.RegistrableRoot
-	27, // 11: gul.v1.BrowseRegistrableRootResponse.directories:type_name -> gul.v1.RegistrableDirectory
-	31, // 12: gul.v1.WorkspacePresentationResponse.workspace:type_name -> gul.v1.WorkspaceEntry
-	31, // 13: gul.v1.RegisterWorkspaceResponse.workspace:type_name -> gul.v1.WorkspaceEntry
-	31, // 14: gul.v1.RevalidateWorkspaceResponse.workspace:type_name -> gul.v1.WorkspaceEntry
-	31, // 15: gul.v1.ListWorkspacesResponse.workspaces:type_name -> gul.v1.WorkspaceEntry
-	44, // 16: gul.v1.DirectSessionPresentationResponse.session:type_name -> gul.v1.DirectSessionPresentation
-	44, // 17: gul.v1.ListDirectSessionsResponse.sessions:type_name -> gul.v1.DirectSessionPresentation
-	73, // 18: gul.v1.PromptHistoryItem.accepted_at:type_name -> google.protobuf.Timestamp
-	53, // 19: gul.v1.ListPromptHistoryResponse.items:type_name -> gul.v1.PromptHistoryItem
+	21, // 9: gul.v1.CheckCompatibilityResponse.configuration:type_name -> gul.v1.ProspectiveLaunchConfiguration
+	26, // 10: gul.v1.ListRegistrableRootsResponse.roots:type_name -> gul.v1.RegistrableRoot
+	29, // 11: gul.v1.BrowseRegistrableRootResponse.directories:type_name -> gul.v1.RegistrableDirectory
+	33, // 12: gul.v1.WorkspacePresentationResponse.workspace:type_name -> gul.v1.WorkspaceEntry
+	33, // 13: gul.v1.RegisterWorkspaceResponse.workspace:type_name -> gul.v1.WorkspaceEntry
+	33, // 14: gul.v1.RevalidateWorkspaceResponse.workspace:type_name -> gul.v1.WorkspaceEntry
+	33, // 15: gul.v1.ListWorkspacesResponse.workspaces:type_name -> gul.v1.WorkspaceEntry
+	46, // 16: gul.v1.DirectSessionPresentationResponse.session:type_name -> gul.v1.DirectSessionPresentation
+	46, // 17: gul.v1.ListDirectSessionsResponse.sessions:type_name -> gul.v1.DirectSessionPresentation
+	77, // 18: gul.v1.PromptHistoryItem.accepted_at:type_name -> google.protobuf.Timestamp
+	55, // 19: gul.v1.ListPromptHistoryResponse.items:type_name -> gul.v1.PromptHistoryItem
 	3,  // 20: gul.v1.ListPromptHistoryResponse.freshness:type_name -> gul.v1.Freshness
-	73, // 21: gul.v1.ListPromptHistoryResponse.observed_at:type_name -> google.protobuf.Timestamp
-	73, // 22: gul.v1.GetPromptHistoryItemResponse.accepted_at:type_name -> google.protobuf.Timestamp
-	56, // 23: gul.v1.GetPromptHistoryItemResponse.original:type_name -> gul.v1.PromptOriginal
+	77, // 21: gul.v1.ListPromptHistoryResponse.observed_at:type_name -> google.protobuf.Timestamp
+	77, // 22: gul.v1.GetPromptHistoryItemResponse.accepted_at:type_name -> google.protobuf.Timestamp
+	58, // 23: gul.v1.GetPromptHistoryItemResponse.original:type_name -> gul.v1.PromptOriginal
 	3,  // 24: gul.v1.GetExecutionStateResponse.freshness:type_name -> gul.v1.Freshness
-	73, // 25: gul.v1.GetExecutionStateResponse.observed_at:type_name -> google.protobuf.Timestamp
+	77, // 25: gul.v1.GetExecutionStateResponse.observed_at:type_name -> google.protobuf.Timestamp
 	4,  // 26: gul.v1.GetExecutionStateResponse.lifecycle:type_name -> gul.v1.SessionLifecycle
 	5,  // 27: gul.v1.GetExecutionStateResponse.composition:type_name -> gul.v1.SessionComposition
 	6,  // 28: gul.v1.GetExecutionStateResponse.approval_policy:type_name -> gul.v1.ApprovalPolicy
-	58, // 29: gul.v1.GetExecutionStateResponse.counts:type_name -> gul.v1.ExecutionCounts
+	60, // 29: gul.v1.GetExecutionStateResponse.counts:type_name -> gul.v1.ExecutionCounts
 	7,  // 30: gul.v1.GetExecutionStateResponse.close_progress:type_name -> gul.v1.CloseProgress
 	8,  // 31: gul.v1.GetExecutionStateResponse.recovery:type_name -> gul.v1.RecoveryClass
-	61, // 32: gul.v1.GetExecutionStateResponse.observed_members:type_name -> gul.v1.ObservedMember
+	63, // 32: gul.v1.GetExecutionStateResponse.observed_members:type_name -> gul.v1.ObservedMember
 	9,  // 33: gul.v1.ObservedMember.lifecycle:type_name -> gul.v1.ObservedMemberLifecycle
-	73, // 34: gul.v1.SpecialistResult.published_at:type_name -> google.protobuf.Timestamp
+	77, // 34: gul.v1.SpecialistResult.published_at:type_name -> google.protobuf.Timestamp
 	10, // 35: gul.v1.SpecialistResult.format:type_name -> gul.v1.SpecialistResultFormat
-	63, // 36: gul.v1.ListSpecialistResultsResponse.items:type_name -> gul.v1.SpecialistResult
+	65, // 36: gul.v1.ListSpecialistResultsResponse.items:type_name -> gul.v1.SpecialistResult
 	3,  // 37: gul.v1.ListSpecialistResultsResponse.freshness:type_name -> gul.v1.Freshness
-	73, // 38: gul.v1.ListSpecialistResultsResponse.observed_at:type_name -> google.protobuf.Timestamp
+	77, // 38: gul.v1.ListSpecialistResultsResponse.observed_at:type_name -> google.protobuf.Timestamp
 	11, // 39: gul.v1.DomainError.code:type_name -> gul.v1.ErrorCode
 	12, // 40: gul.v1.DomainError.action:type_name -> gul.v1.ActionClass
 	13, // 41: gul.v1.CloseOutcome.status:type_name -> gul.v1.CloseStatus
-	65, // 42: gul.v1.CloseOutcome.rejection:type_name -> gul.v1.DomainError
+	67, // 42: gul.v1.CloseOutcome.rejection:type_name -> gul.v1.DomainError
 	12, // 43: gul.v1.CloseOutcome.next_action:type_name -> gul.v1.ActionClass
-	67, // 44: gul.v1.CloseRuntimeResponse.outcome:type_name -> gul.v1.CloseOutcome
-	16, // 45: gul.v1.RuntimeService.ListRuntimeProfiles:input_type -> gul.v1.ListRuntimeProfilesRequest
-	18, // 46: gul.v1.RuntimeService.CheckCompatibility:input_type -> gul.v1.CheckCompatibilityRequest
-	23, // 47: gul.v1.WorkspacePresentationService.ListRegistrableRoots:input_type -> gul.v1.ListRegistrableRootsRequest
-	26, // 48: gul.v1.WorkspacePresentationService.BrowseRegistrableRoot:input_type -> gul.v1.BrowseRegistrableRootRequest
-	29, // 49: gul.v1.WorkspacePresentationService.RegisterFromHostSelection:input_type -> gul.v1.RegisterFromHostSelectionRequest
-	30, // 50: gul.v1.WorkspacePresentationService.RegisterFromAllowlistPath:input_type -> gul.v1.RegisterFromAllowlistPathRequest
-	40, // 51: gul.v1.WorkspacePresentationService.RevalidateWorkspace:input_type -> gul.v1.RevalidateWorkspaceRequest
-	42, // 52: gul.v1.WorkspacePresentationService.ListWorkspaces:input_type -> gul.v1.ListWorkspacesRequest
-	32, // 53: gul.v1.WorkspacePresentationService.RenameWorkspace:input_type -> gul.v1.RenameWorkspaceRequest
-	33, // 54: gul.v1.WorkspacePresentationService.SetWorkspaceFavorite:input_type -> gul.v1.SetWorkspaceFavoriteRequest
-	34, // 55: gul.v1.WorkspacePresentationService.SetWorkspaceHidden:input_type -> gul.v1.SetWorkspaceHiddenRequest
-	21, // 56: gul.v1.WorkspacePresentationService.RemoveWorkspaceEntry:input_type -> gul.v1.RemoveWorkspaceEntryRequest
-	36, // 57: gul.v1.WorkspacePresentationService.GetNavigation:input_type -> gul.v1.GetNavigationRequest
-	37, // 58: gul.v1.WorkspacePresentationService.SetNavigation:input_type -> gul.v1.SetNavigationRequest
-	50, // 59: gul.v1.DirectSessionService.ListDirectSessions:input_type -> gul.v1.ListDirectSessionsRequest
-	45, // 60: gul.v1.DirectSessionService.GetDirectSessionPresentation:input_type -> gul.v1.GetDirectSessionPresentationRequest
-	46, // 61: gul.v1.DirectSessionService.RenameDirectSession:input_type -> gul.v1.RenameDirectSessionRequest
-	47, // 62: gul.v1.DirectSessionService.SetDirectSessionFavorite:input_type -> gul.v1.SetDirectSessionFavoriteRequest
-	48, // 63: gul.v1.DirectSessionService.SetDirectSessionArchived:input_type -> gul.v1.SetDirectSessionArchivedRequest
-	52, // 64: gul.v1.DirectSessionService.ListPromptHistory:input_type -> gul.v1.ListPromptHistoryRequest
-	55, // 65: gul.v1.DirectSessionService.GetPromptHistoryItem:input_type -> gul.v1.GetPromptHistoryItemRequest
-	59, // 66: gul.v1.DirectSessionService.GetExecutionState:input_type -> gul.v1.GetExecutionStateRequest
-	62, // 67: gul.v1.DirectSessionService.ListSpecialistResults:input_type -> gul.v1.ListSpecialistResultsRequest
-	66, // 68: gul.v1.DirectSessionService.CloseRuntime:input_type -> gul.v1.CloseRuntimeRequest
-	69, // 69: gul.v1.ArtifactPresentationService.GetMetadata:input_type -> gul.v1.GetMetadataRequest
-	71, // 70: gul.v1.ArtifactPresentationService.ReadChunk:input_type -> gul.v1.ReadChunkRequest
-	17, // 71: gul.v1.RuntimeService.ListRuntimeProfiles:output_type -> gul.v1.ListRuntimeProfilesResponse
-	20, // 72: gul.v1.RuntimeService.CheckCompatibility:output_type -> gul.v1.CheckCompatibilityResponse
-	25, // 73: gul.v1.WorkspacePresentationService.ListRegistrableRoots:output_type -> gul.v1.ListRegistrableRootsResponse
-	28, // 74: gul.v1.WorkspacePresentationService.BrowseRegistrableRoot:output_type -> gul.v1.BrowseRegistrableRootResponse
-	39, // 75: gul.v1.WorkspacePresentationService.RegisterFromHostSelection:output_type -> gul.v1.RegisterWorkspaceResponse
-	39, // 76: gul.v1.WorkspacePresentationService.RegisterFromAllowlistPath:output_type -> gul.v1.RegisterWorkspaceResponse
-	41, // 77: gul.v1.WorkspacePresentationService.RevalidateWorkspace:output_type -> gul.v1.RevalidateWorkspaceResponse
-	43, // 78: gul.v1.WorkspacePresentationService.ListWorkspaces:output_type -> gul.v1.ListWorkspacesResponse
-	35, // 79: gul.v1.WorkspacePresentationService.RenameWorkspace:output_type -> gul.v1.WorkspacePresentationResponse
-	35, // 80: gul.v1.WorkspacePresentationService.SetWorkspaceFavorite:output_type -> gul.v1.WorkspacePresentationResponse
-	35, // 81: gul.v1.WorkspacePresentationService.SetWorkspaceHidden:output_type -> gul.v1.WorkspacePresentationResponse
-	22, // 82: gul.v1.WorkspacePresentationService.RemoveWorkspaceEntry:output_type -> gul.v1.RemoveWorkspaceEntryResponse
-	38, // 83: gul.v1.WorkspacePresentationService.GetNavigation:output_type -> gul.v1.NavigationResponse
-	38, // 84: gul.v1.WorkspacePresentationService.SetNavigation:output_type -> gul.v1.NavigationResponse
-	51, // 85: gul.v1.DirectSessionService.ListDirectSessions:output_type -> gul.v1.ListDirectSessionsResponse
-	49, // 86: gul.v1.DirectSessionService.GetDirectSessionPresentation:output_type -> gul.v1.DirectSessionPresentationResponse
-	49, // 87: gul.v1.DirectSessionService.RenameDirectSession:output_type -> gul.v1.DirectSessionPresentationResponse
-	49, // 88: gul.v1.DirectSessionService.SetDirectSessionFavorite:output_type -> gul.v1.DirectSessionPresentationResponse
-	49, // 89: gul.v1.DirectSessionService.SetDirectSessionArchived:output_type -> gul.v1.DirectSessionPresentationResponse
-	54, // 90: gul.v1.DirectSessionService.ListPromptHistory:output_type -> gul.v1.ListPromptHistoryResponse
-	57, // 91: gul.v1.DirectSessionService.GetPromptHistoryItem:output_type -> gul.v1.GetPromptHistoryItemResponse
-	60, // 92: gul.v1.DirectSessionService.GetExecutionState:output_type -> gul.v1.GetExecutionStateResponse
-	64, // 93: gul.v1.DirectSessionService.ListSpecialistResults:output_type -> gul.v1.ListSpecialistResultsResponse
-	68, // 94: gul.v1.DirectSessionService.CloseRuntime:output_type -> gul.v1.CloseRuntimeResponse
-	70, // 95: gul.v1.ArtifactPresentationService.GetMetadata:output_type -> gul.v1.GetMetadataResponse
-	72, // 96: gul.v1.ArtifactPresentationService.ReadChunk:output_type -> gul.v1.ReadChunkResponse
-	71, // [71:97] is the sub-list for method output_type
-	45, // [45:71] is the sub-list for method input_type
-	45, // [45:45] is the sub-list for extension type_name
-	45, // [45:45] is the sub-list for extension extendee
-	0,  // [0:45] is the sub-list for field type_name
+	69, // 44: gul.v1.CloseRuntimeResponse.outcome:type_name -> gul.v1.CloseOutcome
+	14, // 45: gul.v1.ClientEvent.kind:type_name -> gul.v1.ClientEventKind
+	77, // 46: gul.v1.ClientEvent.created_at:type_name -> google.protobuf.Timestamp
+	18, // 47: gul.v1.RuntimeService.ListRuntimeProfiles:input_type -> gul.v1.ListRuntimeProfilesRequest
+	20, // 48: gul.v1.RuntimeService.CheckCompatibility:input_type -> gul.v1.CheckCompatibilityRequest
+	25, // 49: gul.v1.WorkspacePresentationService.ListRegistrableRoots:input_type -> gul.v1.ListRegistrableRootsRequest
+	28, // 50: gul.v1.WorkspacePresentationService.BrowseRegistrableRoot:input_type -> gul.v1.BrowseRegistrableRootRequest
+	31, // 51: gul.v1.WorkspacePresentationService.RegisterFromHostSelection:input_type -> gul.v1.RegisterFromHostSelectionRequest
+	32, // 52: gul.v1.WorkspacePresentationService.RegisterFromAllowlistPath:input_type -> gul.v1.RegisterFromAllowlistPathRequest
+	42, // 53: gul.v1.WorkspacePresentationService.RevalidateWorkspace:input_type -> gul.v1.RevalidateWorkspaceRequest
+	44, // 54: gul.v1.WorkspacePresentationService.ListWorkspaces:input_type -> gul.v1.ListWorkspacesRequest
+	34, // 55: gul.v1.WorkspacePresentationService.RenameWorkspace:input_type -> gul.v1.RenameWorkspaceRequest
+	35, // 56: gul.v1.WorkspacePresentationService.SetWorkspaceFavorite:input_type -> gul.v1.SetWorkspaceFavoriteRequest
+	36, // 57: gul.v1.WorkspacePresentationService.SetWorkspaceHidden:input_type -> gul.v1.SetWorkspaceHiddenRequest
+	23, // 58: gul.v1.WorkspacePresentationService.RemoveWorkspaceEntry:input_type -> gul.v1.RemoveWorkspaceEntryRequest
+	38, // 59: gul.v1.WorkspacePresentationService.GetNavigation:input_type -> gul.v1.GetNavigationRequest
+	39, // 60: gul.v1.WorkspacePresentationService.SetNavigation:input_type -> gul.v1.SetNavigationRequest
+	52, // 61: gul.v1.DirectSessionService.ListDirectSessions:input_type -> gul.v1.ListDirectSessionsRequest
+	47, // 62: gul.v1.DirectSessionService.GetDirectSessionPresentation:input_type -> gul.v1.GetDirectSessionPresentationRequest
+	48, // 63: gul.v1.DirectSessionService.RenameDirectSession:input_type -> gul.v1.RenameDirectSessionRequest
+	49, // 64: gul.v1.DirectSessionService.SetDirectSessionFavorite:input_type -> gul.v1.SetDirectSessionFavoriteRequest
+	50, // 65: gul.v1.DirectSessionService.SetDirectSessionArchived:input_type -> gul.v1.SetDirectSessionArchivedRequest
+	54, // 66: gul.v1.DirectSessionService.ListPromptHistory:input_type -> gul.v1.ListPromptHistoryRequest
+	57, // 67: gul.v1.DirectSessionService.GetPromptHistoryItem:input_type -> gul.v1.GetPromptHistoryItemRequest
+	61, // 68: gul.v1.DirectSessionService.GetExecutionState:input_type -> gul.v1.GetExecutionStateRequest
+	64, // 69: gul.v1.DirectSessionService.ListSpecialistResults:input_type -> gul.v1.ListSpecialistResultsRequest
+	68, // 70: gul.v1.DirectSessionService.CloseRuntime:input_type -> gul.v1.CloseRuntimeRequest
+	71, // 71: gul.v1.ArtifactPresentationService.GetMetadata:input_type -> gul.v1.GetMetadataRequest
+	73, // 72: gul.v1.ArtifactPresentationService.ReadChunk:input_type -> gul.v1.ReadChunkRequest
+	75, // 73: gul.v1.ClientEventService.WatchClientEvents:input_type -> gul.v1.WatchClientEventsRequest
+	19, // 74: gul.v1.RuntimeService.ListRuntimeProfiles:output_type -> gul.v1.ListRuntimeProfilesResponse
+	22, // 75: gul.v1.RuntimeService.CheckCompatibility:output_type -> gul.v1.CheckCompatibilityResponse
+	27, // 76: gul.v1.WorkspacePresentationService.ListRegistrableRoots:output_type -> gul.v1.ListRegistrableRootsResponse
+	30, // 77: gul.v1.WorkspacePresentationService.BrowseRegistrableRoot:output_type -> gul.v1.BrowseRegistrableRootResponse
+	41, // 78: gul.v1.WorkspacePresentationService.RegisterFromHostSelection:output_type -> gul.v1.RegisterWorkspaceResponse
+	41, // 79: gul.v1.WorkspacePresentationService.RegisterFromAllowlistPath:output_type -> gul.v1.RegisterWorkspaceResponse
+	43, // 80: gul.v1.WorkspacePresentationService.RevalidateWorkspace:output_type -> gul.v1.RevalidateWorkspaceResponse
+	45, // 81: gul.v1.WorkspacePresentationService.ListWorkspaces:output_type -> gul.v1.ListWorkspacesResponse
+	37, // 82: gul.v1.WorkspacePresentationService.RenameWorkspace:output_type -> gul.v1.WorkspacePresentationResponse
+	37, // 83: gul.v1.WorkspacePresentationService.SetWorkspaceFavorite:output_type -> gul.v1.WorkspacePresentationResponse
+	37, // 84: gul.v1.WorkspacePresentationService.SetWorkspaceHidden:output_type -> gul.v1.WorkspacePresentationResponse
+	24, // 85: gul.v1.WorkspacePresentationService.RemoveWorkspaceEntry:output_type -> gul.v1.RemoveWorkspaceEntryResponse
+	40, // 86: gul.v1.WorkspacePresentationService.GetNavigation:output_type -> gul.v1.NavigationResponse
+	40, // 87: gul.v1.WorkspacePresentationService.SetNavigation:output_type -> gul.v1.NavigationResponse
+	53, // 88: gul.v1.DirectSessionService.ListDirectSessions:output_type -> gul.v1.ListDirectSessionsResponse
+	51, // 89: gul.v1.DirectSessionService.GetDirectSessionPresentation:output_type -> gul.v1.DirectSessionPresentationResponse
+	51, // 90: gul.v1.DirectSessionService.RenameDirectSession:output_type -> gul.v1.DirectSessionPresentationResponse
+	51, // 91: gul.v1.DirectSessionService.SetDirectSessionFavorite:output_type -> gul.v1.DirectSessionPresentationResponse
+	51, // 92: gul.v1.DirectSessionService.SetDirectSessionArchived:output_type -> gul.v1.DirectSessionPresentationResponse
+	56, // 93: gul.v1.DirectSessionService.ListPromptHistory:output_type -> gul.v1.ListPromptHistoryResponse
+	59, // 94: gul.v1.DirectSessionService.GetPromptHistoryItem:output_type -> gul.v1.GetPromptHistoryItemResponse
+	62, // 95: gul.v1.DirectSessionService.GetExecutionState:output_type -> gul.v1.GetExecutionStateResponse
+	66, // 96: gul.v1.DirectSessionService.ListSpecialistResults:output_type -> gul.v1.ListSpecialistResultsResponse
+	70, // 97: gul.v1.DirectSessionService.CloseRuntime:output_type -> gul.v1.CloseRuntimeResponse
+	72, // 98: gul.v1.ArtifactPresentationService.GetMetadata:output_type -> gul.v1.GetMetadataResponse
+	74, // 99: gul.v1.ArtifactPresentationService.ReadChunk:output_type -> gul.v1.ReadChunkResponse
+	76, // 100: gul.v1.ClientEventService.WatchClientEvents:output_type -> gul.v1.ClientEvent
+	74, // [74:101] is the sub-list for method output_type
+	47, // [47:74] is the sub-list for method input_type
+	47, // [47:47] is the sub-list for extension type_name
+	47, // [47:47] is the sub-list for extension extendee
+	0,  // [0:47] is the sub-list for field type_name
 }
 
 func init() { file_gul_v1_gul_proto_init() }
@@ -5109,10 +5369,10 @@ func file_gul_v1_gul_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_gul_v1_gul_proto_rawDesc), len(file_gul_v1_gul_proto_rawDesc)),
-			NumEnums:      14,
-			NumMessages:   59,
+			NumEnums:      16,
+			NumMessages:   61,
 			NumExtensions: 0,
-			NumServices:   4,
+			NumServices:   5,
 		},
 		GoTypes:           file_gul_v1_gul_proto_goTypes,
 		DependencyIndexes: file_gul_v1_gul_proto_depIdxs,

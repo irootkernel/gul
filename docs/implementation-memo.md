@@ -540,10 +540,49 @@ Medium-or-higher finding, pending Low disposition or unmet acceptance criterion
 remains. The full `make test` gate, focused session/API race tests and SOT checks
 passed on the corrected implementation; focused SOT checks also cover closeout.
 
-E4-T1 is next. E5 owns session close, E8 owns authenticated route assembly, and
+E4-T2 is next. E5 owns session close, E8 owns authenticated route assembly, and
 E2/E9 retain released-provider qualification. E3 does not establish mounted-route,
 assembled-product or released-provider acceptance. The shared consumer dossier
 remains for its other roadmap consumers; E3 now links to its canonical outcomes.
+
+### E4-T1 event bridge
+
+`internal/observation` adds separate Cursor and Sequence types, exhaustive
+payload-free event mapping, per-Run checkpoint tracking, 64-entry queues and
+50 ms notification coalescing. The required refresh port receives every
+mandatory aggregate invalidation. A local slow consumer refreshes only its Run;
+mutations use separate provider ports. The manager limits one shared provider
+to eight streams with deterministic priority and 30-second ordinary demotion
+hysteresis. The current components are unmounted; E5 retains reconnect and
+aggregate convergence ownership.
+
+SQLite migration 5 adds pending refresh metadata and Gul-only notification
+references. Projection invalidations, committed cursor and delivery allocation
+share a transaction; validated cursors are recorded separately. Fault tests
+abort after projection writes and prove rollback, retained replay position and
+no delivery. Reopen and independent local-delivery tests preserve the cursor
+boundary. Migration tests cover every retained schema version.
+
+Descriptor-driven generated-wire tests exercise all 15 durable variants,
+malformed identities, unknown fields/enums, stamp drift and oversize envelopes.
+Scenario-provider tests consume the default minimal stream. Bridge tests cover
+coalescing, duplicate replay, finite-stream end/EOF ordering, startup failures,
+metadata retention across demotion, stamp regression after reopen, binding
+deletion during writer contention, crash uncertainty, queue
+saturation, browser coalescing and actual stream-cap enforcement. Focused
+race-enabled checks and serial `make test` pass. Completion review confirms the full T1 requirements and all
+corrected behavior. The SOT negative
+fixtures isolate their selected lifecycle state, so an active task or a changed
+Next task does not invalidate the checker tests.
+
+REQ-API-003 adds the unmounted generated ConnectRPC client-event stream,
+subject/session-scoped replay, and a snapshot-required boundary after 256
+retained notifications. HTTP streaming tests cover replay, subsequent delivery,
+initial/overflow snapshot requests and unauthorized callers. REQ-WRITER-002
+adds the shared fresh-policy/active-owner WRITE rule, explicit submission flag,
+and an unmounted writer-status component. These requirements remain T1-owned;
+T3 will consume the rule in its broader action evaluator. No live-provider or
+assembled browser evidence is claimed.
 
 ## 2. Current development snapshot
 
@@ -555,7 +594,7 @@ remains for its other roadmap consumers; E3 now links to its canonical outcomes.
 | Production source | E1 shared core, bundle, API declarations, isolated SQLite and Wails shell; E3-T1 adds Workspace attachment; E3-T2 adds local presentation; E3-T3 adds passive session binding and aggregate reads; E3-T4 adds global Profile launch selection and unmounted typed handler |
 | Wails host/frontend | One React foundation bundle and isolated Wails shell foundation implemented; E3-T4 launch selector is unmounted and authenticated attach is not implemented |
 | ConnectRPC schema/services | Gul Runtime, DirectSession, ArtifactPresentation and WorkspacePresentation declarations and generated clients exist; isolated handlers remain unmounted |
-| Gul SQLite schema | Gul-owned version 4 schema with Workspace attachment, favorites and Primary binding migrations and isolated repositories implemented; production startup integration pending |
+| Gul SQLite schema | Gul-owned version 5 schema with Workspace attachment, favorites Primary binding and event metadata migrations and isolated repositories implemented; production startup integration pending |
 | Dolgorae RPC supervisor/provider | Not implemented |
 | Controller credential store | Caller-owned mechanism selected by ADR-0047; not implemented |
 | FileService/auth/PWA/Tailscale integration | Not implemented |
@@ -1012,4 +1051,4 @@ The initial documentation assumed Gul would manage one Codex App Server, map Ses
 
 ## 12. Handoff
 
-E12, E1, E13, and E3 are complete. The TASK-053 consumer lock and generated contract tooling remain authoritative. E3-T1 added fake-scoped Workspace attachment, E3-T2 added local-only presentation, E3-T3 added passive session reads, and E3-T4 added prospective global Profile launch selection. E4-T1 is next. E2-T0 remains blocked on an accepted compatible Dolgorae executable and live smoke evidence. No product route or live-provider behavior is activated automatically.
+E12, E1, E13, and E3 are complete. The TASK-053 consumer lock and generated contract tooling remain authoritative. E3-T1 added fake-scoped Workspace attachment, E3-T2 added local-only presentation, E3-T3 added passive session reads, and E3-T4 added prospective global Profile launch selection. E4-T2 is next. E2-T0 remains blocked on an accepted compatible Dolgorae executable and live smoke evidence. No product route or live-provider behavior is activated automatically.

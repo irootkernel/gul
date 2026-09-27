@@ -151,3 +151,26 @@ FOREIGN KEY(subject_id, session_id) REFERENCES direct_session_presentations(subj
 FOREIGN KEY(subject_id, workspace_id) REFERENCES workspace_attachments(subject_id, workspace_id) ON DELETE CASCADE
 )`,
 }
+
+var observationStatements = []string{
+	`CREATE TABLE observation_checkpoint_stamps (
+provider_id TEXT NOT NULL,
+runtime_object_id TEXT NOT NULL,
+stream_kind TEXT NOT NULL,
+stamp TEXT NOT NULL,
+PRIMARY KEY(provider_id, runtime_object_id, stream_kind),
+FOREIGN KEY(provider_id, runtime_object_id, stream_kind) REFERENCES observation_checkpoints(provider_id, runtime_object_id, stream_kind) ON DELETE CASCADE
+)`,
+	`CREATE TABLE observation_refreshes (
+subject_id TEXT NOT NULL REFERENCES app_account(subject_id) ON DELETE CASCADE,
+session_id TEXT NOT NULL,
+refresh_mask INTEGER NOT NULL,
+PRIMARY KEY(subject_id, session_id),
+FOREIGN KEY(subject_id, session_id) REFERENCES direct_session_presentations(subject_id, session_id) ON DELETE CASCADE
+)`,
+	`CREATE TABLE client_projection_notifications (
+sequence INTEGER PRIMARY KEY REFERENCES client_event_journal(sequence) ON DELETE CASCADE,
+session_id TEXT NOT NULL,
+correlation_id TEXT NOT NULL
+)`,
+}
