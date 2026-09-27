@@ -8,7 +8,7 @@
 | Subtitle | Remote operator interface for local development runtimes |
 | Version | 0.1-dolgorae-consumer-v1 |
 | Status | Approved Required State; E1-T1 through E1-T5 foundations completed without assembled product acceptance |
-| Last updated | 2026-09-25 |
+| Last updated | 2026-09-28 |
 | Target | macOS host; modern desktop, iPad, and iPhone browsers |
 
 ## 1. Purpose, authority, and lifecycle

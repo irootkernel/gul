@@ -6,7 +6,7 @@
 | Product | Gul |
 | Version | 0.1-dolgorae-consumer-v1 |
 | Status | Approved target rebaseline; current implementation through E4 within the declared fake/component scope |
-| Last updated | 2026-09-27 |
+| Last updated | 2026-09-28 |
 
 ## 1. Purpose and change control
 
@@ -881,13 +881,18 @@ file_explorer_state
 runtime_projection_cache
 runtime_timeline_cache
 observation_checkpoints
+observation_checkpoint_stamps
+observation_refreshes
+client_projection_notifications
 provider_operation_attempts
 schema_migrations
 ```
 
 `workspace_attachments` was added by migration 2. Migration 3 adds the two
-favorite tables, and migration 4 adds `primary_session_bindings`. The remaining
-tables were created by the initial migration.
+favorite tables, and migration 4 adds `primary_session_bindings`. Migration 5
+adds `observation_checkpoint_stamps`, `observation_refreshes`, and
+`client_projection_notifications`. The remaining tables were created by the
+initial migration.
 
 Prohibited authoritative tables/aggregates include Codex threads, Turns, workspace writer locks, writer generations, pending runtime interactions, native subagents, background processes, and runtime recovery state. A projection table is named and documented as a cache.
 
@@ -1221,6 +1226,9 @@ so later provider refreshes cannot undo a local rename or archive choice.
 Migration 4 adds one-to-one subject-scoped Primary bindings and a local copy of
 the latest provider Run configuration. The copy is presentation data; GetRun
 remains authoritative on every fresh read and after a restart.
+Migration 5 adds checkpoint stamps, pending refresh metadata, and Gul-only
+notification references. Projection updates, checkpoint advancement, and
+notification delivery commit in one immediate transaction.
 
 `internal/desktop` starts and stops the same core through its lifecycle boundary,
 then runs a Wails v3 window over the checked bundle's existing asset handler.

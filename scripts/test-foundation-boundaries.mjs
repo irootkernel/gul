@@ -31,6 +31,26 @@ const launch = goSourceFiles(path.join(sourceRoot, "internal/launch"))
   .map(name => fs.readFileSync(name, "utf8")).join("\n");
 const launchAdapter = goSourceFiles(path.join(sourceRoot, "internal/launch/contractprovider"))
   .map(name => fs.readFileSync(name, "utf8")).join("\n");
+const observation = goSourceFiles(path.join(sourceRoot, "internal/observation"))
+  .filter(name => !name.includes(`${path.sep}contractprovider${path.sep}`))
+  .map(name => fs.readFileSync(name, "utf8")).join("\n");
+const observationAdapter = goSourceFiles(path.join(sourceRoot, "internal/observation/contractprovider"))
+  .map(name => fs.readFileSync(name, "utf8")).join("\n");
+const interaction = goSourceFiles(path.join(sourceRoot, "internal/interaction"))
+  .filter(name => !name.includes(`${path.sep}contractprovider${path.sep}`))
+  .map(name => fs.readFileSync(name, "utf8")).join("\n");
+const interactionAdapter = goSourceFiles(path.join(sourceRoot, "internal/interaction/contractprovider"))
+  .map(name => fs.readFileSync(name, "utf8")).join("\n");
+const action = goSourceFiles(path.join(sourceRoot, "internal/action"))
+  .filter(name => !name.includes(`${path.sep}contractprovider${path.sep}`))
+  .map(name => fs.readFileSync(name, "utf8")).join("\n");
+const actionAdapter = goSourceFiles(path.join(sourceRoot, "internal/action/contractprovider"))
+  .map(name => fs.readFileSync(name, "utf8")).join("\n");
+const history = goSourceFiles(path.join(sourceRoot, "internal/history"))
+  .filter(name => !name.includes(`${path.sep}contractprovider${path.sep}`))
+  .map(name => fs.readFileSync(name, "utf8")).join("\n");
+const historyAdapter = goSourceFiles(path.join(sourceRoot, "internal/history/contractprovider"))
+  .map(name => fs.readFileSync(name, "utf8")).join("\n");
 const scenarioImport = /"github\.com\/rootkernel\/gul\/contract\/scenario(?:\/[^\"]+)?"/;
 
 function sourceFiles(directory) {
@@ -67,6 +87,14 @@ const boundaries = [
   ["session adapter", sessionAdapter, [/"github\.com\/rootkernel\/gul\/internal\/(?:app|delivery|desktop|storage)(?:\/|")/, /"github\.com\/rootkernel\/gul\/api\/generated(?:\/|")/, /"github\.com\/wailsapp/, /"database\/sql"/, /\bListenAndServe\b/, scenarioImport]],
   ["launch", launch, [/"github\.com\/rootkernel\/gul\/internal\/(?:app|delivery|desktop|storage)(?:\/|")/, /"github\.com\/rootkernel\/gul\/(?:contract|api\/generated)(?:\/|")/, /"github\.com\/wailsapp/, /"database\/sql"/, /\bListenAndServe\b/, scenarioImport]],
   ["launch adapter", launchAdapter, [/"github\.com\/rootkernel\/gul\/internal\/(?:app|delivery|desktop|storage)(?:\/|")/, /"github\.com\/rootkernel\/gul\/api\/generated(?:\/|")/, /"github\.com\/wailsapp/, /"database\/sql"/, /\bListenAndServe\b/, scenarioImport]],
+  ["observation", observation, [/"github\.com\/rootkernel\/gul\/internal\/(?:app|delivery|desktop|storage)(?:\/|")/, /"github\.com\/rootkernel\/gul\/(?:contract|api\/generated)(?:\/|")/, /"github\.com\/wailsapp/, /"database\/sql"/, /\bListenAndServe\b/, scenarioImport]],
+  ["observation adapter", observationAdapter, [/"github\.com\/rootkernel\/gul\/internal\/(?:app|delivery|desktop|storage)(?:\/|")/, /"github\.com\/rootkernel\/gul\/api\/generated(?:\/|")/, /"github\.com\/wailsapp/, /"database\/sql"/, /\bListenAndServe\b/, scenarioImport]],
+  ["interaction", interaction, [/"github\.com\/rootkernel\/gul\/internal\/(?:app|delivery|desktop|storage)(?:\/|")/, /"github\.com\/rootkernel\/gul\/(?:contract|api\/generated)(?:\/|")/, /"github\.com\/wailsapp/, /"database\/sql"/, /\bListenAndServe\b/, scenarioImport]],
+  ["interaction adapter", interactionAdapter, [/"github\.com\/rootkernel\/gul\/internal\/(?:app|delivery|desktop|storage)(?:\/|")/, /"github\.com\/rootkernel\/gul\/api\/generated(?:\/|")/, /"github\.com\/wailsapp/, /"database\/sql"/, /\bListenAndServe\b/, scenarioImport]],
+  ["action", action, [/"github\.com\/rootkernel\/gul\/internal\/(?:app|delivery|desktop|storage)(?:\/|")/, /"github\.com\/rootkernel\/gul\/(?:contract|api\/generated)(?:\/|")/, /"github\.com\/wailsapp/, /"database\/sql"/, /\bListenAndServe\b/, scenarioImport]],
+  ["action adapter", actionAdapter, [/"github\.com\/rootkernel\/gul\/internal\/(?:app|delivery|desktop|storage)(?:\/|")/, /"github\.com\/rootkernel\/gul\/api\/generated(?:\/|")/, /"github\.com\/wailsapp/, /"database\/sql"/, /\bListenAndServe\b/, scenarioImport]],
+  ["history", history, [/"github\.com\/rootkernel\/gul\/internal\/(?:app|delivery|desktop|storage)(?:\/|")/, /"github\.com\/rootkernel\/gul\/(?:contract|api\/generated)(?:\/|")/, /"github\.com\/wailsapp/, /"database\/sql"/, /\bListenAndServe\b/, scenarioImport]],
+  ["history adapter", historyAdapter, [/"github\.com\/rootkernel\/gul\/internal\/(?:app|delivery|desktop|storage)(?:\/|")/, /"github\.com\/rootkernel\/gul\/api\/generated(?:\/|")/, /"github\.com\/wailsapp/, /"database\/sql"/, /\bListenAndServe\b/, scenarioImport]],
 ];
 
 for (const [label, source, forbidden] of boundaries) {
@@ -99,6 +127,12 @@ try {
     ["workspace", '"github.com/rootkernel/gul/contract/port"', boundaries[8][2]],
     ["workspace adapter", '"github.com/rootkernel/gul/internal/storage"', boundaries[9][2]],
     ["presentation", '"github.com/rootkernel/gul/internal/storage"', boundaries[10][2]],
+    ...boundaries.slice(15).flatMap(([label, , forbidden]) => [
+      [label, '"github.com/rootkernel/gul/internal/storage"', forbidden],
+      [label, '"github.com/rootkernel/gul/api/generated/go/gul/v1"', forbidden],
+      [label, '"database/sql"', forbidden],
+      ...(label.endsWith(" adapter") ? [] : [[label, '"github.com/rootkernel/gul/contract/port"', forbidden]]),
+    ]),
     ...boundaries.slice(2).map(([label, , forbidden]) => [label, '"github.com/rootkernel/gul/contract/scenario"', forbidden]),
     ...boundaries.slice(2).map(([label, , forbidden]) => [label, '"github.com/rootkernel/gul/contract/scenario/helper"', forbidden]),
   ]) {
@@ -108,4 +142,4 @@ try {
   fs.rmSync(fixture, {recursive: true, force: true});
 }
 
-console.log("frontend, delivery, desktop, command, app, domain, storage, workspace, presentation, session, and launch foundation boundaries passed");
+console.log("frontend, delivery, desktop, command, app, domain, storage, workspace, presentation, session, launch, observation, interaction, action, and history foundation boundaries passed");

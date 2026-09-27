@@ -5,7 +5,7 @@
 | Role | Non-normative implementation observations, dependencies, risks, and handoff |
 | Product | Gul |
 | Version | 0.1-dolgorae-consumer-v1 |
-| Last updated | 2026-09-25 |
+| Last updated | 2026-09-28 |
 
 ## 1. Boundary
 
