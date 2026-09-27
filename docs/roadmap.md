@@ -3,7 +3,7 @@
 | Field | Value |
 | --- | --- |
 | Role | Sole authority for task identity, order, status, dependencies, and phase |
-| Revision | 2026-09-27 E13-T1 event projection correction |
+| Revision | 2026-09-27 E13-T1 ledger and Writer projection correction |
 | Active Task | None |
 | Next | E4-T1 |
 | Required provider | Released Dolgorae v0.1.3 implementing `dolgorae.gul-consumer/v1` |

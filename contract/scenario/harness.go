@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"slices"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -63,6 +64,7 @@ type run struct {
 	interactionKeys     map[interactionRequestKey]*publicv1.ResolveInteractionResponse
 	interactionBodies   map[interactionRequestKey]string
 	interactionRevision uint64
+	ledgerLifecycle     publicv1.RunLifecycle
 	session             *publicv1.OrchestratedSessionProjection
 	results             []*publicv1.OrchestratedSessionResult
 	resultRevisions     []uint64
@@ -378,12 +380,39 @@ func checkRevision(r *run, revision uint64) error {
 }
 
 func (w *workspace) stamp() *publicv1.ProjectionStamp {
+	if owner := w.runs[w.writer.GetOwnerRunId()]; owner != nil {
+		return owner.stamp()
+	}
 	return &publicv1.ProjectionStamp{WriterStateRevision: w.writer.GetStateRevision()}
 }
 
+// Writer policy belongs to the current owner; ownerless observations must not
+// borrow the previous owner's lane or assurance. Reads do not advance state.
+func (w *workspace) snapshot() *publicv1.WriterState {
+	writer := copyOf(w.writer)
+	writer.Stamp = w.stamp()
+	if owner := w.runs[writer.GetOwnerRunId()]; owner != nil {
+		writer.ExecutionLane = owner.projection.GetExecutionLane()
+		writer.RequestedAssurance = owner.projection.GetRequestedAssurance()
+		writer.AchievedAssurance = owner.projection.GetAchievedAssurance()
+		writer.EffectiveAccess = owner.projection.GetEffectivePolicy().GetAccess()
+		writer.PolicyVerification = owner.projection.GetEffectivePolicy().GetVerification()
+	} else {
+		writer.ExecutionLane = publicv1.ExecutionLane_EXECUTION_LANE_UNSPECIFIED
+		writer.RequestedAssurance = publicv1.AssuranceLevel_ASSURANCE_LEVEL_UNSPECIFIED
+		writer.AchievedAssurance = publicv1.AssuranceLevel_ASSURANCE_LEVEL_UNSPECIFIED
+		writer.EffectiveAccess = publicv1.EffectiveAccess_EFFECTIVE_ACCESS_UNKNOWN
+		writer.PolicyVerification = publicv1.PolicyVerification_POLICY_VERIFICATION_UNVERIFIED
+		writer.HandoffEligible = false
+	}
+	return writer
+}
+
+func (r *run) head() string { return strconv.FormatUint(r.projection.GetStateRevision(), 10) }
+
 func (r *run) stamp() *publicv1.ProjectionStamp {
 	return &publicv1.ProjectionStamp{
-		CapturedHeadCursor:       r.projection.GetEventCursor(),
+		CapturedHeadCursor:       r.head(),
 		RunStateRevision:         r.projection.GetStateRevision(),
 		WriterStateRevision:      r.workspace.writer.GetStateRevision(),
 		InteractionStateRevision: r.interactionRevision,
@@ -393,11 +422,16 @@ func (r *run) stamp() *publicv1.ProjectionStamp {
 func (r *run) snapshot() *publicv1.RunProjection {
 	projection := copyOf(r.projection)
 	projection.Stamp = r.stamp()
+	projection.EventCursor = r.head()
 	return projection
 }
 
 func (h *Harness) changed(r *run) {
 	r.projection.StateRevision++
+	if r.ledgerLifecycle != r.projection.GetLifecycle() && r.interactionRevision != 0 {
+		r.interactionRevision = r.projection.GetStateRevision()
+	}
+	r.ledgerLifecycle = r.projection.GetLifecycle()
 	if r.session != nil {
 		r.session.AggregateRevision++
 		r.session.SourceRevision = r.session.AggregateRevision
@@ -407,15 +441,22 @@ func (h *Harness) changed(r *run) {
 
 func (h *Harness) emit(r *run, event *publicv1.DurableRunEvent) {
 	event = copyOf(event)
-	event.Cursor = h.next("event")
+	h.changed(r)
+	event.Cursor = r.head()
 	event.EventId = h.next("event-id")
 	event.OccurredAt = h.timestamp()
 	event.WorkspaceId = r.projection.GetWorkspaceId()
 	event.RunId = r.projection.GetRunId()
 	event.ServerKey = "scenario-server"
 	event.ServerEpoch = 1
-	r.projection.EventCursor = event.Cursor
-	h.changed(r)
+	switch event.Event.(type) {
+	case *publicv1.DurableRunEvent_InteractionOpened, *publicv1.DurableRunEvent_InteractionResolved:
+		r.interactionRevision = r.projection.GetStateRevision()
+	case *publicv1.DurableRunEvent_GenerationChanged, *publicv1.DurableRunEvent_RunStateChanged:
+		if r.interactionRevision != 0 {
+			r.interactionRevision = r.projection.GetStateRevision()
+		}
+	}
 	event.Stamp = r.stamp()
 	r.events = append(r.events, &publicv1.RunEventEnvelope{Item: &publicv1.RunEventEnvelope_DurableEvent{DurableEvent: event}})
 	h.signal(r)
@@ -452,7 +493,18 @@ func (h *Harness) AppendEnvelope(runID string, envelope *publicv1.RunEventEnvelo
 	if r == nil {
 		return invalid()
 	}
-	r.events = append(r.events, copyOf(envelope))
+	item := copyOf(envelope)
+	if heartbeat := item.GetHeartbeat(); heartbeat != nil {
+		heartbeat.RunId = runID
+		heartbeat.DurableHeadCursor = r.head()
+		heartbeat.Lifecycle = r.projection.GetLifecycle()
+		heartbeat.EmittedAt = h.timestamp()
+	}
+	if end := item.GetStreamEnd(); end != nil {
+		end.RunId = runID
+		end.DurableHeadCursor = r.head()
+	}
+	r.events = append(r.events, item)
 	h.signal(r)
 	return nil
 }
@@ -507,16 +559,18 @@ func (h *Harness) completeTurn(r *run, status publicv1.TurnStatus) {
 	runID := r.projection.GetRunId()
 	turn := r.projection.ActiveTurn
 	turn.Status = status
-	r.timeline = append(r.timeline, &publicv1.TimelineItem{
-		Type:   publicv1.TimelineItemType_TIMELINE_ITEM_TYPE_TURN_TERMINAL,
-		Cursor: h.next("timeline"), RunId: runID, TurnId: turn.GetTurnId(),
+	item := &publicv1.TimelineItem{
+		Type:  publicv1.TimelineItemType_TIMELINE_ITEM_TYPE_TURN_TERMINAL,
+		RunId: runID, TurnId: turn.GetTurnId(),
 		OccurredAt: h.timestamp(), Status: &[]publicv1.TimelineItemStatus{terminalItemStatus(status)}[0],
-	})
+	}
 	r.projection.ActiveTurn = nil
 	if r.projection.GetLifecycle() != publicv1.RunLifecycle_RUN_LIFECYCLE_PAUSED {
 		r.projection.Lifecycle = lifecycleFromWork(r)
 	}
 	h.emit(r, &publicv1.DurableRunEvent{Event: &publicv1.DurableRunEvent_TurnStateChanged{TurnStateChanged: &publicv1.TurnStateChanged{Current: status}}})
+	item.Cursor = r.head()
+	r.timeline = append(r.timeline, item)
 }
 
 func lifecycleFromWork(r *run) publicv1.RunLifecycle {
@@ -558,7 +612,6 @@ func (h *Harness) OpenInteraction(runID string, interaction *publicv1.Controller
 	item.Summary.CreatedAt = h.timestamp()
 	r.interactions[item.Summary.GetInteractionId()] = item
 	r.projection.PendingInteractionCount++
-	r.interactionRevision++
 	if r.session != nil {
 		r.session.PendingApprovalCount++
 	}
@@ -592,6 +645,7 @@ func (h *Harness) SpawnSpecialist(rootID, role string) (*publicv1.RunRef, error)
 		StateRevision: 1,
 		Configuration: &publicv1.RunConfigurationProjection{Purpose: publicv1.PurposeKind_PURPOSE_KIND_WORKFLOW_STAGE,
 			PurposeLabel: pointer(role), Parent: &publicv1.ParentRefProjection{Namespace: "run", Kind: "primary", Id: rootID}}}
+	child.ledgerLifecycle = child.projection.GetLifecycle()
 	w.runs[id] = child
 	root.session.NonretiredMemberCount++
 	root.session.NonterminalSpawnCount++

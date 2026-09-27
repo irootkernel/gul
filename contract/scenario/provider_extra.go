@@ -92,7 +92,6 @@ func (h *Harness) ResolveInteraction(_ context.Context, request *publicv1.Resolv
 	interaction.Summary.Status = publicv1.InteractionStatus_INTERACTION_STATUS_RESOLVED
 	interaction.Summary.ResolvedAt = h.timestamp()
 	r.projection.PendingInteractionCount--
-	r.interactionRevision++
 	if r.session != nil {
 		r.session.PendingApprovalCount--
 	}
@@ -123,7 +122,7 @@ func (h *Harness) GetWorkspaceWriterStatus(_ context.Context, request *publicv1.
 	if err != nil {
 		return nil, err
 	}
-	return &publicv1.GetWorkspaceWriterStatusResponse{Writer: copyOf(w.writer)}, nil
+	return &publicv1.GetWorkspaceWriterStatusResponse{Writer: w.snapshot()}, nil
 }
 
 func (h *Harness) AcquireWriter(_ context.Context, request *publicv1.AcquireWriterRequest) (*publicv1.WriterState, error) {
@@ -155,15 +154,14 @@ func (h *Harness) AcquireWriter(_ context.Context, request *publicv1.AcquireWrit
 	w.writer.OwnerRunId = pointer(r.projection.GetRunId())
 	w.writer.WriterGeneration++
 	w.writer.StateRevision++
-	w.writer.Stamp = w.stamp()
-	w.writer.EffectiveAccess = publicv1.EffectiveAccess_EFFECTIVE_ACCESS_WRITE
+	r.projection.EffectivePolicy.Access = publicv1.EffectiveAccess_EFFECTIVE_ACCESS_WRITE
 	r.projection.WriterAuthority.State = w.writer.AuthorityState
 	r.projection.WriterAuthority.WriterGeneration = w.writer.WriterGeneration
 	h.changed(r)
 	if err := h.after("AcquireWriter"); err != nil {
 		return nil, err
 	}
-	return copyOf(w.writer), nil
+	return w.snapshot(), nil
 }
 
 func (h *Harness) ReleaseWriter(_ context.Context, request *publicv1.ReleaseWriterRequest) (*publicv1.WriterState, error) {
@@ -195,15 +193,14 @@ func (h *Harness) ReleaseWriter(_ context.Context, request *publicv1.ReleaseWrit
 	w.writer.OwnerRunId = nil
 	w.writer.WriterGeneration++
 	w.writer.StateRevision++
-	w.writer.Stamp = w.stamp()
-	w.writer.EffectiveAccess = publicv1.EffectiveAccess_EFFECTIVE_ACCESS_READ
+	r.projection.EffectivePolicy.Access = publicv1.EffectiveAccess_EFFECTIVE_ACCESS_READ
 	r.projection.WriterAuthority.State = w.writer.AuthorityState
 	r.projection.WriterAuthority.WriterGeneration = w.writer.WriterGeneration
 	h.changed(r)
 	if err := h.after("ReleaseWriter"); err != nil {
 		return nil, err
 	}
-	return copyOf(w.writer), nil
+	return w.snapshot(), nil
 }
 
 func (h *Harness) VerifyController(_ context.Context, request *publicv1.VerifyControllerRequest) (*publicv1.VerifyControllerResponse, error) {

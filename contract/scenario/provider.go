@@ -93,12 +93,7 @@ func (h *Harness) InspectWorkspace(_ context.Context, request *publicv1.InspectW
 	if w == nil {
 		w = &workspace{id: h.next("workspace"), path: request.GetAbsolutePath(), runs: make(map[string]*run)}
 		w.writer = &publicv1.WriterState{Context: h.response(), WorkspaceId: w.id,
-			AuthorityState:     publicv1.WriterAuthorityState_WRITER_AUTHORITY_STATE_NONE,
-			EffectiveAccess:    publicv1.EffectiveAccess_EFFECTIVE_ACCESS_READ,
-			PolicyVerification: publicv1.PolicyVerification_POLICY_VERIFICATION_VERIFIED,
-			ExecutionLane:      publicv1.ExecutionLane_EXECUTION_LANE_DEDICATED, StateRevision: 1,
-		}
-		w.writer.Stamp = w.stamp()
+			AuthorityState: publicv1.WriterAuthorityState_WRITER_AUTHORITY_STATE_NONE, StateRevision: 1}
 		h.workspaces[w.path] = w
 	}
 	return &publicv1.InspectWorkspaceResponse{Context: h.response(), WorkspaceId: w.id,
@@ -196,6 +191,7 @@ func (h *Harness) StartRun(_ context.Context, request *publicv1.StartRunRequest)
 		AchievedAssurance:   publicv1.AssuranceLevel_ASSURANCE_LEVEL_BEST_EFFORT_PERSONAL_ALPHA,
 		Configuration:       &publicv1.RunConfigurationProjection{ProfileName: request.GetProfileName(), Purpose: request.GetPurpose()},
 	}
+	r.ledgerLifecycle = r.projection.GetLifecycle()
 	if spec.OrchestrationLaunch {
 		r.session = &publicv1.OrchestratedSessionProjection{SessionId: h.next("session"),
 			PrimaryRun: &publicv1.RunRef{Workspace: copyOf(request.GetWorkspace()), RunId: id}, AggregateRevision: 1, SourceRevision: 1,
@@ -300,11 +296,11 @@ func (h *Harness) SubmitTurn(_ context.Context, request *publicv1.SubmitTurnRequ
 	}
 	turnID := h.next("turn")
 	turn := &publicv1.TurnProjection{RunId: r.projection.GetRunId(), ThreadId: h.next("thread"), TurnId: turnID,
-		Status: publicv1.TurnStatus_TURN_STATUS_RUNNING, Cursor: h.next("turn-cursor")}
+		Status: publicv1.TurnStatus_TURN_STATUS_RUNNING}
 	r.projection.ActiveTurn = turn
 	r.projection.Lifecycle = publicv1.RunLifecycle_RUN_LIFECYCLE_RUNNING
 	item := &publicv1.TimelineItem{Type: publicv1.TimelineItemType_TIMELINE_ITEM_TYPE_USER_INPUT_ACCEPTED,
-		Cursor: h.next("timeline"), RunId: r.projection.GetRunId(), TurnId: turnID, OccurredAt: h.timestamp(),
+		RunId: r.projection.GetRunId(), TurnId: turnID, OccurredAt: h.timestamp(),
 		ProviderItemId: pointer(h.next("item")), ProviderOrder: pointer(uint64(len(r.timeline) + 1)),
 		Status: pointer(publicv1.TimelineItemStatus_TIMELINE_ITEM_STATUS_ACCEPTED)}
 	if len(request.GetMessage()) > 4096 {
@@ -319,11 +315,13 @@ func (h *Harness) SubmitTurn(_ context.Context, request *publicv1.SubmitTurnRequ
 	} else {
 		item.Content = &publicv1.TimelineItem_InlineText{InlineText: request.GetMessage()}
 	}
-	r.timeline = append(r.timeline, item)
 	h.emit(r, &publicv1.DurableRunEvent{TurnId: pointer(turnID), Event: &publicv1.DurableRunEvent_TurnStateChanged{
 		TurnStateChanged: &publicv1.TurnStateChanged{Current: publicv1.TurnStatus_TURN_STATUS_RUNNING}}})
+	turn.Cursor = r.head()
+	item.Cursor = r.head()
+	r.timeline = append(r.timeline, item)
 	response := &publicv1.SubmitTurnAccepted{Context: h.response(), AcceptedTurn: copyOf(turn), Run: r.snapshot(),
-		Writer: copyOf(w.writer), IdempotencyKey: key, CorrelationId: h.next("correlation")}
+		Writer: w.snapshot(), IdempotencyKey: key, CorrelationId: h.next("correlation")}
 	r.turnKeys[key] = copyOf(response)
 	r.turnBodies[key] = digest(encoded)
 	if err := h.after("SubmitTurn"); err != nil {
@@ -579,6 +577,19 @@ func parseCursor(value, kind, runID string, maximum int) (head, offset int, err 
 	return head, offset, nil
 }
 
+// Ledger cursors are decimal strings, including zero and filtered gaps.
+// Session-result pagination retains its independent opaque token domain.
+func ledgerCursor(value string, head uint64) (uint64, error) {
+	if value == "" {
+		return 0, nil
+	}
+	n, err := strconv.ParseUint(value, 10, 64)
+	if err != nil || strconv.FormatUint(n, 10) != value || n > head {
+		return 0, invalidCursor()
+	}
+	return n, nil
+}
+
 func boundedLimit(value uint32) int {
 	if value == 0 {
 		return 100
@@ -602,33 +613,35 @@ func (h *Harness) ListRunTimelineItems(_ context.Context, request *publicv1.List
 	if err = checkController(r, request.GetController()); err != nil {
 		return nil, err
 	}
-	head, offset := len(r.timeline), 0
-	if request.GetAfterCursor() != "" {
-		head, offset, err = parseCursor(request.GetAfterCursor(), "timeline", r.projection.GetRunId(), len(r.timeline))
-		if err != nil {
-			return nil, err
+	after, err := ledgerCursor(request.GetAfterCursor(), r.projection.GetStateRevision())
+	if err != nil {
+		return nil, err
+	}
+	response := &publicv1.ListRunTimelineItemsResponse{Context: h.response(), CapturedHeadCursor: r.head(), Stamp: r.stamp()}
+	limit := boundedLimit(request.GetLimit())
+	for _, item := range r.timeline {
+		sequence, _ := strconv.ParseUint(item.GetCursor(), 10, 64)
+		if sequence <= after {
+			continue
 		}
-	}
-	end := min(offset+boundedLimit(request.GetLimit()), head)
-	response := &publicv1.ListRunTimelineItemsResponse{Context: h.response(),
-		CapturedHeadCursor: pageCursor("timeline-head", r.projection.GetRunId(), head, head),
-		Stamp:              r.stamp()}
-	for _, item := range r.timeline[offset:end] {
+		if len(response.Items) == limit {
+			response.NextAfterCursor = pointer(response.Items[len(response.Items)-1].GetCursor())
+			break
+		}
 		response.Items = append(response.Items, copyOf(item))
-	}
-	if end < head {
-		response.NextAfterCursor = pointer(pageCursor("timeline", r.projection.GetRunId(), head, end))
 	}
 	return response, nil
 }
 
 type eventStream struct {
-	ctx        context.Context
-	h          *Harness
-	r          *run
-	index      int
-	closed     bool
-	projection publicv1.ProjectionProfile
+	ctx           context.Context
+	h             *Harness
+	r             *run
+	index         int
+	closed        bool
+	projection    publicv1.ProjectionProfile
+	after         uint64
+	advisoryStart int
 }
 
 func (s *eventStream) Receive() (*publicv1.RunEventEnvelope, error) {
@@ -649,11 +662,21 @@ func (s *eventStream) Receive() (*publicv1.RunEventEnvelope, error) {
 		}
 		if s.index < len(s.r.events) {
 			item := copyOf(s.r.events[s.index])
+			s.index++
 			if event := item.GetDurableEvent(); event != nil {
+				sequence, _ := strconv.ParseUint(event.GetCursor(), 10, 64)
+				if sequence <= s.after {
+					s.h.mu.Unlock()
+					continue
+				}
 				event.Projection = s.projection
 				event.ProjectionVersion = 1
+			} else if s.index <= s.advisoryStart {
+				// Heartbeats and stream ends belong to the original subscription;
+				// they are not durable replay records for a newly opened stream.
+				s.h.mu.Unlock()
+				continue
 			}
-			s.index++
 			if item.GetStreamEnd() != nil {
 				s.closed = true
 			}
@@ -701,18 +724,9 @@ func (h *Harness) WatchRunEvents(ctx context.Context, request *publicv1.WatchRun
 	if err != nil {
 		return nil, err
 	}
-	index := 0
-	if request.GetAfterCursor() != "" {
-		found := false
-		for i, item := range r.events {
-			if item.GetDurableEvent().GetCursor() == request.GetAfterCursor() {
-				index = i + 1
-				found = true
-			}
-		}
-		if !found {
-			return nil, invalidCursor()
-		}
+	after, err := ledgerCursor(request.GetAfterCursor(), r.projection.GetStateRevision())
+	if err != nil {
+		return nil, err
 	}
-	return &eventStream{ctx: ctx, h: h, r: r, index: index, projection: projection}, nil
+	return &eventStream{ctx: ctx, h: h, r: r, projection: projection, after: after, advisoryStart: len(r.events)}, nil
 }

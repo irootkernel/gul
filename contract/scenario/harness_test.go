@@ -547,8 +547,8 @@ func TestAcceptedHistoryCapturedPagesAndProtectedArtifact(t *testing.T) {
 		t.Fatal(err)
 	}
 	page, err := f.h.ListRunTimelineItems(ctx, &publicv1.ListRunTimelineItemsRequest{Run: f.run, Controller: f.controller, TimelineVersion: 1, Limit: 20, AfterCursor: firstPage.GetNextAfterCursor()})
-	if err != nil || len(page.GetItems()) != 2 {
-		t.Fatalf("captured-head page must exclude later append: %v, %v", page, err)
+	if err != nil || len(page.GetItems()) != 3 || page.GetCapturedHeadCursor() == firstPage.GetCapturedHeadCursor() {
+		t.Fatalf("next page must report its new captured head and later append: %v, %v", page, err)
 	}
 	foreign := pageCursor("timeline", "other-run", 1, 0)
 	_, err = f.h.ListRunTimelineItems(ctx, &publicv1.ListRunTimelineItemsRequest{Run: f.run, Controller: f.controller, TimelineVersion: 1, AfterCursor: foreign})

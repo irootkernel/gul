@@ -43,9 +43,22 @@ These are fixture conveniences, not guarantees of the released provider's
 handling of omitted fields. Unknown profiles and unsupported versions
 are rejected. Run, Interaction and timeline snapshots observe the current
 workspace writer state revision, independently of writer generation. The
-workspace-only Writer stamp records that writer revision without inventing a
-Run cursor or Run/Interaction revision. These tests do not establish Gul's
-cross-aggregate convergence or live-provider acceptance.
+Writer stamp uses its owner Run's captured boundary when owned; an ownerless
+Writer has empty/zero Run components and unknown/unverified policy with no lane
+or assurance. Fresh reads never change the retained accepted responses. These
+tests do not establish Gul's cross-aggregate convergence or live-provider
+acceptance.
+
+The pinned producer's SPEC-006 and Projection revision authority also govern
+cursor semantics. Event and timeline cursors are canonical decimal strings in
+one Run ledger. A snapshot head represents the current ledger revision,
+including records omitted from the event projection. Interaction revision is
+the ledger sequence of its latest view change, including lifecycle transitions
+after the first Interaction. Exclusive resume accepts zero
+and filtered gaps; malformed or beyond-head cursors fail. Each timeline page
+captures its own current head, so later pages can include intervening appends.
+Session-result page tokens retain their separate opaque snapshot scope.
+Heartbeats and stream ends report the captured head without advancing it.
 
 Protobuf-ES v2 generates TypeScript message schemas and Connect service
 descriptors in the same checked module. The incompatible Connect-ES v1 plugin

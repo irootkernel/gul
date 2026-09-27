@@ -217,10 +217,9 @@ func TestSharedWriterRevisionInFreshRunSnapshots(t *testing.T) {
 	if err != nil || !proto.Equal(timeline.GetStamp(), fresh.GetRun().GetStamp()) {
 		t.Fatalf("timeline snapshot stamp = %v, %v", timeline, err)
 	}
-	// The workspace-only writer query has no Run selector. It must not borrow
-	// an arbitrary Run's cursor, Run revision, or Interaction revision.
-	if writer.GetStamp().GetCapturedHeadCursor() != "" || writer.GetStamp().GetRunStateRevision() != 0 || writer.GetStamp().GetInteractionStateRevision() != 0 {
-		t.Fatalf("workspace writer acquired unrelated Run context: %v", writer)
+	owner, err := f.h.GetRun(ctx, &publicv1.GetRunRequest{Run: f.run})
+	if err != nil || !proto.Equal(writer.GetStamp(), owner.GetRun().GetStamp()) {
+		t.Fatalf("owned Writer stamp must use its owner Run: writer=%v owner=%v err=%v", writer, owner, err)
 	}
 }
 
@@ -264,7 +263,7 @@ func TestInteractionEventsRetainCommitStamps(t *testing.T) {
 	for i, want := range []*publicv1.RunProjection{opened.GetRun(), resolved.GetRun()} {
 		envelope, err := stream.Receive()
 		stamp := envelope.GetDurableEvent().GetStamp()
-		if err != nil || !proto.Equal(stamp, want.GetStamp()) || stamp.GetInteractionStateRevision() != uint64(i+1) {
+		if err != nil || !proto.Equal(stamp, want.GetStamp()) || stamp.GetInteractionStateRevision() != want.GetStateRevision() {
 			t.Fatalf("interaction event %d = %v, %v; want stamp %v", i, envelope, err, want.GetStamp())
 		}
 	}

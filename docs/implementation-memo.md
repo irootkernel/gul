@@ -350,13 +350,38 @@ subscriber receives its requested supported projection; omitted settings use
 `minimal` version 1 only as a documented fixture default. Acquire/release update
 the workspace writer stamp from its state revision. Fresh Run, Interaction and
 timeline snapshots read that same writer revision, including when another Run
-changed the writer. Writer generation remains a separate field, and a
-workspace-only writer query does not invent per-Run stamp components.
+changed the writer. Writer generation remains a separate field.
+The initial correction left the workspace Writer stamp without Run components.
+The ledger correction below supersedes that incomplete owner-scope assumption.
 Regression tests cover all durable variants, delayed Interaction events,
 projection selection and rejection, replay, returned-message isolation, repeated
 writer acquisition/release, and reads across two Runs. The focused scenario race
 suite and serial `make test` passed. Production wiring and the pinned contract
 remain unchanged. E13-T1 returned to Completed after this verification.
+
+A second E4 prerequisite check on 2026-09-27 found that the fixture's cursor
+and revision meanings differed from SPEC-006 and the Projection revision
+authority in the pinned producer revision. E13-T1 was reopened for this bounded
+correction. Run snapshots now report the captured ledger head; events retain
+their historical commit head. Event, accepted-Turn and timeline cursors share
+canonical decimal Run-ledger sequences. Exclusive reads accept zero and
+filtered gaps and reject malformed or beyond-head positions. Timeline pages
+capture their own current head rather than implying one immutable multi-page
+snapshot. Session-result token semantics remain separate and unchanged.
+Interaction revisions record the ledger sequence of the view change, including
+lifecycle transitions after the first Interaction. The fixture compares the
+current lifecycle with the last committed lifecycle at each ledger update, so
+pause, resume and Turn-driven transitions follow the same revision rule. Writer
+reads use the current owner Run's stamp and policy, or the required ownerless
+empty/zero Run stamp, unknown access, unverified policy and absent lane/assurance.
+Heartbeat and stream-end metadata use the captured head without ledger writes.
+Public-port tests cover these boundaries, historical replay, returned-message
+isolation, newly appended timeline items, fresh owner reads and lifecycle
+transitions before and after an Interaction exists. The earlier
+ownerless-only Writer assertion and fixed-head timeline expectation were
+replaced with the pinned semantics. The focused scenario race suite and serial
+`make test` passed; E13-T1 returned to Completed. E4 implementation and production
+wiring remain separate.
 
 ## 1.13 E13 epic closeout, 2026-09-25
 
