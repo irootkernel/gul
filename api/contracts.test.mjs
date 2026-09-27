@@ -51,7 +51,7 @@ test("the generated browser surface is explicit and contains no upstream private
   expect(ClientEventSchema.fields.map(field => field.name)).toEqual(["delivery_sequence", "session_id", "correlation_id", "kind", "created_at"]);
   expect(Object.keys(RuntimeService.method).sort()).toEqual(["checkCompatibility", "listRuntimeProfiles"]);
   expect(Object.keys(DirectSessionService.method).sort()).toEqual([
-    "closeRuntime", "getDirectSessionPresentation", "getExecutionState", "getPromptHistoryItem", "listDirectSessions", "listPromptHistory", "listSpecialistResults",
+    "closeRuntime", "getConversationEntry", "getDirectSessionPresentation", "getExecutionState", "getPromptHistoryItem", "listConversation", "listDirectSessions", "listPromptHistory", "listSpecialistResults",
     "renameDirectSession", "setDirectSessionArchived", "setDirectSessionFavorite",
   ]);
   expect(Object.keys(WorkspacePresentationService.method).sort()).toEqual([

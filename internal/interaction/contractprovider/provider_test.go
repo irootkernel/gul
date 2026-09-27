@@ -22,6 +22,8 @@ type wireFake struct {
 	drift, foreign, corrupt bool
 	calls                   int
 	artifact                []byte
+	chunkMax                uint32
+	lengths                 []uint32
 }
 
 func (f *wireFake) GetRun(context.Context, *publicv1.GetRunRequest) (*publicv1.GetRunResponse, error) {
@@ -56,9 +58,14 @@ func (f *wireFake) ResolveInteraction(context.Context, *publicv1.ResolveInteract
 	return &publicv1.ResolveInteractionResponse{InteractionId: "id", Status: publicv1.InteractionStatus_INTERACTION_STATUS_RESOLVED, ResolutionReceipt: "opaque"}, nil
 }
 func (f *wireFake) GetArtifact(context.Context, *publicv1.GetArtifactRequest) (*publicv1.GetArtifactResponse, error) {
-	return &publicv1.GetArtifactResponse{Artifact: f.detail.GetFileChangeApproval().GetChangeArtifact(), MaximumChunkSize: 7}, nil
+	maximum := f.chunkMax
+	if maximum == 0 {
+		maximum = 7
+	}
+	return &publicv1.GetArtifactResponse{Artifact: f.detail.GetFileChangeApproval().GetChangeArtifact(), MaximumChunkSize: maximum}, nil
 }
 func (f *wireFake) ReadArtifactChunk(_ context.Context, r *publicv1.ReadArtifactChunkRequest) (*publicv1.ReadArtifactChunkResponse, error) {
+	f.lengths = append(f.lengths, r.Length)
 	data := append([]byte(nil), f.artifact[r.Offset:r.Offset+uint64(r.Length)]...)
 	if f.corrupt {
 		data[0] ^= 1
@@ -114,7 +121,7 @@ func TestEveryAdvertisedKindAndTypedVariant(t *testing.T) {
 	}
 	for i := 1; i <= 7; i++ {
 		f := &wireFake{detail: detail(publicv1.InteractionKind(i))}
-		p, err := New(f, caps())
+		p, err := New(f, negotiated(caps()))
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -147,7 +154,7 @@ func TestRejectsDriftUnknownMismatchAndUnrestrictedPaths(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			f := &wireFake{detail: detail(1)}
 			change(f)
-			p, _ := New(f, caps())
+			p, _ := New(f, negotiated(caps()))
 			if _, err := p.Card(t.Context(), bound(), "id"); err == nil {
 				t.Fatal("accepted invalid detail")
 			}
@@ -163,7 +170,7 @@ func TestEffectiveLimitsUseSelectedPayloadAndCapabilityClassification(t *testing
 	for _, delta := range []int{-1, 0} {
 		c := caps()
 		c.MaximumSafePayloadBytes = uint32(size + delta)
-		p, err := New(f, c)
+		p, err := New(f, negotiated(c))
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -175,7 +182,7 @@ func TestEffectiveLimitsUseSelectedPayloadAndCapabilityClassification(t *testing
 	c := caps()
 	c.MaximumSafePayloadBytes = 20 * 1024 * 1024
 	c.MaximumResponseBytes = 20 * 1024 * 1024
-	p, _ := New(f, c)
+	p, _ := New(f, negotiated(c))
 	if p.payloadLimit != 8388608 || p.ResponseLimit() != 65536 {
 		t.Fatal("local limit")
 	}
@@ -184,7 +191,7 @@ func TestEffectiveLimitsUseSelectedPayloadAndCapabilityClassification(t *testing
 	}} {
 		c := caps()
 		mutate(c)
-		if _, err := New(f, c); err == nil {
+		if _, err := New(f, negotiated(c)); err == nil {
 			t.Fatal("accepted unclassified kind")
 		}
 	}
@@ -193,7 +200,7 @@ func TestArtifactIsCompletelyVerifiedBeforeApproval(t *testing.T) {
 	f := &wireFake{detail: detail(2), artifact: []byte("--- a/src/main.go\n+++ b/src/main.go\n+changed\n")}
 	sum := sha256.Sum256(f.artifact)
 	f.detail.GetFileChangeApproval().Representation = &publicv1.FileChangeApprovalInteraction_ChangeArtifact{ChangeArtifact: &publicv1.ArtifactRef{ArtifactId: "artifact", Kind: publicv1.ArtifactKind_ARTIFACT_KIND_FILE_CHANGE_DIFF, Visibility: publicv1.ArtifactVisibility_ARTIFACT_VISIBILITY_CONTROLLER_ONLY, MediaType: "text/x-diff", ByteLength: uint64(len(f.artifact)), Sha256: hex.EncodeToString(sum[:])}}
-	p, _ := New(f, caps())
+	p, _ := New(f, negotiated(caps()))
 	card, err := p.Card(t.Context(), bound(), "id")
 	if err != nil || card.File.VerifiedDiff != string(f.artifact) {
 		t.Fatal("verified diff", err)
@@ -210,7 +217,7 @@ func TestTerminalDetailCannotExceedInteractionStamp(t *testing.T) {
 		f.detail.Summary.Status = status
 		f.detail.Summary.RequiresUserEscalation = false
 		f.detail.Summary.StateRevision = 3
-		p, _ := New(f, caps())
+		p, _ := New(f, negotiated(caps()))
 		if _, err := p.Card(t.Context(), bound(), "id"); err != interaction.ErrBlocked {
 			t.Fatal("future terminal revision", status, err)
 		}
@@ -226,7 +233,7 @@ func (f inconsistentRun) GetRun(ctx context.Context, r *publicv1.GetRunRequest) 
 }
 func TestRunRevisionMustAgreeWithCompleteStamp(t *testing.T) {
 	f := &wireFake{detail: detail(1)}
-	p, _ := New(inconsistentRun{f}, caps())
+	p, _ := New(inconsistentRun{f}, negotiated(caps()))
 	if _, err := p.Card(t.Context(), bound(), "id"); err != interaction.ErrBlocked || f.calls != 0 {
 		t.Fatal("inconsistent Run accepted", err)
 	}
@@ -253,7 +260,7 @@ func TestActualSelectedPayloadAtEightMiB(t *testing.T) {
 	}
 	c := caps()
 	c.MaximumSafePayloadBytes = 16 * 1024 * 1024
-	p, _ := New(f, c)
+	p, _ := New(f, negotiated(c))
 	if _, err := p.Card(t.Context(), bound(), "id"); err != nil {
 		t.Fatal("exact 8MiB selected payload rejected", err)
 	}
@@ -273,5 +280,87 @@ func TestActualSelectedPayloadAtEightMiB(t *testing.T) {
 	}
 	if _, err := p.Card(t.Context(), bound(), "id"); err != interaction.ErrBlocked {
 		t.Fatal("8MiB+1 accepted", err)
+	}
+}
+
+func negotiated(c *publicv1.InteractionCapabilities) *publicv1.GetCapabilitiesResponse {
+	return &publicv1.GetCapabilitiesResponse{Interactions: c, Features: &publicv1.RuntimeFeatureCapabilities{ArtifactRetrieval: true}, Artifacts: &publicv1.ArtifactCapabilities{MaximumArtifactSize: 64 << 20, MaximumChunkSize: 1 << 20, MaximumInlineResponseBytes: 1 << 20, DigestVerificationRequired: true, ExactByteLengthReported: true, VisibilityClasses: []publicv1.ArtifactVisibility{publicv1.ArtifactVisibility_ARTIFACT_VISIBILITY_CONTROLLER_ONLY}}, SupportedMethods: []string{"ArtifactService.GetArtifact", "ArtifactService.ReadArtifactChunk"}}
+}
+func approvalArtifact(body []byte) *wireFake {
+	f := &wireFake{detail: detail(2), artifact: body}
+	sum := sha256.Sum256(body)
+	f.detail.GetFileChangeApproval().Representation = &publicv1.FileChangeApprovalInteraction_ChangeArtifact{ChangeArtifact: &publicv1.ArtifactRef{ArtifactId: "artifact", Kind: publicv1.ArtifactKind_ARTIFACT_KIND_FILE_CHANGE_DIFF, Visibility: publicv1.ArtifactVisibility_ARTIFACT_VISIBILITY_CONTROLLER_ONLY, MediaType: "text/x-diff", ByteLength: uint64(len(body)), Sha256: hex.EncodeToString(sum[:])}}
+	return f
+}
+func TestApprovalArtifactRequiresNegotiatedCapability(t *testing.T) {
+	for name, mutate := range map[string]func(*publicv1.GetCapabilitiesResponse){
+		"feature":    func(c *publicv1.GetCapabilitiesResponse) { c.Features.ArtifactRetrieval = false },
+		"absent":     func(c *publicv1.GetCapabilitiesResponse) { c.Artifacts = nil },
+		"zero-total": func(c *publicv1.GetCapabilitiesResponse) { c.Artifacts.MaximumArtifactSize = 0 },
+		"zero-chunk": func(c *publicv1.GetCapabilitiesResponse) { c.Artifacts.MaximumChunkSize = 0 },
+		"digest":     func(c *publicv1.GetCapabilitiesResponse) { c.Artifacts.DigestVerificationRequired = false },
+		"length":     func(c *publicv1.GetCapabilitiesResponse) { c.Artifacts.ExactByteLengthReported = false },
+		"visibility": func(c *publicv1.GetCapabilitiesResponse) { c.Artifacts.VisibilityClasses = nil },
+		"method":     func(c *publicv1.GetCapabilitiesResponse) { c.SupportedMethods = c.SupportedMethods[:1] },
+	} {
+		t.Run(name, func(t *testing.T) {
+			c := negotiated(caps())
+			mutate(c)
+			if _, err := New(approvalArtifact([]byte("diff")), c); !errors.Is(err, interaction.ErrBlocked) {
+				t.Fatal(err)
+			}
+		})
+	}
+}
+func TestApprovalArtifactHonorsNegotiatedTotalAndChunkBounds(t *testing.T) {
+	for _, tc := range []struct{ negotiated, metadata, want uint32 }{{1024, 65536, 1024}, {65536, 1024, 1024}, {1 << 20, 1 << 20, 256 << 10}} {
+		f := approvalArtifact([]byte(strings.Repeat("+", 300<<10)))
+		f.chunkMax = tc.metadata
+		c := negotiated(caps())
+		c.Artifacts.MaximumArtifactSize = uint64(len(f.artifact))
+		c.Artifacts.MaximumChunkSize = tc.negotiated
+		p, err := New(f, c)
+		if err != nil {
+			t.Fatal(err)
+		}
+		card, err := p.Card(t.Context(), bound(), "id")
+		if err != nil || card.File.VerifiedDiff != string(f.artifact) {
+			t.Fatal(err)
+		}
+		if len(f.lengths) == 0 || f.lengths[0] != tc.want {
+			t.Fatal(f.lengths)
+		}
+		for _, n := range f.lengths {
+			if n > tc.want {
+				t.Fatal("negotiated bound exceeded", n)
+			}
+		}
+		c.Artifacts.MaximumArtifactSize--
+		p, err = New(f, c)
+		if err != nil {
+			t.Fatal(err)
+		}
+		f.lengths = nil
+		if _, err = p.Card(t.Context(), bound(), "id"); !errors.Is(err, interaction.ErrBlocked) || len(f.lengths) != 0 {
+			t.Fatal("oversize diff read", err, f.lengths)
+		}
+	}
+	f := approvalArtifact([]byte("diff"))
+	p, err := New(f, negotiated(caps()))
+	if err != nil {
+		t.Fatal(err)
+	}
+	ctx, cancel := context.WithCancel(t.Context())
+	cancel()
+	if _, err = p.Card(ctx, bound(), "id"); !errors.Is(err, context.Canceled) || len(f.lengths) != 0 {
+		t.Fatal("canceled diff exposed", err)
+	}
+	f = approvalArtifact([]byte(strings.Repeat("x", (8<<20)+1)))
+	p, err = New(f, negotiated(caps()))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err = p.Card(t.Context(), bound(), "id"); !errors.Is(err, interaction.ErrBlocked) || len(f.lengths) != 0 {
+		t.Fatal("local card limit exceeded", err)
 	}
 }

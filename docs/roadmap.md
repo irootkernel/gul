@@ -3,9 +3,9 @@
 | Field | Value |
 | --- | --- |
 | Role | Sole authority for task identity, order, status, dependencies, and phase |
-| Revision | 2026-09-27 E4-T3 completed |
+| Revision | 2026-09-27 E4-T5 completed |
 | Active Task | None |
-| Next | E4-T5 |
+| Next | E5-T1 |
 | Required provider | Released Dolgorae v0.1.3 implementing `dolgorae.gul-consumer/v1` |
 
 ## 1. Status and execution rules
@@ -228,7 +228,7 @@ coordinator. Current membership is T1, T2, T3, T5 only; T4 remains Deferred.
 | E4-T1 | Pre-release | Completed | E3-T3, E1-T4, E13-T1 | Event bridge, separate cursors, coalescing, all typed invalidation variants and duplicate/slow-consumer fixtures |
 | E4-T2 | Pre-release | Completed | E4-T1, E13-T1 | Controller interaction cards, safe fetch, approval/denial, protected-response absence and competing clients |
 | E4-T3 | Pre-release | Completed | E4-T1, E3-T4, E13-T1 | Shared evaluator including aggregate-close eligibility and explicit interrupt confirmation, writer projection, no active-Turn queue/steering and unavailable-continuation blockers; coordinator remains E5-T1 |
-| E4-T5 | Pre-release | Planned | E4-T1, E4-T2, E13-T1 | ListPromptHistory/GetPromptHistoryItem/ListSpecialistResults implementation, bounded Gul paging and full timeline, stable identity/ordinal coverage, public result discovery and verified artifacts |
+| E4-T5 | Pre-release | Completed | E4-T1, E4-T2, E13-T1 | ListPromptHistory/GetPromptHistoryItem/ListSpecialistResults implementation, bounded Gul paging and full timeline, stable identity/ordinal coverage, public result discovery and verified artifacts |
 
 ### E5: Complete safe close and recovery
 

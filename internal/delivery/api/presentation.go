@@ -8,6 +8,7 @@ import (
 	gulv1 "github.com/rootkernel/gul/api/generated/go/gul/v1"
 	"github.com/rootkernel/gul/api/generated/go/gul/v1/gulv1connect"
 	"github.com/rootkernel/gul/internal/app"
+	"github.com/rootkernel/gul/internal/history"
 	"github.com/rootkernel/gul/internal/presentation"
 	"github.com/rootkernel/gul/internal/session"
 )
@@ -117,6 +118,7 @@ type DirectPresentationHandler struct {
 	Core         *app.Core
 	Presentation *presentation.Service
 	Sessions     *session.Service
+	History      *history.Service
 	Principal    PrincipalResolver
 }
 

@@ -31,6 +31,7 @@ type QueryKind uint8
 const (
 	PromptHistoryQuery QueryKind = iota + 1
 	SpecialistResultsQuery
+	ConversationQuery
 )
 
 // PageScope is the authorization and projection context of one traversal.
@@ -41,6 +42,7 @@ type PageScope struct {
 }
 
 type PageBinding struct {
+	SourceIdentity    string
 	AccountID         string
 	SessionID         string
 	Query             QueryKind
@@ -48,6 +50,8 @@ type PageBinding struct {
 }
 
 type PagePosition struct {
+	SourceRevision uint64
+	CapturedAt     time.Time
 	ProviderCursor string
 	CapturedHead   string
 	ScannedCount   uint64
@@ -139,5 +143,5 @@ func validScope(scope PageScope) bool {
 
 func validBinding(binding PageBinding) bool {
 	return binding.AccountID != "" && binding.SessionID != "" && binding.ProjectionVersion != 0 &&
-		(binding.Query == PromptHistoryQuery || binding.Query == SpecialistResultsQuery)
+		(binding.Query == PromptHistoryQuery || binding.Query == SpecialistResultsQuery || binding.Query == ConversationQuery)
 }

@@ -685,6 +685,56 @@ corrected. Focused race checks, serial `make test` and the actual Chrome fixture
 passed. No unresolved finding or unmet criterion remains. E4-T5 is next; the
 runtime and product-assembly boundaries above remain in force.
 
+### E4-T5 bounded history, originals, results and artifacts
+
+`internal/history` reconstructs the complete allowlisted timeline and a separate
+accepted-human history. It validates chronology and the prefix before assigning
+ordinals. Identical text in separate submissions retains separate IDs; repeated
+reads and reconstructed caches retain each accepted item's ID. A changed original
+or publication cannot overwrite an existing identity mapping. Page tokens bind
+the subject, session, source binding, query and fixed snapshot. History reads at
+most four provider pages per request, including empty continuable pages. Public
+result reads preserve the provider publication head, source revision and capture
+time and keep the Primary as artifact owner.
+
+Originals are reread under current Controller authority and preserve exact UTF-8
+and line endings. Previews stop at a complete UTF-8 prefix of at most 1 KiB.
+Bodies above the 256 KiB browser threshold become Gul artifact references even
+when the provider delivered them inline. Artifact retrieval respects both
+negotiated bounds and the 64 MiB/256 KiB local size/chunk limits, validates every
+chunk and verifies total length and SHA-256 before exposing bytes. References
+are opaque; no artifact read resolves a filesystem path. The bounded cache keeps
+metadata only, with explicit unavailable state after eviction until a fresh
+traversal reconstructs the same IDs. Old page tokens expire on restart. The existing approval-diff adapter also
+requires Artifact capabilities and applies negotiated total and chunk limits;
+its 8 MiB card bound remains stricter than the general artifact limit. Missing
+capabilities, smaller provider limits and cancellation are checked on that path.
+
+The existing three history/result API methods and ArtifactPresentation handlers
+are implemented with subject/session guards. `ListConversation` and
+`GetConversationEntry` expose the complete timeline using Gul-only DTOs and closed
+kind/status enums. All handlers remain unmounted. The renderer permits only
+paragraphs, headings and fenced code; script, HTML, image and link syntax stays
+inert text. Product assembly remains with E7/E8 and reconnect scheduling with E5.
+
+Tests cover fixed traversal scope under appends, empty continuations, source/query
+substitution, exact replay versus identical submissions, concurrent reconstruction,
+SQLite reopen, closed/failed/interrupted history, public result paging, large
+Unicode originals, negotiated limits, corrupt/truncated chunks, cancellation and
+authorization. The scenario-backed test supplies the pinned 1 MiB inline-response
+capability explicitly because the generic E13 capability fixture omits that field;
+it does not claim that fixture is a complete negotiation response. Checked wire
+fixtures cover all five timeline kinds and protocol corruption. The isolated
+Chrome fixture checks inert artifact rendering without external resource loads.
+
+E4-T5 completion: all seven owned requirements passed independent completion
+review. Reconstruction now rejects changes to an existing timeline item's
+Interaction reference, metadata or original source; typed Interaction events
+must carry their permitted status and a nonempty safe title. Authorization
+failures use the established `UNAUTHORIZED`/`ABORT` contract. Focused race checks,
+serial `make test` and the isolated Chrome fixture passed. No unresolved finding
+or unmet criterion remains. E4-wide validation precedes E5-T1.
+
 ## 2. Current development snapshot
 
 | Area | State |
@@ -1152,4 +1202,4 @@ The initial documentation assumed Gul would manage one Codex App Server, map Ses
 
 ## 12. Handoff
 
-E12, E1, E13, and E3 are complete. The TASK-053 consumer lock and generated contract tooling remain authoritative. E3-T1 added fake-scoped Workspace attachment, E3-T2 added local-only presentation, E3-T3 added passive session reads, and E3-T4 added prospective global Profile launch selection. E4-T5 is next. E2-T0 remains blocked on an accepted compatible Dolgorae executable and live smoke evidence. No product route or live-provider behavior is activated automatically.
+E12, E1, E13, and E3 are complete. The TASK-053 consumer lock and generated contract tooling remain authoritative. E3-T1 added fake-scoped Workspace attachment, E3-T2 added local-only presentation, E3-T3 added passive session reads, and E3-T4 added prospective global Profile launch selection. E4-wide validation is next. E2-T0 remains blocked on an accepted compatible Dolgorae executable and live smoke evidence. No product route or live-provider behavior is activated automatically.

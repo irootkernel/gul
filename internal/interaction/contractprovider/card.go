@@ -182,8 +182,11 @@ func (p *Provider) card(ctx context.Context, b interaction.Bound, summary intera
 
 // A file approval cannot become actionable from an unverified artifact reference.
 func (p *Provider) diff(ctx context.Context, b interaction.Bound, expected *publicv1.ArtifactRef) (string, error) {
-	if expected == nil || expected.ArtifactId == "" || expected.Kind != publicv1.ArtifactKind_ARTIFACT_KIND_FILE_CHANGE_DIFF || expected.Visibility != publicv1.ArtifactVisibility_ARTIFACT_VISIBILITY_CONTROLLER_ONLY || expected.MediaType != "text/x-diff" || expected.ByteLength == 0 || expected.ByteLength > interaction.GUL_MAX_SAFE_INTERACTION_PAYLOAD_BYTES || !digest(expected.Sha256) {
+	if expected == nil || expected.ArtifactId == "" || expected.Kind != publicv1.ArtifactKind_ARTIFACT_KIND_FILE_CHANGE_DIFF || expected.Visibility != publicv1.ArtifactVisibility_ARTIFACT_VISIBILITY_CONTROLLER_ONLY || expected.MediaType != "text/x-diff" || expected.ByteLength == 0 || expected.ByteLength > p.maxArtifact || !digest(expected.Sha256) {
 		return "", interaction.ErrBlocked
+	}
+	if err := ctx.Err(); err != nil {
+		return "", err
 	}
 	meta, err := p.port.GetArtifact(ctx, &publicv1.GetArtifactRequest{Run: ref(b), Controller: carrier(b), ArtifactId: expected.ArtifactId})
 	if err != nil {
@@ -195,7 +198,10 @@ func (p *Provider) diff(ctx context.Context, b interaction.Bound, expected *publ
 	data := make([]byte, 0, int(expected.ByteLength))
 	defer clear(data)
 	for uint64(len(data)) < expected.ByteLength {
-		length := min(uint64(meta.MaximumChunkSize), uint64(65536), expected.ByteLength-uint64(len(data)))
+		if err := ctx.Err(); err != nil {
+			return "", err
+		}
+		length := min(uint64(meta.MaximumChunkSize), uint64(p.maxChunk), expected.ByteLength-uint64(len(data)))
 		chunk, err := p.port.ReadArtifactChunk(ctx, &publicv1.ReadArtifactChunkRequest{Run: ref(b), Controller: carrier(b), ArtifactId: expected.ArtifactId, Offset: uint64(len(data)), Length: uint32(length)})
 		if err != nil {
 			return "", interaction.ErrUnavailable
@@ -208,6 +214,9 @@ func (p *Provider) diff(ctx context.Context, b interaction.Bound, expected *publ
 	sum := sha256.Sum256(data)
 	if hex.EncodeToString(sum[:]) != expected.Sha256 || !utf8.Valid(data) {
 		return "", interaction.ErrBlocked
+	}
+	if err := ctx.Err(); err != nil {
+		return "", err
 	}
 	return string(data), nil
 }

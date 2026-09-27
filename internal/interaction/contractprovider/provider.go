@@ -24,17 +24,47 @@ type Port interface {
 }
 type Provider struct {
 	port                        Port
+	maxArtifact                 uint64
+	maxChunk                    uint32
 	responseLimit, payloadLimit int
 	kinds                       map[publicv1.InteractionKind]publicv1.InteractionSupport
 }
 
 // New consumes negotiated capabilities. Transport assembly must disable retries
 // and hedging, as required by the pinned mutation client policy.
-func New(port Port, caps *publicv1.InteractionCapabilities) (*Provider, error) {
+func New(port Port, negotiated *publicv1.GetCapabilitiesResponse) (*Provider, error) {
+	if negotiated == nil || !known(negotiated.ProtoReflect()) || negotiated.Features == nil || !negotiated.Features.ArtifactRetrieval || negotiated.Artifacts == nil {
+		return nil, interaction.ErrBlocked
+	}
+	a := negotiated.Artifacts
+	if a.MaximumArtifactSize == 0 || a.MaximumChunkSize == 0 || a.MaximumInlineResponseBytes == 0 || !a.DigestVerificationRequired || !a.ExactByteLengthReported {
+		return nil, interaction.ErrBlocked
+	}
+	visibility := map[publicv1.ArtifactVisibility]bool{}
+	for _, v := range a.VisibilityClasses {
+		if v == 0 || visibility[v] {
+			return nil, interaction.ErrBlocked
+		}
+		visibility[v] = true
+	}
+	if !visibility[publicv1.ArtifactVisibility_ARTIFACT_VISIBILITY_CONTROLLER_ONLY] {
+		return nil, interaction.ErrBlocked
+	}
+	methods := map[string]bool{}
+	for _, m := range negotiated.SupportedMethods {
+		if methods[m] {
+			return nil, interaction.ErrBlocked
+		}
+		methods[m] = true
+	}
+	if !methods["ArtifactService.GetArtifact"] || !methods["ArtifactService.ReadArtifactChunk"] {
+		return nil, interaction.ErrBlocked
+	}
+	caps := negotiated.Interactions
 	if port == nil || caps == nil || !known(caps.ProtoReflect()) || caps.MaximumResponseBytes == 0 || caps.MaximumSafePayloadBytes == 0 {
 		return nil, interaction.ErrBlocked
 	}
-	p := &Provider{port: port, responseLimit: min(int(caps.MaximumResponseBytes), interaction.MaximumResponseBytes), payloadLimit: min(int(caps.MaximumSafePayloadBytes), interaction.GUL_MAX_SAFE_INTERACTION_PAYLOAD_BYTES), kinds: map[publicv1.InteractionKind]publicv1.InteractionSupport{}}
+	p := &Provider{port: port, maxArtifact: min(a.MaximumArtifactSize, uint64(interaction.GUL_MAX_SAFE_INTERACTION_PAYLOAD_BYTES)), maxChunk: min(a.MaximumChunkSize, uint32(256<<10)), responseLimit: min(int(caps.MaximumResponseBytes), interaction.MaximumResponseBytes), payloadLimit: min(int(caps.MaximumSafePayloadBytes), interaction.GUL_MAX_SAFE_INTERACTION_PAYLOAD_BYTES), kinds: map[publicv1.InteractionKind]publicv1.InteractionSupport{}}
 	advertised := map[publicv1.InteractionKind]bool{}
 	for _, k := range caps.KnownKinds {
 		if classify(k) == 0 || advertised[k] {

@@ -98,7 +98,16 @@ with tempfile.TemporaryDirectory(prefix="gul-actions-browser-") as directory:
               if ({json.dumps(case)} !== 'prompt' && await page.getByRole('button').filter({{hasText: /writer$/}}).evaluateAll(buttons => buttons.some(button => !button.disabled))) throw Error('Blind retry allowed');
               if ({json.dumps(case)} === 'prompt' && (!await page.evaluate(() => window.fixture.consent) || await page.getByRole('textbox').inputValue() !== '')) throw Error('Explicit submit/consent failed');
             }}''')
-        print("PASS real Chrome: six outcomes; one-shot clearing; writer release window and typed conflict; explicit draft submission and interruption consent; typed WRITE submission failures")
+        cli(directory, "goto", url + "?case=artifact")
+        rendered = snapshot(directory)
+        assert "Verified result" in rendered and "한글 原文" in rendered, rendered
+        cli(directory, "run-code", """async page => {
+          if (await page.locator('article script, article img, article iframe, article a, article object, article embed').count()) throw Error('Active content rendered');
+          if (await page.evaluate(() => window.pwned !== undefined)) throw Error('Script executed');
+          if (await page.evaluate(() => performance.getEntriesByType('resource').some(entry => /example.invalid|file:/.test(entry.name)))) throw Error('External resource loaded');
+          if (!(await page.locator('article').innerText()).includes('../../etc/passwd')) throw Error('Opaque path text lost');
+        }""")
+        print("PASS real Chrome: six outcomes; one-shot clearing; writer release window and typed conflict; explicit draft submission and interruption consent; typed WRITE submission failures; inert artifact Markdown")
     finally:
         cli(directory, "close")
         server.shutdown()

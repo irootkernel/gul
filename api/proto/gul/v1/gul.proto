@@ -201,6 +201,8 @@ message ListWorkspacesResponse {
 }
 
 service DirectSessionService {
+  rpc ListConversation(ListConversationRequest) returns (ListConversationResponse);
+  rpc GetConversationEntry(GetConversationEntryRequest) returns (GetConversationEntryResponse);
   rpc ListDirectSessions(ListDirectSessionsRequest) returns (ListDirectSessionsResponse);
   rpc GetDirectSessionPresentation(GetDirectSessionPresentationRequest) returns (DirectSessionPresentationResponse);
   rpc RenameDirectSession(RenameDirectSessionRequest) returns (DirectSessionPresentationResponse);
@@ -255,6 +257,77 @@ message ListDirectSessionsResponse {
 service ArtifactPresentationService {
   rpc GetMetadata(GetMetadataRequest) returns (GetMetadataResponse);
   rpc ReadChunk(ReadChunkRequest) returns (ReadChunkResponse);
+}
+
+enum ConversationKind {
+  CONVERSATION_KIND_UNSPECIFIED = 0;
+  CONVERSATION_KIND_HUMAN = 1;
+  CONVERSATION_KIND_ASSISTANT = 2;
+  CONVERSATION_KIND_INTERACTION_OPENED = 3;
+  CONVERSATION_KIND_INTERACTION_RESOLVED = 4;
+  CONVERSATION_KIND_TURN_TERMINAL = 5;
+}
+
+enum ConversationStatus {
+  CONVERSATION_STATUS_UNSPECIFIED = 0;
+  CONVERSATION_STATUS_ACCEPTED = 1;
+  CONVERSATION_STATUS_FINAL = 2;
+  CONVERSATION_STATUS_OPENED = 3;
+  CONVERSATION_STATUS_RESOLVED = 4;
+  CONVERSATION_STATUS_COMPLETED = 5;
+  CONVERSATION_STATUS_FAILED = 6;
+  CONVERSATION_STATUS_INTERRUPTED = 7;
+  CONVERSATION_STATUS_OUTCOME_UNKNOWN = 8;
+}
+
+message ConversationImage {
+  uint32 ordinal = 1;
+  string detail = 2;
+  string media_type = 3;
+  uint64 byte_length = 4;
+  string sha256 = 5;
+}
+
+message ConversationEntry {
+  string entry_id = 1;
+  string turn_ref = 2;
+  ConversationKind kind = 3;
+  ConversationStatus status = 4;
+  google.protobuf.Timestamp occurred_at = 5;
+  string preview = 6;
+  bool preview_truncated = 7;
+  bool has_original = 8;
+  string interaction_ref = 9;
+  string interaction_kind = 10;
+  string interaction_status = 11;
+  string title = 12;
+  repeated ConversationImage images = 13;
+}
+
+message ListConversationRequest {
+  string session_id = 1;
+  optional string page_token = 2;
+  uint32 page_size = 3;
+}
+
+message ListConversationResponse {
+  string snapshot_id = 1;
+  repeated ConversationEntry items = 2;
+  optional string next_page_token = 3;
+  bool traversal_complete = 4;
+  Freshness freshness = 5;
+  google.protobuf.Timestamp observed_at = 6;
+  string run_state = 7;
+}
+
+message GetConversationEntryRequest {
+  string session_id = 1;
+  string entry_id = 2;
+}
+
+message GetConversationEntryResponse {
+  ConversationEntry entry = 1;
+  PromptOriginal original = 2;
 }
 
 message ListPromptHistoryRequest {

@@ -90,6 +90,12 @@ const (
 	// WorkspacePresentationServiceSetNavigationProcedure is the fully-qualified name of the
 	// WorkspacePresentationService's SetNavigation RPC.
 	WorkspacePresentationServiceSetNavigationProcedure = "/gul.v1.WorkspacePresentationService/SetNavigation"
+	// DirectSessionServiceListConversationProcedure is the fully-qualified name of the
+	// DirectSessionService's ListConversation RPC.
+	DirectSessionServiceListConversationProcedure = "/gul.v1.DirectSessionService/ListConversation"
+	// DirectSessionServiceGetConversationEntryProcedure is the fully-qualified name of the
+	// DirectSessionService's GetConversationEntry RPC.
+	DirectSessionServiceGetConversationEntryProcedure = "/gul.v1.DirectSessionService/GetConversationEntry"
 	// DirectSessionServiceListDirectSessionsProcedure is the fully-qualified name of the
 	// DirectSessionService's ListDirectSessions RPC.
 	DirectSessionServiceListDirectSessionsProcedure = "/gul.v1.DirectSessionService/ListDirectSessions"
@@ -605,6 +611,8 @@ func (UnimplementedWorkspacePresentationServiceHandler) SetNavigation(context.Co
 
 // DirectSessionServiceClient is a client for the gul.v1.DirectSessionService service.
 type DirectSessionServiceClient interface {
+	ListConversation(context.Context, *connect.Request[v1.ListConversationRequest]) (*connect.Response[v1.ListConversationResponse], error)
+	GetConversationEntry(context.Context, *connect.Request[v1.GetConversationEntryRequest]) (*connect.Response[v1.GetConversationEntryResponse], error)
 	ListDirectSessions(context.Context, *connect.Request[v1.ListDirectSessionsRequest]) (*connect.Response[v1.ListDirectSessionsResponse], error)
 	GetDirectSessionPresentation(context.Context, *connect.Request[v1.GetDirectSessionPresentationRequest]) (*connect.Response[v1.DirectSessionPresentationResponse], error)
 	RenameDirectSession(context.Context, *connect.Request[v1.RenameDirectSessionRequest]) (*connect.Response[v1.DirectSessionPresentationResponse], error)
@@ -628,6 +636,18 @@ func NewDirectSessionServiceClient(httpClient connect.HTTPClient, baseURL string
 	baseURL = strings.TrimRight(baseURL, "/")
 	directSessionServiceMethods := v1.File_gul_v1_gul_proto.Services().ByName("DirectSessionService").Methods()
 	return &directSessionServiceClient{
+		listConversation: connect.NewClient[v1.ListConversationRequest, v1.ListConversationResponse](
+			httpClient,
+			baseURL+DirectSessionServiceListConversationProcedure,
+			connect.WithSchema(directSessionServiceMethods.ByName("ListConversation")),
+			connect.WithClientOptions(opts...),
+		),
+		getConversationEntry: connect.NewClient[v1.GetConversationEntryRequest, v1.GetConversationEntryResponse](
+			httpClient,
+			baseURL+DirectSessionServiceGetConversationEntryProcedure,
+			connect.WithSchema(directSessionServiceMethods.ByName("GetConversationEntry")),
+			connect.WithClientOptions(opts...),
+		),
 		listDirectSessions: connect.NewClient[v1.ListDirectSessionsRequest, v1.ListDirectSessionsResponse](
 			httpClient,
 			baseURL+DirectSessionServiceListDirectSessionsProcedure,
@@ -693,6 +713,8 @@ func NewDirectSessionServiceClient(httpClient connect.HTTPClient, baseURL string
 
 // directSessionServiceClient implements DirectSessionServiceClient.
 type directSessionServiceClient struct {
+	listConversation             *connect.Client[v1.ListConversationRequest, v1.ListConversationResponse]
+	getConversationEntry         *connect.Client[v1.GetConversationEntryRequest, v1.GetConversationEntryResponse]
 	listDirectSessions           *connect.Client[v1.ListDirectSessionsRequest, v1.ListDirectSessionsResponse]
 	getDirectSessionPresentation *connect.Client[v1.GetDirectSessionPresentationRequest, v1.DirectSessionPresentationResponse]
 	renameDirectSession          *connect.Client[v1.RenameDirectSessionRequest, v1.DirectSessionPresentationResponse]
@@ -703,6 +725,16 @@ type directSessionServiceClient struct {
 	getExecutionState            *connect.Client[v1.GetExecutionStateRequest, v1.GetExecutionStateResponse]
 	listSpecialistResults        *connect.Client[v1.ListSpecialistResultsRequest, v1.ListSpecialistResultsResponse]
 	closeRuntime                 *connect.Client[v1.CloseRuntimeRequest, v1.CloseRuntimeResponse]
+}
+
+// ListConversation calls gul.v1.DirectSessionService.ListConversation.
+func (c *directSessionServiceClient) ListConversation(ctx context.Context, req *connect.Request[v1.ListConversationRequest]) (*connect.Response[v1.ListConversationResponse], error) {
+	return c.listConversation.CallUnary(ctx, req)
+}
+
+// GetConversationEntry calls gul.v1.DirectSessionService.GetConversationEntry.
+func (c *directSessionServiceClient) GetConversationEntry(ctx context.Context, req *connect.Request[v1.GetConversationEntryRequest]) (*connect.Response[v1.GetConversationEntryResponse], error) {
+	return c.getConversationEntry.CallUnary(ctx, req)
 }
 
 // ListDirectSessions calls gul.v1.DirectSessionService.ListDirectSessions.
@@ -757,6 +789,8 @@ func (c *directSessionServiceClient) CloseRuntime(ctx context.Context, req *conn
 
 // DirectSessionServiceHandler is an implementation of the gul.v1.DirectSessionService service.
 type DirectSessionServiceHandler interface {
+	ListConversation(context.Context, *connect.Request[v1.ListConversationRequest]) (*connect.Response[v1.ListConversationResponse], error)
+	GetConversationEntry(context.Context, *connect.Request[v1.GetConversationEntryRequest]) (*connect.Response[v1.GetConversationEntryResponse], error)
 	ListDirectSessions(context.Context, *connect.Request[v1.ListDirectSessionsRequest]) (*connect.Response[v1.ListDirectSessionsResponse], error)
 	GetDirectSessionPresentation(context.Context, *connect.Request[v1.GetDirectSessionPresentationRequest]) (*connect.Response[v1.DirectSessionPresentationResponse], error)
 	RenameDirectSession(context.Context, *connect.Request[v1.RenameDirectSessionRequest]) (*connect.Response[v1.DirectSessionPresentationResponse], error)
@@ -776,6 +810,18 @@ type DirectSessionServiceHandler interface {
 // and JSON codecs. They also support gzip compression.
 func NewDirectSessionServiceHandler(svc DirectSessionServiceHandler, opts ...connect.HandlerOption) (string, http.Handler) {
 	directSessionServiceMethods := v1.File_gul_v1_gul_proto.Services().ByName("DirectSessionService").Methods()
+	directSessionServiceListConversationHandler := connect.NewUnaryHandler(
+		DirectSessionServiceListConversationProcedure,
+		svc.ListConversation,
+		connect.WithSchema(directSessionServiceMethods.ByName("ListConversation")),
+		connect.WithHandlerOptions(opts...),
+	)
+	directSessionServiceGetConversationEntryHandler := connect.NewUnaryHandler(
+		DirectSessionServiceGetConversationEntryProcedure,
+		svc.GetConversationEntry,
+		connect.WithSchema(directSessionServiceMethods.ByName("GetConversationEntry")),
+		connect.WithHandlerOptions(opts...),
+	)
 	directSessionServiceListDirectSessionsHandler := connect.NewUnaryHandler(
 		DirectSessionServiceListDirectSessionsProcedure,
 		svc.ListDirectSessions,
@@ -838,6 +884,10 @@ func NewDirectSessionServiceHandler(svc DirectSessionServiceHandler, opts ...con
 	)
 	return "/gul.v1.DirectSessionService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
+		case DirectSessionServiceListConversationProcedure:
+			directSessionServiceListConversationHandler.ServeHTTP(w, r)
+		case DirectSessionServiceGetConversationEntryProcedure:
+			directSessionServiceGetConversationEntryHandler.ServeHTTP(w, r)
 		case DirectSessionServiceListDirectSessionsProcedure:
 			directSessionServiceListDirectSessionsHandler.ServeHTTP(w, r)
 		case DirectSessionServiceGetDirectSessionPresentationProcedure:
@@ -866,6 +916,14 @@ func NewDirectSessionServiceHandler(svc DirectSessionServiceHandler, opts ...con
 
 // UnimplementedDirectSessionServiceHandler returns CodeUnimplemented from all methods.
 type UnimplementedDirectSessionServiceHandler struct{}
+
+func (UnimplementedDirectSessionServiceHandler) ListConversation(context.Context, *connect.Request[v1.ListConversationRequest]) (*connect.Response[v1.ListConversationResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("gul.v1.DirectSessionService.ListConversation is not implemented"))
+}
+
+func (UnimplementedDirectSessionServiceHandler) GetConversationEntry(context.Context, *connect.Request[v1.GetConversationEntryRequest]) (*connect.Response[v1.GetConversationEntryResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("gul.v1.DirectSessionService.GetConversationEntry is not implemented"))
+}
 
 func (UnimplementedDirectSessionServiceHandler) ListDirectSessions(context.Context, *connect.Request[v1.ListDirectSessionsRequest]) (*connect.Response[v1.ListDirectSessionsResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("gul.v1.DirectSessionService.ListDirectSessions is not implemented"))

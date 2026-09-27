@@ -1,3 +1,4 @@
+import {SafeMarkdown} from "../src/safe-markdown";
 import {useState} from "react";
 import {createRoot} from "react-dom/client";
 import {create} from "@bufbuild/protobuf";
@@ -48,7 +49,7 @@ function Controls() {
     }} />}
   </>;
 }
-createRoot(document.getElementById("root")!).render((["writer", "busy"].includes(scenario) || scenario.startsWith("prompt")) ? <Controls /> : <InteractionCardView card={card} respond={async body => {
+createRoot(document.getElementById("root")!).render(scenario === "artifact" ? <SafeMarkdown text={'# Verified result\n\n<script>window.pwned=1</script>\n<img src="https://example.invalid/leak">\n![image](https://example.invalid/image)\n[run](javascript:alert(1))\n../../etc/passwd\n한글 原文\n\n```html\n<iframe src="file:///etc/passwd"></iframe>\n```'} /> : (["writer", "busy"].includes(scenario) || scenario.startsWith("prompt")) ? <Controls /> : <InteractionCardView card={card} respond={async body => {
   evidence.calls++;
   if (scenario === "answer") {
     const value = JSON.parse(new TextDecoder().decode(body));

@@ -663,6 +663,14 @@ An operator uses a local terminal outside Gul to reset/provision a Controller ca
 
 Opening or reconnecting a Direct Session performs `GetRun`, then `ListRunTimelineItems` after the stored timeline checkpoint, validates Run and Turn identities, merges provider chronology into a non-authoritative presentation cache, and publishes one coalesced browser snapshot. Unknown or non-approved timeline kinds are rejected or redacted according to the accepted safe-timeline inventory. Missing TimelineCapability is a compatibility blocker.
 
+The E4-T5 reader also exposes bounded `ListConversation` pages and
+`GetConversationEntry` originals through the unmounted DirectSession handler.
+Conversation entries use Gul IDs and closed kinds/statuses for accepted human
+input, final responses, Interaction openings/resolutions and Turn termination.
+A fresh traversal rebuilds the validated prefix; stable metadata-derived IDs let
+reconnect reads merge without text-based deduplication. A timeline older than
+the authorized Run snapshot is unavailable rather than fresh.
+
 ### 8.8 Artifact presentation
 
 Artifact references remain opaque. Dolgorae's inline-final-response and maximum-artifact values are provider wire capabilities; Gul's 256 KiB inline-browser threshold, preferred 256 KiB chunk size, and 64 MiB artifact cap are local presentation/safety limits. A 300 KiB inline provider response is therefore not a protocol violation: Gul may turn it into a bounded browser presentation object. Effective artifact size is `min(provider maximum, 64 MiB)` and each unary chunk request is no larger than both the advertised maximum and Gul's preferred size. Gul verifies exact total length plus SHA-256 before presentation. Safe Markdown is rendered under the Gul allowlist; content is never executed, automatically opened, or interpreted as a local filesystem path.
@@ -1146,7 +1154,9 @@ cards and one-shot response handling. The adapter checks current Controller
 identity/generation, matching complete stamps, the selected typed payload size,
 kind/variant agreement and per-kind decision context. Card paths are relative
 to the bound Workspace; opaque or escaping paths block the card. File-change
-artifacts are read in bounded chunks and verified before they become actionable.
+artifacts require negotiated retrieval support, Controller visibility and integrity
+capabilities. Reads honor the smaller provider/card total bound and the minimum
+negotiated, artifact-specific and 256 KiB chunk bound before becoming actionable.
 Response bytes use the smaller negotiated limit and 64 KiB, are normalized only
 in memory, sent once and cleared where practical. A fresh authorized read after
 every submission distinguishes resolved, stale, pending re-entry and unknown
@@ -1171,6 +1181,26 @@ through the existing Gul journal without moving provider event checkpoints.
 Read failures invalidate the visible projection rather than enabling actions.
 The generated InteractionPresentation handler and React cards remain unmounted;
 E8 owns authenticated registration and E2/E9 own live transport qualification.
+
+`internal/history` supplies Controller-authorized conversation, prompt and public
+Specialist-result reads through the checked contract adapter. Page tokens bind
+subject, session, source binding, query and captured scope. History scans at most
+four provider pages per request; an empty page can still carry a continuation.
+Result traversals retain the provider publication head, revision and capture time.
+Validated human-prefix counts supply one-based ordinals. Stable IDs derive from
+non-secret source identity and chronology, never from the text.
+
+The bounded metadata cache stores no original bodies. Each original read fetches
+its source again; each artifact read checks authorization, negotiated bounds,
+length and SHA-256 before returning bytes. The service permits two concurrent
+reads with a five-second deadline. Tokens expire after fifteen minutes and on
+restart. Missing item mappings return unavailable until an authorized traversal
+rebuilds them; reconstruction preserves the same item IDs. SQLite stores only
+the existing subject-scoped session binding. The generated history/conversation
+and ArtifactPresentation handlers remain unmounted. The shared Markdown renderer
+allows paragraphs, headings and fenced code; HTML, links and images stay literal.
+E5 owns reconnect scheduling, E7 the integrated conversation/history UI, and E8
+route registration. These components use explicit fake evidence, not live RPCs.
 
 `internal/storage` requires an owner-only database directory and file, then
 opens the pinned SQLite driver with one writer and at most four read-only
