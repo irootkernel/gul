@@ -4,6 +4,10 @@ import {
   ActionClass,
   RuntimeService,
   ClientEventService,
+  InteractionPresentationService,
+  InteractionCardSchema,
+  InteractionCardSummarySchema,
+  ResolveRequestSchema,
   ClientEventSchema,
   LaunchExecutionLane,
   LaunchAssurance,
@@ -236,4 +240,12 @@ test("close outcomes keep rejection, pending, confirmation, and ambiguity distin
   expect(() => validateCloseOutcome({...rejected, rejection: {...rejected.rejection, action: 999}})).toThrow("typed code");
   expect(() => validateCloseOutcome({...rejected, nextAction: 999})).toThrow("invalid Gul close outcome");
   expect(() => validateCloseOutcome(create(CloseOutcomeSchema, {status: CloseStatus.CONFIRMED, closeAttemptId: "x".repeat(17000)}))).toThrow("exceeds bound");
+});
+
+
+test("interaction cards use typed Gul fields and a body-only response", () => {
+  expect(Object.keys(InteractionPresentationService.method)).toEqual(["listPending", "getCard", "resolve"]);
+  expect(InteractionCardSchema.fields.map(field => field.name)).toEqual(["summary", "decisions", "command_approval", "file_approval", "user_input", "unsupported"]);
+  expect(InteractionCardSummarySchema.fields.map(field => field.name)).not.toContain("run_id");
+  expect(ResolveRequestSchema.fields.map(field => field.name)).toEqual(["session_id", "interaction_id", "response_json"]);
 });

@@ -574,3 +574,101 @@ enum WriterAccessMode {
   WRITER_ACCESS_MODE_WRITE = 2;
   WRITER_ACCESS_MODE_BLOCKED = 3;
 }
+
+service InteractionPresentationService {
+  rpc ListPending(ListPendingRequest) returns (ListPendingResponse);
+  rpc GetCard(GetCardRequest) returns (GetCardResponse);
+  rpc Resolve(ResolveRequest) returns (ResolveResponse);
+}
+enum InteractionCardKind {
+  INTERACTION_CARD_KIND_UNSPECIFIED = 0;
+  INTERACTION_CARD_KIND_COMMAND_APPROVAL = 1;
+  INTERACTION_CARD_KIND_FILE_APPROVAL = 2;
+  INTERACTION_CARD_KIND_USER_INPUT = 3;
+  INTERACTION_CARD_KIND_UNSUPPORTED = 4;
+}
+enum InteractionCardStatus {
+  INTERACTION_CARD_STATUS_UNSPECIFIED = 0;
+  INTERACTION_CARD_STATUS_PENDING = 1;
+  INTERACTION_CARD_STATUS_RESOLVED = 2;
+  INTERACTION_CARD_STATUS_STALE = 3;
+}
+enum InteractionCardDecision {
+  INTERACTION_CARD_DECISION_UNSPECIFIED = 0;
+  INTERACTION_CARD_DECISION_ACCEPT_ONCE = 1;
+  INTERACTION_CARD_DECISION_DECLINE = 2;
+  INTERACTION_CARD_DECISION_CANCEL = 3;
+}
+enum InteractionResolutionOutcome {
+  INTERACTION_RESOLUTION_OUTCOME_UNSPECIFIED = 0;
+  INTERACTION_RESOLUTION_OUTCOME_UNKNOWN = 4;
+  INTERACTION_RESOLUTION_OUTCOME_RESOLVED = 1;
+  INTERACTION_RESOLUTION_OUTCOME_REENTER = 2;
+  INTERACTION_RESOLUTION_OUTCOME_STALE = 3;
+}
+message InteractionCardSummary {
+  string interaction_id = 1;
+  InteractionCardKind kind = 2;
+  InteractionCardStatus status = 3;
+  google.protobuf.Timestamp created_at = 4;
+  optional google.protobuf.Timestamp expires_at = 5;
+  optional google.protobuf.Timestamp resolved_at = 6;
+  bool contains_protected_input = 7;
+  bool requires_user_escalation = 8;
+}
+message CommandApprovalCard {
+  string title = 1;
+  string message = 2;
+  string reason = 3;
+  repeated string command = 4;
+  string relative_working_directory = 5;
+}
+message FileChangeCard {
+  string relative_path = 1;
+  string kind = 2;
+  string unified_diff = 3;
+  string relative_move_path = 4;
+}
+message FileApprovalCard {
+  string title = 1;
+  string message = 2;
+  string reason = 3;
+  repeated FileChangeCard changes = 4;
+  string verified_diff = 5;
+}
+message InteractionChoice { string label = 1; string description = 2; }
+message InteractionQuestionCard {
+  string question_id = 1;
+  string header = 2;
+  string question = 3;
+  bool allows_other = 4;
+  bool is_secret = 5;
+  repeated InteractionChoice choices = 6;
+}
+message UserInputCard { bool is_blocking = 1; repeated InteractionQuestionCard questions = 2; }
+message UnsupportedInteractionCard { string blocker = 1; }
+message InteractionCard {
+  InteractionCardSummary summary = 1;
+  repeated InteractionCardDecision decisions = 2;
+  oneof detail {
+    CommandApprovalCard command_approval = 10;
+    FileApprovalCard file_approval = 11;
+    UserInputCard user_input = 12;
+    UnsupportedInteractionCard unsupported = 13;
+  }
+}
+message ListPendingRequest { string session_id = 1; }
+message ListPendingResponse { repeated InteractionCardSummary summaries = 1; }
+message GetCardRequest { string session_id = 1; string interaction_id = 2; }
+message GetCardResponse { InteractionCard card = 1; }
+message ResolveRequest {
+  string session_id = 1;
+  string interaction_id = 2;
+  // One-shot raw JSON bytes, bounded before JSON parsing; never retained/replayed.
+  bytes response_json = 3;
+}
+message ResolveResponse {
+  InteractionResolutionOutcome outcome = 1;
+  string resolution_receipt = 2;
+  optional InteractionCard pending_card = 3;
+}

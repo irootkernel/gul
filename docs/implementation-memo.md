@@ -540,7 +540,7 @@ Medium-or-higher finding, pending Low disposition or unmet acceptance criterion
 remains. The full `make test` gate, focused session/API race tests and SOT checks
 passed on the corrected implementation; focused SOT checks also cover closeout.
 
-E4-T2 is next. E5 owns session close, E8 owns authenticated route assembly, and
+E4-T3 is next. E5 owns session close, E8 owns authenticated route assembly, and
 E2/E9 retain released-provider qualification. E3 does not establish mounted-route,
 assembled-product or released-provider acceptance. The shared consumer dossier
 remains for its other roadmap consumers; E3 now links to its canonical outcomes.
@@ -583,6 +583,54 @@ adds the shared fresh-policy/active-owner WRITE rule, explicit submission flag,
 and an unmounted writer-status component. These requirements remain T1-owned;
 T3 will consume the rule in its broader action evaluator. No live-provider or
 assembled browser evidence is claimed.
+
+### E4-T2 interaction cards and response handling
+
+`internal/interaction` now separates observer pending summaries from fresh
+Controller-authorized cards. The checked adapter classifies every advertised
+kind and all four payload variants. It rejects unknown fields/enums, mismatched
+IDs or stamps, missing decision context, unsafe paths and incompatible payloads.
+The selected payload submessage uses the smaller provider limit and the exact
+8 MiB local cap. File-change artifacts require matching metadata, ordered bounded
+chunks, exact length and SHA-256 before the card exposes their diff.
+
+The service normalizes approval, denial, cancellation and user answers in memory.
+It checks raw response size before parsing, applies the smaller provider limit
+and 64 KiB cap again before forwarding, and invokes ResolveInteraction once.
+Neither bodies nor content-derived hashes are retained. Every attempt refreshes
+authorized state: resolved finishes locally, pending requires explicit re-entry,
+stale stays non-actionable, and an unreadable outcome remains unknown. Transport
+assembly must preserve the pinned no-retry/no-hedging policy.
+
+Non-live sessions receive independent observer-only Run and pending reads every
+five seconds under a five-second deadline. The live manager and polling service
+are connected by an observer component. The existing delivery transaction emits
+only session/correlation invalidations; polling never advances event checkpoints.
+The unmounted generated API exposes typed cards and a bounded response body. The
+React form clears its fields before sending, clears its byte buffer afterward,
+and performs no automatic replay or browser-storage writes.
+
+Verification covers the full kind/variant matrix, actual 8 MiB payload and
+64 KiB response boundaries alongside smaller provider limits,
+Controller loss, stamp drift, path rejection, artifact corruption, response loss,
+competing ConnectRPC clients, complete-question validation, internal revision
+consistency, slow-Run polling and regression invalidation, rollback and cursor
+independence. Canary tests check cleared response buffers, safe errors/results
+and SQLite/WAL absence. Question IDs remain JSON keys but use separate DOM field
+names. An isolated Chrome fixture verifies that `__proto__` and `reset` answers
+reach one response callback, input fields and buffers are cleared, and browser
+storage stays empty. These are fake-provider and isolated component checks.
+The E13 scenario harness
+is not used as evidence for fresh Controller detail stamps; typed wire fixtures
+supply those complete projections. E5 retains recovery/convergence and E8 retains
+authenticated product assembly; no live-provider acceptance is claimed.
+
+E4-T2 is complete. Independent review confirmed the original acceptance criteria
+and the corrections, including polling recovery at an unchanged stamp. The full
+`make test` gate, focused race checks, component/type checks and isolated Chrome
+verification passed. No unresolved finding or unmet criterion remains. E4-T3 is
+next; the shared action evaluator and distinct interaction outcome presentation
+remain in that task's scope.
 
 ## 2. Current development snapshot
 
@@ -1051,4 +1099,4 @@ The initial documentation assumed Gul would manage one Codex App Server, map Ses
 
 ## 12. Handoff
 
-E12, E1, E13, and E3 are complete. The TASK-053 consumer lock and generated contract tooling remain authoritative. E3-T1 added fake-scoped Workspace attachment, E3-T2 added local-only presentation, E3-T3 added passive session reads, and E3-T4 added prospective global Profile launch selection. E4-T2 is next. E2-T0 remains blocked on an accepted compatible Dolgorae executable and live smoke evidence. No product route or live-provider behavior is activated automatically.
+E12, E1, E13, and E3 are complete. The TASK-053 consumer lock and generated contract tooling remain authoritative. E3-T1 added fake-scoped Workspace attachment, E3-T2 added local-only presentation, E3-T3 added passive session reads, and E3-T4 added prospective global Profile launch selection. E4-T3 is next. E2-T0 remains blocked on an accepted compatible Dolgorae executable and live smoke evidence. No product route or live-provider behavior is activated automatically.

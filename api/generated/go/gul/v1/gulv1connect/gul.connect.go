@@ -33,6 +33,9 @@ const (
 	ArtifactPresentationServiceName = "gul.v1.ArtifactPresentationService"
 	// ClientEventServiceName is the fully-qualified name of the ClientEventService service.
 	ClientEventServiceName = "gul.v1.ClientEventService"
+	// InteractionPresentationServiceName is the fully-qualified name of the
+	// InteractionPresentationService service.
+	InteractionPresentationServiceName = "gul.v1.InteractionPresentationService"
 )
 
 // These constants are the fully-qualified names of the RPCs defined in this package. They're
@@ -124,6 +127,15 @@ const (
 	// ClientEventServiceWatchClientEventsProcedure is the fully-qualified name of the
 	// ClientEventService's WatchClientEvents RPC.
 	ClientEventServiceWatchClientEventsProcedure = "/gul.v1.ClientEventService/WatchClientEvents"
+	// InteractionPresentationServiceListPendingProcedure is the fully-qualified name of the
+	// InteractionPresentationService's ListPending RPC.
+	InteractionPresentationServiceListPendingProcedure = "/gul.v1.InteractionPresentationService/ListPending"
+	// InteractionPresentationServiceGetCardProcedure is the fully-qualified name of the
+	// InteractionPresentationService's GetCard RPC.
+	InteractionPresentationServiceGetCardProcedure = "/gul.v1.InteractionPresentationService/GetCard"
+	// InteractionPresentationServiceResolveProcedure is the fully-qualified name of the
+	// InteractionPresentationService's Resolve RPC.
+	InteractionPresentationServiceResolveProcedure = "/gul.v1.InteractionPresentationService/Resolve"
 )
 
 // RuntimeServiceClient is a client for the gul.v1.RuntimeService service.
@@ -1049,4 +1061,128 @@ type UnimplementedClientEventServiceHandler struct{}
 
 func (UnimplementedClientEventServiceHandler) WatchClientEvents(context.Context, *connect.Request[v1.WatchClientEventsRequest], *connect.ServerStream[v1.ClientEvent]) error {
 	return connect.NewError(connect.CodeUnimplemented, errors.New("gul.v1.ClientEventService.WatchClientEvents is not implemented"))
+}
+
+// InteractionPresentationServiceClient is a client for the gul.v1.InteractionPresentationService
+// service.
+type InteractionPresentationServiceClient interface {
+	ListPending(context.Context, *connect.Request[v1.ListPendingRequest]) (*connect.Response[v1.ListPendingResponse], error)
+	GetCard(context.Context, *connect.Request[v1.GetCardRequest]) (*connect.Response[v1.GetCardResponse], error)
+	Resolve(context.Context, *connect.Request[v1.ResolveRequest]) (*connect.Response[v1.ResolveResponse], error)
+}
+
+// NewInteractionPresentationServiceClient constructs a client for the
+// gul.v1.InteractionPresentationService service. By default, it uses the Connect protocol with the
+// binary Protobuf Codec, asks for gzipped responses, and sends uncompressed requests. To use the
+// gRPC or gRPC-Web protocols, supply the connect.WithGRPC() or connect.WithGRPCWeb() options.
+//
+// The URL supplied here should be the base URL for the Connect or gRPC server (for example,
+// http://api.acme.com or https://acme.com/grpc).
+func NewInteractionPresentationServiceClient(httpClient connect.HTTPClient, baseURL string, opts ...connect.ClientOption) InteractionPresentationServiceClient {
+	baseURL = strings.TrimRight(baseURL, "/")
+	interactionPresentationServiceMethods := v1.File_gul_v1_gul_proto.Services().ByName("InteractionPresentationService").Methods()
+	return &interactionPresentationServiceClient{
+		listPending: connect.NewClient[v1.ListPendingRequest, v1.ListPendingResponse](
+			httpClient,
+			baseURL+InteractionPresentationServiceListPendingProcedure,
+			connect.WithSchema(interactionPresentationServiceMethods.ByName("ListPending")),
+			connect.WithClientOptions(opts...),
+		),
+		getCard: connect.NewClient[v1.GetCardRequest, v1.GetCardResponse](
+			httpClient,
+			baseURL+InteractionPresentationServiceGetCardProcedure,
+			connect.WithSchema(interactionPresentationServiceMethods.ByName("GetCard")),
+			connect.WithClientOptions(opts...),
+		),
+		resolve: connect.NewClient[v1.ResolveRequest, v1.ResolveResponse](
+			httpClient,
+			baseURL+InteractionPresentationServiceResolveProcedure,
+			connect.WithSchema(interactionPresentationServiceMethods.ByName("Resolve")),
+			connect.WithClientOptions(opts...),
+		),
+	}
+}
+
+// interactionPresentationServiceClient implements InteractionPresentationServiceClient.
+type interactionPresentationServiceClient struct {
+	listPending *connect.Client[v1.ListPendingRequest, v1.ListPendingResponse]
+	getCard     *connect.Client[v1.GetCardRequest, v1.GetCardResponse]
+	resolve     *connect.Client[v1.ResolveRequest, v1.ResolveResponse]
+}
+
+// ListPending calls gul.v1.InteractionPresentationService.ListPending.
+func (c *interactionPresentationServiceClient) ListPending(ctx context.Context, req *connect.Request[v1.ListPendingRequest]) (*connect.Response[v1.ListPendingResponse], error) {
+	return c.listPending.CallUnary(ctx, req)
+}
+
+// GetCard calls gul.v1.InteractionPresentationService.GetCard.
+func (c *interactionPresentationServiceClient) GetCard(ctx context.Context, req *connect.Request[v1.GetCardRequest]) (*connect.Response[v1.GetCardResponse], error) {
+	return c.getCard.CallUnary(ctx, req)
+}
+
+// Resolve calls gul.v1.InteractionPresentationService.Resolve.
+func (c *interactionPresentationServiceClient) Resolve(ctx context.Context, req *connect.Request[v1.ResolveRequest]) (*connect.Response[v1.ResolveResponse], error) {
+	return c.resolve.CallUnary(ctx, req)
+}
+
+// InteractionPresentationServiceHandler is an implementation of the
+// gul.v1.InteractionPresentationService service.
+type InteractionPresentationServiceHandler interface {
+	ListPending(context.Context, *connect.Request[v1.ListPendingRequest]) (*connect.Response[v1.ListPendingResponse], error)
+	GetCard(context.Context, *connect.Request[v1.GetCardRequest]) (*connect.Response[v1.GetCardResponse], error)
+	Resolve(context.Context, *connect.Request[v1.ResolveRequest]) (*connect.Response[v1.ResolveResponse], error)
+}
+
+// NewInteractionPresentationServiceHandler builds an HTTP handler from the service implementation.
+// It returns the path on which to mount the handler and the handler itself.
+//
+// By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf
+// and JSON codecs. They also support gzip compression.
+func NewInteractionPresentationServiceHandler(svc InteractionPresentationServiceHandler, opts ...connect.HandlerOption) (string, http.Handler) {
+	interactionPresentationServiceMethods := v1.File_gul_v1_gul_proto.Services().ByName("InteractionPresentationService").Methods()
+	interactionPresentationServiceListPendingHandler := connect.NewUnaryHandler(
+		InteractionPresentationServiceListPendingProcedure,
+		svc.ListPending,
+		connect.WithSchema(interactionPresentationServiceMethods.ByName("ListPending")),
+		connect.WithHandlerOptions(opts...),
+	)
+	interactionPresentationServiceGetCardHandler := connect.NewUnaryHandler(
+		InteractionPresentationServiceGetCardProcedure,
+		svc.GetCard,
+		connect.WithSchema(interactionPresentationServiceMethods.ByName("GetCard")),
+		connect.WithHandlerOptions(opts...),
+	)
+	interactionPresentationServiceResolveHandler := connect.NewUnaryHandler(
+		InteractionPresentationServiceResolveProcedure,
+		svc.Resolve,
+		connect.WithSchema(interactionPresentationServiceMethods.ByName("Resolve")),
+		connect.WithHandlerOptions(opts...),
+	)
+	return "/gul.v1.InteractionPresentationService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case InteractionPresentationServiceListPendingProcedure:
+			interactionPresentationServiceListPendingHandler.ServeHTTP(w, r)
+		case InteractionPresentationServiceGetCardProcedure:
+			interactionPresentationServiceGetCardHandler.ServeHTTP(w, r)
+		case InteractionPresentationServiceResolveProcedure:
+			interactionPresentationServiceResolveHandler.ServeHTTP(w, r)
+		default:
+			http.NotFound(w, r)
+		}
+	})
+}
+
+// UnimplementedInteractionPresentationServiceHandler returns CodeUnimplemented from all methods.
+type UnimplementedInteractionPresentationServiceHandler struct{}
+
+func (UnimplementedInteractionPresentationServiceHandler) ListPending(context.Context, *connect.Request[v1.ListPendingRequest]) (*connect.Response[v1.ListPendingResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("gul.v1.InteractionPresentationService.ListPending is not implemented"))
+}
+
+func (UnimplementedInteractionPresentationServiceHandler) GetCard(context.Context, *connect.Request[v1.GetCardRequest]) (*connect.Response[v1.GetCardResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("gul.v1.InteractionPresentationService.GetCard is not implemented"))
+}
+
+func (UnimplementedInteractionPresentationServiceHandler) Resolve(context.Context, *connect.Request[v1.ResolveRequest]) (*connect.Response[v1.ResolveResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("gul.v1.InteractionPresentationService.Resolve is not implemented"))
 }

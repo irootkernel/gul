@@ -1023,6 +1023,220 @@ func (WriterAccessMode) EnumDescriptor() ([]byte, []int) {
 	return file_gul_v1_gul_proto_rawDescGZIP(), []int{15}
 }
 
+type InteractionCardKind int32
+
+const (
+	InteractionCardKind_INTERACTION_CARD_KIND_UNSPECIFIED      InteractionCardKind = 0
+	InteractionCardKind_INTERACTION_CARD_KIND_COMMAND_APPROVAL InteractionCardKind = 1
+	InteractionCardKind_INTERACTION_CARD_KIND_FILE_APPROVAL    InteractionCardKind = 2
+	InteractionCardKind_INTERACTION_CARD_KIND_USER_INPUT       InteractionCardKind = 3
+	InteractionCardKind_INTERACTION_CARD_KIND_UNSUPPORTED      InteractionCardKind = 4
+)
+
+// Enum value maps for InteractionCardKind.
+var (
+	InteractionCardKind_name = map[int32]string{
+		0: "INTERACTION_CARD_KIND_UNSPECIFIED",
+		1: "INTERACTION_CARD_KIND_COMMAND_APPROVAL",
+		2: "INTERACTION_CARD_KIND_FILE_APPROVAL",
+		3: "INTERACTION_CARD_KIND_USER_INPUT",
+		4: "INTERACTION_CARD_KIND_UNSUPPORTED",
+	}
+	InteractionCardKind_value = map[string]int32{
+		"INTERACTION_CARD_KIND_UNSPECIFIED":      0,
+		"INTERACTION_CARD_KIND_COMMAND_APPROVAL": 1,
+		"INTERACTION_CARD_KIND_FILE_APPROVAL":    2,
+		"INTERACTION_CARD_KIND_USER_INPUT":       3,
+		"INTERACTION_CARD_KIND_UNSUPPORTED":      4,
+	}
+)
+
+func (x InteractionCardKind) Enum() *InteractionCardKind {
+	p := new(InteractionCardKind)
+	*p = x
+	return p
+}
+
+func (x InteractionCardKind) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (InteractionCardKind) Descriptor() protoreflect.EnumDescriptor {
+	return file_gul_v1_gul_proto_enumTypes[16].Descriptor()
+}
+
+func (InteractionCardKind) Type() protoreflect.EnumType {
+	return &file_gul_v1_gul_proto_enumTypes[16]
+}
+
+func (x InteractionCardKind) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use InteractionCardKind.Descriptor instead.
+func (InteractionCardKind) EnumDescriptor() ([]byte, []int) {
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{16}
+}
+
+type InteractionCardStatus int32
+
+const (
+	InteractionCardStatus_INTERACTION_CARD_STATUS_UNSPECIFIED InteractionCardStatus = 0
+	InteractionCardStatus_INTERACTION_CARD_STATUS_PENDING     InteractionCardStatus = 1
+	InteractionCardStatus_INTERACTION_CARD_STATUS_RESOLVED    InteractionCardStatus = 2
+	InteractionCardStatus_INTERACTION_CARD_STATUS_STALE       InteractionCardStatus = 3
+)
+
+// Enum value maps for InteractionCardStatus.
+var (
+	InteractionCardStatus_name = map[int32]string{
+		0: "INTERACTION_CARD_STATUS_UNSPECIFIED",
+		1: "INTERACTION_CARD_STATUS_PENDING",
+		2: "INTERACTION_CARD_STATUS_RESOLVED",
+		3: "INTERACTION_CARD_STATUS_STALE",
+	}
+	InteractionCardStatus_value = map[string]int32{
+		"INTERACTION_CARD_STATUS_UNSPECIFIED": 0,
+		"INTERACTION_CARD_STATUS_PENDING":     1,
+		"INTERACTION_CARD_STATUS_RESOLVED":    2,
+		"INTERACTION_CARD_STATUS_STALE":       3,
+	}
+)
+
+func (x InteractionCardStatus) Enum() *InteractionCardStatus {
+	p := new(InteractionCardStatus)
+	*p = x
+	return p
+}
+
+func (x InteractionCardStatus) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (InteractionCardStatus) Descriptor() protoreflect.EnumDescriptor {
+	return file_gul_v1_gul_proto_enumTypes[17].Descriptor()
+}
+
+func (InteractionCardStatus) Type() protoreflect.EnumType {
+	return &file_gul_v1_gul_proto_enumTypes[17]
+}
+
+func (x InteractionCardStatus) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use InteractionCardStatus.Descriptor instead.
+func (InteractionCardStatus) EnumDescriptor() ([]byte, []int) {
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{17}
+}
+
+type InteractionCardDecision int32
+
+const (
+	InteractionCardDecision_INTERACTION_CARD_DECISION_UNSPECIFIED InteractionCardDecision = 0
+	InteractionCardDecision_INTERACTION_CARD_DECISION_ACCEPT_ONCE InteractionCardDecision = 1
+	InteractionCardDecision_INTERACTION_CARD_DECISION_DECLINE     InteractionCardDecision = 2
+	InteractionCardDecision_INTERACTION_CARD_DECISION_CANCEL      InteractionCardDecision = 3
+)
+
+// Enum value maps for InteractionCardDecision.
+var (
+	InteractionCardDecision_name = map[int32]string{
+		0: "INTERACTION_CARD_DECISION_UNSPECIFIED",
+		1: "INTERACTION_CARD_DECISION_ACCEPT_ONCE",
+		2: "INTERACTION_CARD_DECISION_DECLINE",
+		3: "INTERACTION_CARD_DECISION_CANCEL",
+	}
+	InteractionCardDecision_value = map[string]int32{
+		"INTERACTION_CARD_DECISION_UNSPECIFIED": 0,
+		"INTERACTION_CARD_DECISION_ACCEPT_ONCE": 1,
+		"INTERACTION_CARD_DECISION_DECLINE":     2,
+		"INTERACTION_CARD_DECISION_CANCEL":      3,
+	}
+)
+
+func (x InteractionCardDecision) Enum() *InteractionCardDecision {
+	p := new(InteractionCardDecision)
+	*p = x
+	return p
+}
+
+func (x InteractionCardDecision) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (InteractionCardDecision) Descriptor() protoreflect.EnumDescriptor {
+	return file_gul_v1_gul_proto_enumTypes[18].Descriptor()
+}
+
+func (InteractionCardDecision) Type() protoreflect.EnumType {
+	return &file_gul_v1_gul_proto_enumTypes[18]
+}
+
+func (x InteractionCardDecision) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use InteractionCardDecision.Descriptor instead.
+func (InteractionCardDecision) EnumDescriptor() ([]byte, []int) {
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{18}
+}
+
+type InteractionResolutionOutcome int32
+
+const (
+	InteractionResolutionOutcome_INTERACTION_RESOLUTION_OUTCOME_UNSPECIFIED InteractionResolutionOutcome = 0
+	InteractionResolutionOutcome_INTERACTION_RESOLUTION_OUTCOME_UNKNOWN     InteractionResolutionOutcome = 4
+	InteractionResolutionOutcome_INTERACTION_RESOLUTION_OUTCOME_RESOLVED    InteractionResolutionOutcome = 1
+	InteractionResolutionOutcome_INTERACTION_RESOLUTION_OUTCOME_REENTER     InteractionResolutionOutcome = 2
+	InteractionResolutionOutcome_INTERACTION_RESOLUTION_OUTCOME_STALE       InteractionResolutionOutcome = 3
+)
+
+// Enum value maps for InteractionResolutionOutcome.
+var (
+	InteractionResolutionOutcome_name = map[int32]string{
+		0: "INTERACTION_RESOLUTION_OUTCOME_UNSPECIFIED",
+		4: "INTERACTION_RESOLUTION_OUTCOME_UNKNOWN",
+		1: "INTERACTION_RESOLUTION_OUTCOME_RESOLVED",
+		2: "INTERACTION_RESOLUTION_OUTCOME_REENTER",
+		3: "INTERACTION_RESOLUTION_OUTCOME_STALE",
+	}
+	InteractionResolutionOutcome_value = map[string]int32{
+		"INTERACTION_RESOLUTION_OUTCOME_UNSPECIFIED": 0,
+		"INTERACTION_RESOLUTION_OUTCOME_UNKNOWN":     4,
+		"INTERACTION_RESOLUTION_OUTCOME_RESOLVED":    1,
+		"INTERACTION_RESOLUTION_OUTCOME_REENTER":     2,
+		"INTERACTION_RESOLUTION_OUTCOME_STALE":       3,
+	}
+)
+
+func (x InteractionResolutionOutcome) Enum() *InteractionResolutionOutcome {
+	p := new(InteractionResolutionOutcome)
+	*p = x
+	return p
+}
+
+func (x InteractionResolutionOutcome) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (InteractionResolutionOutcome) Descriptor() protoreflect.EnumDescriptor {
+	return file_gul_v1_gul_proto_enumTypes[19].Descriptor()
+}
+
+func (InteractionResolutionOutcome) Type() protoreflect.EnumType {
+	return &file_gul_v1_gul_proto_enumTypes[19]
+}
+
+func (x InteractionResolutionOutcome) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use InteractionResolutionOutcome.Descriptor instead.
+func (InteractionResolutionOutcome) EnumDescriptor() ([]byte, []int) {
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{19}
+}
+
 type RuntimeModelChoice struct {
 	state            protoimpl.MessageState `protogen:"open.v1"`
 	ModelId          string                 `protobuf:"bytes,1,opt,name=model_id,json=modelId,proto3" json:"model_id,omitempty"`
@@ -4675,6 +4889,993 @@ func (x *ClientEvent) GetCreatedAt() *timestamppb.Timestamp {
 	return nil
 }
 
+type InteractionCardSummary struct {
+	state                  protoimpl.MessageState `protogen:"open.v1"`
+	InteractionId          string                 `protobuf:"bytes,1,opt,name=interaction_id,json=interactionId,proto3" json:"interaction_id,omitempty"`
+	Kind                   InteractionCardKind    `protobuf:"varint,2,opt,name=kind,proto3,enum=gul.v1.InteractionCardKind" json:"kind,omitempty"`
+	Status                 InteractionCardStatus  `protobuf:"varint,3,opt,name=status,proto3,enum=gul.v1.InteractionCardStatus" json:"status,omitempty"`
+	CreatedAt              *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	ExpiresAt              *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=expires_at,json=expiresAt,proto3,oneof" json:"expires_at,omitempty"`
+	ResolvedAt             *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=resolved_at,json=resolvedAt,proto3,oneof" json:"resolved_at,omitempty"`
+	ContainsProtectedInput bool                   `protobuf:"varint,7,opt,name=contains_protected_input,json=containsProtectedInput,proto3" json:"contains_protected_input,omitempty"`
+	RequiresUserEscalation bool                   `protobuf:"varint,8,opt,name=requires_user_escalation,json=requiresUserEscalation,proto3" json:"requires_user_escalation,omitempty"`
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *InteractionCardSummary) Reset() {
+	*x = InteractionCardSummary{}
+	mi := &file_gul_v1_gul_proto_msgTypes[61]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *InteractionCardSummary) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*InteractionCardSummary) ProtoMessage() {}
+
+func (x *InteractionCardSummary) ProtoReflect() protoreflect.Message {
+	mi := &file_gul_v1_gul_proto_msgTypes[61]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use InteractionCardSummary.ProtoReflect.Descriptor instead.
+func (*InteractionCardSummary) Descriptor() ([]byte, []int) {
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{61}
+}
+
+func (x *InteractionCardSummary) GetInteractionId() string {
+	if x != nil {
+		return x.InteractionId
+	}
+	return ""
+}
+
+func (x *InteractionCardSummary) GetKind() InteractionCardKind {
+	if x != nil {
+		return x.Kind
+	}
+	return InteractionCardKind_INTERACTION_CARD_KIND_UNSPECIFIED
+}
+
+func (x *InteractionCardSummary) GetStatus() InteractionCardStatus {
+	if x != nil {
+		return x.Status
+	}
+	return InteractionCardStatus_INTERACTION_CARD_STATUS_UNSPECIFIED
+}
+
+func (x *InteractionCardSummary) GetCreatedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return nil
+}
+
+func (x *InteractionCardSummary) GetExpiresAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.ExpiresAt
+	}
+	return nil
+}
+
+func (x *InteractionCardSummary) GetResolvedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.ResolvedAt
+	}
+	return nil
+}
+
+func (x *InteractionCardSummary) GetContainsProtectedInput() bool {
+	if x != nil {
+		return x.ContainsProtectedInput
+	}
+	return false
+}
+
+func (x *InteractionCardSummary) GetRequiresUserEscalation() bool {
+	if x != nil {
+		return x.RequiresUserEscalation
+	}
+	return false
+}
+
+type CommandApprovalCard struct {
+	state                    protoimpl.MessageState `protogen:"open.v1"`
+	Title                    string                 `protobuf:"bytes,1,opt,name=title,proto3" json:"title,omitempty"`
+	Message                  string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
+	Reason                   string                 `protobuf:"bytes,3,opt,name=reason,proto3" json:"reason,omitempty"`
+	Command                  []string               `protobuf:"bytes,4,rep,name=command,proto3" json:"command,omitempty"`
+	RelativeWorkingDirectory string                 `protobuf:"bytes,5,opt,name=relative_working_directory,json=relativeWorkingDirectory,proto3" json:"relative_working_directory,omitempty"`
+	unknownFields            protoimpl.UnknownFields
+	sizeCache                protoimpl.SizeCache
+}
+
+func (x *CommandApprovalCard) Reset() {
+	*x = CommandApprovalCard{}
+	mi := &file_gul_v1_gul_proto_msgTypes[62]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CommandApprovalCard) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CommandApprovalCard) ProtoMessage() {}
+
+func (x *CommandApprovalCard) ProtoReflect() protoreflect.Message {
+	mi := &file_gul_v1_gul_proto_msgTypes[62]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CommandApprovalCard.ProtoReflect.Descriptor instead.
+func (*CommandApprovalCard) Descriptor() ([]byte, []int) {
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{62}
+}
+
+func (x *CommandApprovalCard) GetTitle() string {
+	if x != nil {
+		return x.Title
+	}
+	return ""
+}
+
+func (x *CommandApprovalCard) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
+func (x *CommandApprovalCard) GetReason() string {
+	if x != nil {
+		return x.Reason
+	}
+	return ""
+}
+
+func (x *CommandApprovalCard) GetCommand() []string {
+	if x != nil {
+		return x.Command
+	}
+	return nil
+}
+
+func (x *CommandApprovalCard) GetRelativeWorkingDirectory() string {
+	if x != nil {
+		return x.RelativeWorkingDirectory
+	}
+	return ""
+}
+
+type FileChangeCard struct {
+	state            protoimpl.MessageState `protogen:"open.v1"`
+	RelativePath     string                 `protobuf:"bytes,1,opt,name=relative_path,json=relativePath,proto3" json:"relative_path,omitempty"`
+	Kind             string                 `protobuf:"bytes,2,opt,name=kind,proto3" json:"kind,omitempty"`
+	UnifiedDiff      string                 `protobuf:"bytes,3,opt,name=unified_diff,json=unifiedDiff,proto3" json:"unified_diff,omitempty"`
+	RelativeMovePath string                 `protobuf:"bytes,4,opt,name=relative_move_path,json=relativeMovePath,proto3" json:"relative_move_path,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
+}
+
+func (x *FileChangeCard) Reset() {
+	*x = FileChangeCard{}
+	mi := &file_gul_v1_gul_proto_msgTypes[63]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *FileChangeCard) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*FileChangeCard) ProtoMessage() {}
+
+func (x *FileChangeCard) ProtoReflect() protoreflect.Message {
+	mi := &file_gul_v1_gul_proto_msgTypes[63]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use FileChangeCard.ProtoReflect.Descriptor instead.
+func (*FileChangeCard) Descriptor() ([]byte, []int) {
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{63}
+}
+
+func (x *FileChangeCard) GetRelativePath() string {
+	if x != nil {
+		return x.RelativePath
+	}
+	return ""
+}
+
+func (x *FileChangeCard) GetKind() string {
+	if x != nil {
+		return x.Kind
+	}
+	return ""
+}
+
+func (x *FileChangeCard) GetUnifiedDiff() string {
+	if x != nil {
+		return x.UnifiedDiff
+	}
+	return ""
+}
+
+func (x *FileChangeCard) GetRelativeMovePath() string {
+	if x != nil {
+		return x.RelativeMovePath
+	}
+	return ""
+}
+
+type FileApprovalCard struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Title         string                 `protobuf:"bytes,1,opt,name=title,proto3" json:"title,omitempty"`
+	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
+	Reason        string                 `protobuf:"bytes,3,opt,name=reason,proto3" json:"reason,omitempty"`
+	Changes       []*FileChangeCard      `protobuf:"bytes,4,rep,name=changes,proto3" json:"changes,omitempty"`
+	VerifiedDiff  string                 `protobuf:"bytes,5,opt,name=verified_diff,json=verifiedDiff,proto3" json:"verified_diff,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *FileApprovalCard) Reset() {
+	*x = FileApprovalCard{}
+	mi := &file_gul_v1_gul_proto_msgTypes[64]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *FileApprovalCard) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*FileApprovalCard) ProtoMessage() {}
+
+func (x *FileApprovalCard) ProtoReflect() protoreflect.Message {
+	mi := &file_gul_v1_gul_proto_msgTypes[64]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use FileApprovalCard.ProtoReflect.Descriptor instead.
+func (*FileApprovalCard) Descriptor() ([]byte, []int) {
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{64}
+}
+
+func (x *FileApprovalCard) GetTitle() string {
+	if x != nil {
+		return x.Title
+	}
+	return ""
+}
+
+func (x *FileApprovalCard) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
+func (x *FileApprovalCard) GetReason() string {
+	if x != nil {
+		return x.Reason
+	}
+	return ""
+}
+
+func (x *FileApprovalCard) GetChanges() []*FileChangeCard {
+	if x != nil {
+		return x.Changes
+	}
+	return nil
+}
+
+func (x *FileApprovalCard) GetVerifiedDiff() string {
+	if x != nil {
+		return x.VerifiedDiff
+	}
+	return ""
+}
+
+type InteractionChoice struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Label         string                 `protobuf:"bytes,1,opt,name=label,proto3" json:"label,omitempty"`
+	Description   string                 `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *InteractionChoice) Reset() {
+	*x = InteractionChoice{}
+	mi := &file_gul_v1_gul_proto_msgTypes[65]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *InteractionChoice) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*InteractionChoice) ProtoMessage() {}
+
+func (x *InteractionChoice) ProtoReflect() protoreflect.Message {
+	mi := &file_gul_v1_gul_proto_msgTypes[65]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use InteractionChoice.ProtoReflect.Descriptor instead.
+func (*InteractionChoice) Descriptor() ([]byte, []int) {
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{65}
+}
+
+func (x *InteractionChoice) GetLabel() string {
+	if x != nil {
+		return x.Label
+	}
+	return ""
+}
+
+func (x *InteractionChoice) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+type InteractionQuestionCard struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	QuestionId    string                 `protobuf:"bytes,1,opt,name=question_id,json=questionId,proto3" json:"question_id,omitempty"`
+	Header        string                 `protobuf:"bytes,2,opt,name=header,proto3" json:"header,omitempty"`
+	Question      string                 `protobuf:"bytes,3,opt,name=question,proto3" json:"question,omitempty"`
+	AllowsOther   bool                   `protobuf:"varint,4,opt,name=allows_other,json=allowsOther,proto3" json:"allows_other,omitempty"`
+	IsSecret      bool                   `protobuf:"varint,5,opt,name=is_secret,json=isSecret,proto3" json:"is_secret,omitempty"`
+	Choices       []*InteractionChoice   `protobuf:"bytes,6,rep,name=choices,proto3" json:"choices,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *InteractionQuestionCard) Reset() {
+	*x = InteractionQuestionCard{}
+	mi := &file_gul_v1_gul_proto_msgTypes[66]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *InteractionQuestionCard) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*InteractionQuestionCard) ProtoMessage() {}
+
+func (x *InteractionQuestionCard) ProtoReflect() protoreflect.Message {
+	mi := &file_gul_v1_gul_proto_msgTypes[66]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use InteractionQuestionCard.ProtoReflect.Descriptor instead.
+func (*InteractionQuestionCard) Descriptor() ([]byte, []int) {
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{66}
+}
+
+func (x *InteractionQuestionCard) GetQuestionId() string {
+	if x != nil {
+		return x.QuestionId
+	}
+	return ""
+}
+
+func (x *InteractionQuestionCard) GetHeader() string {
+	if x != nil {
+		return x.Header
+	}
+	return ""
+}
+
+func (x *InteractionQuestionCard) GetQuestion() string {
+	if x != nil {
+		return x.Question
+	}
+	return ""
+}
+
+func (x *InteractionQuestionCard) GetAllowsOther() bool {
+	if x != nil {
+		return x.AllowsOther
+	}
+	return false
+}
+
+func (x *InteractionQuestionCard) GetIsSecret() bool {
+	if x != nil {
+		return x.IsSecret
+	}
+	return false
+}
+
+func (x *InteractionQuestionCard) GetChoices() []*InteractionChoice {
+	if x != nil {
+		return x.Choices
+	}
+	return nil
+}
+
+type UserInputCard struct {
+	state         protoimpl.MessageState     `protogen:"open.v1"`
+	IsBlocking    bool                       `protobuf:"varint,1,opt,name=is_blocking,json=isBlocking,proto3" json:"is_blocking,omitempty"`
+	Questions     []*InteractionQuestionCard `protobuf:"bytes,2,rep,name=questions,proto3" json:"questions,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UserInputCard) Reset() {
+	*x = UserInputCard{}
+	mi := &file_gul_v1_gul_proto_msgTypes[67]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UserInputCard) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UserInputCard) ProtoMessage() {}
+
+func (x *UserInputCard) ProtoReflect() protoreflect.Message {
+	mi := &file_gul_v1_gul_proto_msgTypes[67]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UserInputCard.ProtoReflect.Descriptor instead.
+func (*UserInputCard) Descriptor() ([]byte, []int) {
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{67}
+}
+
+func (x *UserInputCard) GetIsBlocking() bool {
+	if x != nil {
+		return x.IsBlocking
+	}
+	return false
+}
+
+func (x *UserInputCard) GetQuestions() []*InteractionQuestionCard {
+	if x != nil {
+		return x.Questions
+	}
+	return nil
+}
+
+type UnsupportedInteractionCard struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Blocker       string                 `protobuf:"bytes,1,opt,name=blocker,proto3" json:"blocker,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UnsupportedInteractionCard) Reset() {
+	*x = UnsupportedInteractionCard{}
+	mi := &file_gul_v1_gul_proto_msgTypes[68]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UnsupportedInteractionCard) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UnsupportedInteractionCard) ProtoMessage() {}
+
+func (x *UnsupportedInteractionCard) ProtoReflect() protoreflect.Message {
+	mi := &file_gul_v1_gul_proto_msgTypes[68]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UnsupportedInteractionCard.ProtoReflect.Descriptor instead.
+func (*UnsupportedInteractionCard) Descriptor() ([]byte, []int) {
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{68}
+}
+
+func (x *UnsupportedInteractionCard) GetBlocker() string {
+	if x != nil {
+		return x.Blocker
+	}
+	return ""
+}
+
+type InteractionCard struct {
+	state     protoimpl.MessageState    `protogen:"open.v1"`
+	Summary   *InteractionCardSummary   `protobuf:"bytes,1,opt,name=summary,proto3" json:"summary,omitempty"`
+	Decisions []InteractionCardDecision `protobuf:"varint,2,rep,packed,name=decisions,proto3,enum=gul.v1.InteractionCardDecision" json:"decisions,omitempty"`
+	// Types that are valid to be assigned to Detail:
+	//
+	//	*InteractionCard_CommandApproval
+	//	*InteractionCard_FileApproval
+	//	*InteractionCard_UserInput
+	//	*InteractionCard_Unsupported
+	Detail        isInteractionCard_Detail `protobuf_oneof:"detail"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *InteractionCard) Reset() {
+	*x = InteractionCard{}
+	mi := &file_gul_v1_gul_proto_msgTypes[69]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *InteractionCard) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*InteractionCard) ProtoMessage() {}
+
+func (x *InteractionCard) ProtoReflect() protoreflect.Message {
+	mi := &file_gul_v1_gul_proto_msgTypes[69]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use InteractionCard.ProtoReflect.Descriptor instead.
+func (*InteractionCard) Descriptor() ([]byte, []int) {
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{69}
+}
+
+func (x *InteractionCard) GetSummary() *InteractionCardSummary {
+	if x != nil {
+		return x.Summary
+	}
+	return nil
+}
+
+func (x *InteractionCard) GetDecisions() []InteractionCardDecision {
+	if x != nil {
+		return x.Decisions
+	}
+	return nil
+}
+
+func (x *InteractionCard) GetDetail() isInteractionCard_Detail {
+	if x != nil {
+		return x.Detail
+	}
+	return nil
+}
+
+func (x *InteractionCard) GetCommandApproval() *CommandApprovalCard {
+	if x != nil {
+		if x, ok := x.Detail.(*InteractionCard_CommandApproval); ok {
+			return x.CommandApproval
+		}
+	}
+	return nil
+}
+
+func (x *InteractionCard) GetFileApproval() *FileApprovalCard {
+	if x != nil {
+		if x, ok := x.Detail.(*InteractionCard_FileApproval); ok {
+			return x.FileApproval
+		}
+	}
+	return nil
+}
+
+func (x *InteractionCard) GetUserInput() *UserInputCard {
+	if x != nil {
+		if x, ok := x.Detail.(*InteractionCard_UserInput); ok {
+			return x.UserInput
+		}
+	}
+	return nil
+}
+
+func (x *InteractionCard) GetUnsupported() *UnsupportedInteractionCard {
+	if x != nil {
+		if x, ok := x.Detail.(*InteractionCard_Unsupported); ok {
+			return x.Unsupported
+		}
+	}
+	return nil
+}
+
+type isInteractionCard_Detail interface {
+	isInteractionCard_Detail()
+}
+
+type InteractionCard_CommandApproval struct {
+	CommandApproval *CommandApprovalCard `protobuf:"bytes,10,opt,name=command_approval,json=commandApproval,proto3,oneof"`
+}
+
+type InteractionCard_FileApproval struct {
+	FileApproval *FileApprovalCard `protobuf:"bytes,11,opt,name=file_approval,json=fileApproval,proto3,oneof"`
+}
+
+type InteractionCard_UserInput struct {
+	UserInput *UserInputCard `protobuf:"bytes,12,opt,name=user_input,json=userInput,proto3,oneof"`
+}
+
+type InteractionCard_Unsupported struct {
+	Unsupported *UnsupportedInteractionCard `protobuf:"bytes,13,opt,name=unsupported,proto3,oneof"`
+}
+
+func (*InteractionCard_CommandApproval) isInteractionCard_Detail() {}
+
+func (*InteractionCard_FileApproval) isInteractionCard_Detail() {}
+
+func (*InteractionCard_UserInput) isInteractionCard_Detail() {}
+
+func (*InteractionCard_Unsupported) isInteractionCard_Detail() {}
+
+type ListPendingRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	SessionId     string                 `protobuf:"bytes,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListPendingRequest) Reset() {
+	*x = ListPendingRequest{}
+	mi := &file_gul_v1_gul_proto_msgTypes[70]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListPendingRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListPendingRequest) ProtoMessage() {}
+
+func (x *ListPendingRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_gul_v1_gul_proto_msgTypes[70]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListPendingRequest.ProtoReflect.Descriptor instead.
+func (*ListPendingRequest) Descriptor() ([]byte, []int) {
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{70}
+}
+
+func (x *ListPendingRequest) GetSessionId() string {
+	if x != nil {
+		return x.SessionId
+	}
+	return ""
+}
+
+type ListPendingResponse struct {
+	state         protoimpl.MessageState    `protogen:"open.v1"`
+	Summaries     []*InteractionCardSummary `protobuf:"bytes,1,rep,name=summaries,proto3" json:"summaries,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListPendingResponse) Reset() {
+	*x = ListPendingResponse{}
+	mi := &file_gul_v1_gul_proto_msgTypes[71]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListPendingResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListPendingResponse) ProtoMessage() {}
+
+func (x *ListPendingResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_gul_v1_gul_proto_msgTypes[71]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListPendingResponse.ProtoReflect.Descriptor instead.
+func (*ListPendingResponse) Descriptor() ([]byte, []int) {
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{71}
+}
+
+func (x *ListPendingResponse) GetSummaries() []*InteractionCardSummary {
+	if x != nil {
+		return x.Summaries
+	}
+	return nil
+}
+
+type GetCardRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	SessionId     string                 `protobuf:"bytes,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
+	InteractionId string                 `protobuf:"bytes,2,opt,name=interaction_id,json=interactionId,proto3" json:"interaction_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetCardRequest) Reset() {
+	*x = GetCardRequest{}
+	mi := &file_gul_v1_gul_proto_msgTypes[72]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetCardRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetCardRequest) ProtoMessage() {}
+
+func (x *GetCardRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_gul_v1_gul_proto_msgTypes[72]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetCardRequest.ProtoReflect.Descriptor instead.
+func (*GetCardRequest) Descriptor() ([]byte, []int) {
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{72}
+}
+
+func (x *GetCardRequest) GetSessionId() string {
+	if x != nil {
+		return x.SessionId
+	}
+	return ""
+}
+
+func (x *GetCardRequest) GetInteractionId() string {
+	if x != nil {
+		return x.InteractionId
+	}
+	return ""
+}
+
+type GetCardResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Card          *InteractionCard       `protobuf:"bytes,1,opt,name=card,proto3" json:"card,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetCardResponse) Reset() {
+	*x = GetCardResponse{}
+	mi := &file_gul_v1_gul_proto_msgTypes[73]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetCardResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetCardResponse) ProtoMessage() {}
+
+func (x *GetCardResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_gul_v1_gul_proto_msgTypes[73]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetCardResponse.ProtoReflect.Descriptor instead.
+func (*GetCardResponse) Descriptor() ([]byte, []int) {
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{73}
+}
+
+func (x *GetCardResponse) GetCard() *InteractionCard {
+	if x != nil {
+		return x.Card
+	}
+	return nil
+}
+
+type ResolveRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	SessionId     string                 `protobuf:"bytes,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
+	InteractionId string                 `protobuf:"bytes,2,opt,name=interaction_id,json=interactionId,proto3" json:"interaction_id,omitempty"`
+	// One-shot raw JSON bytes, bounded before JSON parsing; never retained/replayed.
+	ResponseJson  []byte `protobuf:"bytes,3,opt,name=response_json,json=responseJson,proto3" json:"response_json,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ResolveRequest) Reset() {
+	*x = ResolveRequest{}
+	mi := &file_gul_v1_gul_proto_msgTypes[74]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ResolveRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ResolveRequest) ProtoMessage() {}
+
+func (x *ResolveRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_gul_v1_gul_proto_msgTypes[74]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ResolveRequest.ProtoReflect.Descriptor instead.
+func (*ResolveRequest) Descriptor() ([]byte, []int) {
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{74}
+}
+
+func (x *ResolveRequest) GetSessionId() string {
+	if x != nil {
+		return x.SessionId
+	}
+	return ""
+}
+
+func (x *ResolveRequest) GetInteractionId() string {
+	if x != nil {
+		return x.InteractionId
+	}
+	return ""
+}
+
+func (x *ResolveRequest) GetResponseJson() []byte {
+	if x != nil {
+		return x.ResponseJson
+	}
+	return nil
+}
+
+type ResolveResponse struct {
+	state             protoimpl.MessageState       `protogen:"open.v1"`
+	Outcome           InteractionResolutionOutcome `protobuf:"varint,1,opt,name=outcome,proto3,enum=gul.v1.InteractionResolutionOutcome" json:"outcome,omitempty"`
+	ResolutionReceipt string                       `protobuf:"bytes,2,opt,name=resolution_receipt,json=resolutionReceipt,proto3" json:"resolution_receipt,omitempty"`
+	PendingCard       *InteractionCard             `protobuf:"bytes,3,opt,name=pending_card,json=pendingCard,proto3,oneof" json:"pending_card,omitempty"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
+}
+
+func (x *ResolveResponse) Reset() {
+	*x = ResolveResponse{}
+	mi := &file_gul_v1_gul_proto_msgTypes[75]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ResolveResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ResolveResponse) ProtoMessage() {}
+
+func (x *ResolveResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_gul_v1_gul_proto_msgTypes[75]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ResolveResponse.ProtoReflect.Descriptor instead.
+func (*ResolveResponse) Descriptor() ([]byte, []int) {
+	return file_gul_v1_gul_proto_rawDescGZIP(), []int{75}
+}
+
+func (x *ResolveResponse) GetOutcome() InteractionResolutionOutcome {
+	if x != nil {
+		return x.Outcome
+	}
+	return InteractionResolutionOutcome_INTERACTION_RESOLUTION_OUTCOME_UNSPECIFIED
+}
+
+func (x *ResolveResponse) GetResolutionReceipt() string {
+	if x != nil {
+		return x.ResolutionReceipt
+	}
+	return ""
+}
+
+func (x *ResolveResponse) GetPendingCard() *InteractionCard {
+	if x != nil {
+		return x.PendingCard
+	}
+	return nil
+}
+
 var File_gul_v1_gul_proto protoreflect.FileDescriptor
 
 const file_gul_v1_gul_proto_rawDesc = "" +
@@ -4973,7 +6174,86 @@ const file_gul_v1_gul_proto_rawDesc = "" +
 	"\x0ecorrelation_id\x18\x03 \x01(\tR\rcorrelationId\x12+\n" +
 	"\x04kind\x18\x04 \x01(\x0e2\x17.gul.v1.ClientEventKindR\x04kind\x129\n" +
 	"\n" +
-	"created_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt*\x87\x02\n" +
+	"created_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\"\xf7\x03\n" +
+	"\x16InteractionCardSummary\x12%\n" +
+	"\x0einteraction_id\x18\x01 \x01(\tR\rinteractionId\x12/\n" +
+	"\x04kind\x18\x02 \x01(\x0e2\x1b.gul.v1.InteractionCardKindR\x04kind\x125\n" +
+	"\x06status\x18\x03 \x01(\x0e2\x1d.gul.v1.InteractionCardStatusR\x06status\x129\n" +
+	"\n" +
+	"created_at\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x12>\n" +
+	"\n" +
+	"expires_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampH\x00R\texpiresAt\x88\x01\x01\x12@\n" +
+	"\vresolved_at\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampH\x01R\n" +
+	"resolvedAt\x88\x01\x01\x128\n" +
+	"\x18contains_protected_input\x18\a \x01(\bR\x16containsProtectedInput\x128\n" +
+	"\x18requires_user_escalation\x18\b \x01(\bR\x16requiresUserEscalationB\r\n" +
+	"\v_expires_atB\x0e\n" +
+	"\f_resolved_at\"\xb5\x01\n" +
+	"\x13CommandApprovalCard\x12\x14\n" +
+	"\x05title\x18\x01 \x01(\tR\x05title\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\x12\x16\n" +
+	"\x06reason\x18\x03 \x01(\tR\x06reason\x12\x18\n" +
+	"\acommand\x18\x04 \x03(\tR\acommand\x12<\n" +
+	"\x1arelative_working_directory\x18\x05 \x01(\tR\x18relativeWorkingDirectory\"\x9a\x01\n" +
+	"\x0eFileChangeCard\x12#\n" +
+	"\rrelative_path\x18\x01 \x01(\tR\frelativePath\x12\x12\n" +
+	"\x04kind\x18\x02 \x01(\tR\x04kind\x12!\n" +
+	"\funified_diff\x18\x03 \x01(\tR\vunifiedDiff\x12,\n" +
+	"\x12relative_move_path\x18\x04 \x01(\tR\x10relativeMovePath\"\xb1\x01\n" +
+	"\x10FileApprovalCard\x12\x14\n" +
+	"\x05title\x18\x01 \x01(\tR\x05title\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\x12\x16\n" +
+	"\x06reason\x18\x03 \x01(\tR\x06reason\x120\n" +
+	"\achanges\x18\x04 \x03(\v2\x16.gul.v1.FileChangeCardR\achanges\x12#\n" +
+	"\rverified_diff\x18\x05 \x01(\tR\fverifiedDiff\"K\n" +
+	"\x11InteractionChoice\x12\x14\n" +
+	"\x05label\x18\x01 \x01(\tR\x05label\x12 \n" +
+	"\vdescription\x18\x02 \x01(\tR\vdescription\"\xe3\x01\n" +
+	"\x17InteractionQuestionCard\x12\x1f\n" +
+	"\vquestion_id\x18\x01 \x01(\tR\n" +
+	"questionId\x12\x16\n" +
+	"\x06header\x18\x02 \x01(\tR\x06header\x12\x1a\n" +
+	"\bquestion\x18\x03 \x01(\tR\bquestion\x12!\n" +
+	"\fallows_other\x18\x04 \x01(\bR\vallowsOther\x12\x1b\n" +
+	"\tis_secret\x18\x05 \x01(\bR\bisSecret\x123\n" +
+	"\achoices\x18\x06 \x03(\v2\x19.gul.v1.InteractionChoiceR\achoices\"o\n" +
+	"\rUserInputCard\x12\x1f\n" +
+	"\vis_blocking\x18\x01 \x01(\bR\n" +
+	"isBlocking\x12=\n" +
+	"\tquestions\x18\x02 \x03(\v2\x1f.gul.v1.InteractionQuestionCardR\tquestions\"6\n" +
+	"\x1aUnsupportedInteractionCard\x12\x18\n" +
+	"\ablocker\x18\x01 \x01(\tR\ablocker\"\x9f\x03\n" +
+	"\x0fInteractionCard\x128\n" +
+	"\asummary\x18\x01 \x01(\v2\x1e.gul.v1.InteractionCardSummaryR\asummary\x12=\n" +
+	"\tdecisions\x18\x02 \x03(\x0e2\x1f.gul.v1.InteractionCardDecisionR\tdecisions\x12H\n" +
+	"\x10command_approval\x18\n" +
+	" \x01(\v2\x1b.gul.v1.CommandApprovalCardH\x00R\x0fcommandApproval\x12?\n" +
+	"\rfile_approval\x18\v \x01(\v2\x18.gul.v1.FileApprovalCardH\x00R\ffileApproval\x126\n" +
+	"\n" +
+	"user_input\x18\f \x01(\v2\x15.gul.v1.UserInputCardH\x00R\tuserInput\x12F\n" +
+	"\vunsupported\x18\r \x01(\v2\".gul.v1.UnsupportedInteractionCardH\x00R\vunsupportedB\b\n" +
+	"\x06detail\"3\n" +
+	"\x12ListPendingRequest\x12\x1d\n" +
+	"\n" +
+	"session_id\x18\x01 \x01(\tR\tsessionId\"S\n" +
+	"\x13ListPendingResponse\x12<\n" +
+	"\tsummaries\x18\x01 \x03(\v2\x1e.gul.v1.InteractionCardSummaryR\tsummaries\"V\n" +
+	"\x0eGetCardRequest\x12\x1d\n" +
+	"\n" +
+	"session_id\x18\x01 \x01(\tR\tsessionId\x12%\n" +
+	"\x0einteraction_id\x18\x02 \x01(\tR\rinteractionId\">\n" +
+	"\x0fGetCardResponse\x12+\n" +
+	"\x04card\x18\x01 \x01(\v2\x17.gul.v1.InteractionCardR\x04card\"{\n" +
+	"\x0eResolveRequest\x12\x1d\n" +
+	"\n" +
+	"session_id\x18\x01 \x01(\tR\tsessionId\x12%\n" +
+	"\x0einteraction_id\x18\x02 \x01(\tR\rinteractionId\x12#\n" +
+	"\rresponse_json\x18\x03 \x01(\fR\fresponseJson\"\xd2\x01\n" +
+	"\x0fResolveResponse\x12>\n" +
+	"\aoutcome\x18\x01 \x01(\x0e2$.gul.v1.InteractionResolutionOutcomeR\aoutcome\x12-\n" +
+	"\x12resolution_receipt\x18\x02 \x01(\tR\x11resolutionReceipt\x12?\n" +
+	"\fpending_card\x18\x03 \x01(\v2\x17.gul.v1.InteractionCardH\x00R\vpendingCard\x88\x01\x01B\x0f\n" +
+	"\r_pending_card*\x87\x02\n" +
 	"\x1bRuntimeProfileCompatibility\x12-\n" +
 	")RUNTIME_PROFILE_COMPATIBILITY_UNSPECIFIED\x10\x00\x12,\n" +
 	"(RUNTIME_PROFILE_COMPATIBILITY_COMPATIBLE\x10\x01\x12.\n" +
@@ -5111,7 +6391,29 @@ const file_gul_v1_gul_proto_rawDesc = "" +
 	"\x1eWRITER_ACCESS_MODE_UNSPECIFIED\x10\x00\x12 \n" +
 	"\x1cWRITER_ACCESS_MODE_READ_ONLY\x10\x01\x12\x1c\n" +
 	"\x18WRITER_ACCESS_MODE_WRITE\x10\x02\x12\x1e\n" +
-	"\x1aWRITER_ACCESS_MODE_BLOCKED\x10\x032\xcd\x01\n" +
+	"\x1aWRITER_ACCESS_MODE_BLOCKED\x10\x03*\xde\x01\n" +
+	"\x13InteractionCardKind\x12%\n" +
+	"!INTERACTION_CARD_KIND_UNSPECIFIED\x10\x00\x12*\n" +
+	"&INTERACTION_CARD_KIND_COMMAND_APPROVAL\x10\x01\x12'\n" +
+	"#INTERACTION_CARD_KIND_FILE_APPROVAL\x10\x02\x12$\n" +
+	" INTERACTION_CARD_KIND_USER_INPUT\x10\x03\x12%\n" +
+	"!INTERACTION_CARD_KIND_UNSUPPORTED\x10\x04*\xae\x01\n" +
+	"\x15InteractionCardStatus\x12'\n" +
+	"#INTERACTION_CARD_STATUS_UNSPECIFIED\x10\x00\x12#\n" +
+	"\x1fINTERACTION_CARD_STATUS_PENDING\x10\x01\x12$\n" +
+	" INTERACTION_CARD_STATUS_RESOLVED\x10\x02\x12!\n" +
+	"\x1dINTERACTION_CARD_STATUS_STALE\x10\x03*\xbc\x01\n" +
+	"\x17InteractionCardDecision\x12)\n" +
+	"%INTERACTION_CARD_DECISION_UNSPECIFIED\x10\x00\x12)\n" +
+	"%INTERACTION_CARD_DECISION_ACCEPT_ONCE\x10\x01\x12%\n" +
+	"!INTERACTION_CARD_DECISION_DECLINE\x10\x02\x12$\n" +
+	" INTERACTION_CARD_DECISION_CANCEL\x10\x03*\xfd\x01\n" +
+	"\x1cInteractionResolutionOutcome\x12.\n" +
+	"*INTERACTION_RESOLUTION_OUTCOME_UNSPECIFIED\x10\x00\x12*\n" +
+	"&INTERACTION_RESOLUTION_OUTCOME_UNKNOWN\x10\x04\x12+\n" +
+	"'INTERACTION_RESOLUTION_OUTCOME_RESOLVED\x10\x01\x12*\n" +
+	"&INTERACTION_RESOLUTION_OUTCOME_REENTER\x10\x02\x12(\n" +
+	"$INTERACTION_RESOLUTION_OUTCOME_STALE\x10\x032\xcd\x01\n" +
 	"\x0eRuntimeService\x12^\n" +
 	"\x13ListRuntimeProfiles\x12\".gul.v1.ListRuntimeProfilesRequest\x1a#.gul.v1.ListRuntimeProfilesResponse\x12[\n" +
 	"\x12CheckCompatibility\x12!.gul.v1.CheckCompatibilityRequest\x1a\".gul.v1.CheckCompatibilityResponse2\x83\t\n" +
@@ -5143,7 +6445,11 @@ const file_gul_v1_gul_proto_rawDesc = "" +
 	"\vGetMetadata\x12\x1a.gul.v1.GetMetadataRequest\x1a\x1b.gul.v1.GetMetadataResponse\x12@\n" +
 	"\tReadChunk\x12\x18.gul.v1.ReadChunkRequest\x1a\x19.gul.v1.ReadChunkResponse2b\n" +
 	"\x12ClientEventService\x12L\n" +
-	"\x11WatchClientEvents\x12 .gul.v1.WatchClientEventsRequest\x1a\x13.gul.v1.ClientEvent0\x01B9Z7github.com/rootkernel/gul/api/generated/go/gul/v1;gulv1b\x06proto3"
+	"\x11WatchClientEvents\x12 .gul.v1.WatchClientEventsRequest\x1a\x13.gul.v1.ClientEvent0\x012\xe0\x01\n" +
+	"\x1eInteractionPresentationService\x12F\n" +
+	"\vListPending\x12\x1a.gul.v1.ListPendingRequest\x1a\x1b.gul.v1.ListPendingResponse\x12:\n" +
+	"\aGetCard\x12\x16.gul.v1.GetCardRequest\x1a\x17.gul.v1.GetCardResponse\x12:\n" +
+	"\aResolve\x12\x16.gul.v1.ResolveRequest\x1a\x17.gul.v1.ResolveResponseB9Z7github.com/rootkernel/gul/api/generated/go/gul/v1;gulv1b\x06proto3"
 
 var (
 	file_gul_v1_gul_proto_rawDescOnce sync.Once
@@ -5157,8 +6463,8 @@ func file_gul_v1_gul_proto_rawDescGZIP() []byte {
 	return file_gul_v1_gul_proto_rawDescData
 }
 
-var file_gul_v1_gul_proto_enumTypes = make([]protoimpl.EnumInfo, 16)
-var file_gul_v1_gul_proto_msgTypes = make([]protoimpl.MessageInfo, 61)
+var file_gul_v1_gul_proto_enumTypes = make([]protoimpl.EnumInfo, 20)
+var file_gul_v1_gul_proto_msgTypes = make([]protoimpl.MessageInfo, 76)
 var file_gul_v1_gul_proto_goTypes = []any{
 	(RuntimeProfileCompatibility)(0),            // 0: gul.v1.RuntimeProfileCompatibility
 	(LaunchExecutionLane)(0),                    // 1: gul.v1.LaunchExecutionLane
@@ -5176,176 +6482,219 @@ var file_gul_v1_gul_proto_goTypes = []any{
 	(CloseStatus)(0),                            // 13: gul.v1.CloseStatus
 	(ClientEventKind)(0),                        // 14: gul.v1.ClientEventKind
 	(WriterAccessMode)(0),                       // 15: gul.v1.WriterAccessMode
-	(*RuntimeModelChoice)(nil),                  // 16: gul.v1.RuntimeModelChoice
-	(*RuntimeProfileChoice)(nil),                // 17: gul.v1.RuntimeProfileChoice
-	(*ListRuntimeProfilesRequest)(nil),          // 18: gul.v1.ListRuntimeProfilesRequest
-	(*ListRuntimeProfilesResponse)(nil),         // 19: gul.v1.ListRuntimeProfilesResponse
-	(*CheckCompatibilityRequest)(nil),           // 20: gul.v1.CheckCompatibilityRequest
-	(*ProspectiveLaunchConfiguration)(nil),      // 21: gul.v1.ProspectiveLaunchConfiguration
-	(*CheckCompatibilityResponse)(nil),          // 22: gul.v1.CheckCompatibilityResponse
-	(*RemoveWorkspaceEntryRequest)(nil),         // 23: gul.v1.RemoveWorkspaceEntryRequest
-	(*RemoveWorkspaceEntryResponse)(nil),        // 24: gul.v1.RemoveWorkspaceEntryResponse
-	(*ListRegistrableRootsRequest)(nil),         // 25: gul.v1.ListRegistrableRootsRequest
-	(*RegistrableRoot)(nil),                     // 26: gul.v1.RegistrableRoot
-	(*ListRegistrableRootsResponse)(nil),        // 27: gul.v1.ListRegistrableRootsResponse
-	(*BrowseRegistrableRootRequest)(nil),        // 28: gul.v1.BrowseRegistrableRootRequest
-	(*RegistrableDirectory)(nil),                // 29: gul.v1.RegistrableDirectory
-	(*BrowseRegistrableRootResponse)(nil),       // 30: gul.v1.BrowseRegistrableRootResponse
-	(*RegisterFromHostSelectionRequest)(nil),    // 31: gul.v1.RegisterFromHostSelectionRequest
-	(*RegisterFromAllowlistPathRequest)(nil),    // 32: gul.v1.RegisterFromAllowlistPathRequest
-	(*WorkspaceEntry)(nil),                      // 33: gul.v1.WorkspaceEntry
-	(*RenameWorkspaceRequest)(nil),              // 34: gul.v1.RenameWorkspaceRequest
-	(*SetWorkspaceFavoriteRequest)(nil),         // 35: gul.v1.SetWorkspaceFavoriteRequest
-	(*SetWorkspaceHiddenRequest)(nil),           // 36: gul.v1.SetWorkspaceHiddenRequest
-	(*WorkspacePresentationResponse)(nil),       // 37: gul.v1.WorkspacePresentationResponse
-	(*GetNavigationRequest)(nil),                // 38: gul.v1.GetNavigationRequest
-	(*SetNavigationRequest)(nil),                // 39: gul.v1.SetNavigationRequest
-	(*NavigationResponse)(nil),                  // 40: gul.v1.NavigationResponse
-	(*RegisterWorkspaceResponse)(nil),           // 41: gul.v1.RegisterWorkspaceResponse
-	(*RevalidateWorkspaceRequest)(nil),          // 42: gul.v1.RevalidateWorkspaceRequest
-	(*RevalidateWorkspaceResponse)(nil),         // 43: gul.v1.RevalidateWorkspaceResponse
-	(*ListWorkspacesRequest)(nil),               // 44: gul.v1.ListWorkspacesRequest
-	(*ListWorkspacesResponse)(nil),              // 45: gul.v1.ListWorkspacesResponse
-	(*DirectSessionPresentation)(nil),           // 46: gul.v1.DirectSessionPresentation
-	(*GetDirectSessionPresentationRequest)(nil), // 47: gul.v1.GetDirectSessionPresentationRequest
-	(*RenameDirectSessionRequest)(nil),          // 48: gul.v1.RenameDirectSessionRequest
-	(*SetDirectSessionFavoriteRequest)(nil),     // 49: gul.v1.SetDirectSessionFavoriteRequest
-	(*SetDirectSessionArchivedRequest)(nil),     // 50: gul.v1.SetDirectSessionArchivedRequest
-	(*DirectSessionPresentationResponse)(nil),   // 51: gul.v1.DirectSessionPresentationResponse
-	(*ListDirectSessionsRequest)(nil),           // 52: gul.v1.ListDirectSessionsRequest
-	(*ListDirectSessionsResponse)(nil),          // 53: gul.v1.ListDirectSessionsResponse
-	(*ListPromptHistoryRequest)(nil),            // 54: gul.v1.ListPromptHistoryRequest
-	(*PromptHistoryItem)(nil),                   // 55: gul.v1.PromptHistoryItem
-	(*ListPromptHistoryResponse)(nil),           // 56: gul.v1.ListPromptHistoryResponse
-	(*GetPromptHistoryItemRequest)(nil),         // 57: gul.v1.GetPromptHistoryItemRequest
-	(*PromptOriginal)(nil),                      // 58: gul.v1.PromptOriginal
-	(*GetPromptHistoryItemResponse)(nil),        // 59: gul.v1.GetPromptHistoryItemResponse
-	(*ExecutionCounts)(nil),                     // 60: gul.v1.ExecutionCounts
-	(*GetExecutionStateRequest)(nil),            // 61: gul.v1.GetExecutionStateRequest
-	(*GetExecutionStateResponse)(nil),           // 62: gul.v1.GetExecutionStateResponse
-	(*ObservedMember)(nil),                      // 63: gul.v1.ObservedMember
-	(*ListSpecialistResultsRequest)(nil),        // 64: gul.v1.ListSpecialistResultsRequest
-	(*SpecialistResult)(nil),                    // 65: gul.v1.SpecialistResult
-	(*ListSpecialistResultsResponse)(nil),       // 66: gul.v1.ListSpecialistResultsResponse
-	(*DomainError)(nil),                         // 67: gul.v1.DomainError
-	(*CloseRuntimeRequest)(nil),                 // 68: gul.v1.CloseRuntimeRequest
-	(*CloseOutcome)(nil),                        // 69: gul.v1.CloseOutcome
-	(*CloseRuntimeResponse)(nil),                // 70: gul.v1.CloseRuntimeResponse
-	(*GetMetadataRequest)(nil),                  // 71: gul.v1.GetMetadataRequest
-	(*GetMetadataResponse)(nil),                 // 72: gul.v1.GetMetadataResponse
-	(*ReadChunkRequest)(nil),                    // 73: gul.v1.ReadChunkRequest
-	(*ReadChunkResponse)(nil),                   // 74: gul.v1.ReadChunkResponse
-	(*WatchClientEventsRequest)(nil),            // 75: gul.v1.WatchClientEventsRequest
-	(*ClientEvent)(nil),                         // 76: gul.v1.ClientEvent
-	(*timestamppb.Timestamp)(nil),               // 77: google.protobuf.Timestamp
+	(InteractionCardKind)(0),                    // 16: gul.v1.InteractionCardKind
+	(InteractionCardStatus)(0),                  // 17: gul.v1.InteractionCardStatus
+	(InteractionCardDecision)(0),                // 18: gul.v1.InteractionCardDecision
+	(InteractionResolutionOutcome)(0),           // 19: gul.v1.InteractionResolutionOutcome
+	(*RuntimeModelChoice)(nil),                  // 20: gul.v1.RuntimeModelChoice
+	(*RuntimeProfileChoice)(nil),                // 21: gul.v1.RuntimeProfileChoice
+	(*ListRuntimeProfilesRequest)(nil),          // 22: gul.v1.ListRuntimeProfilesRequest
+	(*ListRuntimeProfilesResponse)(nil),         // 23: gul.v1.ListRuntimeProfilesResponse
+	(*CheckCompatibilityRequest)(nil),           // 24: gul.v1.CheckCompatibilityRequest
+	(*ProspectiveLaunchConfiguration)(nil),      // 25: gul.v1.ProspectiveLaunchConfiguration
+	(*CheckCompatibilityResponse)(nil),          // 26: gul.v1.CheckCompatibilityResponse
+	(*RemoveWorkspaceEntryRequest)(nil),         // 27: gul.v1.RemoveWorkspaceEntryRequest
+	(*RemoveWorkspaceEntryResponse)(nil),        // 28: gul.v1.RemoveWorkspaceEntryResponse
+	(*ListRegistrableRootsRequest)(nil),         // 29: gul.v1.ListRegistrableRootsRequest
+	(*RegistrableRoot)(nil),                     // 30: gul.v1.RegistrableRoot
+	(*ListRegistrableRootsResponse)(nil),        // 31: gul.v1.ListRegistrableRootsResponse
+	(*BrowseRegistrableRootRequest)(nil),        // 32: gul.v1.BrowseRegistrableRootRequest
+	(*RegistrableDirectory)(nil),                // 33: gul.v1.RegistrableDirectory
+	(*BrowseRegistrableRootResponse)(nil),       // 34: gul.v1.BrowseRegistrableRootResponse
+	(*RegisterFromHostSelectionRequest)(nil),    // 35: gul.v1.RegisterFromHostSelectionRequest
+	(*RegisterFromAllowlistPathRequest)(nil),    // 36: gul.v1.RegisterFromAllowlistPathRequest
+	(*WorkspaceEntry)(nil),                      // 37: gul.v1.WorkspaceEntry
+	(*RenameWorkspaceRequest)(nil),              // 38: gul.v1.RenameWorkspaceRequest
+	(*SetWorkspaceFavoriteRequest)(nil),         // 39: gul.v1.SetWorkspaceFavoriteRequest
+	(*SetWorkspaceHiddenRequest)(nil),           // 40: gul.v1.SetWorkspaceHiddenRequest
+	(*WorkspacePresentationResponse)(nil),       // 41: gul.v1.WorkspacePresentationResponse
+	(*GetNavigationRequest)(nil),                // 42: gul.v1.GetNavigationRequest
+	(*SetNavigationRequest)(nil),                // 43: gul.v1.SetNavigationRequest
+	(*NavigationResponse)(nil),                  // 44: gul.v1.NavigationResponse
+	(*RegisterWorkspaceResponse)(nil),           // 45: gul.v1.RegisterWorkspaceResponse
+	(*RevalidateWorkspaceRequest)(nil),          // 46: gul.v1.RevalidateWorkspaceRequest
+	(*RevalidateWorkspaceResponse)(nil),         // 47: gul.v1.RevalidateWorkspaceResponse
+	(*ListWorkspacesRequest)(nil),               // 48: gul.v1.ListWorkspacesRequest
+	(*ListWorkspacesResponse)(nil),              // 49: gul.v1.ListWorkspacesResponse
+	(*DirectSessionPresentation)(nil),           // 50: gul.v1.DirectSessionPresentation
+	(*GetDirectSessionPresentationRequest)(nil), // 51: gul.v1.GetDirectSessionPresentationRequest
+	(*RenameDirectSessionRequest)(nil),          // 52: gul.v1.RenameDirectSessionRequest
+	(*SetDirectSessionFavoriteRequest)(nil),     // 53: gul.v1.SetDirectSessionFavoriteRequest
+	(*SetDirectSessionArchivedRequest)(nil),     // 54: gul.v1.SetDirectSessionArchivedRequest
+	(*DirectSessionPresentationResponse)(nil),   // 55: gul.v1.DirectSessionPresentationResponse
+	(*ListDirectSessionsRequest)(nil),           // 56: gul.v1.ListDirectSessionsRequest
+	(*ListDirectSessionsResponse)(nil),          // 57: gul.v1.ListDirectSessionsResponse
+	(*ListPromptHistoryRequest)(nil),            // 58: gul.v1.ListPromptHistoryRequest
+	(*PromptHistoryItem)(nil),                   // 59: gul.v1.PromptHistoryItem
+	(*ListPromptHistoryResponse)(nil),           // 60: gul.v1.ListPromptHistoryResponse
+	(*GetPromptHistoryItemRequest)(nil),         // 61: gul.v1.GetPromptHistoryItemRequest
+	(*PromptOriginal)(nil),                      // 62: gul.v1.PromptOriginal
+	(*GetPromptHistoryItemResponse)(nil),        // 63: gul.v1.GetPromptHistoryItemResponse
+	(*ExecutionCounts)(nil),                     // 64: gul.v1.ExecutionCounts
+	(*GetExecutionStateRequest)(nil),            // 65: gul.v1.GetExecutionStateRequest
+	(*GetExecutionStateResponse)(nil),           // 66: gul.v1.GetExecutionStateResponse
+	(*ObservedMember)(nil),                      // 67: gul.v1.ObservedMember
+	(*ListSpecialistResultsRequest)(nil),        // 68: gul.v1.ListSpecialistResultsRequest
+	(*SpecialistResult)(nil),                    // 69: gul.v1.SpecialistResult
+	(*ListSpecialistResultsResponse)(nil),       // 70: gul.v1.ListSpecialistResultsResponse
+	(*DomainError)(nil),                         // 71: gul.v1.DomainError
+	(*CloseRuntimeRequest)(nil),                 // 72: gul.v1.CloseRuntimeRequest
+	(*CloseOutcome)(nil),                        // 73: gul.v1.CloseOutcome
+	(*CloseRuntimeResponse)(nil),                // 74: gul.v1.CloseRuntimeResponse
+	(*GetMetadataRequest)(nil),                  // 75: gul.v1.GetMetadataRequest
+	(*GetMetadataResponse)(nil),                 // 76: gul.v1.GetMetadataResponse
+	(*ReadChunkRequest)(nil),                    // 77: gul.v1.ReadChunkRequest
+	(*ReadChunkResponse)(nil),                   // 78: gul.v1.ReadChunkResponse
+	(*WatchClientEventsRequest)(nil),            // 79: gul.v1.WatchClientEventsRequest
+	(*ClientEvent)(nil),                         // 80: gul.v1.ClientEvent
+	(*InteractionCardSummary)(nil),              // 81: gul.v1.InteractionCardSummary
+	(*CommandApprovalCard)(nil),                 // 82: gul.v1.CommandApprovalCard
+	(*FileChangeCard)(nil),                      // 83: gul.v1.FileChangeCard
+	(*FileApprovalCard)(nil),                    // 84: gul.v1.FileApprovalCard
+	(*InteractionChoice)(nil),                   // 85: gul.v1.InteractionChoice
+	(*InteractionQuestionCard)(nil),             // 86: gul.v1.InteractionQuestionCard
+	(*UserInputCard)(nil),                       // 87: gul.v1.UserInputCard
+	(*UnsupportedInteractionCard)(nil),          // 88: gul.v1.UnsupportedInteractionCard
+	(*InteractionCard)(nil),                     // 89: gul.v1.InteractionCard
+	(*ListPendingRequest)(nil),                  // 90: gul.v1.ListPendingRequest
+	(*ListPendingResponse)(nil),                 // 91: gul.v1.ListPendingResponse
+	(*GetCardRequest)(nil),                      // 92: gul.v1.GetCardRequest
+	(*GetCardResponse)(nil),                     // 93: gul.v1.GetCardResponse
+	(*ResolveRequest)(nil),                      // 94: gul.v1.ResolveRequest
+	(*ResolveResponse)(nil),                     // 95: gul.v1.ResolveResponse
+	(*timestamppb.Timestamp)(nil),               // 96: google.protobuf.Timestamp
 }
 var file_gul_v1_gul_proto_depIdxs = []int32{
 	0,  // 0: gul.v1.RuntimeProfileChoice.compatibility:type_name -> gul.v1.RuntimeProfileCompatibility
-	16, // 1: gul.v1.RuntimeProfileChoice.models:type_name -> gul.v1.RuntimeModelChoice
+	20, // 1: gul.v1.RuntimeProfileChoice.models:type_name -> gul.v1.RuntimeModelChoice
 	1,  // 2: gul.v1.RuntimeProfileChoice.supported_lanes:type_name -> gul.v1.LaunchExecutionLane
 	2,  // 3: gul.v1.RuntimeProfileChoice.maximum_assurance:type_name -> gul.v1.LaunchAssurance
-	17, // 4: gul.v1.ListRuntimeProfilesResponse.profiles:type_name -> gul.v1.RuntimeProfileChoice
+	21, // 4: gul.v1.ListRuntimeProfilesResponse.profiles:type_name -> gul.v1.RuntimeProfileChoice
 	1,  // 5: gul.v1.CheckCompatibilityRequest.lane:type_name -> gul.v1.LaunchExecutionLane
 	2,  // 6: gul.v1.CheckCompatibilityRequest.required_assurance:type_name -> gul.v1.LaunchAssurance
 	1,  // 7: gul.v1.ProspectiveLaunchConfiguration.lane:type_name -> gul.v1.LaunchExecutionLane
 	2,  // 8: gul.v1.ProspectiveLaunchConfiguration.required_assurance:type_name -> gul.v1.LaunchAssurance
-	21, // 9: gul.v1.CheckCompatibilityResponse.configuration:type_name -> gul.v1.ProspectiveLaunchConfiguration
-	26, // 10: gul.v1.ListRegistrableRootsResponse.roots:type_name -> gul.v1.RegistrableRoot
-	29, // 11: gul.v1.BrowseRegistrableRootResponse.directories:type_name -> gul.v1.RegistrableDirectory
-	33, // 12: gul.v1.WorkspacePresentationResponse.workspace:type_name -> gul.v1.WorkspaceEntry
-	33, // 13: gul.v1.RegisterWorkspaceResponse.workspace:type_name -> gul.v1.WorkspaceEntry
-	33, // 14: gul.v1.RevalidateWorkspaceResponse.workspace:type_name -> gul.v1.WorkspaceEntry
-	33, // 15: gul.v1.ListWorkspacesResponse.workspaces:type_name -> gul.v1.WorkspaceEntry
-	46, // 16: gul.v1.DirectSessionPresentationResponse.session:type_name -> gul.v1.DirectSessionPresentation
-	46, // 17: gul.v1.ListDirectSessionsResponse.sessions:type_name -> gul.v1.DirectSessionPresentation
-	77, // 18: gul.v1.PromptHistoryItem.accepted_at:type_name -> google.protobuf.Timestamp
-	55, // 19: gul.v1.ListPromptHistoryResponse.items:type_name -> gul.v1.PromptHistoryItem
+	25, // 9: gul.v1.CheckCompatibilityResponse.configuration:type_name -> gul.v1.ProspectiveLaunchConfiguration
+	30, // 10: gul.v1.ListRegistrableRootsResponse.roots:type_name -> gul.v1.RegistrableRoot
+	33, // 11: gul.v1.BrowseRegistrableRootResponse.directories:type_name -> gul.v1.RegistrableDirectory
+	37, // 12: gul.v1.WorkspacePresentationResponse.workspace:type_name -> gul.v1.WorkspaceEntry
+	37, // 13: gul.v1.RegisterWorkspaceResponse.workspace:type_name -> gul.v1.WorkspaceEntry
+	37, // 14: gul.v1.RevalidateWorkspaceResponse.workspace:type_name -> gul.v1.WorkspaceEntry
+	37, // 15: gul.v1.ListWorkspacesResponse.workspaces:type_name -> gul.v1.WorkspaceEntry
+	50, // 16: gul.v1.DirectSessionPresentationResponse.session:type_name -> gul.v1.DirectSessionPresentation
+	50, // 17: gul.v1.ListDirectSessionsResponse.sessions:type_name -> gul.v1.DirectSessionPresentation
+	96, // 18: gul.v1.PromptHistoryItem.accepted_at:type_name -> google.protobuf.Timestamp
+	59, // 19: gul.v1.ListPromptHistoryResponse.items:type_name -> gul.v1.PromptHistoryItem
 	3,  // 20: gul.v1.ListPromptHistoryResponse.freshness:type_name -> gul.v1.Freshness
-	77, // 21: gul.v1.ListPromptHistoryResponse.observed_at:type_name -> google.protobuf.Timestamp
-	77, // 22: gul.v1.GetPromptHistoryItemResponse.accepted_at:type_name -> google.protobuf.Timestamp
-	58, // 23: gul.v1.GetPromptHistoryItemResponse.original:type_name -> gul.v1.PromptOriginal
+	96, // 21: gul.v1.ListPromptHistoryResponse.observed_at:type_name -> google.protobuf.Timestamp
+	96, // 22: gul.v1.GetPromptHistoryItemResponse.accepted_at:type_name -> google.protobuf.Timestamp
+	62, // 23: gul.v1.GetPromptHistoryItemResponse.original:type_name -> gul.v1.PromptOriginal
 	3,  // 24: gul.v1.GetExecutionStateResponse.freshness:type_name -> gul.v1.Freshness
-	77, // 25: gul.v1.GetExecutionStateResponse.observed_at:type_name -> google.protobuf.Timestamp
+	96, // 25: gul.v1.GetExecutionStateResponse.observed_at:type_name -> google.protobuf.Timestamp
 	4,  // 26: gul.v1.GetExecutionStateResponse.lifecycle:type_name -> gul.v1.SessionLifecycle
 	5,  // 27: gul.v1.GetExecutionStateResponse.composition:type_name -> gul.v1.SessionComposition
 	6,  // 28: gul.v1.GetExecutionStateResponse.approval_policy:type_name -> gul.v1.ApprovalPolicy
-	60, // 29: gul.v1.GetExecutionStateResponse.counts:type_name -> gul.v1.ExecutionCounts
+	64, // 29: gul.v1.GetExecutionStateResponse.counts:type_name -> gul.v1.ExecutionCounts
 	7,  // 30: gul.v1.GetExecutionStateResponse.close_progress:type_name -> gul.v1.CloseProgress
 	8,  // 31: gul.v1.GetExecutionStateResponse.recovery:type_name -> gul.v1.RecoveryClass
-	63, // 32: gul.v1.GetExecutionStateResponse.observed_members:type_name -> gul.v1.ObservedMember
+	67, // 32: gul.v1.GetExecutionStateResponse.observed_members:type_name -> gul.v1.ObservedMember
 	9,  // 33: gul.v1.ObservedMember.lifecycle:type_name -> gul.v1.ObservedMemberLifecycle
-	77, // 34: gul.v1.SpecialistResult.published_at:type_name -> google.protobuf.Timestamp
+	96, // 34: gul.v1.SpecialistResult.published_at:type_name -> google.protobuf.Timestamp
 	10, // 35: gul.v1.SpecialistResult.format:type_name -> gul.v1.SpecialistResultFormat
-	65, // 36: gul.v1.ListSpecialistResultsResponse.items:type_name -> gul.v1.SpecialistResult
+	69, // 36: gul.v1.ListSpecialistResultsResponse.items:type_name -> gul.v1.SpecialistResult
 	3,  // 37: gul.v1.ListSpecialistResultsResponse.freshness:type_name -> gul.v1.Freshness
-	77, // 38: gul.v1.ListSpecialistResultsResponse.observed_at:type_name -> google.protobuf.Timestamp
+	96, // 38: gul.v1.ListSpecialistResultsResponse.observed_at:type_name -> google.protobuf.Timestamp
 	11, // 39: gul.v1.DomainError.code:type_name -> gul.v1.ErrorCode
 	12, // 40: gul.v1.DomainError.action:type_name -> gul.v1.ActionClass
 	13, // 41: gul.v1.CloseOutcome.status:type_name -> gul.v1.CloseStatus
-	67, // 42: gul.v1.CloseOutcome.rejection:type_name -> gul.v1.DomainError
+	71, // 42: gul.v1.CloseOutcome.rejection:type_name -> gul.v1.DomainError
 	12, // 43: gul.v1.CloseOutcome.next_action:type_name -> gul.v1.ActionClass
-	69, // 44: gul.v1.CloseRuntimeResponse.outcome:type_name -> gul.v1.CloseOutcome
+	73, // 44: gul.v1.CloseRuntimeResponse.outcome:type_name -> gul.v1.CloseOutcome
 	14, // 45: gul.v1.ClientEvent.kind:type_name -> gul.v1.ClientEventKind
-	77, // 46: gul.v1.ClientEvent.created_at:type_name -> google.protobuf.Timestamp
-	18, // 47: gul.v1.RuntimeService.ListRuntimeProfiles:input_type -> gul.v1.ListRuntimeProfilesRequest
-	20, // 48: gul.v1.RuntimeService.CheckCompatibility:input_type -> gul.v1.CheckCompatibilityRequest
-	25, // 49: gul.v1.WorkspacePresentationService.ListRegistrableRoots:input_type -> gul.v1.ListRegistrableRootsRequest
-	28, // 50: gul.v1.WorkspacePresentationService.BrowseRegistrableRoot:input_type -> gul.v1.BrowseRegistrableRootRequest
-	31, // 51: gul.v1.WorkspacePresentationService.RegisterFromHostSelection:input_type -> gul.v1.RegisterFromHostSelectionRequest
-	32, // 52: gul.v1.WorkspacePresentationService.RegisterFromAllowlistPath:input_type -> gul.v1.RegisterFromAllowlistPathRequest
-	42, // 53: gul.v1.WorkspacePresentationService.RevalidateWorkspace:input_type -> gul.v1.RevalidateWorkspaceRequest
-	44, // 54: gul.v1.WorkspacePresentationService.ListWorkspaces:input_type -> gul.v1.ListWorkspacesRequest
-	34, // 55: gul.v1.WorkspacePresentationService.RenameWorkspace:input_type -> gul.v1.RenameWorkspaceRequest
-	35, // 56: gul.v1.WorkspacePresentationService.SetWorkspaceFavorite:input_type -> gul.v1.SetWorkspaceFavoriteRequest
-	36, // 57: gul.v1.WorkspacePresentationService.SetWorkspaceHidden:input_type -> gul.v1.SetWorkspaceHiddenRequest
-	23, // 58: gul.v1.WorkspacePresentationService.RemoveWorkspaceEntry:input_type -> gul.v1.RemoveWorkspaceEntryRequest
-	38, // 59: gul.v1.WorkspacePresentationService.GetNavigation:input_type -> gul.v1.GetNavigationRequest
-	39, // 60: gul.v1.WorkspacePresentationService.SetNavigation:input_type -> gul.v1.SetNavigationRequest
-	52, // 61: gul.v1.DirectSessionService.ListDirectSessions:input_type -> gul.v1.ListDirectSessionsRequest
-	47, // 62: gul.v1.DirectSessionService.GetDirectSessionPresentation:input_type -> gul.v1.GetDirectSessionPresentationRequest
-	48, // 63: gul.v1.DirectSessionService.RenameDirectSession:input_type -> gul.v1.RenameDirectSessionRequest
-	49, // 64: gul.v1.DirectSessionService.SetDirectSessionFavorite:input_type -> gul.v1.SetDirectSessionFavoriteRequest
-	50, // 65: gul.v1.DirectSessionService.SetDirectSessionArchived:input_type -> gul.v1.SetDirectSessionArchivedRequest
-	54, // 66: gul.v1.DirectSessionService.ListPromptHistory:input_type -> gul.v1.ListPromptHistoryRequest
-	57, // 67: gul.v1.DirectSessionService.GetPromptHistoryItem:input_type -> gul.v1.GetPromptHistoryItemRequest
-	61, // 68: gul.v1.DirectSessionService.GetExecutionState:input_type -> gul.v1.GetExecutionStateRequest
-	64, // 69: gul.v1.DirectSessionService.ListSpecialistResults:input_type -> gul.v1.ListSpecialistResultsRequest
-	68, // 70: gul.v1.DirectSessionService.CloseRuntime:input_type -> gul.v1.CloseRuntimeRequest
-	71, // 71: gul.v1.ArtifactPresentationService.GetMetadata:input_type -> gul.v1.GetMetadataRequest
-	73, // 72: gul.v1.ArtifactPresentationService.ReadChunk:input_type -> gul.v1.ReadChunkRequest
-	75, // 73: gul.v1.ClientEventService.WatchClientEvents:input_type -> gul.v1.WatchClientEventsRequest
-	19, // 74: gul.v1.RuntimeService.ListRuntimeProfiles:output_type -> gul.v1.ListRuntimeProfilesResponse
-	22, // 75: gul.v1.RuntimeService.CheckCompatibility:output_type -> gul.v1.CheckCompatibilityResponse
-	27, // 76: gul.v1.WorkspacePresentationService.ListRegistrableRoots:output_type -> gul.v1.ListRegistrableRootsResponse
-	30, // 77: gul.v1.WorkspacePresentationService.BrowseRegistrableRoot:output_type -> gul.v1.BrowseRegistrableRootResponse
-	41, // 78: gul.v1.WorkspacePresentationService.RegisterFromHostSelection:output_type -> gul.v1.RegisterWorkspaceResponse
-	41, // 79: gul.v1.WorkspacePresentationService.RegisterFromAllowlistPath:output_type -> gul.v1.RegisterWorkspaceResponse
-	43, // 80: gul.v1.WorkspacePresentationService.RevalidateWorkspace:output_type -> gul.v1.RevalidateWorkspaceResponse
-	45, // 81: gul.v1.WorkspacePresentationService.ListWorkspaces:output_type -> gul.v1.ListWorkspacesResponse
-	37, // 82: gul.v1.WorkspacePresentationService.RenameWorkspace:output_type -> gul.v1.WorkspacePresentationResponse
-	37, // 83: gul.v1.WorkspacePresentationService.SetWorkspaceFavorite:output_type -> gul.v1.WorkspacePresentationResponse
-	37, // 84: gul.v1.WorkspacePresentationService.SetWorkspaceHidden:output_type -> gul.v1.WorkspacePresentationResponse
-	24, // 85: gul.v1.WorkspacePresentationService.RemoveWorkspaceEntry:output_type -> gul.v1.RemoveWorkspaceEntryResponse
-	40, // 86: gul.v1.WorkspacePresentationService.GetNavigation:output_type -> gul.v1.NavigationResponse
-	40, // 87: gul.v1.WorkspacePresentationService.SetNavigation:output_type -> gul.v1.NavigationResponse
-	53, // 88: gul.v1.DirectSessionService.ListDirectSessions:output_type -> gul.v1.ListDirectSessionsResponse
-	51, // 89: gul.v1.DirectSessionService.GetDirectSessionPresentation:output_type -> gul.v1.DirectSessionPresentationResponse
-	51, // 90: gul.v1.DirectSessionService.RenameDirectSession:output_type -> gul.v1.DirectSessionPresentationResponse
-	51, // 91: gul.v1.DirectSessionService.SetDirectSessionFavorite:output_type -> gul.v1.DirectSessionPresentationResponse
-	51, // 92: gul.v1.DirectSessionService.SetDirectSessionArchived:output_type -> gul.v1.DirectSessionPresentationResponse
-	56, // 93: gul.v1.DirectSessionService.ListPromptHistory:output_type -> gul.v1.ListPromptHistoryResponse
-	59, // 94: gul.v1.DirectSessionService.GetPromptHistoryItem:output_type -> gul.v1.GetPromptHistoryItemResponse
-	62, // 95: gul.v1.DirectSessionService.GetExecutionState:output_type -> gul.v1.GetExecutionStateResponse
-	66, // 96: gul.v1.DirectSessionService.ListSpecialistResults:output_type -> gul.v1.ListSpecialistResultsResponse
-	70, // 97: gul.v1.DirectSessionService.CloseRuntime:output_type -> gul.v1.CloseRuntimeResponse
-	72, // 98: gul.v1.ArtifactPresentationService.GetMetadata:output_type -> gul.v1.GetMetadataResponse
-	74, // 99: gul.v1.ArtifactPresentationService.ReadChunk:output_type -> gul.v1.ReadChunkResponse
-	76, // 100: gul.v1.ClientEventService.WatchClientEvents:output_type -> gul.v1.ClientEvent
-	74, // [74:101] is the sub-list for method output_type
-	47, // [47:74] is the sub-list for method input_type
-	47, // [47:47] is the sub-list for extension type_name
-	47, // [47:47] is the sub-list for extension extendee
-	0,  // [0:47] is the sub-list for field type_name
+	96, // 46: gul.v1.ClientEvent.created_at:type_name -> google.protobuf.Timestamp
+	16, // 47: gul.v1.InteractionCardSummary.kind:type_name -> gul.v1.InteractionCardKind
+	17, // 48: gul.v1.InteractionCardSummary.status:type_name -> gul.v1.InteractionCardStatus
+	96, // 49: gul.v1.InteractionCardSummary.created_at:type_name -> google.protobuf.Timestamp
+	96, // 50: gul.v1.InteractionCardSummary.expires_at:type_name -> google.protobuf.Timestamp
+	96, // 51: gul.v1.InteractionCardSummary.resolved_at:type_name -> google.protobuf.Timestamp
+	83, // 52: gul.v1.FileApprovalCard.changes:type_name -> gul.v1.FileChangeCard
+	85, // 53: gul.v1.InteractionQuestionCard.choices:type_name -> gul.v1.InteractionChoice
+	86, // 54: gul.v1.UserInputCard.questions:type_name -> gul.v1.InteractionQuestionCard
+	81, // 55: gul.v1.InteractionCard.summary:type_name -> gul.v1.InteractionCardSummary
+	18, // 56: gul.v1.InteractionCard.decisions:type_name -> gul.v1.InteractionCardDecision
+	82, // 57: gul.v1.InteractionCard.command_approval:type_name -> gul.v1.CommandApprovalCard
+	84, // 58: gul.v1.InteractionCard.file_approval:type_name -> gul.v1.FileApprovalCard
+	87, // 59: gul.v1.InteractionCard.user_input:type_name -> gul.v1.UserInputCard
+	88, // 60: gul.v1.InteractionCard.unsupported:type_name -> gul.v1.UnsupportedInteractionCard
+	81, // 61: gul.v1.ListPendingResponse.summaries:type_name -> gul.v1.InteractionCardSummary
+	89, // 62: gul.v1.GetCardResponse.card:type_name -> gul.v1.InteractionCard
+	19, // 63: gul.v1.ResolveResponse.outcome:type_name -> gul.v1.InteractionResolutionOutcome
+	89, // 64: gul.v1.ResolveResponse.pending_card:type_name -> gul.v1.InteractionCard
+	22, // 65: gul.v1.RuntimeService.ListRuntimeProfiles:input_type -> gul.v1.ListRuntimeProfilesRequest
+	24, // 66: gul.v1.RuntimeService.CheckCompatibility:input_type -> gul.v1.CheckCompatibilityRequest
+	29, // 67: gul.v1.WorkspacePresentationService.ListRegistrableRoots:input_type -> gul.v1.ListRegistrableRootsRequest
+	32, // 68: gul.v1.WorkspacePresentationService.BrowseRegistrableRoot:input_type -> gul.v1.BrowseRegistrableRootRequest
+	35, // 69: gul.v1.WorkspacePresentationService.RegisterFromHostSelection:input_type -> gul.v1.RegisterFromHostSelectionRequest
+	36, // 70: gul.v1.WorkspacePresentationService.RegisterFromAllowlistPath:input_type -> gul.v1.RegisterFromAllowlistPathRequest
+	46, // 71: gul.v1.WorkspacePresentationService.RevalidateWorkspace:input_type -> gul.v1.RevalidateWorkspaceRequest
+	48, // 72: gul.v1.WorkspacePresentationService.ListWorkspaces:input_type -> gul.v1.ListWorkspacesRequest
+	38, // 73: gul.v1.WorkspacePresentationService.RenameWorkspace:input_type -> gul.v1.RenameWorkspaceRequest
+	39, // 74: gul.v1.WorkspacePresentationService.SetWorkspaceFavorite:input_type -> gul.v1.SetWorkspaceFavoriteRequest
+	40, // 75: gul.v1.WorkspacePresentationService.SetWorkspaceHidden:input_type -> gul.v1.SetWorkspaceHiddenRequest
+	27, // 76: gul.v1.WorkspacePresentationService.RemoveWorkspaceEntry:input_type -> gul.v1.RemoveWorkspaceEntryRequest
+	42, // 77: gul.v1.WorkspacePresentationService.GetNavigation:input_type -> gul.v1.GetNavigationRequest
+	43, // 78: gul.v1.WorkspacePresentationService.SetNavigation:input_type -> gul.v1.SetNavigationRequest
+	56, // 79: gul.v1.DirectSessionService.ListDirectSessions:input_type -> gul.v1.ListDirectSessionsRequest
+	51, // 80: gul.v1.DirectSessionService.GetDirectSessionPresentation:input_type -> gul.v1.GetDirectSessionPresentationRequest
+	52, // 81: gul.v1.DirectSessionService.RenameDirectSession:input_type -> gul.v1.RenameDirectSessionRequest
+	53, // 82: gul.v1.DirectSessionService.SetDirectSessionFavorite:input_type -> gul.v1.SetDirectSessionFavoriteRequest
+	54, // 83: gul.v1.DirectSessionService.SetDirectSessionArchived:input_type -> gul.v1.SetDirectSessionArchivedRequest
+	58, // 84: gul.v1.DirectSessionService.ListPromptHistory:input_type -> gul.v1.ListPromptHistoryRequest
+	61, // 85: gul.v1.DirectSessionService.GetPromptHistoryItem:input_type -> gul.v1.GetPromptHistoryItemRequest
+	65, // 86: gul.v1.DirectSessionService.GetExecutionState:input_type -> gul.v1.GetExecutionStateRequest
+	68, // 87: gul.v1.DirectSessionService.ListSpecialistResults:input_type -> gul.v1.ListSpecialistResultsRequest
+	72, // 88: gul.v1.DirectSessionService.CloseRuntime:input_type -> gul.v1.CloseRuntimeRequest
+	75, // 89: gul.v1.ArtifactPresentationService.GetMetadata:input_type -> gul.v1.GetMetadataRequest
+	77, // 90: gul.v1.ArtifactPresentationService.ReadChunk:input_type -> gul.v1.ReadChunkRequest
+	79, // 91: gul.v1.ClientEventService.WatchClientEvents:input_type -> gul.v1.WatchClientEventsRequest
+	90, // 92: gul.v1.InteractionPresentationService.ListPending:input_type -> gul.v1.ListPendingRequest
+	92, // 93: gul.v1.InteractionPresentationService.GetCard:input_type -> gul.v1.GetCardRequest
+	94, // 94: gul.v1.InteractionPresentationService.Resolve:input_type -> gul.v1.ResolveRequest
+	23, // 95: gul.v1.RuntimeService.ListRuntimeProfiles:output_type -> gul.v1.ListRuntimeProfilesResponse
+	26, // 96: gul.v1.RuntimeService.CheckCompatibility:output_type -> gul.v1.CheckCompatibilityResponse
+	31, // 97: gul.v1.WorkspacePresentationService.ListRegistrableRoots:output_type -> gul.v1.ListRegistrableRootsResponse
+	34, // 98: gul.v1.WorkspacePresentationService.BrowseRegistrableRoot:output_type -> gul.v1.BrowseRegistrableRootResponse
+	45, // 99: gul.v1.WorkspacePresentationService.RegisterFromHostSelection:output_type -> gul.v1.RegisterWorkspaceResponse
+	45, // 100: gul.v1.WorkspacePresentationService.RegisterFromAllowlistPath:output_type -> gul.v1.RegisterWorkspaceResponse
+	47, // 101: gul.v1.WorkspacePresentationService.RevalidateWorkspace:output_type -> gul.v1.RevalidateWorkspaceResponse
+	49, // 102: gul.v1.WorkspacePresentationService.ListWorkspaces:output_type -> gul.v1.ListWorkspacesResponse
+	41, // 103: gul.v1.WorkspacePresentationService.RenameWorkspace:output_type -> gul.v1.WorkspacePresentationResponse
+	41, // 104: gul.v1.WorkspacePresentationService.SetWorkspaceFavorite:output_type -> gul.v1.WorkspacePresentationResponse
+	41, // 105: gul.v1.WorkspacePresentationService.SetWorkspaceHidden:output_type -> gul.v1.WorkspacePresentationResponse
+	28, // 106: gul.v1.WorkspacePresentationService.RemoveWorkspaceEntry:output_type -> gul.v1.RemoveWorkspaceEntryResponse
+	44, // 107: gul.v1.WorkspacePresentationService.GetNavigation:output_type -> gul.v1.NavigationResponse
+	44, // 108: gul.v1.WorkspacePresentationService.SetNavigation:output_type -> gul.v1.NavigationResponse
+	57, // 109: gul.v1.DirectSessionService.ListDirectSessions:output_type -> gul.v1.ListDirectSessionsResponse
+	55, // 110: gul.v1.DirectSessionService.GetDirectSessionPresentation:output_type -> gul.v1.DirectSessionPresentationResponse
+	55, // 111: gul.v1.DirectSessionService.RenameDirectSession:output_type -> gul.v1.DirectSessionPresentationResponse
+	55, // 112: gul.v1.DirectSessionService.SetDirectSessionFavorite:output_type -> gul.v1.DirectSessionPresentationResponse
+	55, // 113: gul.v1.DirectSessionService.SetDirectSessionArchived:output_type -> gul.v1.DirectSessionPresentationResponse
+	60, // 114: gul.v1.DirectSessionService.ListPromptHistory:output_type -> gul.v1.ListPromptHistoryResponse
+	63, // 115: gul.v1.DirectSessionService.GetPromptHistoryItem:output_type -> gul.v1.GetPromptHistoryItemResponse
+	66, // 116: gul.v1.DirectSessionService.GetExecutionState:output_type -> gul.v1.GetExecutionStateResponse
+	70, // 117: gul.v1.DirectSessionService.ListSpecialistResults:output_type -> gul.v1.ListSpecialistResultsResponse
+	74, // 118: gul.v1.DirectSessionService.CloseRuntime:output_type -> gul.v1.CloseRuntimeResponse
+	76, // 119: gul.v1.ArtifactPresentationService.GetMetadata:output_type -> gul.v1.GetMetadataResponse
+	78, // 120: gul.v1.ArtifactPresentationService.ReadChunk:output_type -> gul.v1.ReadChunkResponse
+	80, // 121: gul.v1.ClientEventService.WatchClientEvents:output_type -> gul.v1.ClientEvent
+	91, // 122: gul.v1.InteractionPresentationService.ListPending:output_type -> gul.v1.ListPendingResponse
+	93, // 123: gul.v1.InteractionPresentationService.GetCard:output_type -> gul.v1.GetCardResponse
+	95, // 124: gul.v1.InteractionPresentationService.Resolve:output_type -> gul.v1.ResolveResponse
+	95, // [95:125] is the sub-list for method output_type
+	65, // [65:95] is the sub-list for method input_type
+	65, // [65:65] is the sub-list for extension type_name
+	65, // [65:65] is the sub-list for extension extendee
+	0,  // [0:65] is the sub-list for field type_name
 }
 
 func init() { file_gul_v1_gul_proto_init() }
@@ -5364,15 +6713,23 @@ func file_gul_v1_gul_proto_init() {
 	file_gul_v1_gul_proto_msgTypes[48].OneofWrappers = []any{}
 	file_gul_v1_gul_proto_msgTypes[50].OneofWrappers = []any{}
 	file_gul_v1_gul_proto_msgTypes[53].OneofWrappers = []any{}
+	file_gul_v1_gul_proto_msgTypes[61].OneofWrappers = []any{}
+	file_gul_v1_gul_proto_msgTypes[69].OneofWrappers = []any{
+		(*InteractionCard_CommandApproval)(nil),
+		(*InteractionCard_FileApproval)(nil),
+		(*InteractionCard_UserInput)(nil),
+		(*InteractionCard_Unsupported)(nil),
+	}
+	file_gul_v1_gul_proto_msgTypes[75].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_gul_v1_gul_proto_rawDesc), len(file_gul_v1_gul_proto_rawDesc)),
-			NumEnums:      16,
-			NumMessages:   61,
+			NumEnums:      20,
+			NumMessages:   76,
 			NumExtensions: 0,
-			NumServices:   5,
+			NumServices:   6,
 		},
 		GoTypes:           file_gul_v1_gul_proto_goTypes,
 		DependencyIndexes: file_gul_v1_gul_proto_depIdxs,

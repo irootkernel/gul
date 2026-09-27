@@ -672,7 +672,7 @@ DirectSessionService
   Recover, Reconcile, BeginControllerAdoption; Create is planned
 
 InteractionPresentationService
-  ListSummaries, GetCard, Resolve
+  ListPending, GetCard, Resolve
 
 WriterActionService
   GetWriterState, Acquire, Release
@@ -1116,8 +1116,27 @@ rule displays WRITE only for fresh active owner authority with verified write
 policy; only an explicit write intent sets the upstream write flag. The writer
 status component renders the backend mode. These components are tested against
 explicit fakes and remain unmounted.
-E4-T2 owns non-live Interaction polling; E5 owns reconnect coordination and
-fresh aggregate convergence.
+E5 owns reconnect coordination and fresh aggregate convergence.
+
+`internal/interaction` provides observer summaries, Controller-authorized typed
+cards and one-shot response handling. The adapter checks current Controller
+identity/generation, matching complete stamps, the selected typed payload size,
+kind/variant agreement and per-kind decision context. Card paths are relative
+to the bound Workspace; opaque or escaping paths block the card. File-change
+artifacts are read in bounded chunks and verified before they become actionable.
+Response bytes use the smaller negotiated limit and 64 KiB, are normalized only
+in memory, sent once and cleared where practical. A fresh authorized read after
+every submission distinguishes resolved, stale, pending re-entry and unknown
+outcomes. No response body or content-derived value enters persistence.
+
+The observer connects live-window selection to per-session unary polling at a
+five-second interval with a five-second total deadline. Independent workers
+prevent a slow Run from starving other Runs. Polling needs no Controller; it
+reads Run and pending Interaction snapshots and emits coalesced invalidations
+through the existing Gul journal without moving provider event checkpoints.
+Read failures invalidate the visible projection rather than enabling actions.
+The generated InteractionPresentation handler and React cards remain unmounted;
+E8 owns authenticated registration and E2/E9 own live transport qualification.
 
 `internal/storage` requires an owner-only database directory and file, then
 opens the pinned SQLite driver with one writer and at most four read-only
