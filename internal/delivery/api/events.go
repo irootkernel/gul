@@ -26,14 +26,7 @@ func (h *ClientEventHandler) access(ctx context.Context) (string, error) {
 	if h == nil || h.Core == nil || h.Principal == nil || h.Events == nil {
 		return "", accessError(connect.CodeUnauthenticated, "event access unavailable")
 	}
-	principal, err := h.Principal(ctx)
-	if err != nil || principal.Subject == "" {
-		return "", accessError(connect.CodeUnauthenticated, "authentication required")
-	}
-	if err := h.Core.RequireLocalAccess(ctx, principal); err != nil {
-		return "", accessError(connect.CodePermissionDenied, "event access denied")
-	}
-	return principal.Subject, nil
+	return localAccess(ctx, h.Core, h.Principal)
 }
 func (h *ClientEventHandler) WatchClientEvents(ctx context.Context, request *connect.Request[gulv1.WatchClientEventsRequest], stream *connect.ServerStream[gulv1.ClientEvent]) error {
 	subject, err := h.access(ctx)

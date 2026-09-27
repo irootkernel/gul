@@ -10,7 +10,10 @@ import (
 
 	"connectrpc.com/connect"
 	gulv1 "github.com/rootkernel/gul/api/generated/go/gul/v1"
+	"github.com/rootkernel/gul/internal/action"
 	"github.com/rootkernel/gul/internal/app"
+	"github.com/rootkernel/gul/internal/history"
+	"github.com/rootkernel/gul/internal/interaction"
 	"github.com/rootkernel/gul/internal/presentation"
 	"github.com/rootkernel/gul/internal/storage"
 	"github.com/rootkernel/gul/internal/workspace"
@@ -21,6 +24,60 @@ type unavailableCounter struct{ calls int }
 func (p *unavailableCounter) Ready(context.Context) error {
 	p.calls++
 	return errors.New("provider offline")
+}
+
+func TestLocalAccessPreservesFailureClassesAcrossHandlers(t *testing.T) {
+	for _, tc := range []struct {
+		name        string
+		persistence app.PersistencePort
+		authorize   app.AuthorizationPort
+		stopped     bool
+		code        connect.Code
+		domain      gulv1.ErrorCode
+		action      gulv1.ActionClass
+	}{
+		{"stopped", ready{}, allow{}, true, connect.CodeUnavailable, gulv1.ErrorCode_ERROR_CODE_SOURCE_UNAVAILABLE, gulv1.ActionClass_ACTION_CLASS_OPERATOR_REPAIR},
+		{"persistence unavailable", unavailable{}, allow{}, false, connect.CodeUnavailable, gulv1.ErrorCode_ERROR_CODE_PERSISTENCE_UNAVAILABLE, gulv1.ActionClass_ACTION_CLASS_OPERATOR_REPAIR},
+		{"unauthorized", ready{}, deny{}, false, connect.CodePermissionDenied, gulv1.ErrorCode_ERROR_CODE_UNAUTHORIZED, gulv1.ActionClass_ACTION_CLASS_ABORT},
+		{"provider offline", ready{}, allow{}, false, 0, 0, 0},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			provider := &unavailableCounter{}
+			core := app.NewCore(app.Dependencies{Provider: provider, Persistence: tc.persistence, Authorization: tc.authorize})
+			if !tc.stopped {
+				if err := core.Start(t.Context()); err != nil {
+					t.Fatal(err)
+				}
+				defer core.Stop(context.Background())
+			}
+			principal := func(context.Context) (app.Principal, error) { return app.Principal{Subject: "owner"}, nil }
+			for name, access := range map[string]func(context.Context) (string, error){
+				"writer":      (&WriterHandler{Core: core, Principal: principal, Actions: &action.Service{}}).access,
+				"interaction": (&InteractionHandler{Core: core, Principal: principal, Interactions: &interaction.Service{}}).access,
+				"events":      (&ClientEventHandler{Core: core, Principal: principal, Events: &eventReader{}}).access,
+				"artifacts":   (&ArtifactHandler{Core: core, Principal: principal, History: &history.Service{}}).access,
+				"workspace":   (&WorkspaceHandler{Core: core, Principal: principal, Presentation: presentation.NewService(nil)}).presentationAccess,
+				"session":     (&DirectPresentationHandler{Core: core, Principal: principal, Presentation: presentation.NewService(nil)}).access,
+			} {
+				t.Run(name, func(t *testing.T) {
+					subject, err := access(t.Context())
+					if tc.code == 0 {
+						if err != nil || subject != "owner" {
+							t.Fatal(subject, err)
+						}
+					} else {
+						assertWorkspaceError(t, err, tc.code, tc.domain, tc.action)
+						if subject != "" {
+							t.Fatal("failed access returned a subject")
+						}
+					}
+				})
+			}
+			if provider.calls != 0 {
+				t.Fatal("local access checked provider readiness")
+			}
+		})
+	}
 }
 
 func TestPresentationHandlersUseOnlyLocalState(t *testing.T) {

@@ -23,14 +23,7 @@ func (h *InteractionHandler) access(ctx context.Context) (string, error) {
 	if h == nil || h.Core == nil || h.Principal == nil || h.Interactions == nil {
 		return "", accessError(connect.CodeUnauthenticated, "interaction access unavailable")
 	}
-	principal, err := h.Principal(ctx)
-	if err != nil || principal.Subject == "" {
-		return "", accessError(connect.CodeUnauthenticated, "authentication required")
-	}
-	if h.Core.RequireLocalAccess(ctx, principal) != nil {
-		return "", accessError(connect.CodePermissionDenied, "interaction access denied")
-	}
-	return principal.Subject, nil
+	return localAccess(ctx, h.Core, h.Principal)
 }
 func (h *InteractionHandler) ListPending(ctx context.Context, request *connect.Request[gulv1.ListPendingRequest]) (*connect.Response[gulv1.ListPendingResponse], error) {
 	subject, err := h.access(ctx)

@@ -138,14 +138,7 @@ func (h *ArtifactHandler) access(ctx context.Context) (string, error) {
 	if h == nil || h.Core == nil || h.Principal == nil || h.History == nil {
 		return "", accessError(connect.CodeUnauthenticated, "product access unavailable")
 	}
-	p, err := h.Principal(ctx)
-	if err != nil || p.Subject == "" {
-		return "", accessError(connect.CodeUnauthenticated, "authentication required")
-	}
-	if err = h.Core.RequireLocalAccess(ctx, p); err != nil {
-		return "", accessError(connect.CodePermissionDenied, "product access denied")
-	}
-	return p.Subject, nil
+	return localAccess(ctx, h.Core, h.Principal)
 }
 func (h *ArtifactHandler) GetMetadata(ctx context.Context, r *connect.Request[gulv1.GetMetadataRequest]) (*connect.Response[gulv1.GetMetadataResponse], error) {
 	subject, err := h.access(ctx)

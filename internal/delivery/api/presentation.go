@@ -13,8 +13,8 @@ import (
 	"github.com/rootkernel/gul/internal/session"
 )
 
-func localAccess(ctx context.Context, core *app.Core, resolve PrincipalResolver, service *presentation.Service) (string, error) {
-	if core == nil || resolve == nil || service == nil {
+func localAccess(ctx context.Context, core *app.Core, resolve PrincipalResolver) (string, error) {
+	if core == nil || resolve == nil {
 		return "", accessError(connect.CodeUnauthenticated, "product access unavailable")
 	}
 	principal, err := resolve(ctx)
@@ -31,10 +31,10 @@ func localAccess(ctx context.Context, core *app.Core, resolve PrincipalResolver,
 }
 
 func (h *WorkspaceHandler) presentationAccess(ctx context.Context) (string, error) {
-	if h == nil {
+	if h == nil || h.Presentation == nil {
 		return "", accessError(connect.CodeUnauthenticated, "product access unavailable")
 	}
-	return localAccess(ctx, h.Core, h.Principal, h.Presentation)
+	return localAccess(ctx, h.Core, h.Principal)
 }
 
 func browserPresentation(entry presentation.Workspace) *gulv1.WorkspaceEntry {
@@ -125,10 +125,10 @@ type DirectPresentationHandler struct {
 var _ gulv1connect.DirectSessionServiceHandler = (*DirectPresentationHandler)(nil)
 
 func (h *DirectPresentationHandler) access(ctx context.Context) (string, error) {
-	if h == nil {
+	if h == nil || h.Presentation == nil {
 		return "", accessError(connect.CodeUnauthenticated, "product access unavailable")
 	}
-	return localAccess(ctx, h.Core, h.Principal, h.Presentation)
+	return localAccess(ctx, h.Core, h.Principal)
 }
 
 func browserDirect(entry presentation.DirectSession) *gulv1.DirectSessionPresentation {

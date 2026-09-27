@@ -23,14 +23,7 @@ func (h *WriterHandler) access(ctx context.Context) (string, error) {
 	if h == nil || h.Core == nil || h.Principal == nil || h.Actions == nil {
 		return "", accessError(connect.CodeUnauthenticated, "action access unavailable")
 	}
-	p, err := h.Principal(ctx)
-	if err != nil || p.Subject == "" {
-		return "", accessError(connect.CodeUnauthenticated, "authentication required")
-	}
-	if h.Core.RequireLocalAccess(ctx, p) != nil {
-		return "", accessError(connect.CodePermissionDenied, "action access denied")
-	}
-	return p.Subject, nil
+	return localAccess(ctx, h.Core, h.Principal)
 }
 func (h *WriterHandler) GetActionState(ctx context.Context, request *connect.Request[gulv1.GetActionStateRequest]) (*connect.Response[gulv1.GetActionStateResponse], error) {
 	subject, err := h.access(ctx)
