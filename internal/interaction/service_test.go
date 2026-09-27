@@ -10,6 +10,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/rootkernel/gul/internal/action"
 	"github.com/rootkernel/gul/internal/observation"
 	"github.com/rootkernel/gul/internal/session"
 	"github.com/rootkernel/gul/internal/workspace"
@@ -98,7 +99,7 @@ func (p *fakeProvider) Observe(ctx context.Context, b Bound) (PendingState, erro
 	return PendingState{Stamp: observation.Stamp{Head: "2", Run: 2, Interaction: 2}}, nil
 }
 func service(p *fakeProvider, c *credentials) *Service {
-	return &Service{Repository: bindings{}, Workspaces: workspaces{}, Carriers: c, Provider: p}
+	return &Service{Actions: allowActions{}, Repository: bindings{}, Workspaces: workspaces{}, Carriers: c, Provider: p}
 }
 
 func TestResponseLossNeverReplaysOrRetainsInput(t *testing.T) {
@@ -388,5 +389,27 @@ func TestPollingRecoveryNotifiesSameStampOnceAndPreservesRegressionFloor(t *test
 				t.Fatal("healthy stamp not coalesced", state, err, n.stamps)
 			}
 		})
+	}
+}
+
+type allowActions struct{}
+
+func (allowActions) InteractionActions(context.Context, string, string) (action.Evaluation, error) {
+	return action.Evaluation{Flags: action.Flags{CanResolveInteraction: true}}, nil
+}
+
+func TestMissingEvaluatorBlocksResponseBeforeProvider(t *testing.T) {
+	p := &fakeProvider{status: Pending}
+	s := service(p, &credentials{})
+	s.Actions = nil
+	body := []byte(`{"answers":{"q":{"answers":["canary-secret"]}}}`)
+	_, err := s.Resolve(t.Context(), "owner", "session", "id", body)
+	if err != ErrBlocked || p.calls != 0 {
+		t.Fatal(err, p.calls)
+	}
+	for _, b := range body {
+		if b != 0 {
+			t.Fatal("blocked response retained")
+		}
 	}
 }

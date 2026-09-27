@@ -632,6 +632,59 @@ verification passed. No unresolved finding or unmet criterion remains. E4-T3 is
 next; the shared action evaluator and distinct interaction outcome presentation
 remain in that task's scope.
 
+### E4-T3 shared action eligibility and writer delegation
+
+`internal/action` defines the closed 19-flag result and independently typed
+provider and local inputs. The checked adapter validates field presence, enums,
+identities, negotiated capabilities and compatible observations before
+classification. It preserves the pinned producer's ownerless workspace-status Writer stamp and
+other-owner revision domains. The authorized aggregate has an independent
+revision and required action; stale aggregate observations disable every action.
+OutcomeUnknown keeps ordinary mutations blocked while preserving an explicitly
+advertised, fresh Reconcile/Recover instruction with required interruption consent.
+That consent covers Primary and background work, member Runs, Spawns, approvals
+and unfinished accepted tasks. Any matching pending local call blocks recovery,
+including when another attempt has an unknown outcome.
+
+The service resolves subject/session ownership, workspace identity and the
+Controller carrier, then reads provider state and local invalidation/operation
+metadata. Acquire and Release re-evaluate the same rule used for presentation
+and invoke one provider RPC with the fresh Run revision. They return its accepted
+Writer projection with actions disabled until another full read. Typed writer
+conflict and unsupported-transition errors stay distinct; ambiguous results
+remain unknown. No local writer authority, reservation or transfer queue is
+stored. A threadless Run without direct-acquire support can activate first write
+only through eligible SubmitTurn(WRITE) from its Unknown/Unverified initial policy.
+Release preserves the full released-Run projection, including its unowned window.
+This task supplies the Submit admission port,
+while E2 owns Submit execution.
+
+The Interaction service also requires the shared response flag. Components show
+six distinct outcomes, clear response input/buffers, and block another response
+on the same card after confirmation or an unknown outcome. The prompt composer
+retains drafts during active Turns and sends only on an explicit action after
+fresh eligibility. Interruption consent starts unchecked. Close, lifecycle and
+adoption results are classifications for their owning coordinators, with no
+placeholder mutation routes.
+
+Focused race tests cover state/capability matrices, stamp domains, independent
+aggregate actions, close confirmation, guarded API calls, SQLite operation
+metadata, accepted provider projections, typed failures and single invocation.
+`frontend/browser/verify-actions.py` exercises actual Chrome against explicit
+component fakes: all six Interaction outcomes, reserved answer IDs, clearing,
+empty browser storage, post-response admission, the unowned release window,
+writer conflict, typed WRITE-submit rejection versus ambiguity, retained drafts
+and explicit consent/submission. The fixture
+is excluded from the product bundle. Generated-wire fixtures model the pinned
+producer; they do not qualify a live provider or assembled product. E5 retains
+mutation convergence and close coordination; E8 retains authenticated assembly.
+
+E4-T3 completion: the original eleven requirements passed the third independent
+completion assessment after the recovery consent and mixed-operation guards were
+corrected. Focused race checks, serial `make test` and the actual Chrome fixture
+passed. No unresolved finding or unmet criterion remains. E4-T5 is next; the
+runtime and product-assembly boundaries above remain in force.
+
 ## 2. Current development snapshot
 
 | Area | State |
@@ -1099,4 +1152,4 @@ The initial documentation assumed Gul would manage one Codex App Server, map Ses
 
 ## 12. Handoff
 
-E12, E1, E13, and E3 are complete. The TASK-053 consumer lock and generated contract tooling remain authoritative. E3-T1 added fake-scoped Workspace attachment, E3-T2 added local-only presentation, E3-T3 added passive session reads, and E3-T4 added prospective global Profile launch selection. E4-T3 is next. E2-T0 remains blocked on an accepted compatible Dolgorae executable and live smoke evidence. No product route or live-provider behavior is activated automatically.
+E12, E1, E13, and E3 are complete. The TASK-053 consumer lock and generated contract tooling remain authoritative. E3-T1 added fake-scoped Workspace attachment, E3-T2 added local-only presentation, E3-T3 added passive session reads, and E3-T4 added prospective global Profile launch selection. E4-T5 is next. E2-T0 remains blocked on an accepted compatible Dolgorae executable and live smoke evidence. No product route or live-provider behavior is activated automatically.

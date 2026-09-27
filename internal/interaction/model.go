@@ -4,6 +4,7 @@ package interaction
 import (
 	"context"
 	"errors"
+	"github.com/rootkernel/gul/internal/action"
 	"time"
 
 	"github.com/rootkernel/gul/internal/observation"
@@ -76,6 +77,7 @@ type Input struct {
 	Questions []Question
 }
 type Card struct {
+	Actions           action.Evaluation
 	Summary           Summary
 	Decisions         []Decision
 	Command           *Command

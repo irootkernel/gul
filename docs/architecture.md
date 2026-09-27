@@ -524,6 +524,29 @@ ActionEvaluationInput
 
 Every field is independently required even when another aggregate appears to imply it. Missing, unknown, string-only, stale, or stamp-incompatible decision input yields `BlockedByProviderCompatibility` or `RequiresFreshSnapshot`; it is never inferred from writer, policy, lifecycle, or diagnostic text. Both UI rendering and every mutation endpoint evaluate this same structure. Aggregate revision has its own domain and is not compared for equality with Run stamps. Session-wide action eligibility requires a fresh authorized aggregate observation; the provider still rechecks actual state at mutation admission.
 
+The E4-T3 implementation uses `internal/action.Input` and the pure `Evaluate`
+function for this contract. The checked adapter reads Run, workspace Writer,
+Profile, pending Interaction, timeline head and authorized root aggregate facts.
+Ownerless workspace-status Writer stamps contain only the workspace Writer revision; another
+owner's Run and Interaction revisions remain in that owner's domain. The local
+repository adds Controller health, subject ownership, invalidation floor and
+unresolved operation metadata. Aggregate required actions remain independent
+from its recovery classification.
+
+`WriterActionService` exposes the shared result and performs guarded Acquire or
+Release once with a freshly read Run revision. Accepted responses display the
+provider projection and require a new complete snapshot before further actions.
+Release returns the released Run policy, lane, assurance and full stamp even when
+the owner is absent; it has a separate validation boundary from workspace status.
+The initial threadless Unknown/Unverified policy permits the first eligible Turn
+without claiming verified WRITE before its accepted provider response.
+The Interaction service uses the same evaluator before response admission.
+`RequireSubmit` is the admission port for later Submit assembly. Primary
+lifecycle, Controller adoption and session-close flags are classifications;
+E2/E5 own their execution, and E8 owns authenticated product route assembly.
+The isolated Writer panel, prompt draft and Interaction components consume only
+these Gul flags and typed blockers. They do not mount a runtime route.
+
 ## 8. Direct Session flows
 
 ### 8.1 Workspace registration
@@ -675,7 +698,7 @@ InteractionPresentationService
   ListPending, GetCard, Resolve
 
 WriterActionService
-  GetWriterState, Acquire, Release
+  GetActionState, AcquireWriter, ReleaseWriter
 
 ArtifactPresentationService
   GetMetadata, ReadChunk
@@ -1128,6 +1151,17 @@ Response bytes use the smaller negotiated limit and 64 KiB, are normalized only
 in memory, sent once and cleared where practical. A fresh authorized read after
 every submission distinguishes resolved, stale, pending re-entry and unknown
 outcomes. No response body or content-derived value enters persistence.
+
+`internal/action` evaluates the closed 19-action set from typed provider facts,
+local coordination metadata and a fresh independent session aggregate. Recovery
+and Close share the same owned-work consent rule, including background work,
+member Runs, Spawns, pending approvals and accepted unfinished tasks. A pending
+local call blocks recovery even when another matching attempt has an unknown
+outcome. Backend Acquire and Release re-evaluate these facts before one provider
+call; accepted projections require a fresh read before another mutation.
+The generated WriterAction handler, writer panel, prompt draft and interrupt
+consent components remain unmounted. E2 owns Submit/Interrupt execution, E5 owns
+Close coordination, and E7/E8 own product assembly.
 
 The observer connects live-window selection to per-session unary polling at a
 five-second interval with a five-second total deadline. Independent workers

@@ -3,5 +3,5 @@
   "compilerOptions": {
     "types": ["bun", "react", "react-dom"]
   },
-  "include": ["src/**/*.test.ts", "src/**/*.test.tsx"]
+  "include": ["src/**/*.test.ts", "src/**/*.test.tsx", "browser/*.tsx"]
 }

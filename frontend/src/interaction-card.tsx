@@ -30,26 +30,33 @@ export async function sendInteractionResponse(body: Uint8Array, respond: Respond
   }
 }
 
-export function InteractionCardView({card, respond}: {card: InteractionCard; respond: Respond}) {
+export function InteractionCardView(props: {card: InteractionCard; respond: Respond}) {
+  return <InteractionCardContent key={props.card.summary?.interactionId} {...props} />;
+}
+
+function InteractionCardContent({card, respond}: {card: InteractionCard; respond: Respond}) {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
+  const [feedback, setFeedback] = useState<{basis: InteractionCard; outcome: InteractionOutcome}>();
+  const outcome = feedback?.basis === card ? feedback.outcome : undefined;
   const inFlight = useRef(false);
-  const active = card.summary?.status === InteractionCardStatus.PENDING;
+  const active = card.summary?.status === InteractionCardStatus.PENDING && card.actions?.canResolveInteraction === true && (!outcome || outcome === "pending");
   const detail = card.detail;
 
-  async function send(value: unknown) {
+  async function send(value: unknown, acceptedOutcome: InteractionOutcome) {
     if (!active || inFlight.current) return;
     const body = new TextEncoder().encode(JSON.stringify(value));
     inFlight.current = true;
     setBusy(true);
     setMessage("");
+    setFeedback(undefined);
     const result = await sendInteractionResponse(body, respond);
     inFlight.current = false;
     setBusy(false);
-    setMessage(result?.outcome === InteractionResolutionOutcome.RESOLVED ? "Response confirmed."
-      : result?.outcome === InteractionResolutionOutcome.REENTER ? "Still pending. Enter your response again."
-        : result?.outcome === InteractionResolutionOutcome.STALE ? "This request has expired or is no longer actionable."
-          : "Response not confirmed. Refresh the request before trying again.");
+    setFeedback({basis: card, outcome: result?.outcome === InteractionResolutionOutcome.RESOLVED
+      ? result.resolutionReceipt ? acceptedOutcome : "resolved_elsewhere"
+      : result?.outcome === InteractionResolutionOutcome.REENTER ? "pending"
+        : result?.outcome === InteractionResolutionOutcome.STALE ? "expiration" : "provider_failure"});
   }
 
   function answer(event: FormEvent<HTMLFormElement>) {
@@ -63,7 +70,7 @@ export function InteractionCardView({card, respond}: {card: InteractionCard; res
       return;
     }
     form.reset();
-    void send({answers});
+    void send({answers}, "answer");
   }
 
   const decisions: [InteractionCardDecision, string, string][] = [
@@ -92,7 +99,20 @@ export function InteractionCardView({card, respond}: {card: InteractionCard; res
     {detail.case === "unsupported" && <p role="alert">{detail.value.blocker}</p>}
     {!detail.case && <p role="alert">Request details are unavailable.</p>}
     {(detail.case === "commandApproval" || detail.case === "fileApproval") && decisions.filter(([id]) => card.decisions.includes(id)).map(([id, label, value]) =>
-      <button key={id} disabled={!active || busy} onClick={() => void send({decision: value})}>{label}</button>)}
+      <button key={id} disabled={!active || busy} onClick={() => void send({decision: value}, value === "accept_once" ? "approval" : value === "decline" ? "denial" : "cancellation")}>{label}</button>)}
+    {!active && card.summary?.status === InteractionCardStatus.PENDING && <p role="alert">A fresh eligible state is required before responding.</p>}
+    {(outcome || card.summary?.status === InteractionCardStatus.STALE || card.summary?.status === InteractionCardStatus.RESOLVED) && <InteractionFeedback outcome={card.summary?.status === InteractionCardStatus.STALE ? "expiration" : outcome ?? "resolved_elsewhere"} />}
     {message && <p role="status">{message}</p>}
   </section>;
+}
+
+export type InteractionOutcome = "approval" | "denial" | "answer" | "expiration" | "cancellation" | "provider_failure" | "pending" | "resolved_elsewhere";
+const outcomeLabels: Record<InteractionOutcome, string> = {
+  approval: "Approval confirmed.", denial: "Denial confirmed.", answer: "Answer confirmed.",
+  expiration: "Request expired or is no longer actionable.", cancellation: "Cancellation confirmed.",
+  provider_failure: "Provider response unavailable. Outcome unknown; refresh before trying again.",
+  pending: "Still pending. Enter your response again.", resolved_elsewhere: "Request is already resolved.",
+};
+export function InteractionFeedback({outcome}: {outcome: InteractionOutcome}) {
+  return <p role={outcome === "provider_failure" ? "alert" : "status"} data-outcome={outcome}>{outcomeLabels[outcome]}</p>;
 }

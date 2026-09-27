@@ -8,7 +8,7 @@ const expectedBrowser = {
 };
 const expectedTest = {
   types: ["bun", "react", "react-dom"],
-  include: ["src/**/*.test.ts", "src/**/*.test.tsx"],
+  include: ["src/**/*.test.ts", "src/**/*.test.tsx", "browser/*.tsx"],
 };
 
 export function validateFrontendConfig(browser, test) {

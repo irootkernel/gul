@@ -36,6 +36,8 @@ const (
 	// InteractionPresentationServiceName is the fully-qualified name of the
 	// InteractionPresentationService service.
 	InteractionPresentationServiceName = "gul.v1.InteractionPresentationService"
+	// WriterActionServiceName is the fully-qualified name of the WriterActionService service.
+	WriterActionServiceName = "gul.v1.WriterActionService"
 )
 
 // These constants are the fully-qualified names of the RPCs defined in this package. They're
@@ -136,6 +138,15 @@ const (
 	// InteractionPresentationServiceResolveProcedure is the fully-qualified name of the
 	// InteractionPresentationService's Resolve RPC.
 	InteractionPresentationServiceResolveProcedure = "/gul.v1.InteractionPresentationService/Resolve"
+	// WriterActionServiceGetActionStateProcedure is the fully-qualified name of the
+	// WriterActionService's GetActionState RPC.
+	WriterActionServiceGetActionStateProcedure = "/gul.v1.WriterActionService/GetActionState"
+	// WriterActionServiceAcquireWriterProcedure is the fully-qualified name of the
+	// WriterActionService's AcquireWriter RPC.
+	WriterActionServiceAcquireWriterProcedure = "/gul.v1.WriterActionService/AcquireWriter"
+	// WriterActionServiceReleaseWriterProcedure is the fully-qualified name of the
+	// WriterActionService's ReleaseWriter RPC.
+	WriterActionServiceReleaseWriterProcedure = "/gul.v1.WriterActionService/ReleaseWriter"
 )
 
 // RuntimeServiceClient is a client for the gul.v1.RuntimeService service.
@@ -1185,4 +1196,126 @@ func (UnimplementedInteractionPresentationServiceHandler) GetCard(context.Contex
 
 func (UnimplementedInteractionPresentationServiceHandler) Resolve(context.Context, *connect.Request[v1.ResolveRequest]) (*connect.Response[v1.ResolveResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("gul.v1.InteractionPresentationService.Resolve is not implemented"))
+}
+
+// WriterActionServiceClient is a client for the gul.v1.WriterActionService service.
+type WriterActionServiceClient interface {
+	GetActionState(context.Context, *connect.Request[v1.GetActionStateRequest]) (*connect.Response[v1.GetActionStateResponse], error)
+	AcquireWriter(context.Context, *connect.Request[v1.AcquireWriterRequest]) (*connect.Response[v1.AcquireWriterResponse], error)
+	ReleaseWriter(context.Context, *connect.Request[v1.ReleaseWriterRequest]) (*connect.Response[v1.ReleaseWriterResponse], error)
+}
+
+// NewWriterActionServiceClient constructs a client for the gul.v1.WriterActionService service. By
+// default, it uses the Connect protocol with the binary Protobuf Codec, asks for gzipped responses,
+// and sends uncompressed requests. To use the gRPC or gRPC-Web protocols, supply the
+// connect.WithGRPC() or connect.WithGRPCWeb() options.
+//
+// The URL supplied here should be the base URL for the Connect or gRPC server (for example,
+// http://api.acme.com or https://acme.com/grpc).
+func NewWriterActionServiceClient(httpClient connect.HTTPClient, baseURL string, opts ...connect.ClientOption) WriterActionServiceClient {
+	baseURL = strings.TrimRight(baseURL, "/")
+	writerActionServiceMethods := v1.File_gul_v1_gul_proto.Services().ByName("WriterActionService").Methods()
+	return &writerActionServiceClient{
+		getActionState: connect.NewClient[v1.GetActionStateRequest, v1.GetActionStateResponse](
+			httpClient,
+			baseURL+WriterActionServiceGetActionStateProcedure,
+			connect.WithSchema(writerActionServiceMethods.ByName("GetActionState")),
+			connect.WithClientOptions(opts...),
+		),
+		acquireWriter: connect.NewClient[v1.AcquireWriterRequest, v1.AcquireWriterResponse](
+			httpClient,
+			baseURL+WriterActionServiceAcquireWriterProcedure,
+			connect.WithSchema(writerActionServiceMethods.ByName("AcquireWriter")),
+			connect.WithClientOptions(opts...),
+		),
+		releaseWriter: connect.NewClient[v1.ReleaseWriterRequest, v1.ReleaseWriterResponse](
+			httpClient,
+			baseURL+WriterActionServiceReleaseWriterProcedure,
+			connect.WithSchema(writerActionServiceMethods.ByName("ReleaseWriter")),
+			connect.WithClientOptions(opts...),
+		),
+	}
+}
+
+// writerActionServiceClient implements WriterActionServiceClient.
+type writerActionServiceClient struct {
+	getActionState *connect.Client[v1.GetActionStateRequest, v1.GetActionStateResponse]
+	acquireWriter  *connect.Client[v1.AcquireWriterRequest, v1.AcquireWriterResponse]
+	releaseWriter  *connect.Client[v1.ReleaseWriterRequest, v1.ReleaseWriterResponse]
+}
+
+// GetActionState calls gul.v1.WriterActionService.GetActionState.
+func (c *writerActionServiceClient) GetActionState(ctx context.Context, req *connect.Request[v1.GetActionStateRequest]) (*connect.Response[v1.GetActionStateResponse], error) {
+	return c.getActionState.CallUnary(ctx, req)
+}
+
+// AcquireWriter calls gul.v1.WriterActionService.AcquireWriter.
+func (c *writerActionServiceClient) AcquireWriter(ctx context.Context, req *connect.Request[v1.AcquireWriterRequest]) (*connect.Response[v1.AcquireWriterResponse], error) {
+	return c.acquireWriter.CallUnary(ctx, req)
+}
+
+// ReleaseWriter calls gul.v1.WriterActionService.ReleaseWriter.
+func (c *writerActionServiceClient) ReleaseWriter(ctx context.Context, req *connect.Request[v1.ReleaseWriterRequest]) (*connect.Response[v1.ReleaseWriterResponse], error) {
+	return c.releaseWriter.CallUnary(ctx, req)
+}
+
+// WriterActionServiceHandler is an implementation of the gul.v1.WriterActionService service.
+type WriterActionServiceHandler interface {
+	GetActionState(context.Context, *connect.Request[v1.GetActionStateRequest]) (*connect.Response[v1.GetActionStateResponse], error)
+	AcquireWriter(context.Context, *connect.Request[v1.AcquireWriterRequest]) (*connect.Response[v1.AcquireWriterResponse], error)
+	ReleaseWriter(context.Context, *connect.Request[v1.ReleaseWriterRequest]) (*connect.Response[v1.ReleaseWriterResponse], error)
+}
+
+// NewWriterActionServiceHandler builds an HTTP handler from the service implementation. It returns
+// the path on which to mount the handler and the handler itself.
+//
+// By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf
+// and JSON codecs. They also support gzip compression.
+func NewWriterActionServiceHandler(svc WriterActionServiceHandler, opts ...connect.HandlerOption) (string, http.Handler) {
+	writerActionServiceMethods := v1.File_gul_v1_gul_proto.Services().ByName("WriterActionService").Methods()
+	writerActionServiceGetActionStateHandler := connect.NewUnaryHandler(
+		WriterActionServiceGetActionStateProcedure,
+		svc.GetActionState,
+		connect.WithSchema(writerActionServiceMethods.ByName("GetActionState")),
+		connect.WithHandlerOptions(opts...),
+	)
+	writerActionServiceAcquireWriterHandler := connect.NewUnaryHandler(
+		WriterActionServiceAcquireWriterProcedure,
+		svc.AcquireWriter,
+		connect.WithSchema(writerActionServiceMethods.ByName("AcquireWriter")),
+		connect.WithHandlerOptions(opts...),
+	)
+	writerActionServiceReleaseWriterHandler := connect.NewUnaryHandler(
+		WriterActionServiceReleaseWriterProcedure,
+		svc.ReleaseWriter,
+		connect.WithSchema(writerActionServiceMethods.ByName("ReleaseWriter")),
+		connect.WithHandlerOptions(opts...),
+	)
+	return "/gul.v1.WriterActionService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case WriterActionServiceGetActionStateProcedure:
+			writerActionServiceGetActionStateHandler.ServeHTTP(w, r)
+		case WriterActionServiceAcquireWriterProcedure:
+			writerActionServiceAcquireWriterHandler.ServeHTTP(w, r)
+		case WriterActionServiceReleaseWriterProcedure:
+			writerActionServiceReleaseWriterHandler.ServeHTTP(w, r)
+		default:
+			http.NotFound(w, r)
+		}
+	})
+}
+
+// UnimplementedWriterActionServiceHandler returns CodeUnimplemented from all methods.
+type UnimplementedWriterActionServiceHandler struct{}
+
+func (UnimplementedWriterActionServiceHandler) GetActionState(context.Context, *connect.Request[v1.GetActionStateRequest]) (*connect.Response[v1.GetActionStateResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("gul.v1.WriterActionService.GetActionState is not implemented"))
+}
+
+func (UnimplementedWriterActionServiceHandler) AcquireWriter(context.Context, *connect.Request[v1.AcquireWriterRequest]) (*connect.Response[v1.AcquireWriterResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("gul.v1.WriterActionService.AcquireWriter is not implemented"))
+}
+
+func (UnimplementedWriterActionServiceHandler) ReleaseWriter(context.Context, *connect.Request[v1.ReleaseWriterRequest]) (*connect.Response[v1.ReleaseWriterResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("gul.v1.WriterActionService.ReleaseWriter is not implemented"))
 }

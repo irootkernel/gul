@@ -14,6 +14,7 @@ import (
 	"connectrpc.com/connect"
 	gulv1 "github.com/rootkernel/gul/api/generated/go/gul/v1"
 	"github.com/rootkernel/gul/api/generated/go/gul/v1/gulv1connect"
+	"github.com/rootkernel/gul/internal/action"
 	"github.com/rootkernel/gul/internal/app"
 	"github.com/rootkernel/gul/internal/interaction"
 	"github.com/rootkernel/gul/internal/observation"
@@ -92,7 +93,7 @@ func TestInteractionRPCCompetingClientsAndSecretAbsence(t *testing.T) {
 		t.Fatal(err)
 	}
 	provider := &interactionProvider{}
-	service := &interaction.Service{Repository: store.Presentation(), Workspaces: interactionWorkspace{}, Carriers: interactionCarrier{}, Provider: provider}
+	service := &interaction.Service{Actions: interactionActions{}, Repository: store.Presentation(), Workspaces: interactionWorkspace{}, Carriers: interactionCarrier{}, Provider: provider}
 	core := app.NewCore(app.Dependencies{Provider: ready{}, Persistence: ready{}, Authorization: allow{}})
 	if err = core.Start(t.Context()); err != nil {
 		t.Fatal(err)
@@ -156,4 +157,10 @@ func TestInteractionRPCCompetingClientsAndSecretAbsence(t *testing.T) {
 	if connect.CodeOf(err) != connect.CodeUnauthenticated || !bytes.Equal(body, make([]byte, len(body))) {
 		t.Fatal("unauthorized body retained")
 	}
+}
+
+type interactionActions struct{}
+
+func (interactionActions) InteractionActions(context.Context, string, string) (action.Evaluation, error) {
+	return action.Evaluation{Flags: action.Flags{CanResolveInteraction: true}}, nil
 }

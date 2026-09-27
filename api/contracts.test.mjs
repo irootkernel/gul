@@ -2,6 +2,9 @@ import {expect, test} from "bun:test";
 import {create, fromBinary, toBinary} from "@bufbuild/protobuf";
 import {
   ActionClass,
+  WriterActionService,
+  ActionFlagsSchema,
+  ActionFailureSchema,
   RuntimeService,
   ClientEventService,
   InteractionPresentationService,
@@ -245,7 +248,20 @@ test("close outcomes keep rejection, pending, confirmation, and ambiguity distin
 
 test("interaction cards use typed Gul fields and a body-only response", () => {
   expect(Object.keys(InteractionPresentationService.method)).toEqual(["listPending", "getCard", "resolve"]);
-  expect(InteractionCardSchema.fields.map(field => field.name)).toEqual(["summary", "decisions", "command_approval", "file_approval", "user_input", "unsupported"]);
+  expect(InteractionCardSchema.fields.map(field => field.name)).toEqual(["actions", "blocker", "summary", "decisions", "command_approval", "file_approval", "user_input", "unsupported"]);
   expect(InteractionCardSummarySchema.fields.map(field => field.name)).not.toContain("run_id");
   expect(ResolveRequestSchema.fields.map(field => field.name)).toEqual(["session_id", "interaction_id", "response_json"]);
+});
+
+
+test("writer actions expose the closed shared decision and typed failure", () => {
+  expect(Object.keys(WriterActionService.method)).toEqual(["getActionState", "acquireWriter", "releaseWriter"]);
+  expect(ActionFlagsSchema.fields.map(field => field.name)).toEqual([
+    "can_submit_read", "can_submit_write", "can_acquire_writer", "can_release_writer",
+    "can_interrupt", "can_resolve_interaction", "can_recover", "can_reconcile", "can_adopt_controller",
+    "can_pause_primary", "can_resume_primary", "can_request_session_close",
+    "requires_close_confirmation", "requires_operator_action", "requires_fresh_snapshot",
+    "blocked_by_outcome_unknown", "blocked_by_credential_state", "blocked_by_background_execution", "blocked_by_provider_compatibility",
+  ]);
+  expect(ActionFailureSchema.fields.map(field => field.name)).toEqual(["blocker"]);
 });

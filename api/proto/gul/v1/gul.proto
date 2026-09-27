@@ -648,6 +648,8 @@ message InteractionQuestionCard {
 message UserInputCard { bool is_blocking = 1; repeated InteractionQuestionCard questions = 2; }
 message UnsupportedInteractionCard { string blocker = 1; }
 message InteractionCard {
+  ActionFlags actions = 7;
+  ActionBlocker blocker = 8;
   InteractionCardSummary summary = 1;
   repeated InteractionCardDecision decisions = 2;
   oneof detail {
@@ -672,3 +674,116 @@ message ResolveResponse {
   string resolution_receipt = 2;
   optional InteractionCard pending_card = 3;
 }
+
+service WriterActionService {
+  rpc GetActionState(GetActionStateRequest) returns (GetActionStateResponse);
+  rpc AcquireWriter(AcquireWriterRequest) returns (AcquireWriterResponse);
+  rpc ReleaseWriter(ReleaseWriterRequest) returns (ReleaseWriterResponse);
+}
+
+enum ActionWriteIntent {
+  ACTION_WRITE_INTENT_UNSPECIFIED = 0;
+  ACTION_WRITE_INTENT_READ = 1;
+  ACTION_WRITE_INTENT_WRITE = 2;
+}
+enum ActionCloseIntent {
+  ACTION_CLOSE_INTENT_UNSPECIFIED = 0;
+  ACTION_CLOSE_INTENT_NONE = 1;
+  ACTION_CLOSE_INTENT_COMPLETE = 2;
+  ACTION_CLOSE_INTENT_ABORT = 3;
+}
+enum WriterAuthority {
+  WRITER_AUTHORITY_UNSPECIFIED = 0;
+  WRITER_AUTHORITY_NONE = 1;
+  WRITER_AUTHORITY_RESERVED = 2;
+  WRITER_AUTHORITY_ACTIVE = 3;
+  WRITER_AUTHORITY_HANDOFF_PREPARED = 4;
+  WRITER_AUTHORITY_RELEASING = 5;
+  WRITER_AUTHORITY_BLOCKED_UNKNOWN = 6;
+}
+enum WriterEffectiveAccess {
+  WRITER_EFFECTIVE_ACCESS_UNSPECIFIED = 0;
+  WRITER_EFFECTIVE_ACCESS_READ = 1;
+  WRITER_EFFECTIVE_ACCESS_WRITE = 2;
+  WRITER_EFFECTIVE_ACCESS_TRANSITIONING = 3;
+  WRITER_EFFECTIVE_ACCESS_UNSUPPORTED = 4;
+  WRITER_EFFECTIVE_ACCESS_UNKNOWN = 5;
+}
+enum WriterPolicyVerification {
+  WRITER_POLICY_VERIFICATION_UNSPECIFIED = 0;
+  WRITER_POLICY_VERIFICATION_VERIFIED = 1;
+  WRITER_POLICY_VERIFICATION_UNVERIFIED = 2;
+  WRITER_POLICY_VERIFICATION_FAILED = 3;
+}
+enum WriterOwner {
+  WRITER_OWNER_UNSPECIFIED = 0;
+  WRITER_OWNER_UNOWNED = 1;
+  WRITER_OWNER_THIS_SESSION = 2;
+  WRITER_OWNER_EXTERNAL_MANAGEMENT = 3;
+}
+enum ActionBlocker {
+  ACTION_BLOCKER_UNSPECIFIED = 0;
+  ACTION_BLOCKER_NONE = 1;
+  ACTION_BLOCKER_PROVIDER_INCOMPATIBLE = 2;
+  ACTION_BLOCKER_FRESH_SNAPSHOT_REQUIRED = 3;
+  ACTION_BLOCKER_CREDENTIAL_BLOCKED = 4;
+  ACTION_BLOCKER_UNRESOLVED_OUTCOME = 5;
+  ACTION_BLOCKER_BACKGROUND_BLOCKED = 6;
+  ACTION_BLOCKER_WRITER_BUSY = 7;
+  ACTION_BLOCKER_UNSUPPORTED_TRANSITION = 8;
+  ACTION_BLOCKER_ACTIVE_TURN_DRAFT = 9;
+  ACTION_BLOCKER_INTERRUPT_CONFIRMATION_REQUIRED = 10;
+  ACTION_BLOCKER_RECOVERY_BLOCKED = 11;
+  ACTION_BLOCKER_PROVIDER_FAILURE = 12;
+}
+message ActionFlags {
+  bool can_submit_read = 1;
+  bool can_submit_write = 2;
+  bool can_acquire_writer = 3;
+  bool can_release_writer = 4;
+  bool can_interrupt = 5;
+  bool can_resolve_interaction = 6;
+  bool can_recover = 7;
+  bool can_reconcile = 8;
+  bool can_adopt_controller = 9;
+  bool can_pause_primary = 10;
+  bool can_resume_primary = 11;
+  bool can_request_session_close = 12;
+  bool requires_close_confirmation = 13;
+  bool requires_operator_action = 14;
+  bool requires_fresh_snapshot = 15;
+  bool blocked_by_outcome_unknown = 16;
+  bool blocked_by_credential_state = 17;
+  bool blocked_by_background_execution = 18;
+  bool blocked_by_provider_compatibility = 19;
+}
+message WriterPresentation {
+  WriterAuthority authority = 1;
+  uint64 generation = 2;
+  WriterEffectiveAccess effective_access = 3;
+  WriterPolicyVerification policy_verification = 4;
+  LaunchExecutionLane lane = 5;
+  LaunchAssurance requested_assurance = 6;
+  LaunchAssurance achieved_assurance = 7;
+  WriterOwner owner = 8;
+  bool background_blocked = 9;
+  bool recovery_blocked = 10;
+}
+message ActionState {
+  ActionFlags flags = 1;
+  ActionBlocker blocker = 2;
+  WriterPresentation writer = 3;
+  WriterAccessMode mode = 4;
+}
+message GetActionStateRequest {
+  string session_id = 1;
+  ActionWriteIntent write_intent = 2;
+  ActionCloseIntent close_intent = 3;
+  bool interrupt_confirmed = 4;
+}
+message GetActionStateResponse { ActionState state = 1; }
+message AcquireWriterRequest { string session_id = 1; }
+message AcquireWriterResponse { ActionState state = 1; }
+message ReleaseWriterRequest { string session_id = 1; }
+message ReleaseWriterResponse { ActionState state = 1; }
+message ActionFailure { ActionBlocker blocker = 1; }

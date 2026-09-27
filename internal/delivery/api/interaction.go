@@ -94,7 +94,7 @@ func browserInteractionSummary(s interaction.Summary) *gulv1.InteractionCardSumm
 	return out
 }
 func browserCard(c interaction.Card) *gulv1.InteractionCard {
-	out := &gulv1.InteractionCard{Summary: browserInteractionSummary(c.Summary)}
+	out := &gulv1.InteractionCard{Summary: browserInteractionSummary(c.Summary), Actions: browserActionFlags(c.Actions.Flags), Blocker: gulv1.ActionBlocker(c.Actions.Blocker + 1)}
 	for _, d := range c.Decisions {
 		out.Decisions = append(out.Decisions, gulv1.InteractionCardDecision(d))
 	}

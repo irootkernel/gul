@@ -11,10 +11,16 @@ import (
 	"time"
 	"unicode/utf8"
 
+	"github.com/rootkernel/gul/internal/action"
 	"github.com/rootkernel/gul/internal/session"
 )
 
+type ActionEvaluator interface {
+	InteractionActions(context.Context, string, string) (action.Evaluation, error)
+}
+
 type Service struct {
+	Actions    ActionEvaluator
 	Repository Repository
 	Workspaces session.Workspace
 	Carriers   session.CarrierResolver
@@ -64,7 +70,18 @@ func (s *Service) Get(ctx context.Context, subject, id, interactionID string) (C
 	if err != nil {
 		return Card{}, err
 	}
-	return s.Provider.Card(ctx, b, interactionID)
+	card, err := s.Provider.Card(ctx, b, interactionID)
+	if err != nil {
+		return Card{}, err
+	}
+	card.Actions = action.Evaluation{Flags: action.Flags{BlockedByProviderCompatibility: true}, Blocker: action.ProviderFailure}
+	if s.Actions != nil {
+		evaluated, evaluationErr := s.Actions.InteractionActions(ctx, subject, id)
+		if evaluationErr == nil {
+			card.Actions = evaluated
+		}
+	}
+	return card, nil
 }
 
 // Resolve consumes its input buffer. It retains neither the body nor any
@@ -84,6 +101,10 @@ func (s *Service) Resolve(ctx context.Context, subject, id, interactionID string
 	if card.Summary.Status == Stale {
 		return Result{Outcome: OutcomeStale}, nil
 	}
+	if !card.Actions.Flags.CanResolveInteraction {
+		return Result{}, ErrBlocked
+	}
+
 	normalized, err := normalize(body, card)
 	if err != nil {
 		return Result{}, err

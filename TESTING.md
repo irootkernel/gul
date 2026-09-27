@@ -42,3 +42,12 @@ React bundle and uses only exact dependency versions; the nested contract Bun
 graph remains separate. Later Tasks may extend the tests but must keep the
 serial facade, deterministic generation, one-bundle delivery, and fail-closed
 prerequisites.
+
+The selected E4-T3 browser check is `python3 frontend/browser/verify-actions.py`.
+It requires existing Bun, `playwright-cli` and Chrome, builds an isolated component
+fixture in a temporary directory, serves it on a loopback ephemeral port, and
+closes its browser session and server afterward. It covers six Interaction
+outcomes, writer changes and prompt/consent behavior against explicit fakes,
+including typed WRITE-submit rejection and unknown outcomes with retained drafts.
+It installs nothing and remains separate from `make test` and live-provider
+acceptance. The fixture is typechecked with the frontend test sources.
