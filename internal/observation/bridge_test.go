@@ -87,12 +87,14 @@ func (p testProvider) Watch(ctx context.Context, _ Binding, after Cursor) (Strea
 type testRefresh struct {
 	mu    sync.Mutex
 	masks []Refresh
+	runs  []string
 }
 
-func (r *testRefresh) Refresh(_ context.Context, _ Binding, mask Refresh, _ Stamp) error {
+func (r *testRefresh) Refresh(_ context.Context, binding Binding, mask Refresh, _ Stamp) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	r.masks = append(r.masks, mask)
+	r.runs = append(r.runs, binding.RunID)
 	return nil
 }
 func testBinding() Binding {
@@ -194,7 +196,7 @@ func TestStorageFailureKeepsReplayBoundaryAndNoDelivery(t *testing.T) {
 func TestBoundedQueueOnlyStopsAffectedRun(t *testing.T) {
 	release := make(chan struct{})
 	repo := &memoryRepo{block: release, validated: make(chan struct{}, 1)}
-	b, s, _, done, _ := bridgeFixture(t, repo)
+	b, s, _, done, refresh := bridgeFixture(t, repo)
 	s.events <- testEvent(2)
 	<-repo.validated
 	for i := 3; i < QueueLimit+8; i++ {
@@ -212,6 +214,11 @@ func TestBoundedQueueOnlyStopsAffectedRun(t *testing.T) {
 	if b.State().Connection != "slow_consumer" {
 		t.Fatal(b.State())
 	}
+	refresh.mu.Lock()
+	if len(refresh.masks) == 0 || refresh.masks[len(refresh.masks)-1] != AllAggregates {
+		t.Errorf("missing overflow repair: %v", refresh.masks)
+	}
+	refresh.mu.Unlock()
 	other, otherStream, cancel, otherDone, _ := bridgeFixture(t, &memoryRepo{})
 	otherStream.events <- testEvent(2)
 	receiveNotification(t, other)
@@ -222,7 +229,7 @@ func TestAdvisoriesAndInvalidEnvelopesDoNotAdvanceCursors(t *testing.T) {
 	for _, kind := range []string{"heartbeat", "terminal", "shutdown", "foreign", "rewind", "unknown"} {
 		t.Run(kind, func(t *testing.T) {
 			repo := &memoryRepo{cp: Checkpoint{Validated: "4", Committed: "4", Stamp: Stamp{Head: "4", Run: 4}}}
-			b, s, cancel, done, _ := bridgeFixture(t, repo)
+			b, s, _, done, _ := bridgeFixture(t, repo)
 			e := Envelope{RunID: "run", Head: "4"}
 			switch kind {
 			case "heartbeat":
@@ -241,8 +248,8 @@ func TestAdvisoriesAndInvalidEnvelopesDoNotAdvanceCursors(t *testing.T) {
 			}
 			s.events <- e
 			if kind == "heartbeat" {
-				time.Sleep(CoalesceInterval)
-				cancel()
+				// The ordered end proves the preceding heartbeat was consumed.
+				s.events <- Envelope{RunID: "run", Head: "4", End: "shutdown"}
 			}
 			err := receiveDone(t, done)
 			if kind == "terminal" && err != nil {
@@ -252,6 +259,9 @@ func TestAdvisoriesAndInvalidEnvelopesDoNotAdvanceCursors(t *testing.T) {
 				t.Fatal("missing failure")
 			}
 			cp, _ := repo.Checkpoint(t.Context(), testBinding())
+			if kind == "heartbeat" && !b.State().LastHeartbeat.Equal(e.Heartbeat) {
+				t.Fatalf("heartbeat not recorded: %+v", b.State())
+			}
 			if cp.Committed != "4" || cp.Validated != "4" {
 				t.Fatal(cp)
 			}
@@ -261,6 +271,65 @@ func TestAdvisoriesAndInvalidEnvelopesDoNotAdvanceCursors(t *testing.T) {
 			default:
 			}
 		})
+	}
+}
+
+func TestDisconnectRefreshesAndResumesCommittedCursor(t *testing.T) {
+	for _, failure := range []error{io.EOF, ErrSlowConsumer} {
+		t.Run(failure.Error(), func(t *testing.T) {
+			repo := &memoryRepo{cp: Checkpoint{Validated: "4", Committed: "4", Stamp: Stamp{Head: "4", Run: 4}}}
+			b, stream, _, done, refresh := bridgeFixture(t, repo)
+			stream.fail <- failure
+			want := ErrRefresh
+			if errors.Is(failure, ErrSlowConsumer) {
+				want = ErrSlowConsumer
+			}
+			if !errors.Is(receiveDone(t, done), want) {
+				t.Fatal("disconnect classification")
+			}
+			if len(refresh.masks) != 1 || refresh.masks[0] != AllAggregates || b.State().LastSnapshot.IsZero() {
+				t.Fatalf("repair missing: %v %+v", refresh.masks, b.State())
+			}
+			cp, _ := repo.Checkpoint(t.Context(), testBinding())
+			if cp.Committed != "4" || cp.Validated != "4" {
+				t.Fatal("disconnect advanced checkpoint", cp)
+			}
+			ctx, cancel := context.WithCancel(t.Context())
+			defer cancel()
+			provider := testProvider{s: &testStream{events: make(chan Envelope), fail: make(chan error)}, after: make(chan Cursor, 1)}
+			b.provider = provider
+			restarted := make(chan error, 1)
+			go func() { restarted <- b.Run(ctx) }()
+			select {
+			case after := <-provider.after:
+				if after != "4" {
+					t.Fatal("unsafe replay boundary", after)
+				}
+			case <-time.After(time.Second):
+				t.Fatal("restart did not subscribe")
+			}
+			cancel()
+			receiveDone(t, restarted)
+		})
+	}
+}
+
+func TestWindowRecentActivityAndStableTie(t *testing.T) {
+	now := time.Now()
+	for _, visible := range []bool{false, true} {
+		var runs []Candidate
+		for i := 0; i < 7; i++ {
+			runs = append(runs, Candidate{RunID: fmt.Sprint(i), ActiveTurn: true})
+		}
+		runs = append(runs, Candidate{RunID: "a", Visible: visible, Recent: now}, Candidate{RunID: "z", Visible: visible, Recent: now.Add(time.Second)})
+		w := &Window{}
+		if modes := w.Select(now, runs); modes["z"] != "live" || modes["a"] != "polling" {
+			t.Fatal("recent activity lost to ID order", modes)
+		}
+		runs[7].Recent = runs[8].Recent
+		if modes := w.Select(now.Add(DemotionDelay), runs); modes["a"] != "live" || modes["z"] != "polling" {
+			t.Fatal("equal activity did not use stable ID", modes)
+		}
 	}
 }
 func TestCrashUncertaintyRefreshesBeforeCommittedResume(t *testing.T) {
@@ -320,6 +389,135 @@ type countingProvider struct {
 	live, max int
 	started   chan struct{}
 }
+
+type perRunRepo map[string]*memoryRepo
+
+func (r perRunRepo) Checkpoint(ctx context.Context, b Binding) (Checkpoint, error) {
+	return r[b.RunID].Checkpoint(ctx, b)
+}
+func (r perRunRepo) Validate(ctx context.Context, b Binding, c Cursor) error {
+	return r[b.RunID].Validate(ctx, b, c)
+}
+func (r perRunRepo) Commit(ctx context.Context, in Invalidation) (Notification, error) {
+	return r[in.Binding.RunID].Commit(ctx, in)
+}
+
+type sharedProvider struct {
+	mu      sync.Mutex
+	streams map[string]*testStream
+	started chan string
+	calls   int
+}
+
+func (p *sharedProvider) Watch(ctx context.Context, b Binding, _ Cursor) (Stream, error) {
+	p.mu.Lock()
+	s := p.streams[b.RunID]
+	s.ctx = ctx
+	p.mu.Unlock()
+	p.started <- b.RunID
+	return s, nil
+}
+
+// This unary fake shares the provider used by every managed subscription.
+func (p *sharedProvider) Acquire(ctx context.Context) error {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	p.calls++
+	return nil
+}
+
+func TestManagerSaturationPreservesSiblingAndUnaryProgress(t *testing.T) {
+	release := make(chan struct{})
+	var unblock sync.Once
+	defer unblock.Do(func() { close(release) })
+	repos := perRunRepo{
+		"slow": {block: release, validated: make(chan struct{}, 1)},
+		"fast": {},
+	}
+	p := &sharedProvider{streams: make(map[string]*testStream), started: make(chan string, 2)}
+	var runs []WatchedRun
+	for _, id := range []string{"slow", "fast"} {
+		p.streams[id] = &testStream{events: make(chan Envelope, QueueLimit*4), fail: make(chan error, 1)}
+		binding := testBinding()
+		binding.RunID, binding.SessionID = id, id
+		runs = append(runs, WatchedRun{Candidate: Candidate{RunID: id}, Binding: binding})
+	}
+	refresh := &testRefresh{}
+	m := NewManager(repos, p, refresh)
+	defer m.Stop()
+	if _, err := m.Update(t.Context(), time.Now(), runs); err != nil {
+		t.Fatal(err)
+	}
+	for range runs {
+		select {
+		case <-p.started:
+		case <-time.After(time.Second):
+			t.Fatal("stream not started")
+		}
+	}
+	send := func(id string, n int) {
+		e := testEvent(n)
+		e.Event.RunID = id
+		p.streams[id].events <- e
+	}
+	send("slow", 1)
+	select {
+	case <-repos["slow"].validated:
+	case <-time.After(time.Second):
+		t.Fatal("slow validation did not block")
+	}
+	for i := 2; i < QueueLimit+8; i++ {
+		send("slow", i)
+	}
+	select {
+	case <-p.streams["slow"].ctx.Done():
+	case <-time.After(time.Second):
+		t.Fatal("slow queue did not saturate")
+	}
+	// Keep the slow repository blocked while sibling delivery and a unary
+	// mutation complete on the same provider. Neither may await its repair.
+	send("fast", 2)
+	unary := make(chan error, 1)
+	go func() { unary <- p.Acquire(t.Context()) }()
+	if n := receiveNotification(t, m.bridges["fast"]); n.SessionID != "fast" {
+		t.Fatal(n)
+	}
+	select {
+	case err := <-unary:
+		if err != nil {
+			t.Fatal(err)
+		}
+	case <-time.After(time.Second):
+		t.Fatal("unary blocked behind slow stream")
+	}
+	unblock.Do(func() { close(release) })
+	select {
+	case <-m.streams["slow"].done:
+	case <-time.After(time.Second):
+		t.Fatal("slow stream repair did not finish")
+	}
+	if state, _ := m.State("fast"); state.Connection != "connected" || state.Committed != "2" {
+		t.Fatal("sibling interrupted", state)
+	}
+	refresh.mu.Lock()
+	defer refresh.mu.Unlock()
+	repairs := 0
+	for i, mask := range refresh.masks {
+		if mask == AllAggregates {
+			repairs++
+			if refresh.runs[i] != "slow" {
+				t.Fatal("repaired unaffected run", refresh.runs)
+			}
+		}
+	}
+	if repairs != 1 || p.calls != 1 {
+		t.Fatal("missing targeted repair or unary mutation", refresh.masks, p.calls)
+	}
+}
+
 type countingStream struct {
 	ctx  context.Context
 	p    *countingProvider
