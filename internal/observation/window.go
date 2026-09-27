@@ -8,7 +8,6 @@ import (
 
 const LiveLimit = 8
 const DemotionDelay = 30 * time.Second
-const PollInterval = 10 * time.Second
 
 type Candidate struct {
 	RunID                                             string

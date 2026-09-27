@@ -2,6 +2,7 @@ package contractprovider
 
 import (
 	"connectrpc.com/connect"
+	"context"
 	"crypto/sha256"
 	"encoding/json"
 	"errors"
@@ -12,6 +13,7 @@ import (
 	"time"
 
 	publicv1 "github.com/rootkernel/gul/contract/generated/go/dolgorae/public/v1"
+	"github.com/rootkernel/gul/contract/port"
 	"github.com/rootkernel/gul/contract/scenario"
 	"github.com/rootkernel/gul/internal/observation"
 	"google.golang.org/protobuf/proto"
@@ -177,6 +179,52 @@ func TestScenarioMinimalStream(t *testing.T) {
 	}
 	if event.Event.Kind != "TurnStateChanged" || event.Event.Refresh != (observation.Run|observation.Timeline) {
 		t.Fatalf("%+v", event)
+	}
+}
+
+type projectionPort struct {
+	port.ObservationPort
+	message *publicv1.RunEventEnvelope
+	request *publicv1.WatchRunEventsRequest
+}
+
+func (p *projectionPort) WatchRunEvents(_ context.Context, request *publicv1.WatchRunEventsRequest) (port.EventStream, error) {
+	p.request = request
+	return projectionStream{p.message}, nil
+}
+
+type projectionStream struct{ message *publicv1.RunEventEnvelope }
+
+func (s projectionStream) Receive() (*publicv1.RunEventEnvelope, error) { return s.message, nil }
+func (s projectionStream) Close() error                                 { return nil }
+
+func TestWatchRejectsBroaderProjection(t *testing.T) {
+	for _, profile := range []publicv1.ProjectionProfile{
+		publicv1.ProjectionProfile_PROJECTION_PROFILE_MINIMAL,
+		publicv1.ProjectionProfile_PROJECTION_PROFILE_OPERATIONAL,
+	} {
+		t.Run(profile.String(), func(t *testing.T) {
+			event := base()
+			event.Projection = profile
+			event.Event = &publicv1.DurableRunEvent_RunStateChanged{RunStateChanged: &publicv1.RunStateChanged{Current: publicv1.RunLifecycle_RUN_LIFECYCLE_IDLE}}
+			provider := &projectionPort{message: &publicv1.RunEventEnvelope{Item: &publicv1.RunEventEnvelope_DurableEvent{DurableEvent: event}}}
+			stream, err := (Provider{Port: provider}).Watch(t.Context(), binding(), "0")
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer stream.Close()
+			if provider.request.Projection != publicv1.ProjectionProfile_PROJECTION_PROFILE_MINIMAL {
+				t.Fatal("requested broader projection")
+			}
+			got, err := stream.Receive()
+			if profile == publicv1.ProjectionProfile_PROJECTION_PROFILE_MINIMAL {
+				if err != nil || got.Event == nil || got.Event.Kind != "RunStateChanged" {
+					t.Fatal(got, err)
+				}
+			} else if !errors.Is(err, observation.ErrInvalid) || got.Event != nil {
+				t.Fatal("accepted broader stream projection", got, err)
+			}
+		})
 	}
 }
 
