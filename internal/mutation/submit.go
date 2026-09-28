@@ -141,7 +141,11 @@ func (s *SubmitService) dispatchSubmit(ctx context.Context, a operation.Mutation
 		return a, ErrUnknown
 	}
 	if err := s.Attempts.ResolveMutation(context.WithoutCancel(ctx), a.OperationID, turnID); err != nil {
-		return a, err
+		if markErr := s.markSubmitUnknown(ctx, a.OperationID); markErr != nil {
+			return a, markErr
+		}
+		a.State = "outcome_unknown"
+		return a, ErrUnknown
 	}
 	s.forget(a.OperationID)
 	a.State, a.OutcomeRef = "resolved", turnID

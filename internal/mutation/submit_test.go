@@ -17,6 +17,19 @@ type submitProvider struct {
 	proof          SubmitEvidence
 }
 
+type failSubmitResolveOnce struct {
+	SubmitAttempts
+	failed bool
+}
+
+func (a *failSubmitResolveOnce) ResolveMutation(ctx context.Context, id, ref string) error {
+	if !a.failed {
+		a.failed = true
+		return errors.New("injected resolve failure")
+	}
+	return a.SubmitAttempts.ResolveMutation(ctx, id, ref)
+}
+
 func (p *submitProvider) SubmitTurn(_ context.Context, request SubmitRequest) (string, error) {
 	p.calls++
 	if request.IdempotencyKey != "stable-submit-key" || string(request.Canonical) != "prompt-secret-and-image-secret" {
@@ -64,6 +77,26 @@ func TestSubmitLostResponseUsesOnlySameProcessExactRequest(t *testing.T) {
 	a, err = s.RecoverTurn(t.Context(), request.OperationID)
 	if err != nil || a.OutcomeRef != "turn-1" || provider.calls != 2 || provider.effects != 1 {
 		t.Fatalf("same-process replay = %+v, %v; calls=%d effects=%d", a, err, provider.calls, provider.effects)
+	}
+}
+
+func TestAcceptedSubmitResolveFailureBecomesRecoverableUnknown(t *testing.T) {
+	db, _, _ := startStore(t)
+	provider := &submitProvider{proof: SubmitEvidence{Status: "unknown"}}
+	attempts := &failSubmitResolveOnce{SubmitAttempts: db.Attempts()}
+	s := SubmitService{Attempts: attempts, Provider: provider, Gate: func(string, string) bool { return true }}
+	request := submitFixture()
+	a, err := s.Submit(t.Context(), request)
+	if !errors.Is(err, ErrUnknown) || a.State != "outcome_unknown" || provider.calls != 1 || provider.effects != 1 {
+		t.Fatalf("accepted response with failed resolve = %+v, %v; calls=%d effects=%d", a, err, provider.calls, provider.effects)
+	}
+	stored, err := db.Attempts().Mutation(t.Context(), request.OperationID)
+	if err != nil || stored.State != "outcome_unknown" {
+		t.Fatalf("retained attempt = %+v, %v", stored, err)
+	}
+	a, err = s.RecoverTurn(t.Context(), request.OperationID)
+	if err != nil || a.State != "resolved" || a.OutcomeRef != "turn-1" || provider.calls != 2 || provider.effects != 1 {
+		t.Fatalf("exact same-process recovery = %+v, %v; calls=%d effects=%d", a, err, provider.calls, provider.effects)
 	}
 }
 

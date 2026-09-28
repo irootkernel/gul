@@ -44,6 +44,23 @@ type startProvider struct {
 	workspace      string
 }
 
+type failMaintenancePass struct {
+	StartAttempts
+	passes chan int
+	count  int
+}
+
+func (a *failMaintenancePass) Replayable(ctx context.Context) ([]operation.MutationAttempt, error) {
+	a.count++
+	if a.count == 2 {
+		a.passes <- a.count
+		return nil, errors.New("injected periodic purge failure")
+	}
+	list, err := a.StartAttempts.Replayable(ctx)
+	a.passes <- a.count
+	return list, err
+}
+
 func (p *startProvider) StartRun(_ context.Context, request replay.StartRun, root, carrier string) (StartResult, error) {
 	p.calls++
 	if root != p.workspace || carrier != "/trusted/carrier" || request.IdempotencyKey != "stable-key" {
@@ -255,5 +272,70 @@ func TestOrphanReplayFileCanResumeExactStart(t *testing.T) {
 	}
 	if _, err := store.Get(request.OperationID, ""); !errors.Is(err, os.ErrNotExist) {
 		t.Fatalf("resolved orphan remains: %v", err)
+	}
+}
+
+func TestMaintainRetriesPeriodicPurgeAfterFailure(t *testing.T) {
+	if PurgeInterval != 6*time.Hour {
+		t.Fatalf("purge interval = %s", PurgeInterval)
+	}
+	db, _, root := startStore(t)
+	workspace := filepath.Join(filepath.Dir(root), "workspace")
+	attempts := &failMaintenancePass{StartAttempts: db.Attempts(), passes: make(chan int, 3)}
+	errorsReported := make(chan error, 1)
+	service := StartService{Attempts: attempts, Replay: replay.Store{Root: root}, Resolver: startResolver{root: workspace},
+		Provider: &startProvider{workspace: workspace}, ReportPurgeError: func(err error) { errorsReported <- err }}
+	ticks := make(chan time.Time, 1)
+	retries := make(chan time.Time, 1)
+	retryIntervals := make(chan time.Duration, 1)
+	ctx, cancel := context.WithCancel(t.Context())
+	defer cancel()
+	done := make(chan error, 1)
+	go func() {
+		done <- service.maintain(ctx, ticks, func(interval time.Duration) <-chan time.Time {
+			retryIntervals <- interval
+			return retries
+		})
+	}()
+	for _, want := range []int{1, 2, 3} {
+		if want == 2 {
+			ticks <- time.Now()
+		}
+		if want == 3 {
+			select {
+			case err := <-errorsReported:
+				if err == nil {
+					t.Fatal("periodic purge failure was not reported")
+				}
+			case <-time.After(time.Second):
+				t.Fatal("periodic purge failure was not reported")
+			}
+			select {
+			case interval := <-retryIntervals:
+				if interval != purgeRetryInterval {
+					t.Fatalf("retry interval = %s", interval)
+				}
+			case <-time.After(time.Second):
+				t.Fatal("retry was not scheduled")
+			}
+			retries <- time.Now()
+		}
+		select {
+		case got := <-attempts.passes:
+			if got != want {
+				t.Fatalf("purge pass = %d, want %d", got, want)
+			}
+		case <-time.After(time.Second):
+			t.Fatalf("purge pass %d did not run", want)
+		}
+	}
+	cancel()
+	select {
+	case err := <-done:
+		if !errors.Is(err, context.Canceled) {
+			t.Fatalf("maintenance cancellation = %v", err)
+		}
+	case <-time.After(time.Second):
+		t.Fatal("maintenance did not stop on cancellation")
 	}
 }

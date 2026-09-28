@@ -1031,6 +1031,15 @@ and malformed old canonical material alongside an expired request. This is a
 fake/component correction to REQ-REC-011; production assembly remains outside
 E5.
 
+A further validation pass found two failure paths in E5-T3. After an accepted
+`SubmitTurn` response, a failed outcome write now marks the attempt
+`OutcomeUnknown`, allowing the same-process exact-key recovery path to run.
+The `StartRun` maintenance loop reports a periodic purge error and retries
+after one minute while retaining its six-hour regular cadence. A concurrent
+deletion of an already resolved replay file no longer aborts the expiry scan.
+Focused fault and maintenance-loop tests cover the corrected paths. The host
+must provide the maintenance error reporter when it assembles these components.
+
 ## 2. Current development snapshot
 
 | Area | State |

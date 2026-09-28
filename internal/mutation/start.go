@@ -43,16 +43,18 @@ type StartAttempts interface {
 }
 
 type StartService struct {
-	Attempts StartAttempts
-	Replay   replay.Store
-	Resolver StartResolver
-	Provider StartProvider
-	Gate     func(string, string) bool // subject, Workspace; compatibility and startup admission
-	MaxAge   time.Duration             // zero selects the fixed 72-hour maximum
-	Now      func() time.Time
+	Attempts         StartAttempts
+	Replay           replay.Store
+	Resolver         StartResolver
+	Provider         StartProvider
+	Gate             func(string, string) bool // subject, Workspace; compatibility and startup admission
+	MaxAge           time.Duration             // zero selects the fixed 72-hour maximum
+	Now              func() time.Time
+	ReportPurgeError func(error) // required when running Maintain
 }
 
 const PurgeInterval = 6 * time.Hour
+const purgeRetryInterval = time.Minute
 
 func (s *StartService) now() time.Time {
 	if s.Now != nil {
@@ -318,19 +320,34 @@ func (s *StartService) Purge(ctx context.Context) error {
 // Maintain runs the first expiry pass before the host admits mutations and
 // repeats it no less often than the first-release six-hour bound.
 func (s *StartService) Maintain(ctx context.Context) error {
+	ticker := time.NewTicker(PurgeInterval)
+	defer ticker.Stop()
+	return s.maintain(ctx, ticker.C, time.After)
+}
+
+func (s *StartService) maintain(ctx context.Context, ticks <-chan time.Time, after func(time.Duration) <-chan time.Time) error {
+	if s == nil || s.ReportPurgeError == nil || ticks == nil || after == nil {
+		return ErrInvalid
+	}
 	if err := s.Purge(ctx); err != nil {
 		return err
 	}
-	ticker := time.NewTicker(PurgeInterval)
-	defer ticker.Stop()
+	var retry <-chan time.Time
 	for {
 		select {
 		case <-ctx.Done():
 			return ctx.Err()
-		case <-ticker.C:
-			if err := s.Purge(ctx); err != nil {
-				return err
+		case <-ticks:
+		case <-retry:
+		}
+		if err := s.Purge(ctx); err != nil {
+			if ctx.Err() != nil {
+				return ctx.Err()
 			}
+			s.ReportPurgeError(err)
+			retry = after(purgeRetryInterval)
+		} else {
+			retry = nil
 		}
 	}
 }

@@ -236,6 +236,9 @@ func (s Store) PurgeExpired(now time.Time, maxAge time.Duration) ([]string, erro
 		if err != nil && modified.IsZero() {
 			info, statErr := entry.Info()
 			if statErr != nil {
+				if errors.Is(statErr, os.ErrNotExist) {
+					continue // A concurrent resolution already removed this entry.
+				}
 				return nil, statErr
 			}
 			modified = info.ModTime()
