@@ -36,6 +36,16 @@ type credentials struct {
 	fail  bool
 }
 
+type interactionAttempts struct{}
+
+func (interactionAttempts) BeginInteraction(context.Context, Bound, string, string) (string, error) {
+	return "attempt", nil
+}
+func (interactionAttempts) FinishInteraction(context.Context, string, string) error { return nil }
+func (interactionAttempts) ReconcileInteraction(context.Context, Bound, string, Status) error {
+	return nil
+}
+
 func (c *credentials) Resolve(context.Context, string, string) (session.Carrier, error) {
 	c.calls.Add(1)
 	if c.fail {
@@ -99,7 +109,7 @@ func (p *fakeProvider) Observe(ctx context.Context, b Bound) (PendingState, erro
 	return PendingState{Stamp: observation.Stamp{Head: "2", Run: 2, Interaction: 2}}, nil
 }
 func service(p *fakeProvider, c *credentials) *Service {
-	return &Service{Actions: allowActions{}, Repository: bindings{}, Workspaces: workspaces{}, Carriers: c, Provider: p}
+	return &Service{Actions: allowActions{}, Repository: bindings{}, Workspaces: workspaces{}, Carriers: c, Provider: p, Attempts: interactionAttempts{}}
 }
 
 func TestResponseLossNeverReplaysOrRetainsInput(t *testing.T) {

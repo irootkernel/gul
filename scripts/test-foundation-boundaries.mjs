@@ -60,6 +60,15 @@ const sessionclose = goSourceFiles(path.join(sourceRoot, "internal/sessionclose"
   .map(name => fs.readFileSync(name, "utf8")).join("\n");
 const recovery = goSourceFiles(path.join(sourceRoot, "internal/recovery"))
   .map(name => fs.readFileSync(name, "utf8")).join("\n");
+const operation = goSourceFiles(path.join(sourceRoot, "internal/operation"))
+  .map(name => fs.readFileSync(name, "utf8")).join("\n");
+const replay = goSourceFiles(path.join(sourceRoot, "internal/replay"))
+  .map(name => fs.readFileSync(name, "utf8")).join("\n");
+const mutation = goSourceFiles(path.join(sourceRoot, "internal/mutation"))
+  .filter(name => !name.includes(`${path.sep}contractprovider${path.sep}`))
+  .map(name => fs.readFileSync(name, "utf8")).join("\n");
+const mutationAdapter = goSourceFiles(path.join(sourceRoot, "internal/mutation/contractprovider"))
+  .map(name => fs.readFileSync(name, "utf8")).join("\n");
 const scenarioImport = /"github\.com\/rootkernel\/gul\/contract\/scenario(?:\/[^\"]+)?"/;
 
 function sourceFiles(directory) {
@@ -108,6 +117,10 @@ const boundaries = [
   ["history adapter", historyAdapter, [/"github\.com\/rootkernel\/gul\/internal\/(?:app|delivery|desktop|storage)(?:\/|")/, /"github\.com\/rootkernel\/gul\/api\/generated(?:\/|")/, /"github\.com\/wailsapp/, /"database\/sql"/, /\bListenAndServe\b/, scenarioImport]],
   ["sessionclose", sessionclose, [/"github\.com\/rootkernel\/gul\/internal\/(?:app|delivery|desktop|storage)(?:\/|")/, /"github\.com\/rootkernel\/gul\/(?:contract|api\/generated)(?:\/|")/, /"github\.com\/wailsapp/, /"database\/sql"/, /\bListenAndServe\b/, scenarioImport]],
   ["recovery", recovery, [/"github\.com\/rootkernel\/gul\/internal\/(?:app|delivery|desktop|storage)(?:\/|")/, /"github\.com\/rootkernel\/gul\/(?:contract|api\/generated)(?:\/|")/, /"github\.com\/wailsapp/, /"database\/sql"/, /\bListenAndServe\b/, scenarioImport]],
+  ["operation", operation, [/"github\.com\/rootkernel\/gul\/internal\/(?:app|delivery|desktop|storage)(?:\/|")/, /"github\.com\/rootkernel\/gul\/(?:contract|api\/generated)(?:\/|")/, /"github\.com\/wailsapp/, /"database\/sql"/, /\bListenAndServe\b/, scenarioImport]],
+  ["replay", replay, [/"github\.com\/rootkernel\/gul\/internal\/(?:app|delivery|desktop|storage)(?:\/|")/, /"github\.com\/rootkernel\/gul\/(?:contract|api\/generated)(?:\/|")/, /"github\.com\/wailsapp/, /"database\/sql"/, /\bListenAndServe\b/, scenarioImport]],
+  ["mutation", mutation, [/"github\.com\/rootkernel\/gul\/internal\/(?:app|delivery|desktop|storage)(?:\/|")/, /"github\.com\/rootkernel\/gul\/(?:contract|api\/generated)(?:\/|")/, /"github\.com\/wailsapp/, /"database\/sql"/, /\bListenAndServe\b/, scenarioImport]],
+  ["mutation adapter", mutationAdapter, [/"github\.com\/rootkernel\/gul\/internal\/(?:app|delivery|desktop|storage)(?:\/|")/, /"github\.com\/rootkernel\/gul\/api\/generated(?:\/|")/, /"github\.com\/wailsapp/, /"database\/sql"/, /\bListenAndServe\b/, scenarioImport]],
 ];
 
 for (const [label, source, forbidden] of boundaries) {
@@ -155,4 +168,4 @@ try {
   fs.rmSync(fixture, {recursive: true, force: true});
 }
 
-console.log("frontend, delivery, desktop, command, app, domain, storage, workspace, presentation, session, launch, observation, interaction, action, history, reconnect, sessionclose, and recovery foundation boundaries passed");
+console.log("frontend, delivery, desktop, command, app, domain, storage, workspace, presentation, session, launch, observation, interaction, action, history, reconnect, sessionclose, recovery, operation, replay, and mutation foundation boundaries passed");

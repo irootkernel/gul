@@ -12,6 +12,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/rootkernel/gul/internal/operation"
 	"github.com/rootkernel/gul/internal/presentation"
 )
 
@@ -245,28 +246,12 @@ func (r CacheRepository) Checkpoint(ctx context.Context, providerID, runtimeObje
 	return checkpoint, err
 }
 
-type OperationAttempt struct {
-	OperationID          string
-	SubjectID            string
-	Kind                 string
-	RequestSHA256        string
-	ReplayKey            string
-	ReplayAvailable      bool
-	ControllerReferences []ControllerReference
-	State                string
-	CreatedAt            time.Time
-}
-
-type ControllerReference struct {
-	Role                 string
-	ExpectedControllerID string
-	CredentialKey        string
-	BindingID            string
-}
+type OperationAttempt = operation.OperationAttempt
+type ControllerReference = operation.ControllerReference
 
 func validateAttempt(attempt OperationAttempt) error {
 	if attempt.OperationID == "" || attempt.SubjectID == "" || attempt.Kind == "" ||
-		(attempt.Kind != "StartRun" && attempt.Kind != "SubmitTurn" && attempt.Kind != "ResolveInteraction" && attempt.Kind != "CloseRun" && attempt.Kind != "RecoverRun" && attempt.Kind != "ReconcileRun") ||
+		(attempt.Kind != "StartRun" && attempt.Kind != "SubmitTurn" && attempt.Kind != "ResolveInteraction" && attempt.Kind != "CloseRun" && attempt.Kind != "RecoverRun" && attempt.Kind != "ReconcileRun" && attempt.Kind != "AcquireWriter" && attempt.Kind != "ReleaseWriter") ||
 		!sha256Hex.MatchString(attempt.RequestSHA256) || attempt.CreatedAt.IsZero() ||
 		attempt.State != "pending" ||
 		(attempt.ReplayKey != "" && (attempt.Kind != "StartRun" || !validLogicalKey(attempt.ReplayKey))) ||

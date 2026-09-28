@@ -93,7 +93,7 @@ func TestInteractionRPCCompetingClientsAndSecretAbsence(t *testing.T) {
 		t.Fatal(err)
 	}
 	provider := &interactionProvider{}
-	service := &interaction.Service{Actions: interactionActions{}, Repository: store.Presentation(), Workspaces: interactionWorkspace{}, Carriers: interactionCarrier{}, Provider: provider}
+	service := &interaction.Service{Actions: interactionActions{}, Repository: store.Presentation(), Workspaces: interactionWorkspace{}, Carriers: interactionCarrier{}, Provider: provider, Attempts: store.InteractionAttempts()}
 	core := app.NewCore(app.Dependencies{Provider: ready{}, Persistence: ready{}, Authorization: allow{}})
 	if err = core.Start(t.Context()); err != nil {
 		t.Fatal(err)

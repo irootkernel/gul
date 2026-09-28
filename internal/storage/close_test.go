@@ -334,7 +334,7 @@ func TestCloseBeginRollsBackAndRejectsUnrelatedUnknown(t *testing.T) {
 func TestCloseMigrationFromVersionFivePreservesBinding(t *testing.T) {
 	s, filename := openTestStore(t)
 	b := closeBound(t, s)
-	for _, query := range []string{`DROP TABLE session_close_operations`, `DROP TABLE session_close_attempts`, `DELETE FROM schema_migrations WHERE version=6`, `PRAGMA user_version=5`} {
+	for _, query := range []string{`DROP TABLE mutation_attempt_details`, `DROP TABLE session_close_operations`, `DROP TABLE session_close_attempts`, `DELETE FROM schema_migrations WHERE version IN (6,7)`, `PRAGMA user_version=5`} {
 		if _, err := s.writer.ExecContext(t.Context(), query); err != nil {
 			t.Fatal(err)
 		}
@@ -376,5 +376,30 @@ func TestClosePendingObservationCap(t *testing.T) {
 	}
 	if pending, err := s.SessionClose().Pending(t.Context(), "owner", "session"); !errors.Is(err, sessionclose.ErrUnavailable) || pending != nil {
 		t.Fatal(len(pending), err)
+	}
+}
+
+func TestCrashBetweenCloseBeginAndSaveBecomesObservableUnknown(t *testing.T) {
+	s, filename := openTestStore(t)
+	b := closeBound(t, s)
+	a, dispatch, err := s.SessionClose().Begin(t.Context(), b, closeAttempt("lost-before-save", sessionclose.Close))
+	if err != nil || !dispatch {
+		t.Fatal(a, dispatch, err)
+	}
+	if err := s.Close(); err != nil {
+		t.Fatal(err)
+	}
+	s, err = Open(t.Context(), filename)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer s.Close()
+	pending, err := s.SessionClose().Pending(t.Context(), b.Binding.SubjectID, b.Binding.ID)
+	if err != nil || len(pending) != 1 || pending[0].ID != a.ID || pending[0].Outcome.Status != sessionclose.OutcomeUnknown || !pending[0].DispatchFinished {
+		t.Fatalf("orphaned close = %+v, %v", pending, err)
+	}
+	generic, err := s.Attempts().Get(t.Context(), a.ID)
+	if err != nil || generic.State != "outcome_unknown" {
+		t.Fatalf("generic attempt = %+v, %v", generic, err)
 	}
 }

@@ -17,7 +17,7 @@ import (
 	_ "modernc.org/sqlite"
 )
 
-const schemaVersion = 6
+const schemaVersion = 7
 
 var ErrSchemaDrift = errors.New("Gul SQLite schema drift")
 
@@ -48,6 +48,17 @@ func Open(ctx context.Context, filename string) (*Store, error) {
 		return nil, err
 	}
 	if err := migrate(ctx, writer); err != nil {
+		writer.Close()
+		return nil, err
+	}
+	// A process exit can happen after a provider accepted a mutation but before
+	// its response was saved. Pending transmissions are unresolved on reopen.
+	if _, err := writer.ExecContext(ctx, "UPDATE provider_operation_attempts SET state='outcome_unknown' WHERE state='pending'"); err != nil {
+		writer.Close()
+		return nil, err
+	}
+	if _, err := writer.ExecContext(ctx, `UPDATE session_close_attempts SET dispatch_finished=1,
+outcome_status='outcome_unknown',code='OUTCOME_UNKNOWN',next_action='RECONCILE_RUN' WHERE dispatch_finished=0`); err != nil {
 		writer.Close()
 		return nil, err
 	}
@@ -215,6 +226,8 @@ func migrationStatements(version int) []string {
 		return observationStatements
 	case 6:
 		return closeStatements
+	case 7:
+		return mutationStatements
 	default:
 		return nil
 	}

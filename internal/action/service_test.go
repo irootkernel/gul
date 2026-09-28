@@ -52,6 +52,13 @@ func (actionWorkspace) Revalidate(context.Context, string, string) (workspace.At
 
 type actionCarrier struct{ missing bool }
 
+type actionAttempts struct{}
+
+func (actionAttempts) BeginWriter(context.Context, Bound, bool, uint64) (string, error) {
+	return "attempt", nil
+}
+func (actionAttempts) FinishWriter(context.Context, string, string) error { return nil }
+
 func (c actionCarrier) Resolve(_ context.Context, _, id string) (session.Carrier, error) {
 	if c.missing {
 		return session.Carrier{}, ErrAuthority
@@ -122,7 +129,7 @@ func (p *actionProvider) Release(_ context.Context, b Bound, revision uint64) (W
 	return readerInput().Writer, nil
 }
 func actionService(p *actionProvider) *Service {
-	return &Service{Repository: actionRepo{NoOperation}, Workspaces: actionWorkspace{}, Carriers: actionCarrier{}, Provider: p, Gate: func(string, string) bool { return true }}
+	return &Service{Repository: actionRepo{NoOperation}, Workspaces: actionWorkspace{}, Carriers: actionCarrier{}, Provider: p, Attempts: actionAttempts{}, Gate: func(string, string) bool { return true }}
 }
 func TestStartupGateBlocksMutationBeforeObservationResume(t *testing.T) {
 	provider := &actionProvider{input: readerInput()}

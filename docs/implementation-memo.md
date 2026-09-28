@@ -898,6 +898,55 @@ Focused Go tests and the serial `make test` gate pass on the settled candidate.
 | REQ-REC-003 | Provider loss and browser-only interruption follow separate recovery paths; transient, stale and terminal fixtures preserve Gul state |
 | REQ-REC-006 | Fail-closed action gate opens only after probe, full refresh, convergence and observation admission; failures expose blockers |
 
+### E5-T3 mutation attempts and replay policy (2026-09-28)
+
+Release notes: intentional no-note. The mutation services and checked adapters
+remain unmounted and change no shipped product route.
+
+Migration 7 stores target, deadline, reconciliation route and resolved provider
+reference beside each non-secret attempt. Begin serializes overlapping pending
+and unknown Controller effects before provider I/O. Database reopen changes
+unfinished attempts to `outcome_unknown`; an unfinished Close also becomes
+eligible for the existing read-only pending-observation path. Writer
+Acquire/Release and protected Interaction Resolve now record an attempt before
+the single provider call. Writer errors with uncertain transport retain an
+unknown blocker. Interaction response bytes and their digest never enter the
+attempt record; a later authorized resolved or stale card can settle an unknown
+attempt for the same Controller binding and Interaction ID.
+
+The StartRun coordinator writes a bounded canonical request to an exclusive
+owner-only file before it records the attempt. The file contains semantic
+request fields and a destination credential-store key, not carrier paths or
+capability bytes. The checked adapter reconstructs paths through trusted
+resolvers, uses the original idempotency key, and validates the returned Run.
+Browser retries read the stored attempt without another call. Recovery repeats
+the exact request while material remains available. Expiry deletes the file,
+keeps the attempt unknown, and permits only a unique Controller-matched
+ListRuns result to resolve it. The component supplies startup and six-hourly
+purge; product startup must call it when E8 assembles the runtime.
+
+SubmitTurn retains its normalized request only in memory. Recovery reads the
+Run and timeline before any same-process exact-key replay. The checked public
+projections do not expose the key that would identify an accepted Turn after
+restart, so an absent page, stale cursor, event gap, or matching prompt text
+cannot authorize a new submit. A fresh process leaves the attempt unknown
+unless an exact provider result proves its outcome. Compatibility gates block
+StartRun and SubmitTurn dispatch and recovery during version drift.
+
+Focused persistence, adapter, browser retry, response-loss, process-exit,
+retention, overlap, and history-gap tests pass, as does the serial `make test`
+gate. Independent review is recorded with task closeout. This is fake/component
+evidence only; no authenticated StartRun or SubmitTurn route, product
+maintenance loop, or live Dolgorae proof is enabled.
+
+| Requirement | Candidate implementation and focused evidence |
+| --- | --- |
+| REQ-REC-008 | Fault tests preserve one effect or an unresolved attempt across response loss, restart, browser retry, event gap and compatibility drift |
+| REQ-REC-009 | Atomic attempt Begin and migration 7 retain non-secret identity, conflict state, target and reconciliation route before dispatch |
+| REQ-REC-011 | Owner-only StartRun replay file, original-key reconstruction, expiry and secondary reconciliation; SubmitTurn memory-only and protected/tokenless no-replay policies |
+| REQ-API-002 | Unary Writer browser retries cannot retransmit after a lost response; typed unknown state remains visible through the action boundary |
+| REQ-PROMPT-005 | Run/timeline reads and unrelated history items never treat a missing page or matching text as proof that SubmitTurn was unaccepted |
+
 ## 2. Current development snapshot
 
 | Area | State |
@@ -905,10 +954,10 @@ Focused Go tests and the serial `make test` gate pass on the settled candidate.
 | Five Gul SOT documents | E0-T4 completed the consumer alignment and Gate A reproduction; E0-T8 completed toolchain/ADR alignment; E0-T7 completed Gate B |
 | Toolchain and developer-command artifacts | E0-T8 accepted one pin manifest and read-only host checks; E0-T7 adds checked contract generation/drift delegates; E1-T1 adds the root Go module; E1-T2 adds root Bun pin validation and checked frontend generation/drift commands; E1-T3 adds checked Gul API/error-catalog generation; no installer |
 | Contract boundary | E12-T1 pins TASK-053 and regenerates checked clients/maps/fake transport for 36 known, 27 required, and 9 unavailable methods; E13-T1 adds an explicit stateful scenario provider over the 27-method port |
-| Production source | E1 shared core, bundle, API declarations, isolated SQLite and Wails shell; E3-T1 adds Workspace attachment; E3-T2 adds local presentation; E3-T3 adds passive session binding and aggregate reads; E3-T4 adds global Profile launch selection; E4 adds typed observation, Interaction cards, shared action eligibility and history/result/artifact adapters; E5-T1 adds whole-session close, explicit recovery, provider health and an injected restart supervisor; E5-T2 adds reconnect coordination and stamp convergence; handlers remain unmounted |
+| Production source | E1 shared core, bundle, API declarations, isolated SQLite and Wails shell; E3-T1 adds Workspace attachment; E3-T2 adds local presentation; E3-T3 adds passive session binding and aggregate reads; E3-T4 adds global Profile launch selection; E4 adds typed observation, Interaction cards, shared action eligibility and history/result/artifact adapters; E5-T1 adds whole-session close, explicit recovery, provider health and an injected restart supervisor; E5-T2 adds reconnect coordination and stamp convergence; E5-T3 adds mutation attempts and operation-specific replay coordination; handlers remain unmounted |
 | Wails host/frontend | One React foundation bundle and isolated Wails shell foundation implemented; E3-T4 launch selector is unmounted and authenticated attach is not implemented |
 | ConnectRPC schema/services | Gul Runtime, DirectSession, ArtifactPresentation and WorkspacePresentation declarations and generated clients exist; isolated handlers remain unmounted |
-| Gul SQLite schema | Gul-owned version 6 schema with Workspace attachment, favorites, Primary binding, event metadata and session-close attempt/operation migrations and isolated repositories implemented; production startup integration pending |
+| Gul SQLite schema | Gul-owned version 7 schema with Workspace attachment, favorites, Primary binding, event metadata, session-close attempts and mutation-attempt details; production startup integration pending |
 | Dolgorae RPC supervisor/provider | Bounded restart policy implemented against an injected lifecycle; production process ownership and live provider remain pending |
 | Controller credential store | Caller-owned mechanism selected by ADR-0047; not implemented |
 | FileService/auth/PWA/Tailscale integration | Not implemented |
@@ -1365,4 +1414,4 @@ The initial documentation assumed Gul would manage one Codex App Server, map Ses
 
 ## 12. Handoff
 
-E12, E1, E13, E3 and E4 are complete. The TASK-053 consumer lock and generated contract tooling remain authoritative. E3-T1 added fake-scoped Workspace attachment, E3-T2 added local-only presentation, E3-T3 added passive session reads, and E3-T4 added prospective global Profile launch selection. E5-T1 is complete; E5-T2 is complete and E5-T3 remains planned. E2-T0 remains blocked on an accepted compatible Dolgorae executable and live smoke evidence. No product route or live-provider behavior is activated automatically.
+E12, E1, E13, E3 and E4 are complete. The TASK-053 consumer lock and generated contract tooling remain authoritative. E3-T1 added fake-scoped Workspace attachment, E3-T2 added local-only presentation, E3-T3 added passive session reads, and E3-T4 added prospective global Profile launch selection. E5-T1/T2/T3 are complete; the E5-wide audit and closeout remain pending. E2-T0 remains blocked on an accepted compatible Dolgorae executable and live smoke evidence. No product route or live-provider behavior is activated automatically.

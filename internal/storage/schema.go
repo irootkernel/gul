@@ -203,3 +203,13 @@ PRIMARY KEY(subject_id, session_id, controller_binding_id, provider_operation_id
 FOREIGN KEY(subject_id, session_id) REFERENCES primary_session_bindings(subject_id, session_id) ON DELETE CASCADE
 )`,
 }
+
+var mutationStatements = []string{
+	`CREATE TABLE mutation_attempt_details (
+operation_id TEXT PRIMARY KEY REFERENCES provider_operation_attempts(operation_id) ON DELETE CASCADE,
+target_ref TEXT NOT NULL,
+deadline_at TEXT NOT NULL,
+reconciliation_route TEXT NOT NULL,
+outcome_ref TEXT NOT NULL DEFAULT ''
+)`,
+}

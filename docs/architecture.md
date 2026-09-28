@@ -5,7 +5,7 @@
 | Role | Target and Current Architecture source of truth |
 | Product | Gul |
 | Version | 0.1-dolgorae-consumer-v1 |
-| Status | Approved target rebaseline; current implementation through E5-T2 within the declared fake/component scope |
+| Status | Approved target rebaseline; current implementation through E5-T3 within the declared fake/component scope |
 | Last updated | 2026-09-28 |
 
 ## 1. Purpose and change control
@@ -1047,11 +1047,11 @@ The serial command facade is `toolchain-check`, `generate-contract`, `contract-c
 
 ## 19. Current snapshot
 
-**Snapshot date:** 2026-09-28 (E5-T2 completion)
+**Snapshot date:** 2026-09-28 (E5-T3 completion)
 
-**Roadmap point:** E0 is `Completed`, E12 is `Completed`, E1 is `Completed`, and E13 is `Completed`; E1-T1 is `Completed` and E1-T2/T3/T4/T5 are `Completed`. E3 and E3-T1/T2/T3/T4 are `Completed`. E4 and E4-T1/T2/T3/T5 are `Completed`. E4-T4 remains Deferred outside the current epic. E5-T1 is `Completed`, E5-T2 is `Completed`, and E5-T3 remains Planned. Former E12-T2/T3 remain Retired. E14 owns pre-release application acceptance. No live-provider or assembled-application acceptance is implied.
+**Roadmap point:** E0 is `Completed`, E12 is `Completed`, E1 is `Completed`, and E13 is `Completed`; E1-T1 is `Completed` and E1-T2/T3/T4/T5 are `Completed`. E3 and E3-T1/T2/T3/T4 are `Completed`. E4 and E4-T1/T2/T3/T5 are `Completed`. E4-T4 remains Deferred outside the current epic. E5-T1/T2/T3 are `Completed`; E5 epic closeout remains pending validation. Former E12-T2/T3 remain Retired. E14 owns pre-release application acceptance. No live-provider or assembled-application acceptance is implied.
 
-**Maturity:** delivery-independent Go core, shared React bundle, declared but disabled Gul API, typed provider ports and explicit scenario harness, isolated SQLite repositories with fake-scoped Workspace attachment, local presentation and passive session reads, and a Wails shell foundation. E4 adds typed event observation, Interaction cards, shared action eligibility and bounded history/result/artifact reads with explicit fakes and isolated browser components. E5-T1 adds whole-session close and explicit recovery, provider health, and an injected restart supervisor. E5-T2 adds provider/browser reconnect coordination and persistent stamp convergence at the same fake/component boundary. Provider and assembled storage lifecycle remain pending.
+**Maturity:** delivery-independent Go core, shared React bundle, declared but disabled Gul API, typed provider ports and explicit scenario harness, isolated SQLite repositories with fake-scoped Workspace attachment, local presentation and passive session reads, and a Wails shell foundation. E4 adds typed event observation, Interaction cards, shared action eligibility and bounded history/result/artifact reads with explicit fakes and isolated browser components. E5-T1 adds whole-session close and explicit recovery, provider health, and an injected restart supervisor. E5-T2 adds provider/browser reconnect coordination and persistent stamp convergence. E5-T3 adds retained mutation attempts, protected StartRun replay material, and operation-specific recovery against fakes. Product assembly and live-provider qualification remain pending.
 
 ### 19.1 Implemented components
 
@@ -1268,6 +1268,29 @@ Only `internal/sessionclose.AggregateRefresher` advances the artifact-verified t
 head. Browser reconnect reads presentation, execution state and bounded Gul
 delivery without sending a provider mutation. These components remain
 unmounted pending later product assembly.
+
+E5-T3 adds a non-secret mutation-attempt detail table in migration 7 and a
+StartRun-only protected replay store. StartRun stores a bounded canonical
+semantic request under a logical key in an owner-only file before recording
+the matching attempt and dispatching the checked gRPC request. Workspace and
+carrier paths are resolved again for each call. A repeated browser request
+reads its existing attempt; an unresolved exact-key replay uses the retained
+file, while an expired or missing file permits only Controller-matched ListRuns
+reconciliation. The coordinator deletes resolved or expired files and exposes
+startup and six-hourly purge operations. The host must invoke that maintenance
+when it assembles the product.
+
+SubmitTurn retains its exact request only in process memory. Its checked
+adapter reads Run and timeline on uncertainty, but their current projections
+do not identify a SubmitTurn idempotency key; an absent page or matching text
+therefore leaves the attempt unknown after restart. Writer Acquire/Release and
+protected Interaction Resolve now persist non-secret attempt metadata before
+their existing single provider call. Unknown attempts block conflicts; a later
+fresh Interaction card can settle a matching protected-response attempt.
+Database reopen also turns unfinished Close and other pending attempts into
+observable uncertainty. These services and adapters remain unmounted; E7/E8
+own authenticated product routes and startup assembly, while E2/E9 own live
+provider evidence.
 
 `internal/desktop` starts and stops the same core through its lifecycle boundary,
 then runs a Wails v3 window over the checked bundle's existing asset handler.

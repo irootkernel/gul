@@ -35,11 +35,16 @@ type Provider interface {
 	Acquire(context.Context, Bound, uint64) (WriterProjection, error)
 	Release(context.Context, Bound, uint64) (WriterProjection, error)
 }
+type MutationAttempts interface {
+	BeginWriter(context.Context, Bound, bool, uint64) (string, error)
+	FinishWriter(context.Context, string, string) error // empty outcome means unknown
+}
 type Service struct {
 	Repository Repository
 	Workspaces session.Workspace
 	Carriers   session.CarrierResolver
 	Provider   Provider
+	Attempts   MutationAttempts
 	// Gate opens after compatibility, snapshots, and observation resume. It also
 	// guards coordinator reads; a missing gate fails closed on every path.
 	Gate func(string, string) bool
@@ -162,6 +167,16 @@ func (s *Service) mutate(ctx context.Context, subject, id string, acquire bool) 
 	if s.Gate == nil || !s.Gate(subject, id) {
 		return MutationResult{Evaluation: Evaluation{Flags: Flags{RequiresFreshSnapshot: true}, Blocker: FreshSnapshotRequired, Mode: WriterBlocked}}, ErrBlocked
 	}
+	if s.Attempts == nil {
+		return MutationResult{}, ErrPersistence
+	}
+	attemptID, err := s.Attempts.BeginWriter(ctx, b, acquire, in.Run.Stamp.Run)
+	if err != nil {
+		if errors.Is(err, ErrOutcomeUnknown) || errors.Is(err, ErrBlocked) {
+			return MutationResult{}, err
+		}
+		return MutationResult{}, ErrPersistence
+	}
 	// Each tokenless mutation is invoked once with the fresh Run revision. The
 	// provider rechecks Controller/revision and owns all authority transitions.
 	callCtx, callCancel := context.WithTimeout(ctx, 20*time.Second)
@@ -173,10 +188,20 @@ func (s *Service) mutate(ctx context.Context, subject, id string, acquire bool) 
 		accepted, err = s.Provider.Release(callCtx, b, in.Run.Stamp.Run)
 	}
 	if err != nil {
+		outcome := ""
+		if errors.Is(err, ErrWriterBusy) || errors.Is(err, ErrUnsupportedTransition) {
+			outcome = "rejected"
+		}
+		if finishErr := s.Attempts.FinishWriter(context.WithoutCancel(ctx), attemptID, outcome); finishErr != nil {
+			return MutationResult{}, ErrPersistence
+		}
 		if errors.Is(err, ErrUnavailable) || errors.Is(err, ErrBlocked) {
 			err = ErrOutcomeUnknown
 		}
 		return MutationResult{}, err
+	}
+	if err := s.Attempts.FinishWriter(context.WithoutCancel(ctx), attemptID, "accepted"); err != nil {
+		return MutationResult{}, ErrOutcomeUnknown
 	}
 	return MutationResult{Accepted: accepted, Evaluation: Evaluation{Writer: accepted, Mode: WriterBlocked, Flags: Flags{RequiresFreshSnapshot: true}, Blocker: FreshSnapshotRequired}}, nil
 }

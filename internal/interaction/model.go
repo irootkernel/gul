@@ -16,11 +16,12 @@ const GUL_MAX_SAFE_INTERACTION_PAYLOAD_BYTES = 8 * 1024 * 1024
 const MaximumResponseBytes = 64 * 1024
 
 var (
-	ErrInvalid     = errors.New("invalid interaction request")
-	ErrBlocked     = errors.New("interaction provider contract blocked")
-	ErrAuthority   = errors.New("interaction controller binding unavailable")
-	ErrUnavailable = errors.New("interaction unavailable")
-	ErrPath        = errors.New("interaction path cannot be presented safely")
+	ErrInvalid         = errors.New("invalid interaction request")
+	ErrBlocked         = errors.New("interaction provider contract blocked")
+	ErrAuthority       = errors.New("interaction controller binding unavailable")
+	ErrUnavailable     = errors.New("interaction unavailable")
+	ErrAttemptConflict = errors.New("interaction attempt unresolved")
+	ErrPath            = errors.New("interaction path cannot be presented safely")
 )
 
 type Kind uint8

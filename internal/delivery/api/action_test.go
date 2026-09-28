@@ -24,6 +24,7 @@ import (
 type apiActionProvider struct {
 	calls      atomic.Int32
 	threadless atomic.Bool
+	lost       atomic.Bool
 }
 
 func (p *apiActionProvider) Read(context.Context, action.Bound) (action.Input, error) {
@@ -37,6 +38,9 @@ func (p *apiActionProvider) Read(context.Context, action.Bound) (action.Input, e
 }
 func (p *apiActionProvider) Acquire(context.Context, action.Bound, uint64) (action.WriterProjection, error) {
 	p.calls.Add(1)
+	if p.lost.Load() {
+		return action.WriterProjection{}, action.ErrUnavailable
+	}
 	return action.WriterProjection{}, action.ErrWriterBusy
 }
 func (p *apiActionProvider) Release(context.Context, action.Bound, uint64) (action.WriterProjection, error) {
@@ -66,7 +70,7 @@ func TestWriterRPCUsesFreshSharedGateAndTypedConflict(t *testing.T) {
 		t.Fatal(err)
 	}
 	provider := &apiActionProvider{}
-	service := &action.Service{Repository: store.Actions("dolgorae"), Workspaces: interactionWorkspace{}, Carriers: interactionCarrier{}, Provider: provider, Gate: func(string, string) bool { return true }}
+	service := &action.Service{Repository: store.Actions("dolgorae"), Workspaces: interactionWorkspace{}, Carriers: interactionCarrier{}, Provider: provider, Attempts: store.WriterAttempts(), Gate: func(string, string) bool { return true }}
 	core := app.NewCore(app.Dependencies{Provider: ready{}, Persistence: ready{}, Authorization: allow{}})
 	if err := core.Start(t.Context()); err != nil {
 		t.Fatal(err)
@@ -108,6 +112,17 @@ func TestWriterRPCUsesFreshSharedGateAndTypedConflict(t *testing.T) {
 	}
 	if _, err = client.GetActionState(t.Context(), connect.NewRequest(&gulv1.GetActionStateRequest{SessionId: "session", WriteIntent: 99, CloseIntent: gulv1.ActionCloseIntent_ACTION_CLOSE_INTENT_NONE})); connect.CodeOf(err) != connect.CodeInvalidArgument {
 		t.Fatal("unknown intent", err)
+	}
+	provider.threadless.Store(false)
+	provider.lost.Store(true)
+	if _, err = client.AcquireWriter(t.Context(), connect.NewRequest(&gulv1.AcquireWriterRequest{SessionId: "session"})); connect.CodeOf(err) != connect.CodeUnavailable || provider.calls.Load() != 2 {
+		t.Fatal("lost response", err, provider.calls.Load())
+	}
+	if _, err = client.AcquireWriter(t.Context(), connect.NewRequest(&gulv1.AcquireWriterRequest{SessionId: "session"})); err == nil || provider.calls.Load() != 2 {
+		t.Fatal("browser retry transmitted a tokenless mutation", err, provider.calls.Load())
+	}
+	if a, err := store.Actions("dolgorae").LocalState(t.Context(), action.Bound{Binding: session.Binding{SubjectID: "owner", ID: "session", RunID: "run", WorkspaceID: "ws", ControllerBindingID: "controller"}, Workspace: workspace.Attachment{ProviderID: "provider", CanonicalRoot: "/workspace"}, Carrier: session.Carrier{ControllerID: "controller"}}); err != nil || a.Operation != action.OperationUnknown {
+		t.Fatalf("lost response state = %+v, %v", a, err)
 	}
 }
 

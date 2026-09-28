@@ -6,6 +6,7 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"io"
 	"strings"
 	"time"
@@ -18,6 +19,11 @@ import (
 type ActionEvaluator interface {
 	InteractionActions(context.Context, string, string) (action.Evaluation, error)
 }
+type MutationAttempts interface {
+	BeginInteraction(context.Context, Bound, string, string) (string, error)
+	FinishInteraction(context.Context, string, string) error // empty outcome means unknown
+	ReconcileInteraction(context.Context, Bound, string, Status) error
+}
 
 type Service struct {
 	Actions    ActionEvaluator
@@ -25,6 +31,7 @@ type Service struct {
 	Workspaces session.Workspace
 	Carriers   session.CarrierResolver
 	Provider   Provider
+	Attempts   MutationAttempts
 }
 
 func (s *Service) bound(ctx context.Context, subject, id string, controller bool) (Bound, error) {
@@ -73,6 +80,11 @@ func (s *Service) Get(ctx context.Context, subject, id, interactionID string) (C
 	card, err := s.Provider.Card(ctx, b, interactionID)
 	if err != nil {
 		return Card{}, err
+	}
+	if s.Attempts != nil && (card.Summary.Status == Resolved || card.Summary.Status == Stale) {
+		if err := s.Attempts.ReconcileInteraction(ctx, b, interactionID, card.Summary.Status); err != nil {
+			return Card{}, ErrUnavailable
+		}
 	}
 	card.Actions = action.Evaluation{Flags: action.Flags{BlockedByProviderCompatibility: true}, Blocker: action.ProviderFailure}
 	if s.Actions != nil {
@@ -123,8 +135,19 @@ func (s *Service) Resolve(ctx context.Context, subject, id, interactionID string
 	if _, err = rand.Read(key[:]); err != nil {
 		return Result{}, ErrUnavailable
 	}
+	if s.Attempts == nil {
+		return Result{}, ErrUnavailable
+	}
+	keyText := hex.EncodeToString(key[:])
+	attemptID, err := s.Attempts.BeginInteraction(ctx, b, interactionID, keyText)
+	if err != nil {
+		if errors.Is(err, ErrAttemptConflict) {
+			return s.observeCompetingResolution(ctx, subject, id, interactionID)
+		}
+		return Result{}, ErrUnavailable
+	}
 	callCtx, cancel := context.WithTimeout(ctx, 20*time.Second)
-	receipt, callErr := s.Provider.Resolve(callCtx, b, interactionID, hex.EncodeToString(key[:]), normalized)
+	receipt, callErr := s.Provider.Resolve(callCtx, b, interactionID, keyText, normalized)
 	cancel()
 	clear(normalized)
 	clear(body)
@@ -133,23 +156,59 @@ func (s *Service) Resolve(ctx context.Context, subject, id, interactionID string
 	refreshCtx, refreshCancel := context.WithTimeout(context.WithoutCancel(ctx), 5*time.Second)
 	defer refreshCancel()
 	fresh, refreshErr := s.Get(refreshCtx, subject, id, interactionID)
+	finishCtx, finishCancel := context.WithTimeout(context.WithoutCancel(ctx), 5*time.Second)
+	defer finishCancel()
 	result := Result{Outcome: OutcomeUnknown}
 	if callErr == nil {
 		result.Receipt = receipt.Receipt
 	}
 	if refreshErr != nil {
+		if err := s.Attempts.FinishInteraction(finishCtx, attemptID, ""); err != nil {
+			return result, ErrUnavailable
+		}
 		return result, nil
 	}
+	outcomeRef := ""
 	switch fresh.Summary.Status {
 	case Resolved:
 		result.Outcome = OutcomeResolved
+		outcomeRef = "resolved"
 	case Stale:
 		result.Outcome = OutcomeStale
+		outcomeRef = "stale"
 	case Pending:
 		result.Outcome = OutcomeReenter
 		result.Card = &fresh
+		outcomeRef = "reenter"
+	}
+	if err := s.Attempts.FinishInteraction(finishCtx, attemptID, outcomeRef); err != nil {
+		return Result{Outcome: OutcomeUnknown}, ErrUnavailable
 	}
 	return result, nil
+}
+
+func (s *Service) observeCompetingResolution(ctx context.Context, subject, id, interactionID string) (Result, error) {
+	readCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 500*time.Millisecond)
+	defer cancel()
+	ticker := time.NewTicker(20 * time.Millisecond)
+	defer ticker.Stop()
+	for {
+		card, err := s.Get(readCtx, subject, id, interactionID)
+		if err != nil {
+			return Result{Outcome: OutcomeUnknown}, nil
+		}
+		switch card.Summary.Status {
+		case Resolved:
+			return Result{Outcome: OutcomeResolved}, nil
+		case Stale:
+			return Result{Outcome: OutcomeStale}, nil
+		}
+		select {
+		case <-readCtx.Done():
+			return Result{Outcome: OutcomeUnknown}, nil
+		case <-ticker.C:
+		}
+	}
 }
 
 func decode(data []byte, target any) error {

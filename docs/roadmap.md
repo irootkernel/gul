@@ -3,9 +3,9 @@
 | Field | Value |
 | --- | --- |
 | Role | Sole authority for task identity, order, status, dependencies, and phase |
-| Revision | 2026-09-28 E5-T2 completion |
+| Revision | 2026-09-28 E5-T3 completion |
 | Active Task | None |
-| Next | E5-T3 |
+| Next | E6-T1 |
 | Required provider | Released Dolgorae v0.1.3 implementing `dolgorae.gul-consumer/v1` |
 
 ## 1. Status and execution rules
@@ -241,7 +241,7 @@ optimistic closure or history-authorized resend is permitted.
 | --- | --- | --- | --- | --- |
 | E5-T1 | Pre-release | Completed | E4-T1, E4-T3, E4-T5, E13-T1 | Complete CloseRuntime coordinator using prior evaluator and aggregate reads, provider-to-Gul operation correlation, pending/confirmed/unknown/recovery behavior and typed blockers; no blind retry |
 | E5-T2 | Pre-release | Completed | E5-T1, E4-T5, E1-T4 | Provider/browser reconnect and stamp convergence using controlled fakes, no success inferred from disconnect |
-| E5-T3 | Pre-release | Planned | E5-T2, E13-T1 | Mutation-attempt/replay policy fault tests; history cache never authorizes resend |
+| E5-T3 | Pre-release | Completed | E5-T2, E13-T1 | Mutation-attempt/replay policy fault tests; history cache never authorizes resend |
 
 ### E6: Complete read-only files and review
 
