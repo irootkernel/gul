@@ -1019,6 +1019,18 @@ the live Dolgorae provider, authenticated product assembly and production
 startup remain with E2/E9, E8/E14 and their named later owners. The shared
 consumer dossier remains for E6 and the other pending epics. E6-T1 is next.
 
+### E5 replay retention correction (2026-09-29)
+
+Cold validation found that an unrelated file in the owner-only replay directory
+could stop the expiry pass before it reached old StartRun material. The replay
+store now ignores names outside its canonical key format and uses the file's
+modification time when malformed canonical material cannot be read. It still
+deletes only expired canonical entries; an unrelated file remains untouched.
+The replay regression test includes a Finder metadata file, an invalid key,
+and malformed old canonical material alongside an expired request. This is a
+fake/component correction to REQ-REC-011; production assembly remains outside
+E5.
+
 ## 2. Current development snapshot
 
 | Area | State |

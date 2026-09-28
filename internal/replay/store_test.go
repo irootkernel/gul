@@ -173,3 +173,37 @@ func TestPurgeContinuesPastPartialCrashOrphan(t *testing.T) {
 		t.Fatalf("partial orphan expiry = %v, %v", keys, err)
 	}
 }
+
+func TestPurgeSkipsUnownedEntriesWithoutBlockingExpiredMaterial(t *testing.T) {
+	root := canonicalRoot(t)
+	if err := os.Chmod(root, 0700); err != nil {
+		t.Fatal(err)
+	}
+	store := Store{Root: root}
+	now := time.Now().UTC()
+	for _, name := range []string{".DS_Store", "not.a.replay.json"} {
+		if err := os.WriteFile(filepath.Join(root, name), []byte("unrelated"), 0600); err != nil {
+			t.Fatal(err)
+		}
+	}
+	partial := filepath.Join(root, "attempt_0.json")
+	if err := os.WriteFile(partial, []byte("{"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Chtimes(partial, now.Add(-MaximumAge), now.Add(-MaximumAge)); err != nil {
+		t.Fatal(err)
+	}
+	request := fixture(now.Add(-MaximumAge))
+	if _, err := store.Put(request); err != nil {
+		t.Fatal(err)
+	}
+	keys, err := store.PurgeExpired(now, MaximumAge)
+	if err != nil || len(keys) != 2 || keys[0] != "attempt_0" || keys[1] != request.OperationID {
+		t.Fatalf("expired keys after unrelated entries = %v, %v", keys, err)
+	}
+	for _, name := range []string{".DS_Store", "not.a.replay.json"} {
+		if _, err := os.Lstat(filepath.Join(root, name)); err != nil {
+			t.Fatalf("unrelated entry %q changed: %v", name, err)
+		}
+	}
+}

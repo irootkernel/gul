@@ -7,7 +7,6 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"io/fs"
 	"os"
@@ -229,13 +228,17 @@ func (s Store) PurgeExpired(now time.Time, maxAge time.Duration) ([]string, erro
 	var expired []string
 	for _, entry := range entries {
 		name := entry.Name()
-		if filepath.Ext(name) != ".json" {
-			return nil, fmt.Errorf("unknown replay store entry: %w", ErrUnavailable)
+		key, ok := strings.CutSuffix(name, ".json")
+		if !ok || !keyPattern.MatchString(key) {
+			continue // Only canonical replay names belong to this store.
 		}
-		key := name[:len(name)-len(".json")]
 		request, _, modified, err := s.readRequest(key)
 		if err != nil && modified.IsZero() {
-			return nil, err
+			info, statErr := entry.Info()
+			if statErr != nil {
+				return nil, statErr
+			}
+			modified = info.ModTime()
 		}
 		if now.Sub(modified) < maxAge && (err != nil || now.Sub(request.CreatedAt) < maxAge) {
 			continue
