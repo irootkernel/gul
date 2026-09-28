@@ -211,12 +211,13 @@ func TestCloseOutcomeStatusesAndClosedErrorVocabulary(t *testing.T) {
 			t.Fatal("non-rejection carried rejection")
 		}
 	}
-	out, err := browserCloseOutcome(sessionclose.Outcome{Status: sessionclose.Rejected, Code: "private-error-canary", NextAction: "private-action-canary"})
-	if err != nil || out.Rejection.Code != gulv1.ErrorCode_ERROR_CODE_PROVIDER_BLOCKED || out.NextAction != gulv1.ActionClass_ACTION_CLASS_OPERATOR_REPAIR || strings.Contains(protojson.Format(out), "canary") {
-		t.Fatal(out, err)
-	}
-	for _, bad := range []sessionclose.Outcome{{Status: "future"}, {Status: sessionclose.Confirmed}} {
-		if _, err := browserCloseOutcome(bad); connect.CodeOf(err) != connect.CodeFailedPrecondition {
+	for _, bad := range []sessionclose.Outcome{
+		{Status: "future"},
+		{Status: sessionclose.Confirmed},
+		{Status: sessionclose.Rejected, Code: "private-error-canary", NextAction: "REFRESH_SNAPSHOT"},
+		{Status: sessionclose.Rejected, Code: "PROVIDER_BLOCKED", NextAction: "private-action-canary"},
+	} {
+		if _, err := browserCloseOutcome(bad); connect.CodeOf(err) != connect.CodeFailedPrecondition || strings.Contains(err.Error(), "canary") {
 			t.Fatalf("invalid outcome = %v", err)
 		}
 	}

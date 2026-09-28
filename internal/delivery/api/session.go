@@ -154,13 +154,13 @@ func browserCloseOutcome(value sessionclose.Outcome) (*gulv1.CloseOutcome, error
 	}
 	action, ok := gulv1.ActionClass_value["ACTION_CLASS_"+value.NextAction]
 	if !ok || action == 0 {
-		action = int32(gulv1.ActionClass_ACTION_CLASS_OPERATOR_REPAIR)
+		return nil, sessionError(session.ErrInvalidProjection)
 	}
 	out.NextAction = gulv1.ActionClass(action)
 	if value.Status == sessionclose.Rejected {
 		number, ok := gulv1.ErrorCode_value["ERROR_CODE_"+value.Code]
 		if !ok || number == 0 {
-			number = int32(gulv1.ErrorCode_ERROR_CODE_PROVIDER_BLOCKED)
+			return nil, sessionError(session.ErrInvalidProjection)
 		}
 		out.Rejection = &gulv1.DomainError{Code: gulv1.ErrorCode(number), Action: out.NextAction}
 	}
