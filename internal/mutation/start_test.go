@@ -8,11 +8,12 @@ import (
 	"testing"
 	"time"
 
+	"github.com/rootkernel/gul/internal/operation"
 	"github.com/rootkernel/gul/internal/replay"
 	"github.com/rootkernel/gul/internal/storage"
 )
 
-type startResolver struct{}
+type startResolver struct{ root string }
 
 type rootedResolver struct{ root string }
 
@@ -23,11 +24,11 @@ func (r rootedResolver) Carrier(ctx context.Context, subject, key string) (strin
 	return (startResolver{}).Carrier(ctx, subject, key)
 }
 
-func (startResolver) Workspace(_ context.Context, subject, id string) (string, string, error) {
+func (r startResolver) Workspace(_ context.Context, subject, id string) (string, string, error) {
 	if subject != "owner" || id != "workspace" {
 		return "", "", ErrBlocked
 	}
-	return "/trusted/workspace", "provider-workspace", nil
+	return r.root, "provider-workspace", nil
 }
 func (startResolver) Carrier(_ context.Context, subject, key string) (string, string, uint64, error) {
 	if subject != "owner" || key != "controllers/destination" {
@@ -40,11 +41,12 @@ type startProvider struct {
 	calls, effects int
 	lostResponse   bool
 	run            StartResult
+	workspace      string
 }
 
 func (p *startProvider) StartRun(_ context.Context, request replay.StartRun, root, carrier string) (StartResult, error) {
 	p.calls++
-	if root != "/trusted/workspace" || carrier != "/trusted/carrier" || request.IdempotencyKey != "stable-key" {
+	if root != p.workspace || carrier != "/trusted/carrier" || request.IdempotencyKey != "stable-key" {
 		return StartResult{}, ErrBlocked
 	}
 	if p.run.RunID == "" {
@@ -58,7 +60,7 @@ func (p *startProvider) StartRun(_ context.Context, request replay.StartRun, roo
 	return p.run, nil
 }
 func (p *startProvider) ListRunsByController(_ context.Context, request replay.StartRun, root string) ([]StartResult, error) {
-	if root != "/trusted/workspace" || request.ControllerID != "controller" || p.run.RunID == "" {
+	if root != p.workspace || request.ControllerID != "controller" || p.run.RunID == "" {
 		return nil, nil
 	}
 	return []StartResult{p.run}, nil
@@ -72,12 +74,18 @@ func startFixture(now time.Time) replay.StartRun {
 
 func startStore(t *testing.T) (*storage.Store, string, string) {
 	t.Helper()
-	root := t.TempDir()
+	root, err := filepath.EvalSymlinks(t.TempDir())
+	if err != nil {
+		t.Fatal(err)
+	}
 	if err := os.Chmod(root, 0700); err != nil {
 		t.Fatal(err)
 	}
 	replayRoot := filepath.Join(root, "replay")
 	if err := os.Mkdir(replayRoot, 0700); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Mkdir(filepath.Join(root, "workspace"), 0700); err != nil {
 		t.Fatal(err)
 	}
 	path := filepath.Join(root, "gul.sqlite")
@@ -95,8 +103,8 @@ func startStore(t *testing.T) (*storage.Store, string, string) {
 func TestLostStartResponseReplaysExactKeyAfterRestart(t *testing.T) {
 	db, path, root := startStore(t)
 	now := time.Now().UTC()
-	provider := &startProvider{lostResponse: true}
-	service := StartService{Attempts: db.Attempts(), Replay: replay.Store{Root: root}, Resolver: startResolver{}, Provider: provider, Gate: func(string, string) bool { return true }, Now: func() time.Time { return now }}
+	provider := &startProvider{lostResponse: true, workspace: filepath.Join(filepath.Dir(root), "workspace")}
+	service := StartService{Attempts: db.Attempts(), Replay: replay.Store{Root: root}, Resolver: startResolver{root: provider.workspace}, Provider: provider, Gate: func(string, string) bool { return true }, Now: func() time.Time { return now }}
 	request := startFixture(now)
 	a, err := service.Start(t.Context(), request)
 	if !errors.Is(err, ErrUnknown) || a.State != "outcome_unknown" || provider.calls != 1 || provider.effects != 1 {
@@ -129,8 +137,8 @@ func TestLostStartResponseReplaysExactKeyAfterRestart(t *testing.T) {
 func TestExpiredStartNeverReplaysAndOnlyAuthoritativeListResolves(t *testing.T) {
 	db, _, root := startStore(t)
 	now := time.Now().UTC()
-	provider := &startProvider{lostResponse: true}
-	service := StartService{Attempts: db.Attempts(), Replay: replay.Store{Root: root}, Resolver: startResolver{}, Provider: provider, Gate: func(string, string) bool { return true }, Now: func() time.Time { return now }, MaxAge: time.Hour}
+	provider := &startProvider{lostResponse: true, workspace: filepath.Join(filepath.Dir(root), "workspace")}
+	service := StartService{Attempts: db.Attempts(), Replay: replay.Store{Root: root}, Resolver: startResolver{root: provider.workspace}, Provider: provider, Gate: func(string, string) bool { return true }, Now: func() time.Time { return now }, MaxAge: time.Hour}
 	request := startFixture(now)
 	if _, err := service.Start(t.Context(), request); !errors.Is(err, ErrUnknown) {
 		t.Fatal(err)
@@ -151,9 +159,9 @@ func TestExpiredStartNeverReplaysAndOnlyAuthoritativeListResolves(t *testing.T) 
 
 func TestVersionDriftBlocksStartReplayUntilCompatibilityReturns(t *testing.T) {
 	db, _, root := startStore(t)
-	provider := &startProvider{lostResponse: true}
+	provider := &startProvider{lostResponse: true, workspace: filepath.Join(filepath.Dir(root), "workspace")}
 	compatible := true
-	service := StartService{Attempts: db.Attempts(), Replay: replay.Store{Root: root}, Resolver: startResolver{}, Provider: provider,
+	service := StartService{Attempts: db.Attempts(), Replay: replay.Store{Root: root}, Resolver: startResolver{root: provider.workspace}, Provider: provider,
 		Gate: func(string, string) bool { return compatible }}
 	request := startFixture(time.Now().UTC())
 	if _, err := service.Start(t.Context(), request); !errors.Is(err, ErrUnknown) {
@@ -171,10 +179,81 @@ func TestVersionDriftBlocksStartReplayUntilCompatibilityReturns(t *testing.T) {
 
 func TestReplayRootInsideWorkspaceBlocksAllocation(t *testing.T) {
 	db, _, root := startStore(t)
-	provider := &startProvider{}
+	provider := &startProvider{workspace: filepath.Join(filepath.Dir(root), "workspace")}
 	service := StartService{Attempts: db.Attempts(), Replay: replay.Store{Root: root}, Resolver: rootedResolver{root: filepath.Dir(root)},
 		Provider: provider, Gate: func(string, string) bool { return true }}
 	if _, err := service.Start(t.Context(), startFixture(time.Now().UTC())); !errors.Is(err, ErrBlocked) || provider.calls != 0 {
 		t.Fatalf("unsafe replay placement = %v, calls=%d", err, provider.calls)
+	}
+}
+
+func TestReplayRootViaParentSymlinkBlocksAllocation(t *testing.T) {
+	db, _, root := startStore(t)
+	parent := filepath.Join(t.TempDir(), "alias")
+	if err := os.Symlink(filepath.Dir(root), parent); err != nil {
+		t.Fatal(err)
+	}
+	provider := &startProvider{workspace: filepath.Join(filepath.Dir(root), "workspace")}
+	service := StartService{Attempts: db.Attempts(), Replay: replay.Store{Root: filepath.Join(parent, filepath.Base(root))}, Resolver: rootedResolver{root: filepath.Dir(root)},
+		Provider: provider, Gate: func(string, string) bool { return true }}
+	if _, err := service.Start(t.Context(), startFixture(time.Now().UTC())); !errors.Is(err, ErrBlocked) || provider.calls != 0 {
+		t.Fatalf("symlinked replay placement = %v, calls=%d", err, provider.calls)
+	}
+}
+
+func TestWorkspaceAliasOfReplayParentBlocksAllocation(t *testing.T) {
+	db, _, root := startStore(t)
+	alias := filepath.Join(t.TempDir(), "workspace-alias")
+	if err := os.Symlink(filepath.Dir(root), alias); err != nil {
+		t.Fatal(err)
+	}
+	provider := &startProvider{}
+	service := StartService{Attempts: db.Attempts(), Replay: replay.Store{Root: root}, Resolver: rootedResolver{root: alias},
+		Provider: provider, Gate: func(string, string) bool { return true }}
+	if _, err := service.Start(t.Context(), startFixture(time.Now().UTC())); !errors.Is(err, ErrBlocked) || provider.calls != 0 {
+		t.Fatalf("workspace alias admitted replay = %v; calls=%d", err, provider.calls)
+	}
+}
+
+func TestRejectedStartConflictDeletesOnlyNewReplayFile(t *testing.T) {
+	db, _, root := startStore(t)
+	now := time.Now().UTC()
+	prior := startFixture(now)
+	prior.OperationID = "prior"
+	_, digest, err := replay.Canonical(prior)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, dispatch, err := db.Attempts().BeginMutation(t.Context(), startAttempt(prior, digest)); err != nil || !dispatch {
+		t.Fatalf("prior attempt = %v; dispatch=%v", err, dispatch)
+	}
+	provider := &startProvider{workspace: filepath.Join(filepath.Dir(root), "workspace")}
+	service := StartService{Attempts: db.Attempts(), Replay: replay.Store{Root: root}, Resolver: startResolver{root: provider.workspace}, Provider: provider,
+		Gate: func(string, string) bool { return true }, Now: func() time.Time { return now }}
+	request := startFixture(now)
+	if _, err := service.Start(t.Context(), request); !errors.Is(err, operation.ErrConflict) || provider.calls != 0 {
+		t.Fatalf("conflicting StartRun = %v; calls=%d", err, provider.calls)
+	}
+	if _, err := os.Lstat(filepath.Join(root, request.OperationID+".json")); !errors.Is(err, os.ErrNotExist) {
+		t.Fatalf("rejected replay remains: %v", err)
+	}
+}
+
+func TestOrphanReplayFileCanResumeExactStart(t *testing.T) {
+	db, _, root := startStore(t)
+	now := time.Now().UTC()
+	request := startFixture(now)
+	store := replay.Store{Root: root}
+	if _, err := store.Put(request); err != nil {
+		t.Fatal(err)
+	}
+	provider := &startProvider{workspace: filepath.Join(filepath.Dir(root), "workspace")}
+	service := StartService{Attempts: db.Attempts(), Replay: store, Resolver: startResolver{root: provider.workspace}, Provider: provider,
+		Gate: func(string, string) bool { return true }, Now: func() time.Time { return now }}
+	if a, err := service.Start(t.Context(), request); err != nil || a.OutcomeRef != "run-1" || provider.calls != 1 {
+		t.Fatalf("orphan replay = %+v, %v; calls=%d", a, err, provider.calls)
+	}
+	if _, err := store.Get(request.OperationID, ""); !errors.Is(err, os.ErrNotExist) {
+		t.Fatalf("resolved orphan remains: %v", err)
 	}
 }

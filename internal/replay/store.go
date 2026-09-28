@@ -89,6 +89,18 @@ func (s Store) root() error {
 	if !filepath.IsAbs(s.Root) {
 		return ErrInvalid
 	}
+	resolved, err := filepath.EvalSymlinks(s.Root)
+	if err != nil || resolved != filepath.Clean(s.Root) {
+		return ErrUnavailable
+	}
+	parent, err := os.Lstat(filepath.Dir(s.Root))
+	if err != nil {
+		return err
+	}
+	owner, ok := parent.Sys().(*syscall.Stat_t)
+	if !ok || int(owner.Uid) != os.Getuid() || !parent.IsDir() || parent.Mode().Perm() != 0700 {
+		return ErrUnavailable
+	}
 	info, err := os.Lstat(s.Root)
 	if err != nil {
 		return err
@@ -140,43 +152,54 @@ func (s Store) Put(request StartRun) (string, error) {
 	return digest, nil
 }
 
-func (s Store) Get(key, digest string) (StartRun, error) {
+func (s Store) readRequest(key string) (StartRun, []byte, time.Time, error) {
 	path, err := s.path(key)
 	if err != nil {
-		return StartRun{}, err
+		return StartRun{}, nil, time.Time{}, err
 	}
 	info, err := os.Lstat(path)
 	if err != nil {
-		return StartRun{}, err
+		return StartRun{}, nil, time.Time{}, err
 	}
 	stat, ok := info.Sys().(*syscall.Stat_t)
-	if !ok || int(stat.Uid) != os.Getuid() || !info.Mode().IsRegular() || info.Mode().Perm() != 0600 || info.Size() > MaximumBytes {
-		return StartRun{}, ErrUnavailable
+	if !ok || int(stat.Uid) != os.Getuid() || !info.Mode().IsRegular() || info.Mode().Perm() != 0600 {
+		return StartRun{}, nil, time.Time{}, ErrUnavailable
+	}
+	if info.Size() > MaximumBytes {
+		return StartRun{}, nil, info.ModTime(), ErrUnavailable
 	}
 	fd, err := syscall.Open(path, syscall.O_RDONLY|syscall.O_NOFOLLOW, 0)
 	if err != nil {
-		return StartRun{}, err
+		return StartRun{}, nil, time.Time{}, err
 	}
 	f := os.NewFile(uintptr(fd), path)
 	defer f.Close()
 	opened, err := f.Stat()
 	if err != nil || !opened.Mode().IsRegular() || opened.Mode().Perm() != 0600 || !os.SameFile(info, opened) {
-		return StartRun{}, ErrUnavailable
+		return StartRun{}, nil, time.Time{}, ErrUnavailable
 	}
 	b, err := io.ReadAll(io.LimitReader(f, MaximumBytes+1))
 	if err != nil || len(b) > MaximumBytes {
-		return StartRun{}, ErrUnavailable
-	}
-	actual := sha256.Sum256(b)
-	if hex.EncodeToString(actual[:]) != digest {
-		return StartRun{}, ErrUnavailable
+		return StartRun{}, nil, opened.ModTime(), ErrUnavailable
 	}
 	var request StartRun
 	if err := json.Unmarshal(b, &request); err != nil || request.OperationID != key || !request.valid() {
-		return StartRun{}, ErrUnavailable
+		return StartRun{}, nil, opened.ModTime(), ErrUnavailable
 	}
 	canonical, _, err := Canonical(request)
 	if err != nil || string(canonical) != string(b) {
+		return StartRun{}, nil, opened.ModTime(), ErrUnavailable
+	}
+	return request, b, opened.ModTime(), nil
+}
+
+func (s Store) Get(key, digest string) (StartRun, error) {
+	request, b, _, err := s.readRequest(key)
+	if err != nil {
+		return StartRun{}, err
+	}
+	actual := sha256.Sum256(b)
+	if hex.EncodeToString(actual[:]) != digest {
 		return StartRun{}, ErrUnavailable
 	}
 	return request, nil
@@ -210,19 +233,11 @@ func (s Store) PurgeExpired(now time.Time, maxAge time.Duration) ([]string, erro
 			return nil, fmt.Errorf("unknown replay store entry: %w", ErrUnavailable)
 		}
 		key := name[:len(name)-len(".json")]
-		path, err := s.path(key)
-		if err != nil {
+		request, _, modified, err := s.readRequest(key)
+		if err != nil && modified.IsZero() {
 			return nil, err
 		}
-		info, err := os.Lstat(path)
-		if err != nil {
-			return nil, err
-		}
-		stat, ok := info.Sys().(*syscall.Stat_t)
-		if !ok || int(stat.Uid) != os.Getuid() || !info.Mode().IsRegular() || info.Mode().Perm() != 0600 {
-			return nil, ErrUnavailable
-		}
-		if now.Sub(info.ModTime()) < maxAge {
+		if now.Sub(modified) < maxAge && (err != nil || now.Sub(request.CreatedAt) < maxAge) {
 			continue
 		}
 		if err := s.Delete(key); err != nil {

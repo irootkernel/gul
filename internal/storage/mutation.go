@@ -10,7 +10,7 @@ import (
 	"github.com/rootkernel/gul/internal/operation"
 )
 
-var ErrMutationConflict = errors.New("conflicting mutation attempt")
+var ErrMutationConflict = operation.ErrConflict
 
 // MutationAttempt extends the common non-secret attempt with its recovery
 // route. OutcomeRef is a validated provider identity, never history authority.

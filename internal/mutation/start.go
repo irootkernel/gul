@@ -7,7 +7,6 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
-	"strings"
 	"time"
 
 	"github.com/rootkernel/gul/internal/operation"
@@ -93,8 +92,22 @@ func overlaps(a, b string) bool {
 		return true
 	}
 	within := func(parent, child string) bool {
-		rel, err := filepath.Rel(parent, child)
-		return err == nil && rel != ".." && !strings.HasPrefix(rel, ".."+string(filepath.Separator))
+		owner, err := os.Stat(parent)
+		if err != nil {
+			return true
+		}
+		for current := child; ; current = filepath.Dir(current) {
+			info, err := os.Stat(current)
+			if err != nil {
+				return true
+			}
+			if os.SameFile(owner, info) {
+				return true
+			}
+			if filepath.Dir(current) == current {
+				return false
+			}
+		}
 	}
 	return within(a, b) || within(b, a)
 }
@@ -132,18 +145,29 @@ func (s *StartService) Start(ctx context.Context, request replay.StartRun) (oper
 	if err != nil {
 		return operation.MutationAttempt{}, err
 	}
+	created := false
 	if _, err := s.Replay.Put(request); err != nil {
-		return operation.MutationAttempt{}, err
+		if !errors.Is(err, os.ErrExist) {
+			return operation.MutationAttempt{}, err
+		}
+		// A crash may leave the exact file before BeginMutation commits. Reuse
+		// only matching canonical material; no provider call preceded Begin.
+		if _, err := s.Replay.Get(request.OperationID, digest); err != nil {
+			return operation.MutationAttempt{}, err
+		}
+	} else {
+		created = true
 	}
 	attempt, dispatch, err := s.Attempts.BeginMutation(ctx, startAttempt(request, digest))
 	if err != nil {
-		_ = s.Replay.Delete(request.OperationID)
+		if created && errors.Is(err, operation.ErrConflict) {
+			if removeErr := s.Replay.Delete(request.OperationID); removeErr != nil {
+				return operation.MutationAttempt{}, errors.Join(err, removeErr)
+			}
+		}
 		return operation.MutationAttempt{}, err
 	}
 	if !dispatch {
-		if err := s.Replay.Delete(request.OperationID); err != nil {
-			return operation.MutationAttempt{}, err
-		}
 		return attempt, nil
 	}
 	return s.dispatch(ctx, attempt, request, root, carrier)

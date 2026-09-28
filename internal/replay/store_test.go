@@ -16,8 +16,17 @@ func fixture(now time.Time) StartRun {
 		RequiredCapabilities: []string{"artifact_capability"}, CreatedAt: now}
 }
 
+func canonicalRoot(t *testing.T) string {
+	t.Helper()
+	root, err := filepath.EvalSymlinks(t.TempDir())
+	if err != nil {
+		t.Fatal(err)
+	}
+	return root
+}
+
 func TestExactStartRunMaterialIsOwnerOnlyAndBoundToDigest(t *testing.T) {
-	root := t.TempDir()
+	root := canonicalRoot(t)
 	if err := os.Chmod(root, 0700); err != nil {
 		t.Fatal(err)
 	}
@@ -60,7 +69,7 @@ func TestExactStartRunMaterialIsOwnerOnlyAndBoundToDigest(t *testing.T) {
 }
 
 func TestReplayRejectsUnsafeRootAndLogicalReference(t *testing.T) {
-	root := t.TempDir()
+	root := canonicalRoot(t)
 	request := fixture(time.Now().UTC())
 	if _, err := (Store{Root: root}).Put(request); err == nil {
 		t.Fatal("permissive root accepted")
@@ -82,10 +91,17 @@ func TestReplayRejectsUnsafeRootAndLogicalReference(t *testing.T) {
 	if _, err := (Store{Root: link}).Put(request); !errors.Is(err, ErrUnavailable) {
 		t.Fatalf("symlink root = %v", err)
 	}
+	parentLink := filepath.Join(canonicalRoot(t), "linked-parent")
+	if err := os.Symlink(filepath.Dir(root), parentLink); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := (Store{Root: filepath.Join(parentLink, filepath.Base(root))}).Put(request); !errors.Is(err, ErrUnavailable) {
+		t.Fatalf("symlink parent = %v", err)
+	}
 }
 
 func TestPurgeExpiresMaterialWithoutInferringOutcome(t *testing.T) {
-	root := t.TempDir()
+	root := canonicalRoot(t)
 	if err := os.Chmod(root, 0700); err != nil {
 		t.Fatal(err)
 	}
@@ -108,5 +124,52 @@ func TestPurgeExpiresMaterialWithoutInferringOutcome(t *testing.T) {
 	}
 	if _, err := store.PurgeExpired(now, MaximumAge+time.Second); !errors.Is(err, ErrInvalid) {
 		t.Fatalf("overlong retention = %v", err)
+	}
+}
+
+func TestPurgeBoundsOrphanByRequestAge(t *testing.T) {
+	root := canonicalRoot(t)
+	if err := os.Chmod(root, 0700); err != nil {
+		t.Fatal(err)
+	}
+	store := Store{Root: root}
+	now := time.Now().UTC()
+	request := fixture(now.Add(-MaximumAge + time.Hour))
+	if _, err := store.Put(request); err != nil {
+		t.Fatal(err)
+	}
+	if keys, err := store.PurgeExpired(now, MaximumAge); err != nil || len(keys) != 0 {
+		t.Fatalf("early purge = %v, %v", keys, err)
+	}
+	if keys, err := store.PurgeExpired(now.Add(time.Hour), MaximumAge); err != nil || len(keys) != 1 || keys[0] != request.OperationID {
+		t.Fatalf("orphan retention = %v, %v", keys, err)
+	}
+}
+
+func TestPurgeContinuesPastPartialCrashOrphan(t *testing.T) {
+	root := canonicalRoot(t)
+	if err := os.Chmod(root, 0700); err != nil {
+		t.Fatal(err)
+	}
+	store := Store{Root: root}
+	now := time.Now().UTC()
+	partial := filepath.Join(root, "attempt_0.json")
+	if err := os.WriteFile(partial, []byte("{"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	request := fixture(now.Add(-MaximumAge))
+	if _, err := store.Put(request); err != nil {
+		t.Fatal(err)
+	}
+	keys, err := store.PurgeExpired(now, MaximumAge)
+	if err != nil || len(keys) != 1 || keys[0] != request.OperationID {
+		t.Fatalf("partial orphan blocked expiry = %v, %v", keys, err)
+	}
+	if err := os.Chtimes(partial, now.Add(-MaximumAge), now.Add(-MaximumAge)); err != nil {
+		t.Fatal(err)
+	}
+	keys, err = store.PurgeExpired(now, MaximumAge)
+	if err != nil || len(keys) != 1 || keys[0] != "attempt_0" {
+		t.Fatalf("partial orphan expiry = %v, %v", keys, err)
 	}
 }

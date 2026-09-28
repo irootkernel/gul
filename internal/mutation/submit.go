@@ -12,6 +12,8 @@ import (
 )
 
 const MaximumSubmitBytes = 8 << 20
+const MaximumLiveSubmits = 4
+const SubmitMemoryAge = 10 * time.Minute
 
 type SubmitRequest struct {
 	OperationID, SubjectID, RunID, BindingID, ControllerID, IdempotencyKey string
@@ -47,7 +49,12 @@ type SubmitService struct {
 	Provider SubmitProvider
 	Gate     func(string, string) bool // subject, Run; compatibility and convergence
 	mu       sync.Mutex
-	live     map[string]SubmitRequest
+	live     map[string]*liveSubmit
+}
+
+type liveSubmit struct {
+	request SubmitRequest
+	timer   *time.Timer
 }
 
 func submitDigest(request SubmitRequest) (string, error) {
@@ -88,17 +95,34 @@ func (s *SubmitService) Submit(ctx context.Context, request SubmitRequest) (oper
 	if !dispatch {
 		return stored, nil
 	}
-	s.mu.Lock()
-	if s.live == nil {
-		s.live = make(map[string]SubmitRequest)
-	}
 	request.Canonical = append([]byte(nil), request.Canonical...)
-	retained := request
-	retained.Canonical = append([]byte(nil), request.Canonical...)
-	s.live[request.OperationID] = retained
-	s.mu.Unlock()
+	s.retain(request, SubmitMemoryAge)
 	defer clear(request.Canonical)
 	return s.dispatchSubmit(ctx, stored, request)
+}
+
+func (s *SubmitService) retain(request SubmitRequest, age time.Duration) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if s.live == nil {
+		s.live = make(map[string]*liveSubmit)
+	}
+	s.forgetLocked(request.OperationID)
+	for len(s.live) >= MaximumLiveSubmits {
+		var oldest string
+		for id, entry := range s.live {
+			if oldest == "" || entry.request.CreatedAt.Before(s.live[oldest].request.CreatedAt) {
+				oldest = id
+			}
+		}
+		s.forgetLocked(oldest)
+	}
+	retained := request
+	retained.Canonical = append([]byte(nil), request.Canonical...)
+	entry := &liveSubmit{request: retained}
+	id := request.OperationID
+	s.live[id] = entry
+	entry.timer = time.AfterFunc(age, func() { s.forget(id) })
 }
 
 func (s *SubmitService) dispatchSubmit(ctx context.Context, a operation.MutationAttempt, request SubmitRequest) (operation.MutationAttempt, error) {
@@ -138,8 +162,15 @@ func (s *SubmitService) markSubmitUnknown(ctx context.Context, id string) error 
 func (s *SubmitService) forget(id string) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	if request, ok := s.live[id]; ok {
-		clear(request.Canonical)
+	s.forgetLocked(id)
+}
+
+func (s *SubmitService) forgetLocked(id string) {
+	if entry, ok := s.live[id]; ok {
+		if entry.timer != nil {
+			entry.timer.Stop()
+		}
+		clear(entry.request.Canonical)
 		delete(s.live, id)
 	}
 }
@@ -192,8 +223,10 @@ func (s *SubmitService) RecoverTurn(ctx context.Context, id string) (operation.M
 		return a, ErrUnknown
 	}
 	s.mu.Lock()
-	request, live := s.live[id]
+	entry, live := s.live[id]
+	var request SubmitRequest
 	if live {
+		request = entry.request
 		request.Canonical = append([]byte(nil), request.Canonical...)
 	}
 	s.mu.Unlock()
@@ -214,8 +247,7 @@ func (s *SubmitService) DropProcessMemory() {
 	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	for id, request := range s.live {
-		clear(request.Canonical)
-		delete(s.live, id)
+	for id := range s.live {
+		s.forgetLocked(id)
 	}
 }

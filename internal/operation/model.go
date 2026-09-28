@@ -8,6 +8,7 @@ import (
 )
 
 var ErrNotFound = errors.New("operation attempt not found")
+var ErrConflict = errors.New("conflicting mutation attempt")
 
 type ControllerReference struct {
 	Role                 string

@@ -947,6 +947,8 @@ maintenance loop, or live Dolgorae proof is enabled.
 
 | Requirement | Candidate implementation and focused evidence |
 | --- | --- |
+| REQ-DIRECT-018 | Architecture Section 6.3 records the mutation policy inventory; checked adapters disable transport retries and fault tests retain unknown attempts and authoritative final projections |
+| REQ-DIRECT-020 | StartRun persists canonical request and non-secret attempt before dispatch, reuses an exact orphan file after pre-attempt crash, and replays the same key, Controller and carrier before Controller-matched ListRuns |
 | REQ-REC-008 | Fault tests preserve one effect or an unresolved attempt across response loss, restart, browser retry, event gap and compatibility drift |
 | REQ-REC-009 | Atomic attempt Begin and migration 7 retain non-secret identity, conflict state, target and reconciliation route before dispatch |
 | REQ-REC-011 | Owner-only StartRun replay file, original-key reconstruction, expiry and secondary reconciliation; SubmitTurn memory-only and protected/tokenless no-replay policies |
@@ -969,6 +971,21 @@ dispatch, and execution-state reads fail closed if the opaque operation
 reference cannot be persisted. The architecture inventory now names migration
 7, and the Current State ledger distinguishes completed E5 coordination from
 unmounted product assembly.
+
+The independent whole-Epic review found two E5-T3 traceability omissions and
+three bounded implementation gaps. The ledger and task evidence now include
+REQ-DIRECT-018 and REQ-DIRECT-020. StartRun checks resolved Workspace/replay
+containment and rejects a symlink anywhere in the replay root path. If a crash
+leaves a replay file before the attempt transaction, the same canonical request
+can reuse that file and still records the attempt before provider dispatch.
+SubmitTurn now clears in-memory exact requests after ten minutes or when a
+four-entry cap evicts them; unresolved non-secret attempts remain. Replay purge
+uses the earlier of canonical request time and file modification time, so an
+orphan created from an old request cannot outlive the 72-hour semantic limit.
+Focused path, orphan, retention, and memory tests cover these corrections. A
+failed Close response save remains fail-closed until process reopen converts
+the unfinished dispatch to an unknown attempt; elapsed time alone cannot prove
+its call has ended.
 
 ## 2. Current development snapshot
 

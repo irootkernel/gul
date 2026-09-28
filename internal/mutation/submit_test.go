@@ -116,3 +116,43 @@ func TestObservationGapAndVersionDriftCannotAuthorizeSubmitResend(t *testing.T) 
 		t.Fatalf("event gap replayed: %v; calls=%d", err, provider.calls)
 	}
 }
+
+func TestSubmitMemoryExpiresAndEvictsWithoutRetainingSecrets(t *testing.T) {
+	s := &SubmitService{}
+	first := submitFixture()
+	first.Canonical = []byte("old-secret")
+	s.retain(first, time.Minute)
+	old := s.live[first.OperationID]
+	for n, id := range []string{"submit_2", "submit_3", "submit_4", "submit_5"} {
+		request := submitFixture()
+		request.OperationID = id
+		request.CreatedAt = first.CreatedAt.Add(time.Duration(n+1) * time.Second)
+		s.retain(request, time.Minute)
+	}
+	if len(s.live) != MaximumLiveSubmits || s.live[first.OperationID] != nil || strings.Contains(string(old.request.Canonical), "secret") {
+		t.Fatal("evicted submit material remains live")
+	}
+	last := submitFixture()
+	last.OperationID = "expiring"
+	last.Canonical = []byte("expiring-secret")
+	s.retain(last, time.Millisecond)
+	expiring := s.live[last.OperationID]
+	deadline := time.After(time.Second)
+	for {
+		s.mu.Lock()
+		_, retained := s.live[last.OperationID]
+		s.mu.Unlock()
+		if !retained {
+			break
+		}
+		select {
+		case <-deadline:
+			t.Fatal("submit material did not expire")
+		case <-time.After(time.Millisecond):
+		}
+	}
+	if strings.Contains(string(expiring.request.Canonical), "secret") {
+		t.Fatal("expired submit material was not cleared")
+	}
+	s.DropProcessMemory()
+}

@@ -134,6 +134,14 @@ func (r CloseRepository) Begin(ctx context.Context, b action.Bound, a sessionclo
 	if err != nil {
 		return sessionclose.Attempt{}, false, err
 	}
+	deadline := sessionclose.CloseTimeout
+	if a.Kind != sessionclose.Close {
+		deadline = sessionclose.RecoveryTimeout
+	}
+	_, err = tx.ExecContext(ctx, `INSERT INTO mutation_attempt_details(operation_id,target_ref,deadline_at,reconciliation_route) VALUES (?,?,?,?)`, a.ID, a.SessionID, timestamp(a.CreatedAt.Add(deadline)), "aggregate_reads")
+	if err != nil {
+		return sessionclose.Attempt{}, false, err
+	}
 	a.DispatchFinished = false
 	a.Outcome = sessionclose.Outcome{Status: sessionclose.InProgress, AttemptID: a.ID, NextAction: "WAIT"}
 	_, err = tx.ExecContext(ctx, `INSERT INTO session_close_attempts(attempt_id,subject_id,session_id,request_id,request_sha256,operation_kind,interrupt,created_at,dispatch_finished,outcome_status,operation_ref,code,next_action) VALUES (?,?,?,?,?,?,?,?,0,?,'','','WAIT')`, a.ID, a.SubjectID, a.SessionID, a.RequestID, a.RequestSHA256, a.Kind, a.Interrupt, timestamp(a.CreatedAt), a.Outcome.Status)

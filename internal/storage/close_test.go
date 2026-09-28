@@ -124,6 +124,10 @@ func TestCloseConcurrentBeginAndStableRetry(t *testing.T) {
 	if err != nil || !found || got.DispatchFinished || got.Outcome.NextAction != "WAIT" {
 		t.Fatal(got, found, err)
 	}
+	var target, deadline, route string
+	if err := s.reader.QueryRowContext(t.Context(), `SELECT target_ref,deadline_at,reconciliation_route FROM mutation_attempt_details WHERE operation_id=?`, got.ID).Scan(&target, &deadline, &route); err != nil || target != "session" || route != "aggregate_reads" || deadline == "" {
+		t.Fatalf("close policy = %q, %q, %q; %v", target, deadline, route, err)
+	}
 	pending, err := s.SessionClose().Pending(t.Context(), "owner", "session")
 	if err != nil || len(pending) != 0 {
 		t.Fatal("in-flight leaked into observation", pending, err)
