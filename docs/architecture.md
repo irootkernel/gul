@@ -6,7 +6,7 @@
 | Product | Gul |
 | Version | 0.1-dolgorae-consumer-v1 |
 | Status | Approved target rebaseline; current implementation through E5-T3 within the declared fake/component scope |
-| Last updated | 2026-09-28 |
+| Last updated | 2026-09-29 |
 
 ## 1. Purpose and change control
 
@@ -1287,7 +1287,9 @@ carrier paths are resolved again for each call. A repeated browser request
 reads its existing attempt; an unresolved exact-key replay uses the retained
 file, while an expired or missing file permits only Controller-matched ListRuns
 reconciliation. The coordinator deletes resolved or expired files and exposes
-startup and six-hourly purge operations. The host must invoke that maintenance
+startup and six-hourly purge operations. The host must provide an error
+reporter, handle an initial purge failure before mutation admission, and keep
+periodic maintenance running through reported errors with one-minute retries
 when it assembles the product.
 
 SubmitTurn retains its exact request only in process memory. Its checked

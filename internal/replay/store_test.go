@@ -207,3 +207,34 @@ func TestPurgeSkipsUnownedEntriesWithoutBlockingExpiredMaterial(t *testing.T) {
 		}
 	}
 }
+
+func TestPurgeContinuesWhenScannedEntryWasDeleted(t *testing.T) {
+	root := canonicalRoot(t)
+	if err := os.Chmod(root, 0700); err != nil {
+		t.Fatal(err)
+	}
+	store := Store{Root: root}
+	now := time.Now().UTC()
+	vanished := filepath.Join(root, "attempt_0.json")
+	if err := os.WriteFile(vanished, []byte("{"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	request := fixture(now.Add(-MaximumAge))
+	if _, err := store.Put(request); err != nil {
+		t.Fatal(err)
+	}
+	entries, err := os.ReadDir(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Remove(vanished); err != nil {
+		t.Fatal(err)
+	}
+	keys, err := store.purgeEntries(now, MaximumAge, entries)
+	if err != nil || len(keys) != 1 || keys[0] != request.OperationID {
+		t.Fatalf("expired keys after concurrent deletion = %v, %v", keys, err)
+	}
+	if _, err := os.Lstat(filepath.Join(root, request.OperationID+".json")); !errors.Is(err, os.ErrNotExist) {
+		t.Fatalf("remaining expired material was not purged: %v", err)
+	}
+}

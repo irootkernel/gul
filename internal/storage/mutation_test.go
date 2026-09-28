@@ -4,6 +4,8 @@ import (
 	"errors"
 	"os"
 	"strings"
+	"sync"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -12,6 +14,68 @@ import (
 	"github.com/rootkernel/gul/internal/observation"
 	"github.com/rootkernel/gul/internal/session"
 )
+
+func TestConcurrentSameKeyMutationBegin(t *testing.T) {
+	for _, kind := range []string{"StartRun", "SubmitTurn"} {
+		t.Run(kind, func(t *testing.T) {
+			s, filename := openTestStore(t)
+			now := time.Now().UTC()
+			if err := s.Auth().CreateAccount(t.Context(), "owner", now); err != nil {
+				t.Fatal(err)
+			}
+			other, err := Open(t.Context(), filename)
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer other.Close()
+			candidate := MutationAttempt{OperationAttempt: OperationAttempt{
+				OperationID: "same-key", SubjectID: "owner", Kind: kind, RequestSHA256: strings.Repeat("a", 64),
+				State: "pending", CreatedAt: now,
+				ControllerReferences: []ControllerReference{{Role: "source", BindingID: "binding-1", ExpectedControllerID: "controller"}},
+			}, TargetRef: "run-1", DeadlineAt: now.Add(20 * time.Second), ReconciliationRoute: "run_timeline"}
+			if kind == "StartRun" {
+				candidate.ReplayKey, candidate.ReplayAvailable = candidate.OperationID, true
+				candidate.ControllerReferences[0] = ControllerReference{Role: "destination", CredentialKey: "controllers/destination", ExpectedControllerID: "controller"}
+				candidate.TargetRef, candidate.ReconciliationRoute = "workspace", "exact_start_then_controller_list"
+			}
+			const workers = 12
+			start := make(chan struct{})
+			var wg sync.WaitGroup
+			var dispatches atomic.Int32
+			for i := range workers {
+				wg.Add(1)
+				go func(i int) {
+					defer wg.Done()
+					<-start
+					repo := s.Attempts()
+					if i%2 == 0 {
+						repo = other.Attempts()
+					}
+					got, dispatch, err := repo.BeginMutation(t.Context(), candidate)
+					if err != nil || got.RequestSHA256 != candidate.RequestSHA256 || got.State != "pending" {
+						t.Errorf("concurrent begin = %+v, %t, %v", got, dispatch, err)
+					}
+					if dispatch {
+						dispatches.Add(1)
+					}
+				}(i)
+			}
+			close(start)
+			wg.Wait()
+			if got := dispatches.Load(); got != 1 {
+				t.Fatalf("provider dispatches = %d", got)
+			}
+			var rows int
+			if err := s.reader.QueryRowContext(t.Context(), "SELECT COUNT(*) FROM provider_operation_attempts WHERE operation_id=?", candidate.OperationID).Scan(&rows); err != nil || rows != 1 {
+				t.Fatalf("stored attempts = %d, %v", rows, err)
+			}
+			candidate.RequestSHA256 = strings.Repeat("b", 64)
+			if _, _, err := s.Attempts().BeginMutation(t.Context(), candidate); !errors.Is(err, ErrMutationConflict) {
+				t.Fatalf("changed same-key request = %v", err)
+			}
+		})
+	}
+}
 
 func TestTokenlessWriterAttemptSurvivesRestartAndBlocksConflict(t *testing.T) {
 	s, filename := openTestStore(t)

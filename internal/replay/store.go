@@ -225,6 +225,10 @@ func (s Store) PurgeExpired(now time.Time, maxAge time.Duration) ([]string, erro
 	if err != nil {
 		return nil, err
 	}
+	return s.purgeEntries(now, maxAge, entries)
+}
+
+func (s Store) purgeEntries(now time.Time, maxAge time.Duration, entries []os.DirEntry) ([]string, error) {
 	var expired []string
 	for _, entry := range entries {
 		name := entry.Name()

@@ -5,7 +5,7 @@
 | Role | Non-normative implementation observations, dependencies, risks, and handoff |
 | Product | Gul |
 | Version | 0.1-dolgorae-consumer-v1 |
-| Last updated | 2026-09-28 |
+| Last updated | 2026-09-29 |
 
 ## 1. Boundary
 
@@ -1037,8 +1037,11 @@ A further validation pass found two failure paths in E5-T3. After an accepted
 The `StartRun` maintenance loop reports a periodic purge error and retries
 after one minute while retaining its six-hour regular cadence. A concurrent
 deletion of an already resolved replay file no longer aborts the expiry scan.
-Focused fault and maintenance-loop tests cover the corrected paths. The host
-must provide the maintenance error reporter when it assembles these components.
+Focused fault, maintenance-loop, and vanished-entry tests cover the corrected
+paths. Concurrent same-key StartRun and SubmitTurn begins now have a storage
+regression test across two connections, proving only one dispatch is admitted.
+The host must provide the maintenance error reporter and handle an initial purge
+error before admitting mutations when it assembles these components.
 
 ## 2. Current development snapshot
 
