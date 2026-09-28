@@ -1264,6 +1264,9 @@ probe, a process-local action gate, independent per-Run refresh and convergence,
 and live or unary-poll observation admission. SQLite keeps Run, Writer,
 Interaction, timeline and delivery state separate; provider loss marks
 projections stale and retains the committed cursor and unresolved attempts.
+An in-flight recovery cannot publish readiness after a newer provider-loss
+notification revokes its gate; a replacement recovery waits for disconnect
+invalidation to finish.
 Only `internal/sessionclose.AggregateRefresher` advances the artifact-verified timeline
 head. Browser reconnect reads presentation, execution state and bounded Gul
 delivery without sending a provider mutation. These components remain

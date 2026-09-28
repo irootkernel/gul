@@ -886,6 +886,12 @@ issue. Local settlement then classified `LocalState` persistence failures,
 asserted that checkpoint-failed Runs never enter unary polling, preserved a
 terminal marker during demotion, and synchronized the current-state handoff.
 Focused Go tests and the serial `make test` gate pass on the settled candidate.
+The E5-wide audit found that a concurrent disconnect could revoke the gate
+while recovery was still waiting on observation, then let that older recovery
+publish readiness. A generation guard now rejects the older result and holds
+new recovery until disconnect invalidation finishes. A race test pauses
+observation across the disconnect and verifies the superseded recovery fails
+closed. The correction remains within the unmounted fake/component scope.
 
 | Requirement | Candidate implementation and focused evidence |
 | --- | --- |
@@ -961,7 +967,7 @@ maintenance loop, or live Dolgorae proof is enabled.
 | Dolgorae RPC supervisor/provider | Bounded restart policy implemented against an injected lifecycle; production process ownership and live provider remain pending |
 | Controller credential store | Caller-owned mechanism selected by ADR-0047; not implemented |
 | FileService/auth/PWA/Tailscale integration | Not implemented |
-| Current State promotions | REQ-HOST-005, REQ-RUNTIME-011, REQ-RUNTIME-022, REQ-CONSUMER-001/002, fake-scoped REQ-WS-001/004/006/007/008/009/010/011/012, REQ-DIRECT-001/003/009/015/019, REQ-SESSION-003, local REQ-WS-003/REQ-DIRECT-007, all 41 E4-owned requirements, and the nine fake/component-scoped E5-T1 requirements in the Current State ledger; no assembled-product or released-provider claim |
+| Current State promotions | REQ-HOST-005, REQ-RUNTIME-011, REQ-RUNTIME-022, REQ-CONSUMER-001/002, fake-scoped REQ-WS-001/004/006/007/008/009/010/011/012, REQ-DIRECT-001/003/009/015/019, REQ-SESSION-003, local REQ-WS-003/REQ-DIRECT-007, all 41 E4-owned requirements, and the fake/component-scoped E5-T1/T2/T3 requirements in the Current State ledger; no assembled-product or released-provider claim |
 
 The repository contains the shared-core and single-bundle delivery foundations,
 declared but inactive Gul APIs, isolated Gul-owned SQLite repositories, bootstrap

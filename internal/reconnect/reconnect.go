@@ -61,6 +61,8 @@ type Service struct {
 	runMu         sync.Mutex
 	mu            sync.RWMutex
 	states        map[sessionKey]Status
+	epoch         uint64
+	disconnecting uint64
 }
 
 func (s *Service) refreshedInput(ctx context.Context, b action.Bound) (action.Input, string, error) {
@@ -110,6 +112,18 @@ func (s *Service) set(subject, id string, state Status) {
 	s.mu.Unlock()
 }
 
+func (s *Service) setIfCurrent(epoch uint64, subject, id string, state Status) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if s.epoch != epoch || s.disconnecting != 0 {
+		return
+	}
+	if s.states == nil {
+		s.states = make(map[sessionKey]Status)
+	}
+	s.states[sessionKey{subject, id}] = state
+}
+
 // Disconnect revokes the process gate before durable invalidation. It is for
 // provider-wide loss; a browser-only tailnet interruption uses Browser.Reconnect.
 func (s *Service) Disconnect(ctx context.Context, runs []action.Bound) error {
@@ -117,11 +131,24 @@ func (s *Service) Disconnect(ctx context.Context, runs []action.Bound) error {
 		return ErrUnavailable
 	}
 	// Revoke readiness immediately, even while another recovery holds runMu.
-	for _, b := range runs {
-		s.set(b.Binding.SubjectID, b.Binding.ID, Status{Connection: "disconnected", Blocker: "provider"})
+	// The epoch also prevents that recovery from publishing a later Ready state.
+	s.mu.Lock()
+	s.epoch++
+	s.disconnecting++
+	if s.states == nil {
+		s.states = make(map[sessionKey]Status)
 	}
+	for _, b := range runs {
+		s.states[sessionKey{b.Binding.SubjectID, b.Binding.ID}] = Status{Connection: "disconnected", Blocker: "provider"}
+	}
+	s.mu.Unlock()
 	s.runMu.Lock()
 	defer s.runMu.Unlock()
+	defer func() {
+		s.mu.Lock()
+		s.disconnecting--
+		s.mu.Unlock()
+	}()
 	var failures []error
 	for _, b := range runs {
 		s.set(b.Binding.SubjectID, b.Binding.ID, Status{Connection: "disconnected", Blocker: "provider"})
@@ -142,6 +169,15 @@ func (s *Service) Recover(ctx context.Context, runs []action.Bound) error {
 	}
 	s.runMu.Lock()
 	defer s.runMu.Unlock()
+	s.mu.RLock()
+	epoch, disconnecting := s.epoch, s.disconnecting
+	s.mu.RUnlock()
+	if disconnecting != 0 {
+		return ErrUnavailable
+	}
+	set := func(subject, id string, state Status) {
+		s.setIfCurrent(epoch, subject, id, state)
+	}
 	seen := make(map[sessionKey]bool, len(runs))
 	var observable []ReadyRun
 	for _, b := range runs {
@@ -151,12 +187,12 @@ func (s *Service) Recover(ctx context.Context, runs []action.Bound) error {
 			return ErrUnavailable
 		}
 		seen[key] = true
-		s.set(b.Binding.SubjectID, id, Status{Connection: "restarting", Blocker: "startup"})
+		set(b.Binding.SubjectID, id, Status{Connection: "restarting", Blocker: "startup"})
 	}
 	var failures []error
 	for _, b := range runs {
 		if err := s.Invalidator.MarkProviderUnavailable(ctx, b); err != nil {
-			s.set(b.Binding.SubjectID, b.Binding.ID, Status{Connection: "disconnected", Blocker: "persistence"})
+			set(b.Binding.SubjectID, b.Binding.ID, Status{Connection: "disconnected", Blocker: "persistence"})
 			failures = append(failures, err)
 		}
 	}
@@ -169,24 +205,24 @@ func (s *Service) Recover(ctx context.Context, runs []action.Bound) error {
 			connection, blocker = "incompatible", "compatibility"
 		}
 		for _, b := range runs {
-			s.set(b.Binding.SubjectID, b.Binding.ID, Status{Connection: connection, Blocker: blocker})
+			set(b.Binding.SubjectID, b.Binding.ID, Status{Connection: connection, Blocker: blocker})
 		}
 		return err
 	}
 	for _, b := range runs {
 		input, blocker, err := s.refreshedInput(ctx, b)
 		if err != nil {
-			s.set(b.Binding.SubjectID, b.Binding.ID, Status{Connection: "stale", Blocker: blocker})
+			set(b.Binding.SubjectID, b.Binding.ID, Status{Connection: "stale", Blocker: blocker})
 			failures = append(failures, err)
 			continue
 		}
 		if input.Run.Lifecycle == action.Closed || input.Run.Lifecycle == action.StartFailed {
 			if err := s.Notifier.MarkProviderRecovered(ctx, b); err != nil {
-				s.set(b.Binding.SubjectID, b.Binding.ID, Status{Connection: "stale", Blocker: "persistence"})
+				set(b.Binding.SubjectID, b.Binding.ID, Status{Connection: "stale", Blocker: "persistence"})
 				failures = append(failures, err)
 				continue
 			}
-			s.set(b.Binding.SubjectID, b.Binding.ID, Status{Connection: "terminal", Blocker: "run_terminal", Ready: true})
+			set(b.Binding.SubjectID, b.Binding.ID, Status{Connection: "terminal", Blocker: "run_terminal", Ready: true})
 			continue
 		}
 		observable = append(observable, ReadyRun{Bound: b, Input: input})
@@ -194,7 +230,7 @@ func (s *Service) Recover(ctx context.Context, runs []action.Bound) error {
 	if len(observable) != 0 {
 		if modes, err := s.Observer.Resume(ctx, observable); err != nil {
 			for _, run := range observable {
-				s.set(run.Bound.Binding.SubjectID, run.Bound.Binding.ID, Status{Connection: "stale", Blocker: "observation"})
+				set(run.Bound.Binding.SubjectID, run.Bound.Binding.ID, Status{Connection: "stale", Blocker: "observation"})
 			}
 			failures = append(failures, err)
 		} else {
@@ -206,31 +242,37 @@ func (s *Service) Recover(ctx context.Context, runs []action.Bound) error {
 						if err == nil {
 							blocker, err = "observation", ErrUnavailable
 						}
-						s.set(run.Bound.Binding.SubjectID, run.Bound.Binding.ID, Status{Connection: "stale", Blocker: blocker})
+						set(run.Bound.Binding.SubjectID, run.Bound.Binding.ID, Status{Connection: "stale", Blocker: blocker})
 						failures = append(failures, err)
 						continue
 					}
 					if err := s.Notifier.MarkProviderRecovered(ctx, run.Bound); err != nil {
-						s.set(run.Bound.Binding.SubjectID, run.Bound.Binding.ID, Status{Connection: "stale", Blocker: "persistence"})
+						set(run.Bound.Binding.SubjectID, run.Bound.Binding.ID, Status{Connection: "stale", Blocker: "persistence"})
 						failures = append(failures, err)
 						continue
 					}
-					s.set(run.Bound.Binding.SubjectID, run.Bound.Binding.ID, Status{Connection: "terminal", Blocker: "run_terminal", Ready: true})
+					set(run.Bound.Binding.SubjectID, run.Bound.Binding.ID, Status{Connection: "terminal", Blocker: "run_terminal", Ready: true})
 					continue
 				}
 				if mode != "connected" && mode != "polling" {
-					s.set(run.Bound.Binding.SubjectID, run.Bound.Binding.ID, Status{Connection: "stale", Blocker: "observation"})
+					set(run.Bound.Binding.SubjectID, run.Bound.Binding.ID, Status{Connection: "stale", Blocker: "observation"})
 					failures = append(failures, ErrUnavailable)
 					continue
 				}
 				if err := s.Notifier.MarkProviderRecovered(ctx, run.Bound); err != nil {
-					s.set(run.Bound.Binding.SubjectID, run.Bound.Binding.ID, Status{Connection: "stale", Blocker: "persistence"})
+					set(run.Bound.Binding.SubjectID, run.Bound.Binding.ID, Status{Connection: "stale", Blocker: "persistence"})
 					failures = append(failures, err)
 					continue
 				}
-				s.set(run.Bound.Binding.SubjectID, run.Bound.Binding.ID, Status{Connection: mode, Ready: true})
+				set(run.Bound.Binding.SubjectID, run.Bound.Binding.ID, Status{Connection: mode, Ready: true})
 			}
 		}
+	}
+	s.mu.RLock()
+	changed := s.epoch != epoch || s.disconnecting != 0
+	s.mu.RUnlock()
+	if changed {
+		failures = append(failures, ErrUnavailable)
 	}
 	return errors.Join(failures...)
 }

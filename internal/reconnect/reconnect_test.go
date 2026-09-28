@@ -4,8 +4,10 @@ import (
 	"context"
 	"errors"
 	"reflect"
+	"runtime"
 	"strconv"
 	"testing"
+	"time"
 
 	"github.com/rootkernel/gul/internal/action"
 	"github.com/rootkernel/gul/internal/observation"
@@ -76,6 +78,50 @@ type observerFake struct {
 	steps *[]string
 	err   error
 	modes map[string]string
+}
+
+type pausedObserver struct {
+	entered chan struct{}
+	release chan struct{}
+}
+
+func (o pausedObserver) Resume(context.Context, []ReadyRun) (map[string]string, error) {
+	close(o.entered)
+	<-o.release
+	return map[string]string{"run": "connected"}, nil
+}
+
+type quietInvalidator struct{}
+
+func (quietInvalidator) MarkProviderUnavailable(context.Context, action.Bound) error { return nil }
+
+func TestDisconnectRevocationOutlivesInFlightRecovery(t *testing.T) {
+	var steps []string
+	observer := pausedObserver{entered: make(chan struct{}), release: make(chan struct{})}
+	s := &Service{Compatibility: probeFake{steps: &steps}, Snapshots: readerFake{steps: &steps},
+		Invalidator: quietInvalidator{}, Notifier: recoveryNotifierFake{}, Refresher: refresherFake{steps: &steps},
+		Converger: convergerFake{steps: &steps, ready: true}, Observer: observer}
+	recovered := make(chan error, 1)
+	go func() { recovered <- s.Recover(t.Context(), []action.Bound{reconnectBound()}) }()
+	<-observer.entered
+	disconnected := make(chan error, 1)
+	go func() { disconnected <- s.Disconnect(t.Context(), []action.Bound{reconnectBound()}) }()
+	deadline := time.After(2 * time.Second)
+	for s.State("owner", "session").Connection != "disconnected" {
+		select {
+		case <-deadline:
+			t.Fatal("disconnect never revoked readiness")
+		default:
+			runtime.Gosched()
+		}
+	}
+	close(observer.release)
+	if err := <-recovered; !errors.Is(err, ErrUnavailable) {
+		t.Fatal("superseded recovery reported ready", err)
+	}
+	if err := <-disconnected; err != nil || s.Ready("owner", "session") {
+		t.Fatal("disconnect reopened gate", err, s.State("owner", "session"))
+	}
 }
 
 func (o observerFake) Resume(_ context.Context, runs []ReadyRun) (map[string]string, error) {
