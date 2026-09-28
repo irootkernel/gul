@@ -821,6 +821,83 @@ UI; no live provider or authenticated product route is enabled. Release notes:
 | REQ-REC-010 | Concrete per-aggregate refresher and bounded artifact verification; independent failures, rollback and invalidation-race tests |
 | REQ-SESSION-002 | Root-only Close, stable opaque correlation, explicit interrupt consent and whole-aggregate confirmation; checked scenario and API tests |
 
+### E5-T2 provider and browser reconnection completion (2026-09-28)
+
+Release notes: intentional no-note; this pre-release fake/component result is
+unmounted and has no user-facing release surface.
+
+The reconnect coordinator closes each subject/session gate before probing the
+provider. It reads each bound Run, refreshes dependent snapshots, reads the Run
+again, converges the aggregate stamps, and resumes observation. The second
+read prevents convergence against a snapshot older than the refresh. A failed
+probe, read, refresh, convergence check, or observation admission leaves a
+visible blocker. The action service requires this gate and checks it again
+before a writer mutation. Browser reconnect reads Gul presentation and current
+execution state before replaying bounded delivery records. An initial or stale
+read requests a full snapshot. These reads do not dispatch provider mutations.
+
+SQLite marks Run, Writer, and Interaction caches stale on reopen. A provider
+disconnect also invalidates their refresh state, records the subject's pending
+operations as unresolved, and emits a Gul invalidation. The bound Run and its
+committed upstream cursor remain intact. Action reads retain complete
+per-aggregate stamps; the convergence transaction refuses an older stamp, an
+outstanding event floor, or a snapshot head ahead of the artifact-verified
+timeline head. A short timeline metadata read cannot clear pending full-timeline work.
+The existing `internal/sessionclose.AggregateRefresher` must finish that work before action
+eligibility returns. Its independent Writer and Interaction reads retain their
+native stamps, including an ownerless Writer.
+
+Live Runs require a successful Watch before their startup gate opens. A failed
+Watch or checkpoint read leaves only that Run stale; healthy siblings can become ready. Runs outside
+the eight-stream live window start the existing bounded unary Interaction
+poller and report `polling`; their fresh snapshot and convergence still gate
+actions. Terminal Runs allow final-state reads after convergence. Action
+eligibility continues to deny terminal mutations. After observation admission,
+provider recovery emits a second bounded Gul invalidation so a browser tail
+that stayed connected during an outage can refresh quiet Runs. Failure to persist that
+notification leaves the startup gate closed.
+
+The stream manager can replace a finished subscription on the next supervised
+update. A terminal marker performs final refresh and does not reconnect; a Run
+that becomes terminal during admission receives a second checked final read. A
+shutdown marker retains restarting status; the next subscription refreshes
+authoritative aggregates before watching from the committed cursor. Typed
+slow-consumer and other transport failures keep their existing per-Run
+handling. The contract probe lives in the checked
+`reconnect/contractprovider` adapter, shares the pinned descriptor with the
+scenario fixture and checks protocol versions and required reconnect methods.
+The new core and adapter join the existing action boundary in the foundation
+check. These components remain unmounted. E7/E8 own authenticated browser and host
+assembly, while E2/E9 own released-provider evidence.
+
+Focused component, persistence and race tests cover restart staleness, an
+invalidation racing a read, convergence input rejection and rollback, gateway
+loss, terminal streams, live and polling admission, transient recovery, browser
+replay order and startup blockers. The first six-role review completed after
+exact recovery of one rate-limited role. The second complete review found
+terminal-gate, sibling-isolation, shared-poller, and test-coverage gaps. This
+correction candidate addresses them. The third complete six-role review found
+one missing service-level convergence denial test and low-severity gaps in
+timeline progress, final-state admission, checkpoint isolation, persistence
+errors, and failure-path tests. This candidate corrects those paths and keeps
+the action gate closed until a verified timeline head matches the fresh Run.
+The final six-role correction confirmation found no remaining Medium-or-higher
+issue. Local settlement then classified `LocalState` persistence failures,
+asserted that checkpoint-failed Runs never enter unary polling, preserved a
+terminal marker during demotion, and synchronized the current-state handoff.
+Focused Go tests and the serial `make test` gate pass on the settled candidate.
+
+| Requirement | Candidate implementation and focused evidence |
+| --- | --- |
+| REQ-RUNTIME-019 | Compatibility probe, durable invalidation, authoritative refresh and committed-cursor stream resumption; storage and stream tests preserve Run identity and unresolved attempts |
+| REQ-PROJ-001 | Reopen and disconnect mark provider caches stale; fresh independent reads replace cached stamps without treating an event as authority |
+| REQ-PROJ-004 | Browser state precedes replay; monotonic Gul delivery and bounded snapshot fallback remain separate from provider cursors and mutations |
+| REQ-PROJ-014 | Terminal, shutdown, typed slow-consumer, transport and heartbeat paths retain distinct stream states and refresh rules |
+| REQ-PROJ-019 | Per-aggregate stamps, event floors and timeline head survive persistence; stale, advancing and fault cases keep action eligibility closed |
+| REQ-REC-002 | Browser reconnection returns local presentation, current provider state and replay or snapshot fallback without a mutation port |
+| REQ-REC-003 | Provider loss and browser-only interruption follow separate recovery paths; transient, stale and terminal fixtures preserve Gul state |
+| REQ-REC-006 | Fail-closed action gate opens only after probe, full refresh, convergence and observation admission; failures expose blockers |
+
 ## 2. Current development snapshot
 
 | Area | State |
@@ -828,7 +905,7 @@ UI; no live provider or authenticated product route is enabled. Release notes:
 | Five Gul SOT documents | E0-T4 completed the consumer alignment and Gate A reproduction; E0-T8 completed toolchain/ADR alignment; E0-T7 completed Gate B |
 | Toolchain and developer-command artifacts | E0-T8 accepted one pin manifest and read-only host checks; E0-T7 adds checked contract generation/drift delegates; E1-T1 adds the root Go module; E1-T2 adds root Bun pin validation and checked frontend generation/drift commands; E1-T3 adds checked Gul API/error-catalog generation; no installer |
 | Contract boundary | E12-T1 pins TASK-053 and regenerates checked clients/maps/fake transport for 36 known, 27 required, and 9 unavailable methods; E13-T1 adds an explicit stateful scenario provider over the 27-method port |
-| Production source | E1 shared core, bundle, API declarations, isolated SQLite and Wails shell; E3-T1 adds Workspace attachment; E3-T2 adds local presentation; E3-T3 adds passive session binding and aggregate reads; E3-T4 adds global Profile launch selection; E4 adds typed observation, Interaction cards, shared action eligibility and history/result/artifact adapters; E5-T1 adds whole-session close, explicit recovery, provider health and an injected restart supervisor; handlers remain unmounted |
+| Production source | E1 shared core, bundle, API declarations, isolated SQLite and Wails shell; E3-T1 adds Workspace attachment; E3-T2 adds local presentation; E3-T3 adds passive session binding and aggregate reads; E3-T4 adds global Profile launch selection; E4 adds typed observation, Interaction cards, shared action eligibility and history/result/artifact adapters; E5-T1 adds whole-session close, explicit recovery, provider health and an injected restart supervisor; E5-T2 adds reconnect coordination and stamp convergence; handlers remain unmounted |
 | Wails host/frontend | One React foundation bundle and isolated Wails shell foundation implemented; E3-T4 launch selector is unmounted and authenticated attach is not implemented |
 | ConnectRPC schema/services | Gul Runtime, DirectSession, ArtifactPresentation and WorkspacePresentation declarations and generated clients exist; isolated handlers remain unmounted |
 | Gul SQLite schema | Gul-owned version 6 schema with Workspace attachment, favorites, Primary binding, event metadata and session-close attempt/operation migrations and isolated repositories implemented; production startup integration pending |
@@ -1288,4 +1365,4 @@ The initial documentation assumed Gul would manage one Codex App Server, map Ses
 
 ## 12. Handoff
 
-E12, E1, E13, E3 and E4 are complete. The TASK-053 consumer lock and generated contract tooling remain authoritative. E3-T1 added fake-scoped Workspace attachment, E3-T2 added local-only presentation, E3-T3 added passive session reads, and E3-T4 added prospective global Profile launch selection. E5-T1 is complete; E5-T2 is next and E5-T3 remains planned. E2-T0 remains blocked on an accepted compatible Dolgorae executable and live smoke evidence. No product route or live-provider behavior is activated automatically.
+E12, E1, E13, E3 and E4 are complete. The TASK-053 consumer lock and generated contract tooling remain authoritative. E3-T1 added fake-scoped Workspace attachment, E3-T2 added local-only presentation, E3-T3 added passive session reads, and E3-T4 added prospective global Profile launch selection. E5-T1 is complete; E5-T2 is complete and E5-T3 remains planned. E2-T0 remains blocked on an accepted compatible Dolgorae executable and live smoke evidence. No product route or live-provider behavior is activated automatically.

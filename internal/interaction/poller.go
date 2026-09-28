@@ -129,7 +129,10 @@ func (p *Poller) Check(ctx context.Context, target PollTarget, previous PollStat
 // not own E5 reconnect or mutation convergence.
 type Observer struct {
 	Live *observation.Manager
-	Poll *Poller
+	Poll interface {
+		Set(context.Context, []PollTarget) error
+		Close()
+	}
 }
 
 func (o *Observer) Update(ctx context.Context, now time.Time, runs []observation.WatchedRun) (map[string]string, error) {
@@ -142,7 +145,7 @@ func (o *Observer) Update(ctx context.Context, now time.Time, runs []observation
 	}
 	var targets []PollTarget
 	for _, run := range runs {
-		if modes[run.RunID] != "live" {
+		if modes[run.RunID] == observation.WindowPolling {
 			targets = append(targets, PollTarget{SubjectID: run.Binding.SubjectID, SessionID: run.Binding.SessionID})
 		}
 	}

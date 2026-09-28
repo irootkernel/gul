@@ -138,6 +138,17 @@ type Refresher interface {
 	Refresh(context.Context, Binding, Refresh, Stamp) error
 }
 
+const (
+	ConnectionConnected    = "connected"
+	ConnectionDisconnected = "disconnected"
+	ConnectionRestarting   = "restarting"
+	ConnectionSlowConsumer = "slow_consumer"
+	ConnectionTerminal     = "terminal"
+	WindowLive             = "live"
+	WindowPolling          = "polling"
+	WindowStale            = "stale"
+)
+
 type SubscriptionState struct {
 	RunID                       string
 	Validated, Committed        Cursor

@@ -174,6 +174,15 @@ func (s *Service) observe(ctx context.Context, attempt Attempt) (Outcome, error)
 	if err != nil {
 		return attempt.Outcome, nil
 	}
+	if input.Local.ProjectionsStale {
+		if err := s.Refresh.Refresh(ctx, bound, input.Run); err != nil {
+			return attempt.Outcome, nil
+		}
+		bound, input, err = s.Actions.ReadState(ctx, attempt.SubjectID, attempt.SessionID, request)
+		if err != nil {
+			return attempt.Outcome, nil
+		}
+	}
 	// The operation itself blocks conflicting mutations. It does not prevent
 	// checking whether independent authoritative reads have converged.
 	input.Local.Operation = action.NoOperation

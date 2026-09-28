@@ -64,8 +64,8 @@ func (b *Bridge) Run(ctx context.Context) (result error) {
 		b.mu.Lock()
 		defer b.mu.Unlock()
 		b.running = false
-		if result != nil && (b.state.Connection == "connecting" || b.state.Connection == "connected") {
-			b.state.Connection = "disconnected"
+		if result != nil && (b.state.Connection == "connecting" || b.state.Connection == ConnectionConnected) {
+			b.state.Connection = ConnectionDisconnected
 		}
 	}()
 	cp, err := b.repo.Checkpoint(ctx, b.binding)
@@ -93,7 +93,7 @@ func (b *Bridge) Run(ctx context.Context) (result error) {
 		}
 		s.Connection = "connecting"
 	})
-	if cp.Validated != cp.Committed {
+	if cp.Validated != cp.Committed || b.State().Generation > 1 {
 		if err := b.refresh.Refresh(ctx, b.binding, AllAggregates, Stamp{}); err != nil {
 			return err
 		}
@@ -105,7 +105,7 @@ func (b *Bridge) Run(ctx context.Context) (result error) {
 	if err != nil {
 		return err
 	}
-	b.update(func(s *SubscriptionState) { s.Connection = "connected" })
+	b.update(func(s *SubscriptionState) { s.Connection = ConnectionConnected })
 	queue := make(chan Envelope, QueueLimit)
 	failed := make(chan error, 1)
 	receiverDone := make(chan struct{})
@@ -159,10 +159,10 @@ func (b *Bridge) Run(ctx context.Context) (result error) {
 		return nil
 	}
 	fail := func(err error) error {
-		b.update(func(s *SubscriptionState) { s.Connection = "disconnected" })
+		b.update(func(s *SubscriptionState) { s.Connection = ConnectionDisconnected })
 		if errors.Is(err, ErrSlowConsumer) || errors.Is(err, ErrRefresh) {
 			if errors.Is(err, ErrSlowConsumer) {
-				b.update(func(s *SubscriptionState) { s.Connection = "slow_consumer" })
+				b.update(func(s *SubscriptionState) { s.Connection = ConnectionSlowConsumer })
 			}
 			if refreshErr := b.refresh.Refresh(ctx, b.binding, AllAggregates, Stamp{}); refreshErr != nil {
 				return errors.Join(err, refreshErr)
@@ -246,10 +246,10 @@ func (b *Bridge) Run(ctx context.Context) (result error) {
 				if err := b.refresh.Refresh(ctx, b.binding, Run|Timeline|Artifacts, Stamp{}); err != nil {
 					return fail(err)
 				}
-				b.update(func(s *SubscriptionState) { s.Connection = "terminal"; s.LastSnapshot = time.Now().UTC() })
+				b.update(func(s *SubscriptionState) { s.Connection = ConnectionTerminal; s.LastSnapshot = time.Now().UTC() })
 				return nil
 			case "shutdown":
-				b.update(func(s *SubscriptionState) { s.Connection = "restarting" })
+				b.update(func(s *SubscriptionState) { s.Connection = ConnectionRestarting })
 				return ErrRefresh
 			default:
 				return fail(ErrInvalid)

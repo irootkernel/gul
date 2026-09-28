@@ -138,18 +138,7 @@ ON CONFLICT(provider_id,runtime_object_id,stream_kind) DO UPDATE SET stamp=exclu
 		return n, err
 	}
 	// Allocation follows projection commit work and shares its transaction.
-	if err = tx.QueryRowContext(ctx, `UPDATE client_delivery_counter SET next_sequence=next_sequence+1 WHERE id=1 RETURNING next_sequence`).Scan(&n.Sequence); err != nil {
-		return n, err
-	}
-	n.SessionID = b.SessionID
-	n.CorrelationID = in.CorrelationID
-	n.Kind = "projection_invalidated"
-	n.CreatedAt = in.At
-	_, err = tx.ExecContext(ctx, `INSERT INTO client_event_journal(sequence,subject_id,event_kind,created_at) VALUES (?,?,?,?)`, int64(n.Sequence), b.SubjectID, n.Kind, timestamp(n.CreatedAt))
-	if err != nil {
-		return n, err
-	}
-	_, err = tx.ExecContext(ctx, `INSERT INTO client_projection_notifications(sequence,session_id,correlation_id) VALUES (?,?,?)`, int64(n.Sequence), n.SessionID, n.CorrelationID)
+	n, err = allocateNotification(ctx, tx, b.SubjectID, b.SessionID, in.CorrelationID, in.At)
 	if err != nil {
 		return n, err
 	}

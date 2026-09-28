@@ -139,13 +139,16 @@ func newFixture(t *testing.T) *closeFixture {
 	if _, err := s.Presentation().InsertBinding(t.Context(), session.Binding{SubjectID: "owner", ID: "session", WorkspaceID: "ws", RunID: "root", ControllerBindingID: "controller", ProviderSessionID: "provider-session"}); err != nil {
 		t.Fatal(err)
 	}
+	if err := s.Cache().PutTimelineHead(t.Context(), "owner", "session", storage.UpstreamCursor{Value: "4"}); err != nil {
+		t.Fatal(err)
+	}
 	p := &projections{input: readyInput()}
 	carrier := &carrierSource{}
 	refresh := &refreshSource{}
 	mutation := &mutationSource{fn: func(context.Context, action.Bound, sessionclose.Kind, uint64, bool) (sessionclose.Mutation, error) {
 		return sessionclose.Mutation{Pending: true, OperationID: "provider-close"}, nil
 	}}
-	return &closeFixture{store: s, state: p, carrier: carrier, mutations: mutation, refresh: refresh, service: &sessionclose.Service{Repository: s.SessionClose(), Actions: &action.Service{Repository: s.Actions("dolgorae"), Workspaces: ws, Carriers: carrier, Provider: p}, Sessions: session.NewService(ws, s.Presentation(), p, carrier), Provider: mutation, Refresh: refresh}}
+	return &closeFixture{store: s, state: p, carrier: carrier, mutations: mutation, refresh: refresh, service: &sessionclose.Service{Repository: s.SessionClose(), Actions: &action.Service{Repository: s.Actions("dolgorae"), Workspaces: ws, Carriers: carrier, Provider: p, Gate: func(string, string) bool { return true }}, Sessions: session.NewService(ws, s.Presentation(), p, carrier), Provider: mutation, Refresh: refresh}}
 }
 func readyInput() action.Input {
 	stamp := observation.Stamp{Head: "4", Run: 4, Writer: 2, Interaction: 3}
@@ -458,9 +461,17 @@ func TestCheckedScenarioCloseWaitsForAggregateAndKeepsOperationReference(t *test
 		t.Fatal(err)
 	}
 	refresh := &sessionclose.AggregateRefresher{Cache: s.CloseRefresh(), Sessions: sessions, Writer: actions, Interactions: interactions, History: history}
-	svc := &sessionclose.Service{Repository: s.SessionClose(), Sessions: sessions, Actions: &action.Service{Repository: s.Actions("dolgorae"), Workspaces: ws, Carriers: carrier, Provider: actions}, Provider: mutation, Refresh: refresh}
+	svc := &sessionclose.Service{Repository: s.SessionClose(), Sessions: sessions, Actions: &action.Service{Repository: s.Actions("dolgorae"), Workspaces: ws, Carriers: carrier, Provider: actions, Gate: func(string, string) bool { return true }}, Provider: mutation, Refresh: refresh}
 	child, err := h.SpawnSpecialist(root.Run.RunId, "reviewer")
 	if err != nil {
+		t.Fatal(err)
+	}
+	bound := action.Bound{Binding: binding, Workspace: ws.entry, Carrier: session.Carrier{AbsolutePath: "/carrier/controller", ControllerID: "controller", Generation: 1}}
+	initial, err := actions.Read(ctx, bound)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = refresh.Refresh(ctx, bound, initial.Run); err != nil {
 		t.Fatal(err)
 	}
 	pending, err := svc.Close(ctx, "owner", binding.ID, "close", true)

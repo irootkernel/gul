@@ -41,6 +41,7 @@ func (m *Manager) Update(ctx context.Context, now time.Time, runs []WatchedRun) 
 	}
 	candidates := make([]Candidate, 0, len(runs))
 	bindings := make(map[string]Binding)
+	failed := make(map[string]bool)
 	for _, r := range runs {
 		if !r.Binding.Valid() || r.Candidate.RunID != r.Binding.RunID {
 			return nil, ErrUnbound
@@ -48,20 +49,35 @@ func (m *Manager) Update(ctx context.Context, now time.Time, runs []WatchedRun) 
 		if _, duplicate := bindings[r.Candidate.RunID]; duplicate {
 			return nil, ErrInvalid
 		}
+		bindings[r.Candidate.RunID] = r.Binding
 		if _, err := m.repo.Checkpoint(ctx, r.Binding); err != nil {
-			return nil, err
+			failed[r.Candidate.RunID] = true
+			continue
 		}
 		candidates = append(candidates, r.Candidate)
-		bindings[r.Candidate.RunID] = r.Binding
 	}
 	modes := m.window.Select(now, candidates)
+	for id := range failed {
+		modes[id] = WindowStale
+	}
 	for id, s := range m.streams {
-		if modes[id] != "live" || s.bridge.binding != bindings[id] {
+		select {
+		case <-s.done:
+			delete(m.streams, id)
+		default:
+		}
+	}
+	for id, s := range m.streams {
+		if modes[id] != WindowLive || s.bridge.binding != bindings[id] {
 			s.cancel()
 			select {
 			case <-s.done:
 				delete(m.streams, id)
-				s.bridge.update(func(state *SubscriptionState) { state.Connection = "polling" })
+				s.bridge.update(func(state *SubscriptionState) {
+					if state.Connection != ConnectionTerminal {
+						state.Connection = WindowPolling
+					}
+				})
 			case <-ctx.Done():
 				return nil, ctx.Err()
 			}
@@ -73,13 +89,17 @@ func (m *Manager) Update(ctx context.Context, now time.Time, runs []WatchedRun) 
 		}
 	}
 	for id, mode := range modes {
-		if mode != "live" {
+		if mode != WindowLive {
 			continue
 		}
 		if _, exists := m.streams[id]; exists {
 			continue
 		}
+		// Retain bridges across subscriptions so Generation tracks reconnects.
 		b := m.bridges[id]
+		if b != nil && b.State().Connection == ConnectionTerminal {
+			continue
+		}
 		if b == nil {
 			var err error
 			b, err = NewBridge(m.repo, m.provider, m.refresh, bindings[id])

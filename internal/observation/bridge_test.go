@@ -11,17 +11,21 @@ import (
 )
 
 type memoryRepo struct {
-	mu        sync.Mutex
-	cp        Checkpoint
-	commits   []Invalidation
-	fail      bool
-	validated chan struct{}
-	block     <-chan struct{}
+	mu             sync.Mutex
+	cp             Checkpoint
+	commits        []Invalidation
+	fail           bool
+	failCheckpoint bool
+	validated      chan struct{}
+	block          <-chan struct{}
 }
 
 func (r *memoryRepo) Checkpoint(context.Context, Binding) (Checkpoint, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
+	if r.failCheckpoint {
+		return Checkpoint{}, errors.New("checkpoint unavailable")
+	}
 	return r.cp, nil
 }
 func (r *memoryRepo) Validate(ctx context.Context, _ Binding, c Cursor) error {
@@ -308,9 +312,121 @@ func TestDisconnectRefreshesAndResumesCommittedCursor(t *testing.T) {
 			case <-time.After(time.Second):
 				t.Fatal("restart did not subscribe")
 			}
+			if len(refresh.masks) != 2 || refresh.masks[1] != AllAggregates {
+				t.Fatal("reconnect skipped fresh aggregates", refresh.masks)
+			}
 			cancel()
 			receiveDone(t, restarted)
 		})
+	}
+}
+
+type successiveProvider struct {
+	mu      sync.Mutex
+	streams []*testStream
+	after   chan Cursor
+}
+
+func (p *successiveProvider) Watch(ctx context.Context, _ Binding, after Cursor) (Stream, error) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	if len(p.streams) == 0 {
+		return nil, ErrRefresh
+	}
+	stream := p.streams[0]
+	p.streams = p.streams[1:]
+	stream.ctx = ctx
+	p.after <- after
+	return stream, nil
+}
+func TestManagerRestartsShutdownButNotTerminalRun(t *testing.T) {
+	for _, end := range []string{"shutdown", "terminal"} {
+		t.Run(end, func(t *testing.T) {
+			first := &testStream{events: make(chan Envelope, 1), fail: make(chan error, 1)}
+			second := &testStream{events: make(chan Envelope), fail: make(chan error, 1)}
+			provider := &successiveProvider{streams: []*testStream{first, second}, after: make(chan Cursor, 2)}
+			repo := &memoryRepo{cp: Checkpoint{Validated: "4", Committed: "4", Stamp: Stamp{Head: "4", Run: 4}}}
+			refresh := &testRefresh{}
+			manager := NewManager(repo, provider, refresh)
+			defer manager.Stop()
+			run := WatchedRun{Candidate: Candidate{RunID: "run"}, Binding: testBinding()}
+			if _, err := manager.Update(t.Context(), time.Now(), []WatchedRun{run}); err != nil {
+				t.Fatal(err)
+			}
+			if after := <-provider.after; after != "4" {
+				t.Fatal(after)
+			}
+			first.events <- Envelope{RunID: "run", Head: "4", End: end}
+			select {
+			case <-manager.streams["run"].done:
+			case <-time.After(time.Second):
+				t.Fatal("first stream did not end")
+			}
+			if _, err := manager.Update(t.Context(), time.Now().Add(time.Second), []WatchedRun{run}); err != nil {
+				t.Fatal(err)
+			}
+			if end == "terminal" {
+				select {
+				case after := <-provider.after:
+					t.Fatal("terminal reconnected", after)
+				case <-time.After(50 * time.Millisecond):
+				}
+				if state, _ := manager.State("run"); state.Connection != "terminal" {
+					t.Fatal(state)
+				}
+				return
+			}
+			select {
+			case after := <-provider.after:
+				if after != "4" {
+					t.Fatal(after)
+				}
+			case <-time.After(time.Second):
+				t.Fatal("shutdown did not reconnect")
+			}
+			refresh.mu.Lock()
+			defer refresh.mu.Unlock()
+			if len(refresh.masks) != 1 || refresh.masks[0] != AllAggregates {
+				t.Fatal(refresh.masks)
+			}
+		})
+	}
+}
+
+func TestManagerDemotionPreservesTerminalMarker(t *testing.T) {
+	repo := &memoryRepo{}
+	provider := &sharedProvider{streams: make(map[string]*testStream), started: make(chan string, LiveLimit+1)}
+	refresh := &testRefresh{}
+	manager := NewManager(repo, provider, refresh)
+	defer manager.Stop()
+	bridge, err := NewBridge(repo, provider, refresh, testBinding())
+	if err != nil {
+		t.Fatal(err)
+	}
+	bridge.update(func(state *SubscriptionState) { state.Connection = ConnectionTerminal })
+	done := make(chan struct{})
+	manager.streams["run"] = managedStream{cancel: func() {}, done: done, bridge: bridge}
+	manager.bridges["run"] = bridge
+	runs := []WatchedRun{{Candidate: Candidate{RunID: "run"}, Binding: testBinding()}}
+	for i := range LiveLimit {
+		id := fmt.Sprintf("priority-%d", i)
+		binding := testBinding()
+		binding.RunID, binding.SessionID = id, id
+		provider.streams[id] = &testStream{events: make(chan Envelope), fail: make(chan error)}
+		runs = append(runs, WatchedRun{Candidate: Candidate{RunID: id, PendingInteraction: true}, Binding: binding})
+	}
+	go func() { time.Sleep(time.Millisecond); close(done) }()
+	if _, err := manager.Update(t.Context(), time.Now(), runs); err != nil {
+		t.Fatal(err)
+	}
+	if state, ok := manager.State("run"); !ok || state.Connection != ConnectionTerminal {
+		t.Fatal(state, ok)
+	}
+	if _, err := manager.Update(t.Context(), time.Now(), runs[:1]); err != nil {
+		t.Fatal(err)
+	}
+	if _, exists := manager.streams["run"]; exists {
+		t.Fatal("terminal run reconnected")
 	}
 }
 
@@ -518,6 +634,31 @@ func TestManagerSaturationPreservesSiblingAndUnaryProgress(t *testing.T) {
 	}
 }
 
+func TestManagerCheckpointFailureKeepsSiblingLive(t *testing.T) {
+	repos := perRunRepo{"broken": {failCheckpoint: true}, "healthy": {}}
+	p := &sharedProvider{streams: map[string]*testStream{"healthy": {events: make(chan Envelope, 1), fail: make(chan error, 1)}}, started: make(chan string, 1)}
+	m := NewManager(repos, p, &testRefresh{})
+	defer m.Stop()
+	var runs []WatchedRun
+	for _, id := range []string{"broken", "healthy"} {
+		binding := testBinding()
+		binding.RunID, binding.SessionID = id, id
+		runs = append(runs, WatchedRun{Candidate: Candidate{RunID: id}, Binding: binding})
+	}
+	modes, err := m.Update(t.Context(), time.Now(), runs)
+	if err != nil || modes["broken"] != WindowStale || modes["healthy"] != WindowLive {
+		t.Fatal(modes, err)
+	}
+	select {
+	case id := <-p.started:
+		if id != "healthy" {
+			t.Fatal(id)
+		}
+	case <-time.After(time.Second):
+		t.Fatal("healthy stream not started")
+	}
+}
+
 type countingStream struct {
 	ctx  context.Context
 	p    *countingProvider
@@ -710,7 +851,7 @@ func TestManagerPreservesMetadataAcrossDemotion(t *testing.T) {
 	}
 	<-p.started
 	promoted, ok := m.State("7")
-	if !ok || promoted.Generation != 2 || promoted.ReconnectAttempts != 1 || promoted.LastHeartbeat != now || promoted.LastSnapshot != now {
+	if !ok || promoted.Generation != 2 || promoted.ReconnectAttempts != 1 || promoted.LastHeartbeat != now || promoted.LastSnapshot.Before(now) {
 		t.Fatalf("promoted %+v", promoted)
 	}
 }

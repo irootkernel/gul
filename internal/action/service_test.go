@@ -2,6 +2,7 @@ package action
 
 import (
 	"context"
+	"errors"
 	"strconv"
 	"sync"
 	"testing"
@@ -12,6 +13,26 @@ import (
 )
 
 type actionRepo struct{ operation OperationState }
+
+func (actionRepo) Converge(context.Context, Bound, Input) (bool, error) { return true, nil }
+
+type nonConvergingRepo struct {
+	actionRepo
+	err error
+}
+
+type failingLocalRepo struct {
+	actionRepo
+	err error
+}
+
+func (r failingLocalRepo) LocalState(context.Context, Bound) (LocalState, error) {
+	return LocalState{}, r.err
+}
+
+func (r nonConvergingRepo) Converge(context.Context, Bound, Input) (bool, error) {
+	return false, r.err
+}
 
 func (r actionRepo) Binding(_ context.Context, subject, id string) (session.Binding, error) {
 	if subject != "owner" {
@@ -101,7 +122,76 @@ func (p *actionProvider) Release(_ context.Context, b Bound, revision uint64) (W
 	return readerInput().Writer, nil
 }
 func actionService(p *actionProvider) *Service {
-	return &Service{Repository: actionRepo{NoOperation}, Workspaces: actionWorkspace{}, Carriers: actionCarrier{}, Provider: p}
+	return &Service{Repository: actionRepo{NoOperation}, Workspaces: actionWorkspace{}, Carriers: actionCarrier{}, Provider: p, Gate: func(string, string) bool { return true }}
+}
+func TestStartupGateBlocksMutationBeforeObservationResume(t *testing.T) {
+	provider := &actionProvider{input: readerInput()}
+	service := actionService(provider)
+	service.Gate = nil
+	result, err := service.Evaluate(t.Context(), "owner", "session", Request{Intent: IntentWrite, CloseIntent: NoCloseIntent})
+	if err != nil || !result.Flags.RequiresFreshSnapshot || result.Flags.CanAcquireWriter {
+		t.Fatal(result, err)
+	}
+	if _, err := service.Acquire(t.Context(), "owner", "session"); err == nil || provider.acquire != 0 {
+		t.Fatal(err, provider.acquire)
+	}
+	service.Gate = func(string, string) bool { return true }
+	result, err = service.Evaluate(t.Context(), "owner", "session", Request{Intent: IntentWrite, CloseIntent: NoCloseIntent})
+	if err != nil || !result.Flags.CanAcquireWriter {
+		t.Fatal(result, err)
+	}
+}
+func TestStartupGateClosingAfterReadBlocksWriterDispatch(t *testing.T) {
+	provider := &actionProvider{input: readerInput()}
+	service := actionService(provider)
+	checks := 0
+	service.Gate = func(subject, sessionID string) bool {
+		if subject != "owner" || sessionID != "session" {
+			t.Fatal(subject, sessionID)
+		}
+		checks++
+		return checks < 3
+	}
+	result, err := service.Acquire(t.Context(), "owner", "session")
+	if err != ErrBlocked || result.Evaluation.Blocker != FreshSnapshotRequired || provider.acquire != 0 || checks != 3 {
+		t.Fatal(result, err, provider.acquire, checks)
+	}
+}
+func TestServiceRejectsNonConvergedSnapshotsBeforeWriterDispatch(t *testing.T) {
+	for _, fault := range []error{nil, errors.New("cache fault")} {
+		provider := &actionProvider{input: readerInput()}
+		service := actionService(provider)
+		service.Repository = nonConvergingRepo{actionRepo: actionRepo{NoOperation}, err: fault}
+		evaluation, err := service.Evaluate(t.Context(), "owner", "session", Request{Intent: IntentWrite, CloseIntent: NoCloseIntent})
+		if fault == nil {
+			if err != nil || evaluation.Blocker != FreshSnapshotRequired || !evaluation.Flags.RequiresFreshSnapshot {
+				t.Fatal(evaluation, err)
+			}
+		} else if err != ErrPersistence || evaluation.Blocker != FreshSnapshotRequired || !evaluation.Flags.RequiresFreshSnapshot || evaluation.Mode != WriterBlocked {
+			t.Fatal(evaluation, err)
+		}
+		if _, err := service.Acquire(t.Context(), "owner", "session"); err == nil || provider.acquire != 0 {
+			t.Fatal(err, provider.acquire)
+		}
+	}
+}
+func TestServiceClassifiesLocalStateFailureBeforeWriterDispatch(t *testing.T) {
+	for _, fault := range []error{errors.New("disk fault"), ErrAuthority} {
+		provider := &actionProvider{input: readerInput()}
+		service := actionService(provider)
+		service.Repository = failingLocalRepo{actionRepo: actionRepo{NoOperation}, err: fault}
+		_, err := service.Evaluate(t.Context(), "owner", "session", Request{Intent: IntentWrite, CloseIntent: NoCloseIntent})
+		want := ErrPersistence
+		if errors.Is(fault, ErrAuthority) {
+			want = ErrAuthority
+		}
+		if !errors.Is(err, want) {
+			t.Fatal(err, want)
+		}
+		if _, err := service.Acquire(t.Context(), "owner", "session"); err == nil || provider.acquire != 0 {
+			t.Fatal(err, provider.acquire)
+		}
+	}
 }
 func TestGuardedWriterCallsAndSeparateUnownedWindow(t *testing.T) {
 	p := &actionProvider{input: readerInput()}

@@ -314,10 +314,11 @@ type Aggregate struct {
 	NonretiredMembers, NonterminalSpawns, PendingApprovals, AcceptedUnfinishedTasks, UnknownOutcomeTasks uint64
 }
 type LocalState struct {
-	Ownership  Ownership
-	Credential Credential
-	Operation  OperationState
-	Floor      observation.Stamp
+	Ownership        Ownership
+	Credential       Credential
+	Operation        OperationState
+	Floor            observation.Stamp
+	ProjectionsStale bool
 }
 type Request struct {
 	Intent             WriteIntent

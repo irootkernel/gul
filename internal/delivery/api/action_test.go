@@ -62,8 +62,11 @@ func TestWriterRPCUsesFreshSharedGateAndTypedConflict(t *testing.T) {
 	if _, err := store.Presentation().InsertBinding(t.Context(), session.Binding{SubjectID: "owner", ID: "session", WorkspaceID: "ws", RunID: "run", ControllerBindingID: "controller", ProviderSessionID: "provider-session"}); err != nil {
 		t.Fatal(err)
 	}
+	if err := store.Cache().PutTimelineHead(t.Context(), "owner", "session", storage.UpstreamCursor{Value: "4"}); err != nil {
+		t.Fatal(err)
+	}
 	provider := &apiActionProvider{}
-	service := &action.Service{Repository: store.Actions("dolgorae"), Workspaces: interactionWorkspace{}, Carriers: interactionCarrier{}, Provider: provider}
+	service := &action.Service{Repository: store.Actions("dolgorae"), Workspaces: interactionWorkspace{}, Carriers: interactionCarrier{}, Provider: provider, Gate: func(string, string) bool { return true }}
 	core := app.NewCore(app.Dependencies{Provider: ready{}, Persistence: ready{}, Authorization: allow{}})
 	if err := core.Start(t.Context()); err != nil {
 		t.Fatal(err)
@@ -105,5 +108,26 @@ func TestWriterRPCUsesFreshSharedGateAndTypedConflict(t *testing.T) {
 	}
 	if _, err = client.GetActionState(t.Context(), connect.NewRequest(&gulv1.GetActionStateRequest{SessionId: "session", WriteIntent: 99, CloseIntent: gulv1.ActionCloseIntent_ACTION_CLOSE_INTENT_NONE})); connect.CodeOf(err) != connect.CodeInvalidArgument {
 		t.Fatal("unknown intent", err)
+	}
+}
+
+func TestActionPersistenceErrorUsesLocalRepairCode(t *testing.T) {
+	err := actionError(action.ErrPersistence)
+	var rpc *connect.Error
+	if !errors.As(err, &rpc) || rpc.Code() != connect.CodeUnavailable {
+		t.Fatal(err)
+	}
+	var blocker, code bool
+	for _, detail := range rpc.Details() {
+		value, _ := detail.Value()
+		switch typed := value.(type) {
+		case *gulv1.ActionFailure:
+			blocker = typed.Blocker == gulv1.ActionBlocker_ACTION_BLOCKER_FRESH_SNAPSHOT_REQUIRED
+		case *gulv1.DomainError:
+			code = typed.Code == gulv1.ErrorCode_ERROR_CODE_PERSISTENCE_UNAVAILABLE && typed.Action == gulv1.ActionClass_ACTION_CLASS_OPERATOR_REPAIR
+		}
+	}
+	if !blocker || !code {
+		t.Fatal(rpc.Details())
 	}
 }

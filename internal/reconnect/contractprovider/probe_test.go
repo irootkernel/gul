@@ -1,0 +1,53 @@
+package contractprovider
+
+import (
+	"context"
+	"errors"
+	"slices"
+	"testing"
+	"time"
+
+	publicv1 "github.com/rootkernel/gul/contract/generated/go/dolgorae/public/v1"
+	"github.com/rootkernel/gul/contract/port"
+	"github.com/rootkernel/gul/contract/scenario"
+	"github.com/rootkernel/gul/internal/reconnect"
+	"github.com/rootkernel/gul/internal/recovery"
+)
+
+type alteredRuntime struct {
+	port.RuntimePort
+	change func(*publicv1.GetCapabilitiesResponse)
+}
+
+func (r alteredRuntime) GetCapabilities(ctx context.Context, req *publicv1.GetCapabilitiesRequest) (*publicv1.GetCapabilitiesResponse, error) {
+	capabilities, err := r.RuntimePort.GetCapabilities(ctx, req)
+	if err == nil {
+		r.change(capabilities)
+	}
+	return capabilities, err
+}
+
+func TestContractProbeRejectsProtocolAndMethodDrift(t *testing.T) {
+	provider := scenario.New(time.Now())
+	if err := (ContractProbe{}).Check(t.Context()); !errors.Is(err, reconnect.ErrUnavailable) {
+		t.Fatal(err)
+	}
+	if err := (ContractProbe{Port: provider}).Check(t.Context()); err != nil {
+		t.Fatal(err)
+	}
+	for _, change := range []func(*publicv1.GetCapabilitiesResponse){
+		func(c *publicv1.GetCapabilitiesResponse) { c.Protocol.EventProtocolVersion++ },
+		func(c *publicv1.GetCapabilitiesResponse) { c.DescriptorSha256 = "changed" },
+		func(c *publicv1.GetCapabilitiesResponse) { c.SupportedMethods = nil },
+		func(c *publicv1.GetCapabilitiesResponse) { c.Protocol.MaximumClientProtocolVersion = 0 },
+		func(c *publicv1.GetCapabilitiesResponse) { c.Features.PersistentRuns = false },
+		func(c *publicv1.GetCapabilitiesResponse) {
+			c.SupportedMethods = slices.DeleteFunc(c.SupportedMethods, func(method string) bool { return method == "WriterService.GetWorkspaceWriterStatus" })
+		},
+	} {
+		err := (ContractProbe{Port: alteredRuntime{provider, change}}).Check(t.Context())
+		if !errors.Is(err, recovery.ErrIncompatible) {
+			t.Fatal(err)
+		}
+	}
+}

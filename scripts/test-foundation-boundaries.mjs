@@ -51,6 +51,11 @@ const history = goSourceFiles(path.join(sourceRoot, "internal/history"))
   .map(name => fs.readFileSync(name, "utf8")).join("\n");
 const historyAdapter = goSourceFiles(path.join(sourceRoot, "internal/history/contractprovider"))
   .map(name => fs.readFileSync(name, "utf8")).join("\n");
+const reconnect = goSourceFiles(path.join(sourceRoot, "internal/reconnect"))
+  .filter(name => !name.includes(`${path.sep}contractprovider${path.sep}`))
+  .map(name => fs.readFileSync(name, "utf8")).join("\n");
+const reconnectAdapter = goSourceFiles(path.join(sourceRoot, "internal/reconnect/contractprovider"))
+  .map(name => fs.readFileSync(name, "utf8")).join("\n");
 const sessionclose = goSourceFiles(path.join(sourceRoot, "internal/sessionclose"))
   .map(name => fs.readFileSync(name, "utf8")).join("\n");
 const recovery = goSourceFiles(path.join(sourceRoot, "internal/recovery"))
@@ -96,6 +101,8 @@ const boundaries = [
   ["interaction", interaction, [/"github\.com\/rootkernel\/gul\/internal\/(?:app|delivery|desktop|storage)(?:\/|")/, /"github\.com\/rootkernel\/gul\/(?:contract|api\/generated)(?:\/|")/, /"github\.com\/wailsapp/, /"database\/sql"/, /\bListenAndServe\b/, scenarioImport]],
   ["interaction adapter", interactionAdapter, [/"github\.com\/rootkernel\/gul\/internal\/(?:app|delivery|desktop|storage)(?:\/|")/, /"github\.com\/rootkernel\/gul\/api\/generated(?:\/|")/, /"github\.com\/wailsapp/, /"database\/sql"/, /\bListenAndServe\b/, scenarioImport]],
   ["action", action, [/"github\.com\/rootkernel\/gul\/internal\/(?:app|delivery|desktop|storage)(?:\/|")/, /"github\.com\/rootkernel\/gul\/(?:contract|api\/generated)(?:\/|")/, /"github\.com\/wailsapp/, /"database\/sql"/, /\bListenAndServe\b/, scenarioImport]],
+  ["reconnect", reconnect, [/"github\.com\/rootkernel\/gul\/internal\/(?:app|delivery|desktop|storage)(?:\/|")/, /"github\.com\/rootkernel\/gul\/(?:contract|api\/generated)(?:\/|")/, /"github\.com\/wailsapp/, /"database\/sql"/, /\bListenAndServe\b/, scenarioImport]],
+  ["reconnect adapter", reconnectAdapter, [/"github\.com\/rootkernel\/gul\/internal\/(?:app|delivery|desktop|storage)(?:\/|")/, /"github\.com\/rootkernel\/gul\/api\/generated(?:\/|")/, /"github\.com\/wailsapp/, /"database\/sql"/, /\bListenAndServe\b/, scenarioImport]],
   ["action adapter", actionAdapter, [/"github\.com\/rootkernel\/gul\/internal\/(?:app|delivery|desktop|storage)(?:\/|")/, /"github\.com\/rootkernel\/gul\/api\/generated(?:\/|")/, /"github\.com\/wailsapp/, /"database\/sql"/, /\bListenAndServe\b/, scenarioImport]],
   ["history", history, [/"github\.com\/rootkernel\/gul\/internal\/(?:app|delivery|desktop|storage)(?:\/|")/, /"github\.com\/rootkernel\/gul\/(?:contract|api\/generated)(?:\/|")/, /"github\.com\/wailsapp/, /"database\/sql"/, /\bListenAndServe\b/, scenarioImport]],
   ["history adapter", historyAdapter, [/"github\.com\/rootkernel\/gul\/internal\/(?:app|delivery|desktop|storage)(?:\/|")/, /"github\.com\/rootkernel\/gul\/api\/generated(?:\/|")/, /"github\.com\/wailsapp/, /"database\/sql"/, /\bListenAndServe\b/, scenarioImport]],
@@ -148,4 +155,4 @@ try {
   fs.rmSync(fixture, {recursive: true, force: true});
 }
 
-console.log("frontend, delivery, desktop, command, app, domain, storage, workspace, presentation, session, launch, observation, interaction, action, history, sessionclose, and recovery foundation boundaries passed");
+console.log("frontend, delivery, desktop, command, app, domain, storage, workspace, presentation, session, launch, observation, interaction, action, history, reconnect, sessionclose, and recovery foundation boundaries passed");

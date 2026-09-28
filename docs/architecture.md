@@ -5,7 +5,7 @@
 | Role | Target and Current Architecture source of truth |
 | Product | Gul |
 | Version | 0.1-dolgorae-consumer-v1 |
-| Status | Approved target rebaseline; current implementation through E4 within the declared fake/component scope |
+| Status | Approved target rebaseline; current implementation through E5-T2 within the declared fake/component scope |
 | Last updated | 2026-09-28 |
 
 ## 1. Purpose and change control
@@ -1047,11 +1047,11 @@ The serial command facade is `toolchain-check`, `generate-contract`, `contract-c
 
 ## 19. Current snapshot
 
-**Snapshot date:** 2026-09-28 (E5-T1 completion)
+**Snapshot date:** 2026-09-28 (E5-T2 completion)
 
-**Roadmap point:** E0 is `Completed`, E12 is `Completed`, E1 is `Completed`, and E13 is `Completed`; E1-T1 is `Completed` and E1-T2/T3/T4/T5 are `Completed`. E3 and E3-T1/T2/T3/T4 are `Completed`. E4 and E4-T1/T2/T3/T5 are `Completed`. E4-T4 remains Deferred outside the current epic. E5-T1 is `Completed`; E5-T2/T3 remain Planned. Former E12-T2/T3 remain Retired. E14 owns pre-release application acceptance. No live-provider or assembled-application acceptance is implied.
+**Roadmap point:** E0 is `Completed`, E12 is `Completed`, E1 is `Completed`, and E13 is `Completed`; E1-T1 is `Completed` and E1-T2/T3/T4/T5 are `Completed`. E3 and E3-T1/T2/T3/T4 are `Completed`. E4 and E4-T1/T2/T3/T5 are `Completed`. E4-T4 remains Deferred outside the current epic. E5-T1 is `Completed`, E5-T2 is `Completed`, and E5-T3 remains Planned. Former E12-T2/T3 remain Retired. E14 owns pre-release application acceptance. No live-provider or assembled-application acceptance is implied.
 
-**Maturity:** delivery-independent Go core, shared React bundle, declared but disabled Gul API, typed provider ports and explicit scenario harness, isolated SQLite repositories with fake-scoped Workspace attachment, local presentation and passive session reads, and a Wails shell foundation. E4 adds typed event observation, Interaction cards, shared action eligibility and bounded history/result/artifact reads with explicit fakes and isolated browser components. E5-T1 adds whole-session close and explicit recovery, provider health, and an injected restart supervisor at the same fake/component boundary. Provider and assembled storage lifecycle remain pending.
+**Maturity:** delivery-independent Go core, shared React bundle, declared but disabled Gul API, typed provider ports and explicit scenario harness, isolated SQLite repositories with fake-scoped Workspace attachment, local presentation and passive session reads, and a Wails shell foundation. E4 adds typed event observation, Interaction cards, shared action eligibility and bounded history/result/artifact reads with explicit fakes and isolated browser components. E5-T1 adds whole-session close and explicit recovery, provider health, and an injected restart supervisor. E5-T2 adds provider/browser reconnect coordination and persistent stamp convergence at the same fake/component boundary. Provider and assembled storage lifecycle remain pending.
 
 ### 19.1 Implemented components
 
@@ -1258,6 +1258,16 @@ component displays health and snapshot freshness without deriving actions.
 `internal/recovery.Supervisor` uses an injected gateway lifecycle, clock and
 random source for the bounded restart policy. Product route registration,
 process startup and live-provider evidence remain with their later owners.
+
+E5-T2 adds `internal/reconnect` with a checked compatibility
+probe, a process-local action gate, independent per-Run refresh and convergence,
+and live or unary-poll observation admission. SQLite keeps Run, Writer,
+Interaction, timeline and delivery state separate; provider loss marks
+projections stale and retains the committed cursor and unresolved attempts.
+Only `internal/sessionclose.AggregateRefresher` advances the artifact-verified timeline
+head. Browser reconnect reads presentation, execution state and bounded Gul
+delivery without sending a provider mutation. These components remain
+unmounted pending later product assembly.
 
 `internal/desktop` starts and stops the same core through its lifecycle boundary,
 then runs a Wails v3 window over the checked bundle's existing asset handler.

@@ -35,7 +35,6 @@ var laterMethods = []string{
 	"WriterService.CancelWriterHandoff", "WriterService.CommitWriterHandoff", "WriterService.PrepareWriterHandoff",
 }
 
-const pinnedDescriptorSHA256 = "28b132842bbeb48123c2b7cc529de689e6e6286b0783cbde8551d17ba4921ed5"
 const maximumArtifactSize = 64 << 20
 const maximumChunkSize = 65536
 const maximumPageLimit = 500
@@ -71,7 +70,7 @@ func (h *Harness) GetCapabilities(_ context.Context, request *publicv1.GetCapabi
 			VisibilityClasses: []publicv1.ArtifactVisibility{publicv1.ArtifactVisibility_ARTIFACT_VISIBILITY_CONTROLLER_ONLY}},
 		SupportedMethods:       append(slices.Clone(requiredMethods), h.laterMethods...),
 		AccessPolicyTransition: publicv1.SupportState_SUPPORT_STATE_UNAVAILABLE,
-		DescriptorSha256:       pinnedDescriptorSHA256,
+		DescriptorSha256:       port.DescriptorSHA256,
 		SupportedControlModes:  []publicv1.ControlMode{publicv1.ControlMode_CONTROL_MODE_DIRECT_INTERACTIVE},
 		SupportedTransports:    []publicv1.PublicTransport{publicv1.PublicTransport_PUBLIC_TRANSPORT_LOCAL_GRPC},
 		ProfileLaunchMode:      publicv1.ProfileLaunchMode_PROFILE_LAUNCH_MODE_DOLGORAE_OWNED_DIRECT_EXECUTABLE,

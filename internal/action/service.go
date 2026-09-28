@@ -13,6 +13,7 @@ var (
 	ErrOutcomeUnknown        = errors.New("action outcome unknown")
 	ErrInvalid               = errors.New("invalid action request")
 	ErrAuthority             = errors.New("action authority unavailable")
+	ErrPersistence           = errors.New("action persistence unavailable")
 	ErrUnavailable           = errors.New("action provider unavailable")
 	ErrBlocked               = errors.New("action blocked by current eligibility")
 	ErrWriterBusy            = errors.New("writer_busy")
@@ -26,6 +27,7 @@ type Bound struct {
 }
 type Repository interface {
 	Binding(context.Context, string, string) (session.Binding, error)
+	Converge(context.Context, Bound, Input) (bool, error)
 	LocalState(context.Context, Bound) (LocalState, error)
 }
 type Provider interface {
@@ -38,11 +40,17 @@ type Service struct {
 	Workspaces session.Workspace
 	Carriers   session.CarrierResolver
 	Provider   Provider
+	// Gate opens after compatibility, snapshots, and observation resume. It also
+	// guards coordinator reads; a missing gate fails closed on every path.
+	Gate func(string, string) bool
 }
 
 func (s *Service) state(ctx context.Context, subject, id string, request Request) (Bound, Input, error) {
 	if s == nil || s.Repository == nil || s.Workspaces == nil || s.Provider == nil || subject == "" || id == "" || len(id) > 256 {
 		return Bound{}, Input{}, ErrInvalid
+	}
+	if s.Gate == nil || !s.Gate(subject, id) {
+		return Bound{}, Input{}, ErrBlocked
 	}
 	b, err := s.Repository.Binding(ctx, subject, id)
 	if err != nil || b.SubjectID != subject || b.ID != id || b.RunID == "" || b.ProviderSessionID == "" {
@@ -66,24 +74,41 @@ func (s *Service) state(ctx context.Context, subject, id string, request Request
 	if err != nil {
 		return bound, Input{}, err
 	}
+	converged, err := s.Repository.Converge(ctx, bound, in)
+	if err != nil {
+		if errors.Is(err, ErrAuthority) {
+			return bound, Input{}, ErrAuthority
+		}
+		return bound, Input{}, ErrPersistence
+	}
 	local, err := s.Repository.LocalState(ctx, bound)
 	if err != nil {
-		return bound, Input{}, ErrAuthority
+		if errors.Is(err, ErrAuthority) {
+			return bound, Input{}, ErrAuthority
+		}
+		return bound, Input{}, ErrPersistence
 	}
 	// Only the backend credential store and binding repository establish these.
 	if health == Healthy && !in.ControllerMatches {
 		health = CredentialUnhealthy
 	}
 	local.Credential = health
+	local.ProjectionsStale = local.ProjectionsStale || !converged || s.Gate == nil || !s.Gate(subject, id)
 	in.Local = local
 	in.Request = request
 	return bound, in, nil
 }
 func (s *Service) Evaluate(ctx context.Context, subject, id string, request Request) (Evaluation, error) {
+	if s != nil && (s.Gate == nil || !s.Gate(subject, id)) {
+		return Evaluation{Flags: Flags{RequiresFreshSnapshot: true}, Blocker: FreshSnapshotRequired, Mode: WriterBlocked}, nil
+	}
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 	_, in, err := s.state(ctx, subject, id, request)
 	if err != nil {
+		if errors.Is(err, ErrPersistence) {
+			return Evaluation{Flags: Flags{RequiresFreshSnapshot: true}, Blocker: FreshSnapshotRequired, Mode: WriterBlocked}, err
+		}
 		return Evaluation{Flags: Flags{BlockedByProviderCompatibility: true}, Blocker: ProviderFailure, Mode: WriterBlocked}, err
 	}
 	return Evaluate(in), nil
@@ -133,6 +158,9 @@ func (s *Service) mutate(ctx context.Context, subject, id string, acquire bool) 
 	evaluation := Evaluate(in)
 	if acquire && !evaluation.Flags.CanAcquireWriter || !acquire && !evaluation.Flags.CanReleaseWriter {
 		return MutationResult{Evaluation: evaluation}, blockedError(evaluation.Blocker)
+	}
+	if s.Gate == nil || !s.Gate(subject, id) {
+		return MutationResult{Evaluation: Evaluation{Flags: Flags{RequiresFreshSnapshot: true}, Blocker: FreshSnapshotRequired, Mode: WriterBlocked}}, ErrBlocked
 	}
 	// Each tokenless mutation is invoked once with the fresh Run revision. The
 	// provider rechecks Controller/revision and owns all authority transitions.

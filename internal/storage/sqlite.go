@@ -13,6 +13,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/rootkernel/gul/internal/observation"
 	_ "modernc.org/sqlite"
 )
 
@@ -51,6 +52,15 @@ func Open(ctx context.Context, filename string) (*Store, error) {
 		return nil, err
 	}
 	if _, err := writer.ExecContext(ctx, "UPDATE runtime_projection_cache SET freshness = 'stale'"); err != nil {
+		writer.Close()
+		return nil, err
+	}
+	if _, err := writer.ExecContext(ctx, `UPDATE observation_refreshes SET refresh_mask=refresh_mask|?`, uint16(observation.AllAggregates)); err != nil {
+		writer.Close()
+		return nil, err
+	}
+	if _, err := writer.ExecContext(ctx, `INSERT OR IGNORE INTO observation_refreshes(subject_id,session_id,refresh_mask)
+SELECT subject_id,session_id,? FROM primary_session_bindings`, uint16(observation.AllAggregates)); err != nil {
 		writer.Close()
 		return nil, err
 	}

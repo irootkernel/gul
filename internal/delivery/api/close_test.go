@@ -94,7 +94,10 @@ func TestCloseRuntimeAuthorizationPrivacyAndStableReadReference(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	actions := &action.Service{Repository: store.Actions("dolgorae"), Workspaces: workspaces, Carriers: carriers, Provider: &apiCloseActions{close: provider}}
+	if err := store.Cache().PutTimelineHead(t.Context(), "owner", binding.ID, storage.UpstreamCursor{Value: "4"}); err != nil {
+		t.Fatal(err)
+	}
+	actions := &action.Service{Repository: store.Actions("dolgorae"), Workspaces: workspaces, Carriers: carriers, Provider: &apiCloseActions{close: provider}, Gate: func(string, string) bool { return true }}
 	closer := &sessionclose.Service{Repository: store.SessionClose(), Actions: actions, Sessions: sessions, Provider: provider, Refresh: apiCloseRefresh{}}
 	core := app.NewCore(app.Dependencies{Provider: ready{}, Persistence: ready{}, Authorization: allow{}})
 	if err := core.Start(t.Context()); err != nil {

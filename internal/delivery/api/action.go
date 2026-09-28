@@ -100,6 +100,11 @@ func actionError(err error) error {
 		code = connect.CodePermissionDenied
 		detail.Code = gulv1.ErrorCode_ERROR_CODE_CONTROLLER_MISMATCH
 		detail.Action = gulv1.ActionClass_ACTION_CLASS_VERIFY_CONTROLLER
+	case errors.Is(err, action.ErrPersistence):
+		blocker = action.FreshSnapshotRequired
+		code = connect.CodeUnavailable
+		detail.Code = gulv1.ErrorCode_ERROR_CODE_PERSISTENCE_UNAVAILABLE
+		detail.Action = gulv1.ActionClass_ACTION_CLASS_OPERATOR_REPAIR
 	case errors.Is(err, action.ErrWriterBusy):
 		blocker = action.WriterBusy
 		detail.Code = gulv1.ErrorCode_ERROR_CODE_WRITER_CONFLICT

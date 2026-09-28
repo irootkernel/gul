@@ -78,9 +78,9 @@ func (w *Window) Select(now time.Time, candidates []Candidate) map[string]string
 	}
 	modes := make(map[string]string, len(unique))
 	for id := range unique {
-		modes[id] = "polling"
+		modes[id] = WindowPolling
 		if _, ok := selected[id]; ok {
-			modes[id] = "live"
+			modes[id] = WindowLive
 			if since, old := w.live[id]; old {
 				selected[id] = since
 			}

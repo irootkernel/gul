@@ -17,7 +17,7 @@ func Evaluate(in Input) Evaluation {
 		}
 		return out
 	}
-	if in.Freshness != Fresh || !compatibleStamps(in) {
+	if in.Freshness != Fresh || l.ProjectionsStale || !compatibleStamps(in) {
 		f.RequiresFreshSnapshot = true
 		out.Blocker = FreshSnapshotRequired
 		return out

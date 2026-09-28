@@ -101,7 +101,7 @@ func TestUnsupportedTransitionPreservesSourceAndExternalWriterHasNoTakeover(t *t
 }
 func TestFreshnessAndIndependentAggregateRevision(t *testing.T) {
 	for _, change := range []func(*Input){
-		func(in *Input) { in.Freshness = Stale }, func(in *Input) { in.InteractionStamp.Run++ }, func(in *Input) { in.TimelineHead = "3" }, func(in *Input) { in.Writer.Revision++ }, func(in *Input) { in.Local.Floor = observation.Stamp{Head: "5", Run: 5, Writer: 2, Interaction: 3} },
+		func(in *Input) { in.Freshness = Stale }, func(in *Input) { in.Local.ProjectionsStale = true }, func(in *Input) { in.InteractionStamp.Run++ }, func(in *Input) { in.TimelineHead = "3" }, func(in *Input) { in.Writer.Revision++ }, func(in *Input) { in.Local.Floor = observation.Stamp{Head: "5", Run: 5, Writer: 2, Interaction: 3} },
 	} {
 		in := readerInput()
 		change(&in)
