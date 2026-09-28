@@ -5,7 +5,7 @@
 | Role | Target and Current Architecture source of truth |
 | Product | Gul |
 | Version | 0.1-dolgorae-consumer-v1 |
-| Status | Approved target rebaseline; current implementation through E5-T3 within the declared fake/component scope |
+| Status | Approved target rebaseline; current implementation through E6-T1 within the declared component scope |
 | Last updated | 2026-09-29 |
 
 ## 1. Purpose and change control
@@ -1051,11 +1051,11 @@ The serial command facade is `toolchain-check`, `generate-contract`, `contract-c
 
 ## 19. Current snapshot
 
-**Snapshot date:** 2026-09-28 (E5 epic closeout)
+**Snapshot date:** 2026-09-29 (E6-T1)
 
-**Roadmap point:** E0 is `Completed`, E12 is `Completed`, E1 is `Completed`, and E13 is `Completed`; E1-T1 is `Completed` and E1-T2/T3/T4/T5 are `Completed`. E3 and E3-T1/T2/T3/T4 are `Completed`. E4 and E4-T1/T2/T3/T5 are `Completed`. E4-T4 remains Deferred outside the current epic. E5 and E5-T1/T2/T3 are `Completed`. Former E12-T2/T3 remain Retired. E14 owns pre-release application acceptance. No live-provider or assembled-application acceptance is implied.
+**Roadmap point:** E0 is `Completed`, E12 is `Completed`, E1 is `Completed`, and E13 is `Completed`; E1-T1 is `Completed` and E1-T2/T3/T4/T5 are `Completed`. E3 and E3-T1/T2/T3/T4 are `Completed`. E4 and E4-T1/T2/T3/T5 are `Completed`. E4-T4 remains Deferred outside its epic. E5 and E5-T1/T2/T3 are `Completed`. E6 is `In Progress`, E6-T1 is `Completed`, and E6-T2/T3 remain `Planned`. Former E12-T2/T3 remain Retired. E14 owns pre-release application acceptance. No live-provider or assembled-application acceptance is implied.
 
-**Maturity:** delivery-independent Go core, shared React bundle, declared but disabled Gul API, typed provider ports and explicit scenario harness, isolated SQLite repositories with fake-scoped Workspace attachment, local presentation and passive session reads, and a Wails shell foundation. E4 adds typed event observation, Interaction cards, shared action eligibility and bounded history/result/artifact reads with explicit fakes and isolated browser components. E5-T1 adds whole-session close and explicit recovery, provider health, and an injected restart supervisor. E5-T2 adds provider/browser reconnect coordination and persistent stamp convergence. E5-T3 adds retained mutation attempts, protected StartRun replay material, and operation-specific recovery against fakes. Product assembly and live-provider qualification remain pending.
+**Maturity:** delivery-independent Go core, shared React bundle, declared but disabled Gul API, typed provider ports and explicit scenario harness, isolated SQLite repositories with fake-scoped Workspace attachment, local presentation and passive session reads, and a Wails shell foundation. E4 adds typed observation, Interaction cards, action eligibility and bounded history/result/artifact reads. E5 adds whole-session close, reconnect convergence and operation-specific recovery against fakes. E6-T1 adds verified-root local FileService inspection and an unmounted typed API; preview, Git, watcher, product assembly and live-provider qualification remain pending.
 
 ### 19.1 Implemented components
 
@@ -1067,8 +1067,8 @@ availability is not implied. The core does not import Wails; the desktop
 foundation hosts it, while assembled headless and authenticated delivery remain
 future work.
 
-`api/proto` declares Gul-owned Runtime, WorkspacePresentation, DirectSession and
-ArtifactPresentation browser
+`api/proto` declares Gul-owned Runtime, WorkspacePresentation, DirectSession,
+ArtifactPresentation and FileService browser
 contracts. Its `bounds.json` is the shared authority for generated Go and
 TypeScript page/content limits. Generated clients are checked for drift. The
 declarations are not registered as routes. `contract/port` defines the exact
@@ -1103,6 +1103,16 @@ ConnectRPC status and include `UNAUTHORIZED` with the closed `ABORT` action.
 The macOS shell
 has a directory-picker adapter, but no attached product binding. Dismissing the
 host picker returns a typed cancelled registration result with no Workspace.
+
+`internal/files` reads a subject-scoped saved Workspace attachment without
+calling the provider. It checks the canonical root's stored filesystem identity
+on each request, then walks relative paths through root-anchored descriptors.
+It rechecks the opened node's current location before returning its descriptor.
+Symlinks resolving outside the root and every resolved `.dolgorae/**` path fail
+with the same unavailable-path result as a missing target. The typed
+`InspectPath` handler uses the local access gate and exposes only node
+kind and size. No FileService route is mounted yet; E6-T2/T3 add bounded content,
+Git and invalidation, and E7/E8/E14 own assembled presentation and delivery.
 
 `internal/presentation` changes only subject-scoped Gul metadata. Attached
 Workspace names, favorites and hidden state are independent of their directory

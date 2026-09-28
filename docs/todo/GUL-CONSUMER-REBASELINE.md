@@ -57,6 +57,12 @@ provider assembly. The exact requirement owners are in Required Specifications.
 E13's scenario tests need no future UI; E14's tests must exercise the real Gul
 application, not just replay the E13 provider drivers.
 
+E6-T1 supplies the local, read-only FileService guard over E3's saved verified
+Workspace attachment. E6-T2/T3 must route preview, Markdown assets, Git reads
+and watcher invalidations through that guard before `REQ-FILE-015` can be
+promoted across E6. E2 retains Submit-image integration; E7 owns the assembled
+file pane, and E14 owns authenticated application acceptance.
+
 ## 2. Producer order and evidence boundary
 
 TASK-025 is Completed at `57e6be8`, and TASK-053 is Completed at

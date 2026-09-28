@@ -3,12 +3,12 @@
 | Field | Value |
 | --- | --- |
 | Role | Sole authority for task identity, order, status, dependencies, and phase |
-| Revision | 2026-09-28 E5 epic closeout |
+| Revision | 2026-09-29 E6-T1 completion |
 | Active Task | None |
-| Next | E6-T1 |
+| Next | E6-T2 |
 | Required provider | Released Dolgorae v0.1.3 implementing `dolgorae.gul-consumer/v1` |
 
-`Next` names the next queued Task after the completed E5 Epic.
+`Next` names the next queued Task within E6.
 
 ## 1. Status and execution rules
 
@@ -133,7 +133,7 @@ second owner of membership, order or status.
 | E3 | Completed | Workspace/session presentation and global Profile selection | [Roadmap](#e3-complete-workspace-and-session-presentation); [Memo](implementation-memo.md#118-e3-epic-closeout-2026-09-26) |
 | E4 | Completed | Events, interactions, writer evaluator, complete timeline and artifacts; excludes E4-T4 | [Roadmap](#e4-complete-events-interactions-history-and-action-evaluation); [Memo](implementation-memo.md#e4-epic-closeout-2026-09-27) |
 | E5 | Completed | Safe whole-session close, projection convergence and ambiguous-outcome handling | [Roadmap](#e5-complete-safe-close-and-recovery); [Memo](implementation-memo.md#e5-epic-closeout-2026-09-28) |
-| E6 | Planned | Read-only FileService and bounded preview/review | [Shared](todo/GUL-CONSUMER-REBASELINE.md) |
+| E6 | In Progress | Read-only FileService and bounded preview/review | [Shared](todo/GUL-CONSUMER-REBASELINE.md) |
 | E7 | Planned | Responsive UI, mandatory Prompt History, accessibility and IME | [Shared](todo/GUL-CONSUMER-REBASELINE.md) |
 | E8 | Planned | Authentication, browser protection and headless/PWA/tailnet packaging together | [Shared](todo/GUL-CONSUMER-REBASELINE.md) |
 | E14 | Planned | Assembled pre-release application acceptance and live handoff; E14-T1 | [Shared](todo/GUL-CONSUMER-REBASELINE.md) |
@@ -254,7 +254,7 @@ unless the implementation proposes a different accepted rendering policy.
 
 | Task | Phase | Status | Predecessors | Owned result and verification |
 | --- | --- | --- | --- | --- |
-| E6-T1 | Pre-release | Planned | E3-T1 | Verified-root FileService guards and all private-subtree/escape denial tests using isolated roots |
+| E6-T1 | Pre-release | Completed | E3-T1 | Verified-root FileService guards and all private-subtree/escape denial tests using isolated roots |
 | E6-T2 | Pre-release | Planned | E6-T1 | Bounded directory/text/raster/Markdown preview and SVG-safe fallback |
 | E6-T3 | Pre-release | Planned | E6-T2 | Refresh, bounded Git review, typed degradation without runtime dependency |
 

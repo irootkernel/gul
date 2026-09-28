@@ -8,7 +8,7 @@
 | Subtitle | Remote operator interface for local development runtimes |
 | Version | 0.1-dolgorae-consumer-v1 |
 | Status | Approved Required State; E1-T1 through E1-T5 foundations completed without assembled product acceptance |
-| Last updated | 2026-09-28 |
+| Last updated | 2026-09-29 |
 | Target | macOS host; modern desktop, iPad, and iPhone browsers |
 
 ## 1. Purpose, authority, and lifecycle
@@ -507,6 +507,10 @@ E5-T2 adds provider and browser reconnect coordination, startup convergence,
 and stamp gating against controlled fakes. E5-T3 adds operation-specific replay
 and uncertainty handling against checked provider fakes. Both remain unmounted;
 assembled UI and live-provider qualification remain future work.
+E6-T1 adds a local, read-only FileService guard over subject-scoped verified
+Workspace attachments and one unmounted typed inspection handler. Its accepted
+scope is isolated root access; preview, Git, watcher and assembled product
+surfaces remain with E6-T2/T3 and later integration owners.
 
 | Requirement | Accepted Current State | Evidence |
 |---|---|---|
@@ -525,6 +529,9 @@ assembled UI and live-provider qualification remain future work.
 | REQ-WS-010 | Symlink aliases collapse to one attachment; moved or replaced identity fails closed | E3-T1 canonicalization and revalidation fixtures; `make test` |
 | REQ-WS-011 | Registration invokes inspection only and creates no Git worktree | E3-T1; inspected provider port and registration call graph; workspace and Git-metadata non-mutation fixture; `make test` |
 | REQ-WS-012 | Host-loaded canonical allowlist bounds browsing; outside, traversal, symlink, and private-subtree probes fail with one typed selection error | E3-T1 containment fixtures; `make test` |
+| REQ-FILE-001 | Local FileService inspection reads a saved verified Workspace root without a Turn or provider call; component scope, unmounted | E6-T1; isolated filesystem and API tests; serial `make test`; implementation memo |
+| REQ-FILE-002 | The typed inspection API accepts only a Workspace Entry ID and normalized relative path, with no browser absolute path or provider identity; component scope, unmounted | E6-T1; generated API drift and negative request tests; serial `make test`; implementation memo |
+| REQ-FILE-003 | The shared guarded accessor rechecks the root identity, resolves in-root symlinks through anchored descriptors, and rejects escape or replacement before reading; component scope, unmounted | E6-T1; isolated root, nested symlink, alias, replacement and API tests; serial `make test`; implementation memo |
 | REQ-DIRECT-001 | Each locally accepted Primary Run has one persisted subject-scoped Direct Session binding; three Runs list and reopen without a Codex thread field | E3-T3 scenario-backed binding and SQLite reopen test; `make test` |
 | REQ-DIRECT-003 | Permanent shared read-only launch requires an explicit lane choice, visible warning and acknowledgement before configuration check | E3-T4 React selection, authenticated handler and domain tests; `make test` |
 | REQ-DIRECT-007 | Direct Session name, favorite, archive and last navigation selection are subject-scoped SQLite presentation; offline actions invoke no provider method | E3-T2; restart, isolation and offline handler tests; `make test` |

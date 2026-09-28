@@ -870,3 +870,25 @@ message AcquireWriterResponse { ActionState state = 1; }
 message ReleaseWriterRequest { string session_id = 1; }
 message ReleaseWriterResponse { ActionState state = 1; }
 message ActionFailure { ActionBlocker blocker = 1; }
+
+// FileService reads only from a previously verified Workspace Entry. Its
+// handlers remain unmounted until authenticated product route assembly.
+service FileService {
+  rpc InspectPath(InspectPathRequest) returns (InspectPathResponse);
+}
+
+message InspectPathRequest {
+  string workspace_id = 1;
+  string relative_path = 2;
+}
+
+enum FileNodeKind {
+  FILE_NODE_KIND_UNSPECIFIED = 0;
+  FILE_NODE_KIND_DIRECTORY = 1;
+  FILE_NODE_KIND_REGULAR_FILE = 2;
+}
+
+message InspectPathResponse {
+  FileNodeKind kind = 1;
+  uint64 byte_length = 2;
+}

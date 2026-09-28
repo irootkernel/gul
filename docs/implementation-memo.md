@@ -1043,6 +1043,30 @@ regression test across two connections, proving only one dispatch is admitted.
 The host must provide the maintenance error reporter and handle an initial purge
 error before admitting mutations when it assembles these components.
 
+### E6-T1 verified-root FileService guard (2026-09-29)
+
+The local FileService takes the subject from trusted delivery context and uses
+the requested Workspace Entry ID to read its subject-scoped attachment. It
+verifies the canonical root's stored filesystem identity on every access. It
+resolves relative paths through root-anchored descriptors, permits contained
+symlinks, and checks the opened node's current location before returning its
+descriptor. Traversal, replacement, non-UTF8 input and resolved `.dolgorae/**`
+aliases are denied before content reads. The unmounted ConnectRPC inspection
+handler returns only node kind and size and uses the local access gate. The
+provider is not queried for ordinary file access, so a disconnected runtime
+does not prevent local root verification.
+
+Isolated filesystem tests exercise private descendants, nested aliases,
+in-root and escaping symlinks, root replacement, directory movement outside
+the root or into `.dolgorae`, and subject isolation. API tests cover trusted
+principal gating with an offline provider, indistinguishable unavailable-path
+errors and the distinct non-UTF8 error. `REQ-FILE-001..003` are accepted at this
+component boundary. The complete cross-surface `REQ-FILE-015` promotion awaits
+E6-T2/T3 preview, Markdown, Git and watcher consumers; Submit-image integration
+remains with its later owner. The shared accessor is the required entry point
+for those consumers, and neither a live provider nor an authenticated product
+route is claimed by this task.
+
 ## 2. Current development snapshot
 
 | Area | State |
@@ -1050,14 +1074,14 @@ error before admitting mutations when it assembles these components.
 | Five Gul SOT documents | E0-T4 completed the consumer alignment and Gate A reproduction; E0-T8 completed toolchain/ADR alignment; E0-T7 completed Gate B |
 | Toolchain and developer-command artifacts | E0-T8 accepted one pin manifest and read-only host checks; E0-T7 adds checked contract generation/drift delegates; E1-T1 adds the root Go module; E1-T2 adds root Bun pin validation and checked frontend generation/drift commands; E1-T3 adds checked Gul API/error-catalog generation; no installer |
 | Contract boundary | E12-T1 pins TASK-053 and regenerates checked clients/maps/fake transport for 36 known, 27 required, and 9 unavailable methods; E13-T1 adds an explicit stateful scenario provider over the 27-method port |
-| Production source | E1 shared core, bundle, API declarations, isolated SQLite and Wails shell; E3-T1 adds Workspace attachment; E3-T2 adds local presentation; E3-T3 adds passive session binding and aggregate reads; E3-T4 adds global Profile launch selection; E4 adds typed observation, Interaction cards, shared action eligibility and history/result/artifact adapters; E5-T1 adds whole-session close, explicit recovery, provider health and an injected restart supervisor; E5-T2 adds reconnect coordination and stamp convergence; E5-T3 adds mutation attempts and operation-specific replay coordination; handlers remain unmounted |
+| Production source | E1 shared core, bundle, API declarations, isolated SQLite and Wails shell; E3 adds Workspace attachment and presentation; E4 adds typed observation, Interactions, actions and bounded history/result/artifact reads; E5 adds safe close, reconnect and operation-specific replay; E6-T1 adds a verified-root local FileService guard and typed inspection handler; handlers remain unmounted |
 | Wails host/frontend | One React foundation bundle and isolated Wails shell foundation implemented; E3-T4 launch selector is unmounted and authenticated attach is not implemented |
 | ConnectRPC schema/services | Gul Runtime, DirectSession, ArtifactPresentation and WorkspacePresentation declarations and generated clients exist; isolated handlers remain unmounted |
 | Gul SQLite schema | Gul-owned version 8 schema with Workspace attachment, favorites, Primary binding, event metadata, session-close attempts, mutation-attempt details and Writer reconciliation baselines; production startup integration pending |
 | Dolgorae RPC supervisor/provider | Bounded restart policy implemented against an injected lifecycle; production process ownership and live provider remain pending |
 | Controller credential store | Caller-owned mechanism selected by ADR-0047; not implemented |
-| FileService/auth/PWA/Tailscale integration | Not implemented |
-| Current State promotions | REQ-HOST-005, REQ-RUNTIME-011, REQ-RUNTIME-022, REQ-CONSUMER-001/002, fake-scoped REQ-WS-001/004/006/007/008/009/010/011/012, REQ-DIRECT-001/003/009/015/019, REQ-SESSION-003, local REQ-WS-003/REQ-DIRECT-007, all 41 E4-owned requirements, and the fake/component-scoped E5-T1/T2/T3 requirements in the Current State ledger; no assembled-product or released-provider claim |
+| FileService/auth/PWA/Tailscale integration | E6-T1 local guard and unmounted inspection API implemented; bounded preview, Git, watcher and product integration pending |
+| Current State promotions | Prior E0/E12/E1/E13/E3/E4/E5 entries plus component-scoped REQ-FILE-001..003; no assembled-product or released-provider claim |
 
 The repository contains the shared-core and single-bundle delivery foundations,
 declared but inactive Gul APIs, isolated Gul-owned SQLite repositories, bootstrap
@@ -1510,4 +1534,4 @@ The initial documentation assumed Gul would manage one Codex App Server, map Ses
 
 ## 12. Handoff
 
-E12, E1, E13, E3, E4 and E5 are complete. The TASK-053 consumer lock and generated contract tooling remain authoritative. E3-T1 added fake-scoped Workspace attachment, E3-T2 added local-only presentation, E3-T3 added passive session reads, and E3-T4 added prospective global Profile launch selection. E5 added whole-session close, reconnect convergence and operation-specific replay against checked fakes; its audit and closeout are complete. E6-T1 is next. E2-T0 remains blocked on an accepted compatible Dolgorae executable and live smoke evidence. No product route or live-provider behavior is activated automatically.
+E12, E1, E13, E3, E4 and E5 are complete. The TASK-053 consumer lock and generated contract tooling remain authoritative. E6-T1 adds guarded local FileService inspection over E3's saved Workspace attachment. E6-T2 is next for bounded previews; E6-T3 owns Git and invalidation. E2-T0 remains blocked on an accepted compatible Dolgorae executable and live smoke evidence. No product route or live-provider behavior is activated automatically.

@@ -38,6 +38,8 @@ const (
 	InteractionPresentationServiceName = "gul.v1.InteractionPresentationService"
 	// WriterActionServiceName is the fully-qualified name of the WriterActionService service.
 	WriterActionServiceName = "gul.v1.WriterActionService"
+	// FileServiceName is the fully-qualified name of the FileService service.
+	FileServiceName = "gul.v1.FileService"
 )
 
 // These constants are the fully-qualified names of the RPCs defined in this package. They're
@@ -153,6 +155,8 @@ const (
 	// WriterActionServiceReleaseWriterProcedure is the fully-qualified name of the
 	// WriterActionService's ReleaseWriter RPC.
 	WriterActionServiceReleaseWriterProcedure = "/gul.v1.WriterActionService/ReleaseWriter"
+	// FileServiceInspectPathProcedure is the fully-qualified name of the FileService's InspectPath RPC.
+	FileServiceInspectPathProcedure = "/gul.v1.FileService/InspectPath"
 )
 
 // RuntimeServiceClient is a client for the gul.v1.RuntimeService service.
@@ -1376,4 +1380,74 @@ func (UnimplementedWriterActionServiceHandler) AcquireWriter(context.Context, *c
 
 func (UnimplementedWriterActionServiceHandler) ReleaseWriter(context.Context, *connect.Request[v1.ReleaseWriterRequest]) (*connect.Response[v1.ReleaseWriterResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("gul.v1.WriterActionService.ReleaseWriter is not implemented"))
+}
+
+// FileServiceClient is a client for the gul.v1.FileService service.
+type FileServiceClient interface {
+	InspectPath(context.Context, *connect.Request[v1.InspectPathRequest]) (*connect.Response[v1.InspectPathResponse], error)
+}
+
+// NewFileServiceClient constructs a client for the gul.v1.FileService service. By default, it uses
+// the Connect protocol with the binary Protobuf Codec, asks for gzipped responses, and sends
+// uncompressed requests. To use the gRPC or gRPC-Web protocols, supply the connect.WithGRPC() or
+// connect.WithGRPCWeb() options.
+//
+// The URL supplied here should be the base URL for the Connect or gRPC server (for example,
+// http://api.acme.com or https://acme.com/grpc).
+func NewFileServiceClient(httpClient connect.HTTPClient, baseURL string, opts ...connect.ClientOption) FileServiceClient {
+	baseURL = strings.TrimRight(baseURL, "/")
+	fileServiceMethods := v1.File_gul_v1_gul_proto.Services().ByName("FileService").Methods()
+	return &fileServiceClient{
+		inspectPath: connect.NewClient[v1.InspectPathRequest, v1.InspectPathResponse](
+			httpClient,
+			baseURL+FileServiceInspectPathProcedure,
+			connect.WithSchema(fileServiceMethods.ByName("InspectPath")),
+			connect.WithClientOptions(opts...),
+		),
+	}
+}
+
+// fileServiceClient implements FileServiceClient.
+type fileServiceClient struct {
+	inspectPath *connect.Client[v1.InspectPathRequest, v1.InspectPathResponse]
+}
+
+// InspectPath calls gul.v1.FileService.InspectPath.
+func (c *fileServiceClient) InspectPath(ctx context.Context, req *connect.Request[v1.InspectPathRequest]) (*connect.Response[v1.InspectPathResponse], error) {
+	return c.inspectPath.CallUnary(ctx, req)
+}
+
+// FileServiceHandler is an implementation of the gul.v1.FileService service.
+type FileServiceHandler interface {
+	InspectPath(context.Context, *connect.Request[v1.InspectPathRequest]) (*connect.Response[v1.InspectPathResponse], error)
+}
+
+// NewFileServiceHandler builds an HTTP handler from the service implementation. It returns the path
+// on which to mount the handler and the handler itself.
+//
+// By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf
+// and JSON codecs. They also support gzip compression.
+func NewFileServiceHandler(svc FileServiceHandler, opts ...connect.HandlerOption) (string, http.Handler) {
+	fileServiceMethods := v1.File_gul_v1_gul_proto.Services().ByName("FileService").Methods()
+	fileServiceInspectPathHandler := connect.NewUnaryHandler(
+		FileServiceInspectPathProcedure,
+		svc.InspectPath,
+		connect.WithSchema(fileServiceMethods.ByName("InspectPath")),
+		connect.WithHandlerOptions(opts...),
+	)
+	return "/gul.v1.FileService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case FileServiceInspectPathProcedure:
+			fileServiceInspectPathHandler.ServeHTTP(w, r)
+		default:
+			http.NotFound(w, r)
+		}
+	})
+}
+
+// UnimplementedFileServiceHandler returns CodeUnimplemented from all methods.
+type UnimplementedFileServiceHandler struct{}
+
+func (UnimplementedFileServiceHandler) InspectPath(context.Context, *connect.Request[v1.InspectPathRequest]) (*connect.Response[v1.InspectPathResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("gul.v1.FileService.InspectPath is not implemented"))
 }
