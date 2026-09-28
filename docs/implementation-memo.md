@@ -1005,6 +1005,20 @@ the current authoritative Writer state without claiming that the original RPC
 succeeded. Focused fault, migration, drift and projection tests cover these
 boundaries.
 
+### E5 epic closeout (2026-09-28)
+
+E5-T1, E5-T2 and E5-T3 are complete. The final audit traced all 24 E5-owned
+requirements through their fake/component implementations, tests and Current
+State records. Independent whole-Epic review and correction confirmation found
+no remaining blocker, medium-or-higher finding or unmet criterion on committed
+candidate `32cf17f`.
+
+Serial `make test`, focused Go race and contract checks, and source-of-truth
+validation passed. These results cover checked adapters and isolated components;
+the live Dolgorae provider, authenticated product assembly and production
+startup remain with E2/E9, E8/E14 and their named later owners. The shared
+consumer dossier remains for E6 and the other pending epics. E6-T1 is next.
+
 ## 2. Current development snapshot
 
 | Area | State |
@@ -1472,4 +1486,4 @@ The initial documentation assumed Gul would manage one Codex App Server, map Ses
 
 ## 12. Handoff
 
-E12, E1, E13, E3 and E4 are complete. The TASK-053 consumer lock and generated contract tooling remain authoritative. E3-T1 added fake-scoped Workspace attachment, E3-T2 added local-only presentation, E3-T3 added passive session reads, and E3-T4 added prospective global Profile launch selection. E5-T1/T2/T3 are complete; the E5-wide audit and closeout remain pending. E2-T0 remains blocked on an accepted compatible Dolgorae executable and live smoke evidence. No product route or live-provider behavior is activated automatically.
+E12, E1, E13, E3, E4 and E5 are complete. The TASK-053 consumer lock and generated contract tooling remain authoritative. E3-T1 added fake-scoped Workspace attachment, E3-T2 added local-only presentation, E3-T3 added passive session reads, and E3-T4 added prospective global Profile launch selection. E5 added whole-session close, reconnect convergence and operation-specific replay against checked fakes; its audit and closeout are complete. E6-T1 is next. E2-T0 remains blocked on an accepted compatible Dolgorae executable and live smoke evidence. No product route or live-provider behavior is activated automatically.

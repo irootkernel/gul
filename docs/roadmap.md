@@ -3,13 +3,12 @@
 | Field | Value |
 | --- | --- |
 | Role | Sole authority for task identity, order, status, dependencies, and phase |
-| Revision | 2026-09-28 E5-T3 completion |
+| Revision | 2026-09-28 E5 epic closeout |
 | Active Task | None |
 | Next | E6-T1 |
 | Required provider | Released Dolgorae v0.1.3 implementing `dolgorae.gul-consumer/v1` |
 
-`Next` names the next queued Task after E5 closeout. E6-T1 is not eligible
-while E5 remains In Progress.
+`Next` names the next queued Task after the completed E5 Epic.
 
 ## 1. Status and execution rules
 
@@ -133,7 +132,7 @@ second owner of membership, order or status.
 | E13 | Completed | Stateful consumer fake provider and reusable scenario harness; E13-T1 | [Roadmap](#e13-supply-stateful-consumer-fakes); [Memo](implementation-memo.md#113-e13-epic-closeout-2026-09-25) |
 | E3 | Completed | Workspace/session presentation and global Profile selection | [Roadmap](#e3-complete-workspace-and-session-presentation); [Memo](implementation-memo.md#118-e3-epic-closeout-2026-09-26) |
 | E4 | Completed | Events, interactions, writer evaluator, complete timeline and artifacts; excludes E4-T4 | [Roadmap](#e4-complete-events-interactions-history-and-action-evaluation); [Memo](implementation-memo.md#e4-epic-closeout-2026-09-27) |
-| E5 | In Progress | Safe whole-session close, projection convergence and ambiguous-outcome handling | [Shared](todo/GUL-CONSUMER-REBASELINE.md) |
+| E5 | Completed | Safe whole-session close, projection convergence and ambiguous-outcome handling | [Roadmap](#e5-complete-safe-close-and-recovery); [Memo](implementation-memo.md#e5-epic-closeout-2026-09-28) |
 | E6 | Planned | Read-only FileService and bounded preview/review | [Shared](todo/GUL-CONSUMER-REBASELINE.md) |
 | E7 | Planned | Responsive UI, mandatory Prompt History, accessibility and IME | [Shared](todo/GUL-CONSUMER-REBASELINE.md) |
 | E8 | Planned | Authentication, browser protection and headless/PWA/tailnet packaging together | [Shared](todo/GUL-CONSUMER-REBASELINE.md) |
