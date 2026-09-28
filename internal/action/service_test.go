@@ -59,6 +59,12 @@ func (actionAttempts) BeginWriter(context.Context, Bound, bool, uint64) (string,
 }
 func (actionAttempts) FinishWriter(context.Context, string, string) error { return nil }
 
+type failingWriterAttempts struct{ actionAttempts }
+
+func (failingWriterAttempts) FinishWriter(context.Context, string, string) error {
+	return errors.New("disk unavailable")
+}
+
 func (c actionCarrier) Resolve(_ context.Context, _, id string) (session.Carrier, error) {
 	if c.missing {
 		return session.Carrier{}, ErrAuthority
@@ -270,6 +276,28 @@ func TestCredentialAndOperationGuardsNeverInvokeProviderMutation(t *testing.T) {
 
 func observationCursor(revision uint64) observation.Cursor {
 	return observation.Cursor(strconv.FormatUint(revision, 10))
+}
+
+func TestWriterAttemptPersistenceFailureFailsClosedAfterDispatch(t *testing.T) {
+	for _, providerError := range []error{nil, ErrUnavailable} {
+		p := &actionProvider{input: readerInput(), fail: providerError}
+		s := actionService(p)
+		s.Attempts = failingWriterAttempts{}
+		_, err := s.Acquire(t.Context(), "owner", "session")
+		want := ErrOutcomeUnknown
+		if providerError != nil {
+			want = ErrPersistence
+		}
+		if !errors.Is(err, want) || p.acquire != 1 {
+			t.Fatalf("post-dispatch persistence failure = %v, calls=%d", err, p.acquire)
+		}
+	}
+	p := &actionProvider{input: readerInput()}
+	s := actionService(p)
+	s.Attempts = nil
+	if _, err := s.Acquire(t.Context(), "owner", "session"); !errors.Is(err, ErrPersistence) || p.acquire != 0 {
+		t.Fatalf("missing attempt store dispatched = %v, calls=%d", err, p.acquire)
+	}
 }
 
 func TestAmbiguousWriterFailureIsNeverRetried(t *testing.T) {

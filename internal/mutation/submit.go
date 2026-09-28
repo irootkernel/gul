@@ -35,8 +35,15 @@ type SubmitProvider interface {
 	ReconcileTurn(context.Context, SubmitReference) (SubmitEvidence, error)
 }
 
+type SubmitAttempts interface {
+	Mutation(context.Context, string) (operation.MutationAttempt, error)
+	BeginMutation(context.Context, operation.MutationAttempt) (operation.MutationAttempt, bool, error)
+	MarkOutcomeUnknown(context.Context, string) error
+	ResolveMutation(context.Context, string, string) error
+}
+
 type SubmitService struct {
-	Attempts StartAttempts
+	Attempts SubmitAttempts
 	Provider SubmitProvider
 	Gate     func(string, string) bool // subject, Run; compatibility and convergence
 	mu       sync.Mutex

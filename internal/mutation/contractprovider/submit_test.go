@@ -73,4 +73,10 @@ func TestSubmitAdapterUsesTrustedPathsAndDoesNotInferAcceptanceFromHistory(t *te
 	if _, err := provider.SubmitTurn(t.Context(), request); !errors.Is(err, ErrInvalidProjection) {
 		t.Fatalf("mismatched accepted key = %v", err)
 	}
+	port.badKey = false
+	port.submission = nil
+	request.Canonical = append(append([]byte(nil), b...), 0xf8, 0x07, 0x01)
+	if _, err := provider.SubmitTurn(t.Context(), request); !errors.Is(err, mutation.ErrInvalid) || port.submission != nil {
+		t.Fatalf("unknown request field reached provider: %v", err)
+	}
 }

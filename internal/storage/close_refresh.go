@@ -164,9 +164,20 @@ func (r CloseRefreshRepository) CompleteRefresh(ctx context.Context, b action.Bo
 		encoded, _ := json.Marshal(closeStamp(stamp))
 		_, err = tx.ExecContext(ctx, `UPDATE runtime_projection_cache SET projection_stamp=?,freshness='fresh' WHERE subject_id=? AND session_id=? AND aggregate_kind=?`, string(encoded), b.Binding.SubjectID, b.Binding.ID, aggregate)
 	} else if kind == observation.Timeline {
-		_, err = tx.ExecContext(ctx, `INSERT INTO runtime_timeline_cache(subject_id,session_id,captured_head_cursor) VALUES(?,?,?)
-ON CONFLICT(subject_id,session_id) DO UPDATE SET captured_head_cursor=excluded.captured_head_cursor
-WHERE length(excluded.captured_head_cursor)>length(captured_head_cursor) OR (length(excluded.captured_head_cursor)=length(captured_head_cursor) AND excluded.captured_head_cursor>=captured_head_cursor)`, b.Binding.SubjectID, b.Binding.ID, string(stamp.Head))
+		var current observation.Cursor
+		err = tx.QueryRowContext(ctx, `SELECT captured_head_cursor FROM runtime_timeline_cache WHERE subject_id=? AND session_id=?`, b.Binding.SubjectID, b.Binding.ID).Scan(&current)
+		if err != nil && !errors.Is(err, sql.ErrNoRows) {
+			return err
+		}
+		if err == nil && !current.Valid() {
+			return sessionclose.ErrUnavailable
+		}
+		if errors.Is(err, sql.ErrNoRows) || stamp.Head.Compare(current) >= 0 {
+			_, err = tx.ExecContext(ctx, `INSERT INTO runtime_timeline_cache(subject_id,session_id,captured_head_cursor) VALUES(?,?,?)
+ON CONFLICT(subject_id,session_id) DO UPDATE SET captured_head_cursor=excluded.captured_head_cursor`, b.Binding.SubjectID, b.Binding.ID, string(stamp.Head))
+		} else {
+			err = nil
+		}
 	}
 	if err != nil {
 		return err

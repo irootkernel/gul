@@ -887,6 +887,7 @@ client_projection_notifications
 provider_operation_attempts
 session_close_attempts
 session_close_operations
+mutation_attempt_details
 schema_migrations
 ```
 
@@ -894,8 +895,8 @@ schema_migrations
 favorite tables, and migration 4 adds `primary_session_bindings`. Migration 5
 adds `observation_checkpoint_stamps`, `observation_refreshes`, and
 `client_projection_notifications`. Migration 6 adds `session_close_attempts`
-and `session_close_operations`. The remaining tables were created by the initial
-migration.
+and `session_close_operations`. Migration 7 adds `mutation_attempt_details`.
+The remaining tables were created by the initial migration.
 
 Prohibited authoritative tables/aggregates include Codex threads, Turns, workspace writer locks, writer generations, pending runtime interactions, native subagents, background processes, and runtime recovery state. A projection table is named and documented as a cache.
 
@@ -1264,6 +1265,9 @@ probe, a process-local action gate, independent per-Run refresh and convergence,
 and live or unary-poll observation admission. SQLite keeps Run, Writer,
 Interaction, timeline and delivery state separate; provider loss marks
 projections stale and retains the committed cursor and unresolved attempts.
+The reconnect snapshot reader uses the direct provider read port before the
+action gate opens; routing those reads through gated action admission would
+prevent startup convergence.
 An in-flight recovery cannot publish readiness after a newer provider-loss
 notification revokes its gate; a replacement recovery waits for disconnect
 invalidation to finish.

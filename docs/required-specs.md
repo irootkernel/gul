@@ -499,11 +499,14 @@ no Run or Controller carrier.
 E4 adds typed event delivery, Controller Interaction handling, shared action
 eligibility and bounded history/result/artifact reads. Its 41 requirements are
 accepted against checked provider fakes and isolated browser components; live
-provider qualification, reconnect and authenticated product assembly remain with
+provider qualification and authenticated product assembly remain with
 their named later owners. E5-T1 adds whole-session close, explicit recovery,
 typed provider health and bounded restart policy against injected components.
-Its nine requirements are accepted at the same fake/component boundary;
-startup convergence, general replay policy and assembled UI remain future work.
+Its nine requirements are accepted at the same fake/component boundary.
+E5-T2 adds provider and browser reconnect coordination, startup convergence,
+and stamp gating against controlled fakes. E5-T3 adds operation-specific replay
+and uncertainty handling against checked provider fakes. Both remain unmounted;
+assembled UI and live-provider qualification remain future work.
 
 | Requirement | Accepted Current State | Evidence |
 |---|---|---|

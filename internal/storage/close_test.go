@@ -331,6 +331,65 @@ func TestCloseBeginRollsBackAndRejectsUnrelatedUnknown(t *testing.T) {
 	}
 }
 
+func TestExplicitRecoveryCanInspectControllerWithUnknownWriterAttempt(t *testing.T) {
+	s, filename := openTestStore(t)
+	b := closeBound(t, s)
+	id, err := s.WriterAttempts().BeginWriter(t.Context(), b, true, 4)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := s.Close(); err != nil {
+		t.Fatal(err)
+	}
+	s, err = Open(t.Context(), filename)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer s.Close()
+	if attempt, err := s.Attempts().Mutation(t.Context(), id); err != nil || attempt.State != "outcome_unknown" {
+		t.Fatalf("reopened writer attempt = %+v, %v", attempt, err)
+	}
+	if _, _, err := s.SessionClose().Begin(t.Context(), b, closeAttempt("close", sessionclose.Close)); !errors.Is(err, sessionclose.ErrConflict) {
+		t.Fatalf("ordinary close admitted during uncertainty: %v", err)
+	}
+	recovery, dispatch, err := s.SessionClose().Begin(t.Context(), b, closeAttempt("recover", sessionclose.Recover))
+	if err != nil || !dispatch {
+		t.Fatalf("explicit recovery blocked: %+v %t %v", recovery, dispatch, err)
+	}
+	if _, _, err := s.SessionClose().Begin(t.Context(), b, closeAttempt("reconcile", sessionclose.Reconcile)); !errors.Is(err, sessionclose.ErrConflict) {
+		t.Fatalf("second recovery admitted while first is pending: %v", err)
+	}
+	if attempt, err := s.Attempts().Mutation(t.Context(), id); err != nil || attempt.State != "outcome_unknown" {
+		t.Fatalf("recovery cleared unrelated uncertainty: %+v, %v", attempt, err)
+	}
+}
+
+func TestExplicitReconcileCanInspectControllerWithUnknownSubmitAttempt(t *testing.T) {
+	s, _ := openTestStore(t)
+	defer s.Close()
+	b := closeBound(t, s)
+	now := time.Now().UTC()
+	_, dispatch, err := s.Attempts().BeginMutation(t.Context(), MutationAttempt{OperationAttempt: OperationAttempt{
+		OperationID: "submit", SubjectID: b.Binding.SubjectID, Kind: "SubmitTurn", RequestSHA256: strings.Repeat("a", 64),
+		ControllerReferences: []ControllerReference{{Role: "source", BindingID: b.Binding.ControllerBindingID, ExpectedControllerID: b.Carrier.ControllerID}},
+		State:                "pending", CreatedAt: now}, TargetRef: b.Binding.RunID, DeadlineAt: now.Add(20 * time.Second), ReconciliationRoute: "run_timeline"})
+	if err != nil || !dispatch {
+		t.Fatalf("submit attempt = %t %v", dispatch, err)
+	}
+	if _, _, err := s.SessionClose().Begin(t.Context(), b, closeAttempt("pending-reconcile", sessionclose.Reconcile)); !errors.Is(err, sessionclose.ErrConflict) {
+		t.Fatalf("reconcile passed pending submit: %v", err)
+	}
+	if err := s.Attempts().MarkOutcomeUnknown(t.Context(), "submit"); err != nil {
+		t.Fatal(err)
+	}
+	if _, _, err := s.SessionClose().Begin(t.Context(), b, closeAttempt("ordinary-close", sessionclose.Close)); !errors.Is(err, sessionclose.ErrConflict) {
+		t.Fatalf("close passed unknown submit: %v", err)
+	}
+	if _, dispatch, err := s.SessionClose().Begin(t.Context(), b, closeAttempt("reconcile", sessionclose.Reconcile)); err != nil || !dispatch {
+		t.Fatalf("explicit reconcile blocked by unknown submit: %t %v", dispatch, err)
+	}
+}
+
 func TestCloseMigrationFromVersionFivePreservesBinding(t *testing.T) {
 	s, filename := openTestStore(t)
 	b := closeBound(t, s)

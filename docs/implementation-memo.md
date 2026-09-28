@@ -953,6 +953,23 @@ maintenance loop, or live Dolgorae proof is enabled.
 | REQ-API-002 | Unary Writer browser retries cannot retransmit after a lost response; typed unknown state remains visible through the action boundary |
 | REQ-PROMPT-005 | Run/timeline reads and unrelated history items never treat a missing page or matching text as proof that SubmitTurn was unaccepted |
 
+The whole-Epic review found that storage rejected provider-advertised
+Recover/Reconcile after an unrelated SubmitTurn or Writer attempt became
+`outcome_unknown`. Explicit recovery now passes the overlap check only for an
+exact Controller binding and ID. Pending attempts, unscoped records, ordinary
+Close, and a second simultaneous recovery remain blocked. Reopen and
+pending/unknown tests exercise the boundary without clearing the older
+uncertainty. The public Run/timeline projections cannot settle an unknown
+SubmitTurn after process exit; Close stays blocked until authoritative evidence
+exists. The review also identified missing fault coverage for result
+persistence; focused tests now verify that Writer and Interaction failures
+after dispatch return typed uncertainty or unavailability without another
+provider call. The SubmitTurn adapter rejects unknown protobuf fields before
+dispatch, and execution-state reads fail closed if the opaque operation
+reference cannot be persisted. The architecture inventory now names migration
+7, and the Current State ledger distinguishes completed E5 coordination from
+unmounted product assembly.
+
 ## 2. Current development snapshot
 
 | Area | State |

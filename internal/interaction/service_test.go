@@ -46,6 +46,24 @@ func (interactionAttempts) ReconcileInteraction(context.Context, Bound, string, 
 	return nil
 }
 
+type failingInteractionAttempts struct {
+	interactionAttempts
+	finishFail, reconcileFail bool
+}
+
+func (a failingInteractionAttempts) FinishInteraction(context.Context, string, string) error {
+	if a.finishFail {
+		return errors.New("disk unavailable")
+	}
+	return nil
+}
+func (a failingInteractionAttempts) ReconcileInteraction(context.Context, Bound, string, Status) error {
+	if a.reconcileFail {
+		return errors.New("disk unavailable")
+	}
+	return nil
+}
+
 func (c *credentials) Resolve(context.Context, string, string) (session.Carrier, error) {
 	c.calls.Add(1)
 	if c.fail {
@@ -110,6 +128,31 @@ func (p *fakeProvider) Observe(ctx context.Context, b Bound) (PendingState, erro
 }
 func service(p *fakeProvider, c *credentials) *Service {
 	return &Service{Actions: allowActions{}, Repository: bindings{}, Workspaces: workspaces{}, Carriers: c, Provider: p, Attempts: interactionAttempts{}}
+}
+
+func TestInteractionAttemptPersistenceFailureFailsClosedAfterDispatch(t *testing.T) {
+	for _, lost := range []bool{false, true} {
+		p := &fakeProvider{status: Pending, loss: lost}
+		s := service(p, &credentials{})
+		s.Attempts = failingInteractionAttempts{finishFail: true}
+		body := []byte(`{"answers":{"q":{"answers":["secret"]}}}`)
+		result, err := s.Resolve(t.Context(), "owner", "session", "id", body)
+		if !errors.Is(err, ErrUnavailable) || result.Outcome != OutcomeUnknown || p.calls != 1 {
+			t.Fatalf("post-dispatch persistence failure = %+v, %v, calls=%d", result, err, p.calls)
+		}
+	}
+	p := &fakeProvider{status: Resolved}
+	s := service(p, &credentials{})
+	s.Attempts = failingInteractionAttempts{reconcileFail: true}
+	if _, err := s.Get(t.Context(), "owner", "session", "id"); !errors.Is(err, ErrUnavailable) || p.calls != 0 {
+		t.Fatalf("failed reconciliation exposed card = %v, calls=%d", err, p.calls)
+	}
+	p = &fakeProvider{status: Pending}
+	s = service(p, &credentials{})
+	s.Attempts = nil
+	if _, err := s.Resolve(t.Context(), "owner", "session", "id", []byte(`{"answers":{"q":{"answers":["secret"]}}}`)); !errors.Is(err, ErrUnavailable) || p.calls != 0 {
+		t.Fatalf("missing attempt store dispatched = %v, calls=%d", err, p.calls)
+	}
 }
 
 func TestResponseLossNeverReplaysOrRetainsInput(t *testing.T) {

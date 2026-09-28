@@ -72,6 +72,12 @@ type blockingProvider struct {
 
 type memoryRepository struct{ bindings map[string]session.Binding }
 
+type failingOperationReferenceRepository struct{ *memoryRepository }
+
+func (failingOperationReferenceRepository) OperationReference(context.Context, session.Binding, string) (string, error) {
+	return "", errors.New("local reference write failed")
+}
+
 type failedRepository struct{ session.Repository }
 
 func (failedRepository) Binding(context.Context, string, string) (session.Binding, error) {
@@ -501,6 +507,24 @@ func TestStaleCacheEvictsOldestOf257Sessions(t *testing.T) {
 	}
 }
 
+func TestOperationReferencePersistenceFailureDoesNotReturnCachedState(t *testing.T) {
+	repo := &memoryRepository{bindings: map[string]session.Binding{
+		"owner/session": {SubjectID: "owner", ID: "session", WorkspaceID: "workspace", RunID: "run", ControllerBindingID: "controller", ProviderSessionID: "provider-session"},
+	}}
+	provider := &fixedProvider{}
+	svc := session.NewService(workspaces{"owner/workspace": {ID: "workspace", ProviderID: "provider-workspace"}},
+		failingOperationReferenceRepository{repo}, provider,
+		carriers{"owner/controller": {AbsolutePath: "/carrier", ControllerID: "controller", Generation: 1}})
+	if state, err := svc.GetExecutionState(t.Context(), "owner", "session"); err != nil || state.Freshness != "fresh" {
+		t.Fatalf("initial snapshot = %+v, %v", state, err)
+	}
+	provider.closeOperationID = "provider-close"
+	state, err := svc.GetExecutionState(t.Context(), "owner", "session")
+	if !errors.Is(err, session.ErrPersistenceUnavailable) || state.Snapshot != nil || state.Freshness != "" {
+		t.Fatalf("reference write exposed cached state = %+v, %v", state, err)
+	}
+}
+
 func TestCancelledBindPreservesCancellation(t *testing.T) {
 	ctx, cancel := context.WithCancel(t.Context())
 	cancel()
@@ -561,8 +585,9 @@ func TestOversizedProviderSnapshotIsRejectedBeforePersistence(t *testing.T) {
 }
 
 type fixedProvider struct {
-	offline   bool
-	sessionID string
+	offline          bool
+	sessionID        string
+	closeOperationID string
 }
 
 func (p *fixedProvider) Snapshot(ctx context.Context, attachment workspace.Attachment, runID string, _ session.Carrier) (session.Snapshot, error) {
@@ -575,7 +600,7 @@ func (p *fixedProvider) Snapshot(ctx context.Context, attachment workspace.Attac
 	}
 	return session.Snapshot{ProviderSessionID: id, PrimaryRunID: runID, ProviderWorkspaceID: attachment.ProviderID,
 		Lifecycle: "active", Composition: "standalone_primary", ApprovalPolicy: "user_approval_required", CloseProgress: "none", Recovery: "none",
-		AggregateRevision: 1, RunRevision: 1, ObservedAt: time.Now().UTC()}, nil
+		AggregateRevision: 1, RunRevision: 1, CloseOperationID: p.closeOperationID, ObservedAt: time.Now().UTC()}, nil
 }
 
 func (r *memoryRepository) OperationReference(_ context.Context, b session.Binding, providerID string) (string, error) {

@@ -18,6 +18,8 @@ var ErrUnavailable = errors.New("reconnect unavailable")
 
 type Compatibility interface{ Check(context.Context) error }
 type SnapshotReader interface {
+	// Read must use the raw provider read port: this coordinator opens the
+	// action gate only after these snapshots converge.
 	Read(context.Context, action.Bound) (action.Input, error)
 }
 type Invalidator interface {

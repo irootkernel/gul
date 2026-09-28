@@ -110,7 +110,13 @@ func (r CloseRepository) Begin(ctx context.Context, b action.Bound, a sessionclo
 		for _, ref := range refs {
 			matches = matches || ref.BindingID == b.Binding.ID || ref.BindingID == b.Binding.ControllerBindingID || ref.ExpectedControllerID == b.Carrier.ControllerID
 		}
-		if matches && !(state == "outcome_unknown" && closeSession == a.SessionID && a.Kind != sessionclose.Close) {
+		// Explicit recovery may inspect the same Controller even while an older
+		// mutation outcome is unknown. A pending call, an unscoped legacy row,
+		// or an ordinary Close still owns the overlap lock.
+		recoverable := state == "outcome_unknown" && a.Kind != sessionclose.Close &&
+			(closeSession == a.SessionID || closeSession == "" && len(refs) == 1 &&
+				refs[0].BindingID == b.Binding.ControllerBindingID && refs[0].ExpectedControllerID == b.Carrier.ControllerID)
+		if matches && !recoverable {
 			blocked = true
 			break
 		}
