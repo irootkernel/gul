@@ -983,9 +983,27 @@ four-entry cap evicts them; unresolved non-secret attempts remain. Replay purge
 uses the earlier of canonical request time and file modification time, so an
 orphan created from an old request cannot outlive the 72-hour semantic limit.
 Focused path, orphan, retention, and memory tests cover these corrections. A
-failed Close response save remains fail-closed until process reopen converts
-the unfinished dispatch to an unknown attempt; elapsed time alone cannot prove
-its call has ended.
+failed Close response save remains fail-closed while storage is unavailable.
+The same service retains the finished dispatch in memory and persists its
+uncertainty before later observation, without sending the call again. Process
+reopen converts an unfinished dispatch to an unknown attempt; elapsed time
+alone cannot prove its call has ended.
+
+A subsequent whole-Epic review identified a close-operation correlation gap:
+terminal Close confirmation requires the provider operation reference returned
+by that dispatch and a matching complete/abort intent. A foreign close after a
+lost response leaves the original attempt unknown. Reconnect checks the full
+pinned consumer method inventory and required Writer/artifact features before
+opening the mutation gate. Writer Acquire/Release uses the declared 15-second
+deadline; migration 8 records the pre-call Writer revision and generation with
+the attempt and records when its dispatch ends. A later fresh, converged
+Run/Writer read settles an unknown tokenless attempt only when the dispatch
+has ended, the target owner's Writer revision and generation advance, and
+the cached stamps remain current in the settlement transaction. Pre-v8
+unknown Writer attempts have no baseline and stay unresolved. This records
+the current authoritative Writer state without claiming that the original RPC
+succeeded. Focused fault, migration, drift and projection tests cover these
+boundaries.
 
 ## 2. Current development snapshot
 
@@ -997,7 +1015,7 @@ its call has ended.
 | Production source | E1 shared core, bundle, API declarations, isolated SQLite and Wails shell; E3-T1 adds Workspace attachment; E3-T2 adds local presentation; E3-T3 adds passive session binding and aggregate reads; E3-T4 adds global Profile launch selection; E4 adds typed observation, Interaction cards, shared action eligibility and history/result/artifact adapters; E5-T1 adds whole-session close, explicit recovery, provider health and an injected restart supervisor; E5-T2 adds reconnect coordination and stamp convergence; E5-T3 adds mutation attempts and operation-specific replay coordination; handlers remain unmounted |
 | Wails host/frontend | One React foundation bundle and isolated Wails shell foundation implemented; E3-T4 launch selector is unmounted and authenticated attach is not implemented |
 | ConnectRPC schema/services | Gul Runtime, DirectSession, ArtifactPresentation and WorkspacePresentation declarations and generated clients exist; isolated handlers remain unmounted |
-| Gul SQLite schema | Gul-owned version 7 schema with Workspace attachment, favorites, Primary binding, event metadata, session-close attempts and mutation-attempt details; production startup integration pending |
+| Gul SQLite schema | Gul-owned version 8 schema with Workspace attachment, favorites, Primary binding, event metadata, session-close attempts, mutation-attempt details and Writer reconciliation baselines; production startup integration pending |
 | Dolgorae RPC supervisor/provider | Bounded restart policy implemented against an injected lifecycle; production process ownership and live provider remain pending |
 | Controller credential store | Caller-owned mechanism selected by ADR-0047; not implemented |
 | FileService/auth/PWA/Tailscale integration | Not implemented |

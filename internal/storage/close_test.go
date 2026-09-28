@@ -338,7 +338,7 @@ func TestCloseBeginRollsBackAndRejectsUnrelatedUnknown(t *testing.T) {
 func TestExplicitRecoveryCanInspectControllerWithUnknownWriterAttempt(t *testing.T) {
 	s, filename := openTestStore(t)
 	b := closeBound(t, s)
-	id, err := s.WriterAttempts().BeginWriter(t.Context(), b, true, 4)
+	id, err := s.WriterAttempts().BeginWriter(t.Context(), b, true, 4, action.WriterProjection{Revision: 2})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -397,7 +397,7 @@ func TestExplicitReconcileCanInspectControllerWithUnknownSubmitAttempt(t *testin
 func TestCloseMigrationFromVersionFivePreservesBinding(t *testing.T) {
 	s, filename := openTestStore(t)
 	b := closeBound(t, s)
-	for _, query := range []string{`DROP TABLE mutation_attempt_details`, `DROP TABLE session_close_operations`, `DROP TABLE session_close_attempts`, `DELETE FROM schema_migrations WHERE version IN (6,7)`, `PRAGMA user_version=5`} {
+	for _, query := range []string{`DROP TABLE writer_attempt_details`, `DROP TABLE mutation_attempt_details`, `DROP TABLE session_close_operations`, `DROP TABLE session_close_attempts`, `DELETE FROM schema_migrations WHERE version IN (6,7,8)`, `PRAGMA user_version=5`} {
 		if _, err := s.writer.ExecContext(t.Context(), query); err != nil {
 			t.Fatal(err)
 		}

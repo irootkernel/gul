@@ -158,6 +158,7 @@ func terminal(in *action.Input) {
 	in.Run.Lifecycle = action.Closed
 	in.Aggregate.Lifecycle = action.SessionCompleted
 	in.Aggregate.CloseProgress = action.CloseCompleted
+	in.Aggregate.CloseIntent = action.CompleteSession
 }
 
 func TestCloseReceiptAndStableAttemptRequireIndependentWholeSessionConfirmation(t *testing.T) {
@@ -198,6 +199,7 @@ func TestCloseReceiptAndStableAttemptRequireIndependentWholeSessionConfirmation(
 			}
 		})
 	}
+	f.state.operation = "provider-close"
 	f.state.change(func(in *action.Input) { *in = readyInput(); terminal(in) })
 	confirmed, err := f.service.Close(t.Context(), "owner", "session", "request", false)
 	if err != nil || confirmed.Status != sessionclose.Confirmed || confirmed.AttemptID != first.AttemptID || f.mutations.calls.Load() != 1 || f.refresh.calls.Load() == 0 {
@@ -231,6 +233,42 @@ func TestLostResponseNeverReplaysAndUnknownRetainsBlocker(t *testing.T) {
 	}
 	if _, err := f.service.Close(t.Context(), "owner", "session", "request", true); !errors.Is(err, sessionclose.ErrConflict) {
 		t.Fatal("changed repeat admitted", err)
+	}
+}
+
+func TestCloseDoesNotConfirmAnotherOperationOrOppositeIntent(t *testing.T) {
+	for _, tc := range []struct {
+		name string
+		lost bool
+	}{{name: "uncorrelated response loss", lost: true}, {name: "opposite intent", lost: false}} {
+		t.Run(tc.name, func(t *testing.T) {
+			f := newFixture(t)
+			if tc.lost {
+				f.mutations.fn = func(context.Context, action.Bound, sessionclose.Kind, uint64, bool) (sessionclose.Mutation, error) {
+					return sessionclose.Mutation{}, errors.New("lost reply")
+				}
+			}
+			first, err := f.service.Close(t.Context(), "owner", "session", "request", false)
+			if err != nil {
+				t.Fatal(err)
+			}
+			f.state.operation = "provider-close"
+			if tc.lost {
+				f.state.operation = "another-close"
+			}
+			f.state.change(func(in *action.Input) {
+				terminal(in)
+				if !tc.lost {
+					in.Aggregate.Lifecycle = action.SessionAborted
+					in.Aggregate.CloseProgress = action.CloseAborted
+					in.Aggregate.CloseIntent = action.AbortSession
+				}
+			})
+			out, err := f.service.Close(t.Context(), "owner", "session", "request", false)
+			if err != nil || out.Status == sessionclose.Confirmed || out.AttemptID != first.AttemptID || f.mutations.calls.Load() != 1 {
+				t.Fatalf("foreign close confirmed: %+v, %v", out, err)
+			}
+		})
 	}
 }
 
@@ -571,7 +609,12 @@ func TestClosePostTransmissionStorageFailuresNeverPermitResend(t *testing.T) {
 				f.state.operation = "observed-operation"
 			}
 			repository.failReference, repository.failSave = point != "save", point == "save"
-			if _, err := f.service.Close(t.Context(), "owner", "session", "request", false); !errors.Is(err, failure) {
+			out, err := f.service.Close(t.Context(), "owner", "session", "request", false)
+			if point == "observation-reference" {
+				if err != nil || out.Status != sessionclose.OutcomeUnknown || out.OperationRef != "" {
+					t.Fatalf("unrelated provider operation was attributed: %+v, %v", out, err)
+				}
+			} else if !errors.Is(err, failure) {
 				t.Fatalf("failure lost: %v", err)
 			}
 			retained, found, err := f.store.SessionClose().Find(t.Context(), "owner", "session", "request")
@@ -586,8 +629,21 @@ func TestClosePostTransmissionStorageFailuresNeverPermitResend(t *testing.T) {
 				t.Fatalf("unsafe retained state: %+v", retained)
 			}
 			repository.failSave, repository.failReference = false, false
-			if _, err := f.service.Close(t.Context(), "owner", "session", "request", false); err != nil {
+			if point == "save" {
+				if err := f.service.ObservePending(t.Context(), "owner", "session"); err != nil {
+					t.Fatal(err)
+				}
+				retained, found, err = f.store.SessionClose().Find(t.Context(), "owner", "session", "request")
+				if err != nil || !found || !retained.DispatchFinished || retained.Outcome.Status == sessionclose.InProgress && retained.Outcome.NextAction == "WAIT" {
+					t.Fatalf("completed dispatch was not restored for observation: %+v, %v", retained, err)
+				}
+			}
+			recovered, err := f.service.Close(t.Context(), "owner", "session", "request", false)
+			if err != nil {
 				t.Fatal(err)
+			}
+			if point == "reference" && recovered.OperationRef == "" {
+				t.Fatal("original provider operation identity was lost after storage recovered")
 			}
 			if out, err := f.service.Close(t.Context(), "owner", "session", "different", false); err != nil || out.Status != sessionclose.Rejected {
 				t.Fatalf("conflicting retry admitted: %+v, %v", out, err)

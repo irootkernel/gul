@@ -33,8 +33,10 @@ type OperationAttempt = Attempt
 
 type MutationAttempt struct {
 	OperationAttempt
-	TargetRef           string
-	DeadlineAt          time.Time
-	ReconciliationRoute string
-	OutcomeRef          string
+	TargetRef              string
+	DeadlineAt             time.Time
+	ReconciliationRoute    string
+	OutcomeRef             string
+	WriterRevisionBefore   uint64
+	WriterGenerationBefore uint64
 }

@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"sync"
 	"time"
 
 	"github.com/rootkernel/gul/internal/action"
@@ -20,6 +21,79 @@ type Service struct {
 	Sessions   *session.Service
 	Provider   Provider
 	Refresh    Refresher
+	finishedMu sync.Mutex
+	finished   map[string]finishedClose
+}
+
+type finishedClose struct {
+	attempt           Attempt
+	providerOperation string
+}
+
+func (s *Service) remember(a Attempt, providerOperation string) {
+	s.finishedMu.Lock()
+	defer s.finishedMu.Unlock()
+	if s.finished == nil {
+		s.finished = make(map[string]finishedClose)
+	}
+	s.finished[a.ID] = finishedClose{attempt: a, providerOperation: providerOperation}
+}
+
+func (s *Service) forget(id string) {
+	s.finishedMu.Lock()
+	delete(s.finished, id)
+	s.finishedMu.Unlock()
+}
+
+func (s *Service) completed(id string) (finishedClose, bool) {
+	s.finishedMu.Lock()
+	defer s.finishedMu.Unlock()
+	a, ok := s.finished[id]
+	return a, ok
+}
+
+func (s *Service) flushCompleted(ctx context.Context, a Attempt) (Attempt, error) {
+	finished, ok := s.completed(a.ID)
+	if !ok || finished.attempt.SubjectID != a.SubjectID || finished.attempt.SessionID != a.SessionID || finished.attempt.RequestID != a.RequestID {
+		return a, nil
+	}
+	if finished.providerOperation != "" && finished.attempt.Outcome.OperationRef == "" {
+		binding, err := s.Repository.Binding(ctx, a.SubjectID, a.SessionID)
+		if err != nil {
+			return a, err
+		}
+		ref, err := s.Repository.OperationReference(ctx, binding, finished.providerOperation)
+		if err != nil {
+			return a, err
+		}
+		finished.attempt.Outcome.OperationRef = ref
+	}
+	if err := s.Repository.Save(ctx, finished.attempt); err != nil {
+		return a, err
+	}
+	s.forget(a.ID)
+	current, found, err := s.Repository.Find(ctx, a.SubjectID, a.SessionID, a.RequestID)
+	if err != nil || !found {
+		return a, errors.Join(err, ErrUnavailable)
+	}
+	return current, nil
+}
+
+func (s *Service) flushSession(ctx context.Context, subject, id string) error {
+	s.finishedMu.Lock()
+	var entries []Attempt
+	for _, a := range s.finished {
+		if a.attempt.SubjectID == subject && a.attempt.SessionID == id {
+			entries = append(entries, a.attempt)
+		}
+	}
+	s.finishedMu.Unlock()
+	for _, a := range entries {
+		if _, err := s.flushCompleted(ctx, a); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (s *Service) Close(ctx context.Context, subject, id, requestID string, interrupt bool) (Outcome, error) {
@@ -55,6 +129,12 @@ func (s *Service) execute(ctx context.Context, subject, id, requestID string, ki
 	if found {
 		if previous.RequestSHA256 != digest {
 			return Outcome{}, ErrConflict
+		}
+		if _, ok := s.completed(previous.ID); ok {
+			previous, err = s.flushCompleted(ctx, previous)
+			if err != nil {
+				return Outcome{}, err
+			}
 		}
 		if !previous.DispatchFinished || previous.Outcome.Status == Rejected || previous.Outcome.Status == Confirmed {
 			return previous.Outcome, nil
@@ -108,6 +188,7 @@ func (s *Service) execute(ctx context.Context, subject, id, requestID string, ki
 		if mutation.OperationID != "" {
 			attempt.Outcome.OperationRef, err = s.Repository.OperationReference(saveCtx, bound.Binding, mutation.OperationID)
 			if err != nil {
+				s.remember(attempt, mutation.OperationID)
 				_ = s.Repository.Save(saveCtx, attempt)
 				return Outcome{}, err
 			}
@@ -118,9 +199,11 @@ func (s *Service) execute(ctx context.Context, subject, id, requestID string, ki
 			attempt.Outcome.Status = InProgress
 		}
 	}
+	s.remember(attempt, "")
 	if err := s.Repository.Save(saveCtx, attempt); err != nil {
 		return Outcome{}, err
 	}
+	s.forget(attempt.ID)
 	if attempt.Outcome.Status == Rejected || ctx.Err() != nil {
 		return attempt.Outcome, nil
 	}
@@ -144,6 +227,9 @@ func (s *Service) ObservePending(ctx context.Context, subject, id string) error 
 	}
 	if b.SubjectID != subject || b.ID != id {
 		return session.ErrNotFound
+	}
+	if err := s.flushSession(ctx, subject, id); err != nil {
+		return err
 	}
 	attempts, err := s.Repository.Pending(ctx, subject, id)
 	if err != nil {
@@ -190,15 +276,16 @@ func (s *Service) observe(ctx context.Context, attempt Attempt) (Outcome, error)
 	if (evaluation.Flags.RequiresFreshSnapshot && !evaluation.Flags.CanRecover && !evaluation.Flags.CanReconcile) || evaluation.Flags.BlockedByProviderCompatibility || evaluation.Flags.BlockedByCredentialState || state.Snapshot.AggregateRevision != input.Aggregate.Revision || state.Snapshot.RunRevision != input.Run.Stamp.Run {
 		return attempt.Outcome, nil
 	}
-	if operation := state.Snapshot.CloseOperationID; operation != "" {
+	matchedClose := false
+	if operation := state.Snapshot.CloseOperationID; attempt.Kind == Close && operation != "" && attempt.Outcome.OperationRef != "" {
 		ref, err := s.Repository.OperationReference(ctx, bound.Binding, operation)
 		if err != nil {
 			return Outcome{}, err
 		}
-		if attempt.Outcome.OperationRef != "" && attempt.Outcome.OperationRef != ref {
+		if attempt.Outcome.OperationRef != ref {
 			return attempt.Outcome, nil
 		}
-		attempt.Outcome.OperationRef = ref
+		matchedClose = true
 	}
 	aggregate := input.Aggregate
 	attempt.Outcome.Code = ""
@@ -222,6 +309,10 @@ func (s *Service) observe(ctx context.Context, attempt Attempt) (Outcome, error)
 		}
 		attempt.Outcome.Status, attempt.Outcome.NextAction = Confirmed, "ABORT"
 	case input.Run.Lifecycle == action.Closed && (aggregate.CloseProgress == action.CloseCompleted || aggregate.CloseProgress == action.CloseAborted) && (aggregate.Lifecycle == action.SessionCompleted || aggregate.Lifecycle == action.SessionAborted) && aggregate.NonterminalSpawns == 0 && aggregate.PendingApprovals == 0 && aggregate.AcceptedUnfinishedTasks == 0 && input.Run.ActiveTurn == action.Missing && input.Run.Pending == 0 && (input.Run.Background == action.Absent || input.Run.Background == action.NotApplicable) && input.Run.Authority == action.Unowned && input.Writer.Owner != action.ThisSession && !input.Writer.BackgroundBlocked && !input.Writer.RecoveryBlocked:
+		if attempt.Kind == Close && (!matchedClose || !closeIntentMatches(attempt.Interrupt, aggregate)) {
+			attempt.Outcome.Status = OutcomeUnknown
+			break
+		}
 		if !terminalSnapshot(*state.Snapshot, aggregate) {
 			return attempt.Outcome, nil
 		}
@@ -238,6 +329,13 @@ func (s *Service) observe(ctx context.Context, attempt Attempt) (Outcome, error)
 		return Outcome{}, err
 	}
 	return attempt.Outcome, nil
+}
+
+func closeIntentMatches(interrupt bool, aggregate action.Aggregate) bool {
+	if interrupt {
+		return aggregate.CloseIntent == action.AbortSession && aggregate.CloseProgress == action.CloseAborted && aggregate.Lifecycle == action.SessionAborted
+	}
+	return aggregate.CloseIntent == action.CompleteSession && aggregate.CloseProgress == action.CloseCompleted && aggregate.Lifecycle == action.SessionCompleted
 }
 
 func terminalSnapshot(s session.Snapshot, a action.Aggregate) bool {

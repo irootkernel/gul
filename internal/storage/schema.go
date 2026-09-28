@@ -213,3 +213,12 @@ reconciliation_route TEXT NOT NULL,
 outcome_ref TEXT NOT NULL DEFAULT ''
 )`,
 }
+
+var writerReconciliationStatements = []string{
+	`CREATE TABLE writer_attempt_details (
+operation_id TEXT PRIMARY KEY REFERENCES provider_operation_attempts(operation_id) ON DELETE CASCADE,
+writer_revision_before TEXT NOT NULL,
+writer_generation_before TEXT NOT NULL,
+dispatch_finished INTEGER NOT NULL DEFAULT 0 CHECK(dispatch_finished IN (0,1))
+)`,
+}

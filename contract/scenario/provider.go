@@ -16,18 +16,7 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-var requiredMethods = []string{
-	"ArtifactService.GetArtifact", "ArtifactService.ReadArtifactChunk",
-	"ControllerService.VerifyController",
-	"InteractionService.GetControllerInteraction", "InteractionService.ListPendingInteractions", "InteractionService.ResolveInteraction",
-	"ObservationService.ListRunTimelineItems", "ObservationService.WatchRunEvents",
-	"OrchestrationService.GetOrchestratedSession", "OrchestrationService.ListOrchestratedSessionResults",
-	"RunService.CloseRun", "RunService.GetRun", "RunService.InterruptTurn", "RunService.ListRuns",
-	"RunService.PauseRun", "RunService.ReconcileRun", "RunService.RecoverRun", "RunService.ResumeRun",
-	"RunService.StartRun", "RunService.SubmitTurn",
-	"RuntimeService.GetCapabilities", "RuntimeService.GetProfile", "RuntimeService.InspectWorkspace", "RuntimeService.ListProfiles",
-	"WriterService.AcquireWriter", "WriterService.GetWorkspaceWriterStatus", "WriterService.ReleaseWriter",
-}
+var requiredMethods = port.RequiredMethods()
 
 var laterMethods = []string{
 	"RunService.CreateWriteContinuation", "RunService.DeleteRun", "RunService.ForkRun",
@@ -56,7 +45,7 @@ func (h *Harness) GetCapabilities(_ context.Context, request *publicv1.GetCapabi
 			EventProtocolVersion: 1, TimelineProtocolVersion: 1, EventProjectionVersion: 1, GrpcErrorDetailVersion: 1,
 			ProjectionProfiles: []publicv1.ProjectionProfile{publicv1.ProjectionProfile_PROJECTION_PROFILE_MINIMAL, publicv1.ProjectionProfile_PROJECTION_PROFILE_OPERATIONAL}},
 		ControllerCarrier: &publicv1.CredentialCarrierCapabilities{SchemaId: "dolgorae.controller-credential/v1", SchemaVersion: 1,
-			SchemaSha256:            "6e888023fa6f12964afbd2867832944307dc626cad3fe6c6bc517768ab98b84f",
+			SchemaSha256:            port.ControllerCredentialSchemaSHA256,
 			CarrierRootLocator:      "~/.dolgorae/controller-carriers/gul/<installation-id>",
 			AcceptedControllerKinds: []publicv1.ControllerKind{publicv1.ControllerKind_CONTROLLER_KIND_INTERACTIVE_CLIENT},
 			SameUidRequired:         true, RegularFileRequired: true, SymlinksForbidden: true,
@@ -65,7 +54,9 @@ func (h *Harness) GetCapabilities(_ context.Context, request *publicv1.GetCapabi
 			ControllerTimeline: true, DurableWriterAuthority: true, EventReplay: true,
 			ArtifactRetrieval: true, ControllerBinding: true, SafeClientProjection: true,
 			PublicLocalSocket: true, ControlModes: true, BrokeredIndependentSubagentRuns: true},
+		Interactions: scenarioInteractions(),
 		Artifacts: &publicv1.ArtifactCapabilities{MaximumArtifactSize: maximumArtifactSize, MaximumChunkSize: maximumChunkSize,
+			MaximumInlineResponseBytes: 1 << 20,
 			DigestVerificationRequired: true, ExactByteLengthReported: true,
 			VisibilityClasses: []publicv1.ArtifactVisibility{publicv1.ArtifactVisibility_ARTIFACT_VISIBILITY_CONTROLLER_ONLY}},
 		SupportedMethods:       append(slices.Clone(requiredMethods), h.laterMethods...),
@@ -75,6 +66,22 @@ func (h *Harness) GetCapabilities(_ context.Context, request *publicv1.GetCapabi
 		SupportedTransports:    []publicv1.PublicTransport{publicv1.PublicTransport_PUBLIC_TRANSPORT_LOCAL_GRPC},
 		ProfileLaunchMode:      publicv1.ProfileLaunchMode_PROFILE_LAUNCH_MODE_DOLGORAE_OWNED_DIRECT_EXECUTABLE,
 	}, nil
+}
+
+func scenarioInteractions() *publicv1.InteractionCapabilities {
+	caps := &publicv1.InteractionCapabilities{MaximumResponseBytes: 1 << 20, MaximumSafePayloadBytes: 8 << 20}
+	for kind := publicv1.InteractionKind_INTERACTION_KIND_COMMAND_EXECUTION_APPROVAL; kind <= publicv1.InteractionKind_INTERACTION_KIND_UNSUPPORTED_REQUEST; kind++ {
+		support := publicv1.InteractionSupport_INTERACTION_SUPPORT_RECOGNIZED_UNSUPPORTED
+		switch kind {
+		case publicv1.InteractionKind_INTERACTION_KIND_COMMAND_EXECUTION_APPROVAL,
+			publicv1.InteractionKind_INTERACTION_KIND_FILE_CHANGE_APPROVAL,
+			publicv1.InteractionKind_INTERACTION_KIND_USER_INPUT:
+			support = publicv1.InteractionSupport_INTERACTION_SUPPORT_SUPPORTED
+		}
+		caps.KnownKinds = append(caps.KnownKinds, kind)
+		caps.Items = append(caps.Items, &publicv1.InteractionCapability{Kind: kind, Support: support})
+	}
+	return caps
 }
 
 func (h *Harness) InspectWorkspace(_ context.Context, request *publicv1.InspectWorkspaceRequest) (*publicv1.InspectWorkspaceResponse, error) {

@@ -41,8 +41,30 @@ func TestContractProbeRejectsProtocolAndMethodDrift(t *testing.T) {
 		func(c *publicv1.GetCapabilitiesResponse) { c.SupportedMethods = nil },
 		func(c *publicv1.GetCapabilitiesResponse) { c.Protocol.MaximumClientProtocolVersion = 0 },
 		func(c *publicv1.GetCapabilitiesResponse) { c.Features.PersistentRuns = false },
+		func(c *publicv1.GetCapabilitiesResponse) { c.Features.ArtifactRetrieval = false },
+		func(c *publicv1.GetCapabilitiesResponse) { c.ControllerCarrier = nil },
+		func(c *publicv1.GetCapabilitiesResponse) { c.ControllerCarrier.SchemaSha256 = "changed" },
+		func(c *publicv1.GetCapabilitiesResponse) { c.Artifacts.DigestVerificationRequired = false },
+		func(c *publicv1.GetCapabilitiesResponse) { c.Artifacts.MaximumInlineResponseBytes = 0 },
+		func(c *publicv1.GetCapabilitiesResponse) { c.Interactions = nil },
+		func(c *publicv1.GetCapabilitiesResponse) { c.Interactions.MaximumResponseBytes = 0 },
+		func(c *publicv1.GetCapabilitiesResponse) { c.Interactions.Items = nil },
+		func(c *publicv1.GetCapabilitiesResponse) { c.Interactions.Items[0].Support = -1 },
+		func(c *publicv1.GetCapabilitiesResponse) {
+			c.Artifacts.VisibilityClasses = append(c.Artifacts.VisibilityClasses, c.Artifacts.VisibilityClasses[0])
+		},
+		func(c *publicv1.GetCapabilitiesResponse) {
+			c.SupportedMethods = append(c.SupportedMethods, c.SupportedMethods[0])
+		},
+		func(c *publicv1.GetCapabilitiesResponse) {
+			c.AccessPolicyTransition = publicv1.SupportState_SUPPORT_STATE_UNSPECIFIED
+		},
+		func(c *publicv1.GetCapabilitiesResponse) { c.SupportedTransports = nil },
 		func(c *publicv1.GetCapabilitiesResponse) {
 			c.SupportedMethods = slices.DeleteFunc(c.SupportedMethods, func(method string) bool { return method == "WriterService.GetWorkspaceWriterStatus" })
+		},
+		func(c *publicv1.GetCapabilitiesResponse) {
+			c.SupportedMethods = slices.DeleteFunc(c.SupportedMethods, func(method string) bool { return method == "RunService.CloseRun" })
 		},
 	} {
 		err := (ContractProbe{Port: alteredRuntime{provider, change}}).Check(t.Context())

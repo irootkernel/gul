@@ -3,6 +3,7 @@ package action
 import (
 	"context"
 	"errors"
+	"sync"
 	"time"
 
 	"github.com/rootkernel/gul/internal/session"
@@ -36,18 +37,47 @@ type Provider interface {
 	Release(context.Context, Bound, uint64) (WriterProjection, error)
 }
 type MutationAttempts interface {
-	BeginWriter(context.Context, Bound, bool, uint64) (string, error)
+	BeginWriter(context.Context, Bound, bool, uint64, WriterProjection) (string, error)
 	FinishWriter(context.Context, string, string) error // empty outcome means unknown
+	ReconcileWriter(context.Context, Bound, Input) error
 }
 type Service struct {
-	Repository Repository
-	Workspaces session.Workspace
-	Carriers   session.CarrierResolver
-	Provider   Provider
-	Attempts   MutationAttempts
+	Repository      Repository
+	Workspaces      session.Workspace
+	Carriers        session.CarrierResolver
+	Provider        Provider
+	Attempts        MutationAttempts
+	writerMu        sync.Mutex
+	finishedWriters map[string]string
 	// Gate opens after compatibility, snapshots, and observation resume. It also
 	// guards coordinator reads; a missing gate fails closed on every path.
 	Gate func(string, string) bool
+}
+
+func (s *Service) finishWriter(ctx context.Context, id, outcome string) error {
+	s.writerMu.Lock()
+	defer s.writerMu.Unlock()
+	if s.finishedWriters == nil {
+		s.finishedWriters = make(map[string]string)
+	}
+	s.finishedWriters[id] = outcome
+	if err := s.Attempts.FinishWriter(ctx, id, outcome); err != nil {
+		return err
+	}
+	delete(s.finishedWriters, id)
+	return nil
+}
+
+func (s *Service) flushWriters(ctx context.Context) error {
+	s.writerMu.Lock()
+	defer s.writerMu.Unlock()
+	for id, outcome := range s.finishedWriters {
+		if err := s.Attempts.FinishWriter(ctx, id, outcome); err != nil {
+			return err
+		}
+		delete(s.finishedWriters, id)
+	}
+	return nil
 }
 
 func (s *Service) state(ctx context.Context, subject, id string, request Request) (Bound, Input, error) {
@@ -79,12 +109,22 @@ func (s *Service) state(ctx context.Context, subject, id string, request Request
 	if err != nil {
 		return bound, Input{}, err
 	}
+	if s.Attempts != nil {
+		if err := s.flushWriters(ctx); err != nil {
+			return bound, Input{}, ErrPersistence
+		}
+	}
 	converged, err := s.Repository.Converge(ctx, bound, in)
 	if err != nil {
 		if errors.Is(err, ErrAuthority) {
 			return bound, Input{}, ErrAuthority
 		}
 		return bound, Input{}, ErrPersistence
+	}
+	if converged && s.Attempts != nil {
+		if err := s.Attempts.ReconcileWriter(ctx, bound, in); err != nil {
+			return bound, Input{}, ErrPersistence
+		}
 	}
 	local, err := s.Repository.LocalState(ctx, bound)
 	if err != nil {
@@ -170,7 +210,7 @@ func (s *Service) mutate(ctx context.Context, subject, id string, acquire bool) 
 	if s.Attempts == nil {
 		return MutationResult{}, ErrPersistence
 	}
-	attemptID, err := s.Attempts.BeginWriter(ctx, b, acquire, in.Run.Stamp.Run)
+	attemptID, err := s.Attempts.BeginWriter(ctx, b, acquire, in.Run.Stamp.Run, in.Writer)
 	if err != nil {
 		if errors.Is(err, ErrOutcomeUnknown) || errors.Is(err, ErrBlocked) {
 			return MutationResult{}, err
@@ -179,7 +219,7 @@ func (s *Service) mutate(ctx context.Context, subject, id string, acquire bool) 
 	}
 	// Each tokenless mutation is invoked once with the fresh Run revision. The
 	// provider rechecks Controller/revision and owns all authority transitions.
-	callCtx, callCancel := context.WithTimeout(ctx, 20*time.Second)
+	callCtx, callCancel := context.WithTimeout(ctx, 15*time.Second)
 	defer callCancel()
 	var accepted WriterProjection
 	if acquire {
@@ -192,7 +232,7 @@ func (s *Service) mutate(ctx context.Context, subject, id string, acquire bool) 
 		if errors.Is(err, ErrWriterBusy) || errors.Is(err, ErrUnsupportedTransition) {
 			outcome = "rejected"
 		}
-		if finishErr := s.Attempts.FinishWriter(context.WithoutCancel(ctx), attemptID, outcome); finishErr != nil {
+		if finishErr := s.finishWriter(context.WithoutCancel(ctx), attemptID, outcome); finishErr != nil {
 			return MutationResult{}, ErrPersistence
 		}
 		if errors.Is(err, ErrUnavailable) || errors.Is(err, ErrBlocked) {
@@ -200,7 +240,7 @@ func (s *Service) mutate(ctx context.Context, subject, id string, acquire bool) 
 		}
 		return MutationResult{}, err
 	}
-	if err := s.Attempts.FinishWriter(context.WithoutCancel(ctx), attemptID, "accepted"); err != nil {
+	if err := s.finishWriter(context.WithoutCancel(ctx), attemptID, "accepted"); err != nil {
 		return MutationResult{}, ErrOutcomeUnknown
 	}
 	return MutationResult{Accepted: accepted, Evaluation: Evaluation{Writer: accepted, Mode: WriterBlocked, Flags: Flags{RequiresFreshSnapshot: true}, Blocker: FreshSnapshotRequired}}, nil

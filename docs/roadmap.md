@@ -8,6 +8,9 @@
 | Next | E6-T1 |
 | Required provider | Released Dolgorae v0.1.3 implementing `dolgorae.gul-consumer/v1` |
 
+`Next` names the next queued Task after E5 closeout. E6-T1 is not eligible
+while E5 remains In Progress.
+
 ## 1. Status and execution rules
 
 Allowed executable states are `Planned`, `In Progress`, `In Review`, `Completed`,

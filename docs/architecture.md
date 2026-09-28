@@ -888,6 +888,7 @@ provider_operation_attempts
 session_close_attempts
 session_close_operations
 mutation_attempt_details
+writer_attempt_details
 schema_migrations
 ```
 
@@ -895,7 +896,9 @@ schema_migrations
 favorite tables, and migration 4 adds `primary_session_bindings`. Migration 5
 adds `observation_checkpoint_stamps`, `observation_refreshes`, and
 `client_projection_notifications`. Migration 6 adds `session_close_attempts`
-and `session_close_operations`. Migration 7 adds `mutation_attempt_details`.
+and `session_close_operations`. Migration 7 adds `mutation_attempt_details`,
+and migration 8 adds `writer_attempt_details` with pre-call Writer revision,
+generation and dispatch completion.
 The remaining tables were created by the initial migration.
 
 Prohibited authoritative tables/aggregates include Codex threads, Turns, workspace writer locks, writer generations, pending runtime interactions, native subagents, background processes, and runtime recovery state. A projection table is named and documented as a cache.
@@ -1292,8 +1295,12 @@ adapter reads Run and timeline on uncertainty, but their current projections
 do not identify a SubmitTurn idempotency key; an absent page or matching text
 therefore leaves the attempt unknown after restart. Writer Acquire/Release and
 protected Interaction Resolve now persist non-secret attempt metadata before
-their existing single provider call. Unknown attempts block conflicts; a later
-fresh Interaction card can settle a matching protected-response attempt.
+their existing single provider call. Unknown attempts block conflicts. A
+later fresh, converged Run/Writer read can settle a completed Writer call only
+when its revision and generation advanced beyond the recorded pre-call state
+and its owner matches the requested effect. Reconciliation rechecks the cache
+and attempt under one transaction; old attempts without a pre-call baseline
+remain unknown. A later fresh Interaction card can settle a matching protected-response attempt.
 Database reopen also turns unfinished Close and other pending attempts into
 observable uncertainty. These services and adapters remain unmounted; E7/E8
 own authenticated product routes and startup assembly, while E2/E9 own live

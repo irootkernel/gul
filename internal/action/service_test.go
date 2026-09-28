@@ -54,15 +54,30 @@ type actionCarrier struct{ missing bool }
 
 type actionAttempts struct{}
 
-func (actionAttempts) BeginWriter(context.Context, Bound, bool, uint64) (string, error) {
+func (actionAttempts) BeginWriter(context.Context, Bound, bool, uint64, WriterProjection) (string, error) {
 	return "attempt", nil
 }
-func (actionAttempts) FinishWriter(context.Context, string, string) error { return nil }
+func (actionAttempts) FinishWriter(context.Context, string, string) error  { return nil }
+func (actionAttempts) ReconcileWriter(context.Context, Bound, Input) error { return nil }
 
 type failingWriterAttempts struct{ actionAttempts }
 
 func (failingWriterAttempts) FinishWriter(context.Context, string, string) error {
 	return errors.New("disk unavailable")
+}
+
+type recoveringWriterAttempts struct {
+	actionAttempts
+	fail, finished int
+}
+
+func (r *recoveringWriterAttempts) FinishWriter(context.Context, string, string) error {
+	if r.fail > 0 {
+		r.fail--
+		return errors.New("temporary disk failure")
+	}
+	r.finished++
+	return nil
 }
 
 func (c actionCarrier) Resolve(_ context.Context, _, id string) (session.Carrier, error) {
@@ -297,6 +312,19 @@ func TestWriterAttemptPersistenceFailureFailsClosedAfterDispatch(t *testing.T) {
 	s.Attempts = nil
 	if _, err := s.Acquire(t.Context(), "owner", "session"); !errors.Is(err, ErrPersistence) || p.acquire != 0 {
 		t.Fatalf("missing attempt store dispatched = %v, calls=%d", err, p.acquire)
+	}
+}
+
+func TestFinishedWriterDispatchPersistsAfterStorageRecovers(t *testing.T) {
+	p := &actionProvider{input: readerInput()}
+	s := actionService(p)
+	attempts := &recoveringWriterAttempts{fail: 1}
+	s.Attempts = attempts
+	if _, err := s.Acquire(t.Context(), "owner", "session"); !errors.Is(err, ErrOutcomeUnknown) || p.acquire != 1 {
+		t.Fatalf("first dispatch = %v, calls=%d", err, p.acquire)
+	}
+	if _, _, err := s.ReadState(t.Context(), "owner", "session", Request{Intent: IntentRead}); err != nil || attempts.finished != 1 || p.acquire != 1 || len(s.finishedWriters) != 0 {
+		t.Fatalf("finished dispatch was not persisted after recovery: %v, finished=%d calls=%d", err, attempts.finished, p.acquire)
 	}
 }
 
