@@ -53,3 +53,12 @@ It also checks inert artifact Markdown, path-shaped reference text, and the abse
 of executable elements and external resource loads.
 It installs nothing and remains separate from `make test` and live-provider
 acceptance. The fixture is typechecked with the frontend test sources.
+
+The E7-T1 browser check is `python3 frontend/browser/verify-files.py`. It
+requires existing Bun, `playwright-cli`, and Chrome. The check builds the
+responsive operator component against explicit typed clients in a temporary
+loopback fixture and exercises desktop panes, iPhone-size
+navigation, session selection, file browsing, preview, degraded Git status,
+pagination and retry, comparison, workspace return, navigation-write isolation,
+explicit refresh, and representative client failures. It is separate from
+`make test` and does not qualify authenticated delivery or a live provider.

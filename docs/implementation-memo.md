@@ -1141,6 +1141,36 @@ covers the unmounted FileService component. E7/E8/E14 retain assembled product
 and authentication work, E2 retains live provider integration, and the shared
 consumer dossier remains available to those pending epics.
 
+### E7-T1 responsive panes and file navigation (2026-09-29)
+
+The checked React bundle contains an operator component with a desktop
+workspace/session pane, conversation pane, and read-only file pane. Small
+screens use Sessions, Chat, and Files controls. Workspace and session selection
+use the existing navigation and Direct Session presentation methods. File
+location is kept per Workspace while switching panes or Workspaces. The file
+pane uses bounded ListDirectory pages, ReadPreview, GetGitStatus,
+CompareFixedRevisions, and explicit RefreshFiles calls through injected typed
+clients. A provider-managed denied node cannot be opened. Git status failure
+does not suppress a Working preview. A writer-active warning marks previews as
+potentially intermediate. The foundation entry remains fail-closed until E8
+provides authenticated clients; E14 owns assembled application acceptance.
+
+The Chrome fixture checks desktop and narrow layouts, session selection,
+page continuation, retry, and retention after preview, stale-page rejection,
+preview and fixed-revision comparison, denied-node behavior, Workspace return,
+navigation-write serialization, filtered and empty presentation states, and error recovery.
+A Safari screenshot on an iPhone 17 Pro simulator confirms
+the small-screen layout and native controls render. The serial `make test`,
+frontend bundle regeneration and reproducibility check passed. This evidence
+does not establish iPhone Safari interaction behavior, authenticated delivery,
+or released-provider compatibility. E7-T2 adds current activity, conversation,
+Prompt History, and approval controls; E7-T3 verifies accessibility and Korean
+IME on supported layouts.
+`REQ-UI-001`, `REQ-UI-002`, and `REQ-UI-004` are accepted at this fake-client
+browser boundary. The Chrome fixture supplies their behavior assertions;
+`make test` supplies typechecking, bundle reproducibility, and existing
+foundation coverage.
+
 ## 2. Current development snapshot
 
 | Area | State |
@@ -1148,14 +1178,14 @@ consumer dossier remains available to those pending epics.
 | Five Gul SOT documents | E0-T4 completed the consumer alignment and Gate A reproduction; E0-T8 completed toolchain/ADR alignment; E0-T7 completed Gate B |
 | Toolchain and developer-command artifacts | E0-T8 accepted one pin manifest and read-only host checks; E0-T7 adds checked contract generation/drift delegates; E1-T1 adds the root Go module; E1-T2 adds root Bun pin validation and checked frontend generation/drift commands; E1-T3 adds checked Gul API/error-catalog generation; no installer |
 | Contract boundary | E12-T1 pins TASK-053 and regenerates checked clients/maps/fake transport for 36 known, 27 required, and 9 unavailable methods; E13-T1 adds an explicit stateful scenario provider over the 27-method port |
-| Production source | E1 shared core, bundle, API declarations, isolated SQLite and Wails shell; E3 adds Workspace attachment and presentation; E4 adds typed observation, Interactions, actions and bounded history/result/artifact reads; E5 adds safe close, reconnect and operation-specific replay; E6 adds verified-root local FileService, bounded previews, refresh, watcher and Git review; handlers remain unmounted |
-| Wails host/frontend | One React foundation bundle and isolated Wails shell foundation implemented; E3-T4 launch selector is unmounted and authenticated attach is not implemented |
+| Production source | E1 shared core, bundle, API declarations, isolated SQLite and Wails shell; E3 adds Workspace attachment and presentation; E4 adds typed observation, Interactions, actions and bounded history/result/artifact reads; E5 adds safe close, reconnect and operation-specific replay; E6 adds verified-root local FileService, bounded previews, refresh, watcher and Git review; E7-T1 adds the responsive operator and file-pane frontend through injected clients; handlers remain unmounted |
+| Wails host/frontend | One checked React bundle includes the E7-T1 operator component and fail-closed foundation; isolated Wails shell foundation exists, E3-T4 launch selector is unmounted, and authenticated attach is not implemented |
 | ConnectRPC schema/services | Gul Runtime, DirectSession, ArtifactPresentation, WorkspacePresentation and FileService declarations and generated clients exist; isolated handlers remain unmounted |
 | Gul SQLite schema | Gul-owned version 8 schema with Workspace attachment, favorites, Primary binding, event metadata, session-close attempts, mutation-attempt details and Writer reconciliation baselines; production startup integration pending |
 | Dolgorae RPC supervisor/provider | Bounded restart policy implemented against an injected lifecycle; production process ownership and live provider remain pending |
 | Controller credential store | Caller-owned mechanism selected by ADR-0047; not implemented |
-| FileService/auth/PWA/Tailscale integration | E6 local guard, bounded preview, refresh, watcher and Git review implemented behind unmounted APIs; product integration pending |
-| Current State promotions | Prior E0/E12/E1/E13/E3/E4/E5 entries plus component-scoped REQ-FILE-001..014 and REQ-FILE-016; cross-surface REQ-FILE-015 pending; no assembled-product or released-provider claim |
+| FileService/auth/PWA/Tailscale integration | E6 local guard, bounded preview, refresh, watcher and Git review implemented behind unmounted APIs; E7-T1 file presentation uses injected clients; authenticated product integration pending |
+| Current State promotions | Prior E0/E12/E1/E13/E3/E4/E5 entries plus component-scoped REQ-FILE-001..014 and REQ-FILE-016 and fake-client REQ-UI-001/002/004; cross-surface REQ-FILE-015 pending; no assembled-product or released-provider claim |
 
 The repository contains the shared-core and single-bundle delivery foundations,
 declared but inactive Gul APIs, isolated Gul-owned SQLite repositories, bootstrap

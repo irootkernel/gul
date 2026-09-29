@@ -522,6 +522,11 @@ path denial, and typed degradation are accepted at this component boundary;
 E7/E8/E14 own the assembled pane and authenticated delivery. E6-T1 established
 the guard used by E6-T2/T3. E2-T3 owns the Submit-image handoff and final
 cross-surface promotion of REQ-FILE-015, which remains Required State.
+E7-T1 adds the responsive workspace, conversation and file panes with mobile
+Sessions/Chat/Files navigation. The pane uses typed FileService reads, review
+and explicit refresh. It preserves the directory and selected file while
+switching panes and Workspaces. This is fake-client browser acceptance;
+authenticated delivery remains with E8/E14.
 
 | Requirement | Accepted Current State | Evidence |
 |---|---|---|
@@ -555,6 +560,9 @@ cross-surface promotion of REQ-FILE-015, which remains Required State.
 | REQ-FILE-013 | Fixed `HEAD` and Working text, Markdown, and raster revisions render side by side or through an explicit narrow-screen switch, including missing and rename cases; component scope, unmounted | E6-T3; revision fixture and React comparison test; serial `make test`; implementation memo |
 | REQ-FILE-014 | Non-Git, unborn `HEAD`, and unavailable Git return typed degradation while retaining Working preview; component scope, unmounted | E6-T3; degradation fixture; serial `make test`; implementation memo |
 | REQ-FILE-016 | Root-scoped host watcher bounds node count, scan count, queue depth, and coalescing interval; private events do not invalidate; component scope, unmounted | E6-T3; watcher isolation and limit tests; serial `make test`; implementation memo |
+| REQ-UI-001 | Three responsive workspace/session, conversation and file panes render from injected typed clients; activity display in the first pane remains E7-T2, and the authenticated product route remains disabled | E7-T1; Chrome layout fixture; iPhone Safari layout observation; `make test` typecheck and bundle drift only; implementation memo |
+| REQ-UI-002 | Small screens expose Sessions, Chat and Files top-level controls and preserve workspace/file navigation context | E7-T1; Chrome iPhone-size navigation fixture; iPhone Safari layout observation; implementation memo |
+| REQ-UI-004 | Explorer, preview and fixed-revision comparison retain the current directory and selected file across pane and Workspace changes | E7-T1; Chrome file navigation and degradation fixture; `make test` typecheck and bundle drift only; implementation memo |
 | REQ-DIRECT-001 | Each locally accepted Primary Run has one persisted subject-scoped Direct Session binding; three Runs list and reopen without a Codex thread field | E3-T3 scenario-backed binding and SQLite reopen test; `make test` |
 | REQ-DIRECT-003 | Permanent shared read-only launch requires an explicit lane choice, visible warning and acknowledgement before configuration check | E3-T4 React selection, authenticated handler and domain tests; `make test` |
 | REQ-DIRECT-007 | Direct Session name, favorite, archive and last navigation selection are subject-scoped SQLite presentation; offline actions invoke no provider method | E3-T2; restart, isolation and offline handler tests; `make test` |
