@@ -3,12 +3,12 @@
 | Field | Value |
 | --- | --- |
 | Role | Sole authority for task identity, order, status, dependencies, and phase |
-| Revision | 2026-09-30 E7-T3 completion candidate |
+| Revision | 2026-09-30 E7 epic closeout |
 | Active Task | None |
 | Next | E8-T1 |
 | Required provider | Released Dolgorae v0.1.3 implementing `dolgorae.gul-consumer/v1` |
 
-`Next` names the next queued Task after E7-T3 completion.
+`Next` names the next queued Task after E7 completion.
 
 ## 1. Status and execution rules
 
@@ -134,7 +134,7 @@ second owner of membership, order or status.
 | E4 | Completed | Events, interactions, writer evaluator, complete timeline and artifacts; excludes E4-T4 | [Roadmap](#e4-complete-events-interactions-history-and-action-evaluation); [Memo](implementation-memo.md#e4-epic-closeout-2026-09-27) |
 | E5 | Completed | Safe whole-session close, projection convergence and ambiguous-outcome handling | [Roadmap](#e5-complete-safe-close-and-recovery); [Memo](implementation-memo.md#e5-epic-closeout-2026-09-28) |
 | E6 | Completed | Read-only FileService and bounded preview/review | [Roadmap](#e6-complete-read-only-files-and-review); [Memo](implementation-memo.md#e6-epic-closeout-2026-09-29) |
-| E7 | Planned | Responsive UI, mandatory Prompt History, accessibility and IME | [Shared](todo/GUL-CONSUMER-REBASELINE.md) |
+| E7 | Completed | Responsive UI, mandatory Prompt History, accessibility and IME | [Roadmap](#e7-complete-the-usable-responsive-interface); [Memo](implementation-memo.md#e7-epic-closeout-2026-09-30) |
 | E8 | Planned | Authentication, browser protection and headless/PWA/tailnet packaging together | [Shared](todo/GUL-CONSUMER-REBASELINE.md) |
 | E14 | Planned | Assembled pre-release application acceptance and live handoff; E14-T1 | [Shared](todo/GUL-CONSUMER-REBASELINE.md) |
 | E2 | Planned | Released provider qualification and real integration | [Shared](todo/GUL-CONSUMER-REBASELINE.md) |

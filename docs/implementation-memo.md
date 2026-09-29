@@ -1289,6 +1289,23 @@ whole-Epic review; the review covered the preceding committed three-task
 range. Authenticated assembly, live providers, and native device composition
 remain outside E7's acceptance scope.
 
+### E7 epic closeout (2026-09-30)
+
+E7-T1, E7-T2, and E7-T3 are complete. The whole-Epic audit and independent
+review covered their committed range at the injected-client and browser
+boundary. The audit found one Low file-pane race. Review findings identified
+that race and five other Low corrections; the six issues were resolved in
+commit `02a71fe`. The review preceded those corrected bytes. Local
+verification of the correction passed `make test` and the real Chrome file,
+activity, accessibility, and action checks. The accepted E7 requirements have
+no remaining unmet criterion or open validation finding at this scope.
+
+The checked bundle still mounts the fail-closed foundation until E8 provides
+authenticated assembly. E2 owns released-provider integration, E9 owns native
+device and live-provider qualification, and E14 owns assembled pre-release
+acceptance. The shared consumer dossier remains linked from those pending
+Epics. E8-T1 is the next queued Task.
+
 ## 2. Current development snapshot
 
 | Area | State |
