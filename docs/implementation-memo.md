@@ -1171,6 +1171,54 @@ browser boundary. The Chrome fixture supplies their behavior assertions;
 `make test` supplies typechecking, bundle reproducibility, and existing
 foundation coverage.
 
+### E7-T2 activity, conversation and Prompt History (2026-09-29)
+
+The injected-client operator view now reads GetExecutionState, GetActionState,
+ListPending/GetCard, ListConversation/GetConversationEntry and
+ListPromptHistory/GetPromptHistoryItem. The selected session's provider,
+activity, writer, policy, assurance and request count appear in navigation and
+the mobile header. Pending Interaction cards precede activity and conversation.
+When eligibility alone is unavailable, navigation retains the provider,
+activity, policy and pending count from successful reads and marks writer and
+assurance unavailable. Loaded card details stay visible during a stale or
+blocked state, with response controls disabled.
+The separate Prompt History keeps provider item identity, ordinal and time,
+opens the exact full original, and links to its conversation Turn. Inline and
+artifact-backed originals render as inert text. Artifact reads accept Gul's
+supported text media types, cap content at 64 MiB, and check
+metadata, every chunk and the full SHA-256 digest before decoding. Conversation
+refresh drops locally expanded content and rereads provider pages. The panels
+bound page metadata and inline originals before rendering. Linked Turns outside
+the loaded page are fetched by ID. Command streams appear in Interaction cards,
+outside the normal conversation.
+
+CloseRuntime uses a fresh typed eligibility snapshot and explicit interruption
+consent. A returned pending status stays pending; a confirmed mutation receipt
+does not claim whole-session closure without a fresh provider projection. An
+ambiguous response or transport failure blocks another close request in the
+current view. Typed external-action blockers name the provider-side step and
+remove in-product retry controls. A definitive rejection with a typed external
+blocker also holds the close control until the view is reopened. Interruption
+consent refreshes eligibility without clearing pending cards or activity.
+Writer changes retain the E4-T3 one-shot
+component behavior. There is no declared SubmitTurn browser RPC, so the
+operator view does not report or simulate prompt submission; E2 owns that
+boundary and E7-T3 exercises the existing draft component's input behavior.
+
+`python3 frontend/browser/verify-activity.py` passed in real Chrome against
+explicit typed fakes. It covers mobile status and Interaction priority,
+chronological conversation across refresh and pagination, linked Turns outside
+the loaded page, Markdown artifact originals and digest failure, same-text
+Prompt History items, close receipts and transport failure, and typed external
+blockers. Focused unit tests check typed error mapping and artifact integrity,
+including a multi-chunk original, rejected metadata and full-body digest drift.
+Provider-page tests cover item, token, preview and serialized metadata limits.
+The serial
+`make test` and checked bundle verify compilation and existing gates; browser
+behavior remains a separate selected check. This is fake-client presentation
+evidence, not authenticated assembly, live provider, or supported-device
+interaction qualification.
+
 ## 2. Current development snapshot
 
 | Area | State |
@@ -1178,14 +1226,14 @@ foundation coverage.
 | Five Gul SOT documents | E0-T4 completed the consumer alignment and Gate A reproduction; E0-T8 completed toolchain/ADR alignment; E0-T7 completed Gate B |
 | Toolchain and developer-command artifacts | E0-T8 accepted one pin manifest and read-only host checks; E0-T7 adds checked contract generation/drift delegates; E1-T1 adds the root Go module; E1-T2 adds root Bun pin validation and checked frontend generation/drift commands; E1-T3 adds checked Gul API/error-catalog generation; no installer |
 | Contract boundary | E12-T1 pins TASK-053 and regenerates checked clients/maps/fake transport for 36 known, 27 required, and 9 unavailable methods; E13-T1 adds an explicit stateful scenario provider over the 27-method port |
-| Production source | E1 shared core, bundle, API declarations, isolated SQLite and Wails shell; E3 adds Workspace attachment and presentation; E4 adds typed observation, Interactions, actions and bounded history/result/artifact reads; E5 adds safe close, reconnect and operation-specific replay; E6 adds verified-root local FileService, bounded previews, refresh, watcher and Git review; E7-T1 adds the responsive operator and file-pane frontend through injected clients; handlers remain unmounted |
-| Wails host/frontend | One checked React bundle includes the E7-T1 operator component and fail-closed foundation; isolated Wails shell foundation exists, E3-T4 launch selector is unmounted, and authenticated attach is not implemented |
+| Production source | E1 shared core, bundle, API declarations, isolated SQLite and Wails shell; E3 adds Workspace attachment and presentation; E4 adds typed observation, Interactions, actions and bounded history/result/artifact reads; E5 adds safe close, reconnect and operation-specific replay; E6 adds verified-root local FileService, bounded previews, refresh, watcher and Git review; E7-T1/T2 add the responsive operator, files and session presentation through injected clients; handlers remain unmounted |
+| Wails host/frontend | One checked React bundle includes the E7-T1/T2 operator components and fail-closed foundation; isolated Wails shell foundation exists, E3-T4 launch selector is unmounted, and authenticated attach is not implemented |
 | ConnectRPC schema/services | Gul Runtime, DirectSession, ArtifactPresentation, WorkspacePresentation and FileService declarations and generated clients exist; isolated handlers remain unmounted |
 | Gul SQLite schema | Gul-owned version 8 schema with Workspace attachment, favorites, Primary binding, event metadata, session-close attempts, mutation-attempt details and Writer reconciliation baselines; production startup integration pending |
 | Dolgorae RPC supervisor/provider | Bounded restart policy implemented against an injected lifecycle; production process ownership and live provider remain pending |
 | Controller credential store | Caller-owned mechanism selected by ADR-0047; not implemented |
 | FileService/auth/PWA/Tailscale integration | E6 local guard, bounded preview, refresh, watcher and Git review implemented behind unmounted APIs; E7-T1 file presentation uses injected clients; authenticated product integration pending |
-| Current State promotions | Prior E0/E12/E1/E13/E3/E4/E5 entries plus component-scoped REQ-FILE-001..014 and REQ-FILE-016 and fake-client REQ-UI-001/002/004; cross-surface REQ-FILE-015 pending; no assembled-product or released-provider claim |
+| Current State promotions | Prior E0/E12/E1/E13/E3/E4/E5 entries plus component-scoped REQ-FILE-001..014 and REQ-FILE-016; E7-T1 fake-client REQ-UI-001/002/004 and E7-T2 fake-client REQ-OUT-001/002/004/007, REQ-UI-003/006/009/010 and REQ-PROMPT-001; cross-surface REQ-FILE-015 pending; no assembled-product or released-provider claim |
 
 The repository contains the shared-core and single-bundle delivery foundations,
 declared but inactive Gul APIs, isolated Gul-owned SQLite repositories, bootstrap

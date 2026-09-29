@@ -1,0 +1,31 @@
+import {expect, test} from "bun:test";
+import {create} from "@bufbuild/protobuf";
+import {ConversationEntrySchema, ListConversationResponseSchema, ListPromptHistoryResponseSchema,
+  PromptHistoryItemSchema} from "../../api/generated/ts/gul/v1/gul_pb";
+import {maximumPageMetadataBytes, maximumPageSize, maximumPreviewBytes, maximumTokenBytes} from "../../api/generated/ts/gul/v1/bounds";
+import {assertConversationPage, assertHistoryPage} from "./paged-provider-list";
+
+test("conversation page rejects each browser response bound", () => {
+  const entry = create(ConversationEntrySchema, {entryId: "entry-1", preview: "ok"});
+  const valid = create(ListConversationResponseSchema, {snapshotId: "snapshot", items: [entry], nextPageToken: "next"});
+  expect(() => assertConversationPage(valid)).not.toThrow();
+  const invalid = [
+    {snapshotId: ""},
+    {items: Array(maximumPageSize + 1).fill(entry)},
+    {nextPageToken: "x".repeat(maximumTokenBytes + 1)},
+    {traversalComplete: true},
+    {items: [create(ConversationEntrySchema, {entryId: "entry-1", preview: "x".repeat(maximumPreviewBytes + 1)})]},
+    {items: [create(ConversationEntrySchema, {entryId: "entry-1", title: "x".repeat(maximumPageMetadataBytes), preview: "ok"})]},
+  ];
+  for (const fields of invalid) {
+    expect(() => assertConversationPage(create(ListConversationResponseSchema, {...valid, ...fields}))).toThrow("Provider page is invalid");
+  }
+});
+
+test("Prompt History page uses the same bounded admission", () => {
+  const item = create(PromptHistoryItemSchema, {promptItemId: "prompt-1", preview: "original"});
+  const valid = create(ListPromptHistoryResponseSchema, {snapshotId: "snapshot", items: [item], nextPageToken: "next"});
+  expect(() => assertHistoryPage(valid)).not.toThrow();
+  expect(() => assertHistoryPage(create(ListPromptHistoryResponseSchema,
+    {...valid, items: [create(PromptHistoryItemSchema, {...item, preview: "x".repeat(maximumPreviewBytes + 1)})]}))).toThrow("Provider page is invalid");
+});

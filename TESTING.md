@@ -62,3 +62,15 @@ navigation, session selection, file browsing, preview, degraded Git status,
 pagination and retry, comparison, workspace return, navigation-write isolation,
 explicit refresh, and representative client failures. It is separate from
 `make test` and does not qualify authenticated delivery or a live provider.
+
+The E7-T2 browser check is `python3 frontend/browser/verify-activity.py`.
+It requires existing Bun, `playwright-cli`, and Chrome.
+It builds an isolated typed-client fixture and checks mobile navigation status,
+pending Interaction priority, chronological conversation across refresh and
+pagination, accepted-user Prompt History with inline and artifact originals,
+linked Turns outside the loaded page, close receipts and transport failure,
+read degradation, and typed external blockers in real Chrome.
+`make test` typechecks the fixture and runs focused artifact integrity,
+provider page limit and typed blocker unit tests. The browser check remains
+separate from `make test`
+and does not qualify authenticated delivery or a live provider.

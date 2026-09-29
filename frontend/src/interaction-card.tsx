@@ -30,17 +30,17 @@ export async function sendInteractionResponse(body: Uint8Array, respond: Respond
   }
 }
 
-export function InteractionCardView(props: {card: InteractionCard; respond: Respond}) {
+export function InteractionCardView(props: {card: InteractionCard; respond: Respond; actionable?: boolean}) {
   return <InteractionCardContent key={props.card.summary?.interactionId} {...props} />;
 }
 
-function InteractionCardContent({card, respond}: {card: InteractionCard; respond: Respond}) {
+function InteractionCardContent({card, respond, actionable = true}: {card: InteractionCard; respond: Respond; actionable?: boolean}) {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const [feedback, setFeedback] = useState<{basis: InteractionCard; outcome: InteractionOutcome}>();
   const outcome = feedback?.basis === card ? feedback.outcome : undefined;
   const inFlight = useRef(false);
-  const active = card.summary?.status === InteractionCardStatus.PENDING && card.actions?.canResolveInteraction === true && (!outcome || outcome === "pending");
+  const active = actionable && card.summary?.status === InteractionCardStatus.PENDING && card.actions?.canResolveInteraction === true && (!outcome || outcome === "pending");
   const detail = card.detail;
 
   async function send(value: unknown, acceptedOutcome: InteractionOutcome) {

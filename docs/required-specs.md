@@ -527,6 +527,13 @@ Sessions/Chat/Files navigation. The pane uses typed FileService reads, review
 and explicit refresh. It preserves the directory and selected file while
 switching panes and Workspaces. This is fake-client browser acceptance;
 authenticated delivery remains with E8/E14.
+E7-T2 adds provider-projected activity, pending Interaction cards, chronological
+conversation, and a separate accepted-user Prompt History through injected typed
+clients. Full originals use inline content or checked artifact reads. Close
+requires fresh eligibility and explicit interruption consent; an ambiguous
+response disables another request in the current view. External-action blockers
+name the provider-side step and suppress an in-product retry. This is fake-client
+browser acceptance, with no authenticated route or live provider.
 
 | Requirement | Accepted Current State | Evidence |
 |---|---|---|
@@ -560,9 +567,18 @@ authenticated delivery remains with E8/E14.
 | REQ-FILE-013 | Fixed `HEAD` and Working text, Markdown, and raster revisions render side by side or through an explicit narrow-screen switch, including missing and rename cases; component scope, unmounted | E6-T3; revision fixture and React comparison test; serial `make test`; implementation memo |
 | REQ-FILE-014 | Non-Git, unborn `HEAD`, and unavailable Git return typed degradation while retaining Working preview; component scope, unmounted | E6-T3; degradation fixture; serial `make test`; implementation memo |
 | REQ-FILE-016 | Root-scoped host watcher bounds node count, scan count, queue depth, and coalescing interval; private events do not invalidate; component scope, unmounted | E6-T3; watcher isolation and limit tests; serial `make test`; implementation memo |
-| REQ-UI-001 | Three responsive workspace/session, conversation and file panes render from injected typed clients; activity display in the first pane remains E7-T2, and the authenticated product route remains disabled | E7-T1; Chrome layout fixture; iPhone Safari layout observation; `make test` typecheck and bundle drift only; implementation memo |
+| REQ-UI-001 | Three responsive workspace/session, conversation and file panes render from injected typed clients; authenticated product route remains disabled | E7-T1/T2; Chrome layout and activity fixtures; iPhone Safari layout observation; `make test`; implementation memo |
 | REQ-UI-002 | Small screens expose Sessions, Chat and Files top-level controls and preserve workspace/file navigation context | E7-T1; Chrome iPhone-size navigation fixture; iPhone Safari layout observation; implementation memo |
+| REQ-UI-003 | Selected-session navigation shows typed provider, activity, writer, policy, assurance and pending-request state, including the mobile header | E7-T2; integrated Chrome mobile activity fixture; `make test` typecheck; implementation memo |
 | REQ-UI-004 | Explorer, preview and fixed-revision comparison retain the current directory and selected file across pane and Workspace changes | E7-T1; Chrome file navigation and degradation fixture; `make test` typecheck and bundle drift only; implementation memo |
+| REQ-UI-006 | Pending Interaction cards precede passive activity and conversation, with the card visible in the checked mobile viewport | E7-T2; Chrome mobile priority fixture; implementation memo |
+| REQ-UI-009 | Typed workspace, Profile, Controller, provider-root, and incompatibility blockers have distinct safe explanations | E7-T2; typed-error unit and Chrome fixtures; implementation memo |
+| REQ-UI-010 | External-action blockers name the provider-side repair and suppress in-product retry; ambiguous close is distinct and cannot be resubmitted in the same view | E7-T2; typed-error and Chrome negative fixtures; implementation memo |
+| REQ-OUT-001 | Current activity and aggregate pending approvals come from GetExecutionState; navigation request count comes from ListPending and shows Unavailable when that read fails | E7-T2; Chrome activity and degradation fixtures; implementation memo |
+| REQ-OUT-002 | Final assistant content is fetched from the provider-backed history projection and reloaded after refresh; browser memory holds presentation only | E7-T2; Chrome original-and-refresh fixture; artifact digest test; implementation memo |
+| REQ-OUT-004 | Normal conversation renders bounded human/assistant previews and interaction titles; command arguments appear only in the separate Interaction card | E7-T2; Chrome conversation and card fixture; implementation memo |
+| REQ-OUT-007 | Chronological provider page order survives refresh and continuation without identity duplication | E7-T2; Chrome refresh and pagination fixture; implementation memo |
+| REQ-PROMPT-001 | Accepted user-only Prompt History shows distinct IDs for same-text inputs, ordinals, provider times, full originals and linked Turn navigation | E7-T2; Chrome history fixture; artifact digest test; implementation memo |
 | REQ-DIRECT-001 | Each locally accepted Primary Run has one persisted subject-scoped Direct Session binding; three Runs list and reopen without a Codex thread field | E3-T3 scenario-backed binding and SQLite reopen test; `make test` |
 | REQ-DIRECT-003 | Permanent shared read-only launch requires an explicit lane choice, visible warning and acknowledgement before configuration check | E3-T4 React selection, authenticated handler and domain tests; `make test` |
 | REQ-DIRECT-007 | Direct Session name, favorite, archive and last navigation selection are subject-scoped SQLite presentation; offline actions invoke no provider method | E3-T2; restart, isolation and offline handler tests; `make test` |

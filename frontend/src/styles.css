@@ -79,9 +79,10 @@ h1 {
 }
 
 .operator { min-height: 100vh; color: #eef2f6; background: #11161e; }
-.operator__header { display: flex; align-items: baseline; gap: 1.5rem; padding: 1rem 1.5rem; border-bottom: 1px solid #374454; }
+.operator__header { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.5rem 1.5rem; padding: 1rem 1.5rem; border-bottom: 1px solid #374454; }
 .operator__header h1 { margin: 0; font-size: 1.5rem; }
 .operator__header p { margin: 0; color: #b7c4d3; }
+.operator__header-status { flex-basis: 100%; font-size: 0.8rem; overflow-wrap: anywhere; }
 .operator__panes { display: grid; grid-template-columns: minmax(14rem, 22%) minmax(20rem, 1fr) minmax(18rem, 30%); min-height: calc(100vh - 4rem); }
 .operator__pane { min-width: 0; padding: 1.25rem; overflow: auto; border-right: 1px solid #374454; }
 .operator__pane:last-child { border-right: 0; }
@@ -101,6 +102,16 @@ h1 {
 .file-pane__path { display: flex; align-items: center; flex-wrap: wrap; gap: 0.75rem; margin: 0.75rem 0; overflow-wrap: anywhere; }
 .file-pane__list button { width: 100%; text-align: left; overflow-wrap: anywhere; }
 .file-pane pre { max-width: 100%; overflow: auto; }
+.session-detail { display: grid; gap: 1.25rem; }
+.session-detail > section, .session-detail__summary { min-width: 0; padding: 0.8rem; border: 1px solid #374454; border-radius: 0.4rem; }
+.session-detail__interactions { border-color: #f2b84b !important; background: #28251d; }
+.session-detail__interactions > section { padding: 0.8rem 0; border-top: 1px solid #766947; }
+.session-detail__tabs { display: flex; gap: 0.5rem; }
+.session-detail pre { max-width: 100%; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; }
+.session-detail dl { display: grid; grid-template-columns: minmax(6rem, auto) 1fr; gap: 0.25rem 0.75rem; }
+.session-detail dd { margin: 0; overflow-wrap: anywhere; }
+.session-detail li { overflow-wrap: anywhere; }
+.operator__activity { font-size: 0.8rem; color: #b7c4d3; }
 
 @media (max-width: 50rem) {
   .operator__header { padding: 0.85rem 1rem; }
