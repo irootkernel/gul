@@ -388,7 +388,7 @@ scope. E2/E9 still own actual-provider proof.
 | REQ-FILE-012 | Markdown MUST support a safe rendered view with contained workspace-relative raster images from the selected fixed revision. | Raw HTML and automatic external loads are blocked; image paths pass all FileService and private-root guards. | E6-T2 |
 | REQ-FILE-013 | Changed text, Markdown, and supported raster images MUST support fixed `HEAD` versus Working comparison. | Desktop uses side-by-side and small screens use an explicit revision switch; added, deleted, renamed, and missing-asset cases are represented without fabrication. | E6-T3 |
 | REQ-FILE-014 | Browsing MUST remain usable when Git comparison is unavailable. | Non-Git, unborn `HEAD`, and unavailable Git return typed degradation without breaking current preview. | E6-T3 |
-| REQ-FILE-015 | `.dolgorae` MUST appear only as one non-expandable provider-managed denied node; denial MUST be evaluated on the fully resolved real path after symlink resolution and before any read, listing, status, or provider hand-off. | Descendants and symlink or nested-symlink aliases resolving into them are unavailable to listing, preview, Markdown assets, Submit images, Git status/diff, and all ancestor aggregates. | E6-T1 |
+| REQ-FILE-015 | `.dolgorae` MUST appear only as one non-expandable provider-managed denied node; denial MUST be evaluated on the fully resolved real path after symlink resolution and before any read, listing, status, or provider hand-off. | Descendants and symlink or nested-symlink aliases resolving into them are unavailable to listing, preview, Markdown assets, Submit images, Git status/diff, and all ancestor aggregates. | E2-T3 |
 | REQ-FILE-016 | File invalidation MUST use a bounded host filesystem watcher scoped to the verified canonical root and MUST NOT depend on any upstream event projection. | The watcher is bounded in queue depth, coalescing interval, and watched-node count; `.dolgorae/**` events are discarded at the resolved path; FileService invalidation works while the provider is unavailable. | E6-T3 |
 | REQ-UI-001 | Desktop and wide-tablet layout MUST use workspace/activity, conversation, and file panes. | Responsive layout tests pass. | E7-T1 |
 | REQ-UI-002 | Small screens MUST use Sessions, Chat, and Files top-level navigation. | iPhone tests preserve context. | E7-T1 |
@@ -519,7 +519,9 @@ E6-T3 and E7.
 E6-T3 adds explicit refresh, a bounded host watcher, and fixed `HEAD` versus
 Working Git review through unmounted FileService handlers. Git status, private
 path denial, and typed degradation are accepted at this component boundary;
-E7/E8/E14 own the assembled pane and authenticated delivery.
+E7/E8/E14 own the assembled pane and authenticated delivery. E6-T1 established
+the guard used by E6-T2/T3. E2-T3 owns the Submit-image handoff and final
+cross-surface promotion of REQ-FILE-015, which remains Required State.
 
 | Requirement | Accepted Current State | Evidence |
 |---|---|---|

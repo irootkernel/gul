@@ -1126,6 +1126,8 @@ refresh, watcher limits, combined status, revision assets, and degraded Git.
 `REQ-FILE-009..011`, `REQ-FILE-013..014`, and `REQ-FILE-016` are accepted at
 the unmounted component boundary. Complete cross-surface `REQ-FILE-015` and
 assembled file-pane behavior remain with their designated integration owners.
+E2-T3 owns the Submit-image handoff and final REQ-FILE-015 promotion; E6-T1
+supplied its shared local guard.
 
 ## 2. Current development snapshot
 

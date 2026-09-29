@@ -310,7 +310,7 @@ core, authentication, files and UI; it does not rebuild those Epics.
 | E2-T0 | Post-release | Planned | E14-T1; Provider released | Pin and qualify exact released executable/contract/capabilities; no silent installation or replaced production binary |
 | E2-T1 | Post-release | Planned | E2-T0, E1-T3 | Real gateway supervision, private UDS ownership, shared channel, handshake and process isolation |
 | E2-T2 | Post-release | Planned | E2-T1, E1-T4 | Actual exclusive carriers under advertised fixed-home root, adoption and authorization, no Operator or child credential |
-| E2-T3 | Post-release | Planned | E2-T2, E3-T4, E4-T5, E8-T3, E14-T1 | Actual session start, sequential read/write submit, approval, timeline/history, public session/results and aggregate close vertical slice through the authenticated headless core/browser |
+| E2-T3 | Post-release | Planned | E2-T2, E3-T4, E4-T5, E8-T3, E14-T1 | Actual session start, sequential read/write submit with guarded image handoff, approval, timeline/history, public session/results and aggregate close vertical slice through the authenticated headless core/browser |
 
 ### E9: Qualify actual Gul and the first release
 
