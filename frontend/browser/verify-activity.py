@@ -260,6 +260,28 @@ with tempfile.TemporaryDirectory(prefix="gul-e7-activity-") as directory:
               await page.waitForFunction(() => document.querySelectorAll('[aria-label="Conversation timeline"] ol li').length === 3);
               if (await page.evaluate(() => window.fixture.entry) !== calls) throw Error('Linked Turn was refetched on pagination');
             }}""")
+        for suffix, button, expected_reads in (("conversation-delay", "Refresh conversation", 2),
+                                                ("conversation-before-linked", "More conversation", 1)):
+            cli(directory, "goto", f"http://127.0.0.1:{server.server_port}/?integrated&linked-delay&{suffix}")
+            cli(directory, "run-code", f"""async page => {{
+              await page.setViewportSize({{width:1280, height:800}});
+              await page.getByRole('button', {{name:'Prompt History', exact:true}}).click();
+              await page.getByRole('button', {{name:'More accepted prompts'}}).click();
+              await page.getByRole('button', {{name:'Open matching Turn for prompt 2'}}).click();
+              await page.waitForFunction(() => window.fixture.entry === 1);
+              await page.getByRole('button', {{name:'{button}', exact:true}}).click();
+              await page.waitForFunction(() => window.fixture.conversation >= 2);
+              await page.getByText('Linked Turn: repeat', {{exact:false}}).waitFor();
+              if (await page.evaluate(() => window.fixture.entry) !== {expected_reads})
+                throw Error('Linked lookup was duplicated on a list update');
+              if (await page.getByRole('region', {{name:'Conversation timeline'}}).locator('#conversation-entry-3').count())
+                throw Error('Fixture unexpectedly loaded the linked Turn in the list');
+              await page.getByRole('button', {{name:'Prompt History', exact:true}}).click();
+              await page.getByRole('button', {{name:'Open matching Turn for prompt 2'}}).click();
+              if (await page.evaluate(() => window.fixture.entry) !== {expected_reads})
+                throw Error('Reopening the linked Turn repeated its read');
+            }}""")
+        cli(directory, "resize", "390", "844")
         for suffix in ["execution-failure", "close=stale", "blocker=PROFILE_MISSING"]:
             cli(directory, "goto", f"http://127.0.0.1:{server.server_port}/?{suffix}")
             cli(directory, "run-code", """async page => {

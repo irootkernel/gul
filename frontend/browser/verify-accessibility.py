@@ -266,6 +266,37 @@ with tempfile.TemporaryDirectory(prefix="gul-e7-accessibility-") as directory:
           if (!await input.evaluate(element => element === document.activeElement) || await input.inputValue() !== '한글 입력')
             throw Error('Delayed linked Turn stole answer focus');
         }""")
+        cli(directory, "goto", url + "/activity/?integrated&linked-delay&conversation-delay")
+        cli(directory, "run-code", """async page => {
+          await page.getByRole('button', {name:'Prompt History', exact:true}).click();
+          await page.getByRole('button', {name:'More accepted prompts'}).click();
+          await page.getByRole('button', {name:'Open matching Turn for prompt 2'}).click();
+          await page.waitForFunction(() => window.fixture.entry === 1);
+          const refresh = page.getByRole('button', {name:'Refresh conversation'});
+          await refresh.focus();
+          await page.keyboard.press('Enter');
+          await page.getByText('Linked Turn: repeat', {exact:false}).waitFor();
+          if (!await refresh.evaluate(element => element === document.activeElement))
+            throw Error('Refreshed linked Turn stole keyboard focus');
+          await page.getByRole('button', {name:'Prompt History', exact:true}).click();
+          await page.getByRole('button', {name:'Open matching Turn for prompt 2'}).focus();
+          await page.keyboard.press('Enter');
+          await page.waitForFunction(() => document.activeElement?.textContent?.trim()?.startsWith('Linked Turn: repeat'));
+        }""")
+        cli(directory, "goto", url + "/activity/?integrated&linked-delay")
+        cli(directory, "run-code", """async page => {
+          await page.getByRole('button', {name:'Prompt History', exact:true}).click();
+          await page.getByRole('button', {name:'More accepted prompts'}).click();
+          await page.getByRole('button', {name:'Open matching Turn for prompt 2'}).click();
+          await page.waitForFunction(() => window.fixture.entry === 1);
+          await page.getByRole('button', {name:'Prompt History', exact:true}).click();
+          await page.getByRole('button', {name:'Open matching Turn for prompt 1'}).focus();
+          await page.keyboard.press('Enter');
+          await page.waitForFunction(() => document.activeElement?.textContent?.trim() === 'Linked Turn: repeat');
+          await page.waitForTimeout(550);
+          if (await page.getByRole('region', {name:'Conversation timeline'}).locator('#conversation-entry-1').getAttribute('aria-current') !== 'true')
+            throw Error('Delayed lookup displaced the current Turn');
+        }""")
         cli(directory, "goto", url + "/activity/?integrated&workspace-untyped")
         cli(directory, "run-code", """async page => {
           await page.getByRole('button', {name:'Retry workspace load'}).waitFor();

@@ -54,8 +54,12 @@ const artifactDigests = new Map(await Promise.all([...artifactBodies].map(async 
   Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", bytes))).map(byte => byte.toString(16).padStart(2, "0")).join("")] as const)));
 
 const clients: SessionDetailClient = {
-  listConversation: async request => {calls.conversation++; return create(ListConversationResponseSchema,
-    request.pageToken ? {snapshotId: params.has("conversation-snapshot-change") ? "conversation-2" : "conversation-1",
+  listConversation: async request => {calls.conversation++;
+    if (params.has("conversation-delay") && calls.conversation > 1) await new Promise(resolve => setTimeout(resolve, 100));
+    return create(ListConversationResponseSchema,
+    request.pageToken === "more" && params.has("conversation-before-linked")
+      ? {snapshotId: "conversation-1", items: [opened], nextPageToken: "last"}
+      : request.pageToken ? {snapshotId: params.has("conversation-snapshot-change") ? "conversation-2" : "conversation-1",
       items: params.has("conversation-overlap") ? [answer, second] : [second], traversalComplete: true}
       : {snapshotId: "conversation-1", items: params.has("entry-interaction") ? [first, opened, answer] : [first, answer], nextPageToken: "more", traversalComplete: params.has("invalid-page")});},
   getConversationEntry: async ({entryId}) => {calls.entry++;

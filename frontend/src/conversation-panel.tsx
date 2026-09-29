@@ -37,7 +37,7 @@ export function ConversationPanel({sessionId, client, focusEntryId, focusRequest
   const [expanded, setExpanded] = useState<Record<string, string>>({});
   const [expandError, setExpandError] = useState("");
   const generation = useRef(0);
-  const requestedFocusId = useRef("");
+  const requestedFocus = useRef<{entryId: string; generation: number} | undefined>(undefined);
   const linkedStatus = useRef<HTMLParagraphElement>(null);
   const linkedError = useRef<HTMLParagraphElement>(null);
   const focusedRequest = useRef(0);
@@ -55,30 +55,30 @@ export function ConversationPanel({sessionId, client, focusEntryId, focusRequest
   useEffect(() => {
     let current = true;
     generation.current++;
-    setLoading(true); setBusy(false); setEntries([]); setNextToken(""); setSnapshotId(""); setFocused(undefined); setFocusError(undefined); requestedFocusId.current = ""; setError(""); setExpanded({});
+    setLoading(true); setBusy(false); setEntries([]); setNextToken(""); setSnapshotId(""); setFocused(undefined); setFocusError(undefined); requestedFocus.current = undefined; setError(""); setExpanded({});
     void client.listConversation({sessionId, pageSize: 50}).then(page => {
       if (!current) return;
       assertConversationPage(page);
       setEntries(page.items); setSnapshotId(page.snapshotId); setNextToken(page.nextPageToken ?? "");
     }).catch(() => {if (current) setError("Conversation is unavailable. Refresh to try again.");})
       .finally(() => {if (current) setLoading(false);});
-    return () => {current = false;};
+    return () => {current = false; generation.current++;};
   }, [client, sessionId, reload]);
 
   useEffect(() => {
-    let current = true;
-    if (!focusEntryId) {setFocused(undefined); setFocusError(undefined); requestedFocusId.current = ""; return () => {current = false;};}
+    if (!focusEntryId) {setFocused(undefined); setFocusError(undefined); requestedFocus.current = undefined; return;}
     const loaded = entries.find(entry => entry.entryId === focusEntryId);
-    if (loaded) {setFocused(loaded); setFocusError(undefined); return () => {current = false;};}
-    if (requestedFocusId.current === focusEntryId) return () => {current = false;};
-    requestedFocusId.current = focusEntryId;
+    if (loaded) {requestedFocus.current = undefined; setFocused(loaded); setFocusError(undefined); return;}
+    if (requestedFocus.current?.entryId === focusEntryId && requestedFocus.current.generation === generation.current) return;
+    const request = {entryId: focusEntryId, generation: generation.current};
+    requestedFocus.current = request;
     setFocused(undefined); setFocusError(undefined);
     void client.getConversationEntry({sessionId, entryId: focusEntryId})
-      .then(result => {if (current) {if (result.entry?.entryId === focusEntryId &&
+      .then(result => {if (requestedFocus.current === request && request.generation === generation.current) {if (result.entry?.entryId === focusEntryId &&
           new TextEncoder().encode(result.entry.preview).length <= maximumPreviewBytes) setFocused(result.entry);
         else setFocusError({entryId: focusEntryId, message: "The linked Turn is unavailable. Refresh conversation to try again."});}})
-      .catch(() => {if (current) setFocusError({entryId: focusEntryId, message: "The linked Turn is unavailable. Refresh conversation to try again."});});
-    return () => {current = false;};
+      .catch(() => {if (requestedFocus.current === request && request.generation === generation.current)
+        setFocusError({entryId: focusEntryId, message: "The linked Turn is unavailable. Refresh conversation to try again."});});
   }, [client, sessionId, focusEntryId, entries]);
 
   async function loadMore() {
