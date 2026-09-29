@@ -13,7 +13,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"unicode/utf8"
 
 	"golang.org/x/sys/unix"
 )
@@ -112,7 +111,7 @@ func (s *Service) Compare(ctx context.Context, subject, workspaceID, relative st
 		return Comparison{}, err
 	}
 	ext := strings.ToLower(path.Ext(headPath))
-	raster := ext == ".png" || ext == ".jpg" || ext == ".jpeg" || ext == ".webp" || ext == ".gif"
+	raster := rasterExtension(ext)
 	limit := int64(MaxTextBytes + 1)
 	if raster {
 		limit = MaxImageBytes
@@ -237,10 +236,10 @@ func (s *Service) GitStatus(ctx context.Context, subject, workspaceID, relative 
 }
 
 func (s *Service) gitAllowedPath(ctx context.Context, subject, workspaceID, relative string) error {
-	if !utf8.ValidString(relative) {
-		return ErrUnsupportedPathEncoding
+	if err := validateRelativePath(relative); err != nil {
+		return err
 	}
-	if len(relative) > 4096 || !fs.ValidPath(relative) || strings.ContainsAny(relative, "\\\x00") || privateComponent(filepath.FromSlash(relative)) {
+	if privateComponent(filepath.FromSlash(relative)) {
 		return ErrPathUnavailable
 	}
 	if relative == "." {

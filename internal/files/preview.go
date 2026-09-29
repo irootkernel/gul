@@ -130,7 +130,7 @@ func (s *Service) ListDirectory(ctx context.Context, subject, workspaceID, relat
 		if !utf8.ValidString(name) {
 			return DirectoryPage{}, ErrUnsupportedPathEncoding
 		}
-		if strings.EqualFold(name, ".dolgorae") {
+		if privateComponent(name) {
 			if name == ".dolgorae" {
 				result.Entries = append(result.Entries, Entry{Name: name, ProviderManagedDenied: true})
 			}
@@ -276,7 +276,7 @@ type rasterLoader func(context.Context, string, int64) ([]byte, string, error)
 
 func previewReader(ctx context.Context, relative string, reader io.Reader, size int64, load rasterLoader) (Preview, error) {
 	ext := strings.ToLower(path.Ext(relative))
-	if ext == ".png" || ext == ".jpg" || ext == ".jpeg" || ext == ".webp" || ext == ".gif" {
+	if rasterExtension(ext) {
 		data, kind, err := readRaster(reader, size)
 		if err != nil {
 			return Preview{Kind: PreviewUnsupported}, nil
@@ -332,6 +332,15 @@ func previewReader(ctx context.Context, relative string, reader io.Reader, size 
 		}
 	}
 	return result, nil
+}
+
+func rasterExtension(ext string) bool {
+	switch ext {
+	case ".png", ".jpg", ".jpeg", ".webp", ".gif":
+		return true
+	default:
+		return false
+	}
 }
 
 func sourceLanguage(ext string) string {

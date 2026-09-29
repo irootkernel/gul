@@ -61,17 +61,26 @@ func (s *Service) Inspect(ctx context.Context, subject, workspaceID, relative st
 	return Node{Directory: info.IsDir(), Size: info.Size()}, nil
 }
 
+func validateRelativePath(relative string) error {
+	if !utf8.ValidString(relative) {
+		return ErrUnsupportedPathEncoding
+	}
+	if len(relative) > 4096 || !fs.ValidPath(relative) || strings.ContainsAny(relative, "\\\x00") {
+		return ErrPathUnavailable
+	}
+	return nil
+}
+
 // Open returns an already checked descriptor and its resolved root-relative
 // path. Callers must use the descriptor instead of reopening the path.
 func (s *Service) Open(ctx context.Context, subject, workspaceID, relative string) (*os.File, string, error) {
 	if err := ctx.Err(); err != nil {
 		return nil, "", err
 	}
-	if !utf8.ValidString(relative) {
-		return nil, "", ErrUnsupportedPathEncoding
+	if err := validateRelativePath(relative); err != nil {
+		return nil, "", err
 	}
-	if subject == "" || workspaceID == "" || len(relative) > 4096 ||
-		!fs.ValidPath(relative) || strings.ContainsAny(relative, "\\\x00") {
+	if subject == "" || workspaceID == "" {
 		return nil, "", ErrPathUnavailable
 	}
 	if s == nil || s.attachments == nil {
@@ -184,7 +193,7 @@ func walk(root int, rootPath, relative string) (*os.File, string, error) {
 	for len(parts) > 0 {
 		name := parts[0]
 		parts = parts[1:]
-		if strings.EqualFold(name, ".dolgorae") {
+		if privateComponent(name) {
 			return nil, "", ErrPathUnavailable
 		}
 		var before unix.Stat_t

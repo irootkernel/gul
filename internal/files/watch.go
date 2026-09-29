@@ -254,7 +254,7 @@ func (s *Service) watchEvent(ctx context.Context, watcher hostWatcher, paths map
 		return ".", false
 	}
 	relative = filepath.ToSlash(relative)
-	if !fs.ValidPath(relative) || privateComponent(filepath.FromSlash(relative)) {
+	if validateRelativePath(relative) != nil || privateComponent(filepath.FromSlash(relative)) {
 		return ".", false
 	}
 	if event.Has(fsnotify.Remove) || event.Has(fsnotify.Rename) {
