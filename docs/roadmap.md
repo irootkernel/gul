@@ -267,7 +267,7 @@ remote/PWA installation packaging belong to E8, not E7's scoped UI acceptance.
 
 | Task | Phase | Status | Predecessors | Owned result and verification |
 | --- | --- | --- | --- | --- |
-| E7-T1 | Pre-release | Planned | E1-T2, E3-T3, E6-T3 | Desktop panes/mobile navigation, actual file-pane integration and preserved presentation context |
+| E7-T1 | Pre-release | Planned | E1-T2, E3-T3, E6-T3 | Desktop panes/mobile navigation, actual file-pane integration with the writer-active preview warning, and preserved presentation context |
 | E7-T2 | Pre-release | Planned | E7-T1, E4-T2, E4-T3, E4-T5, E5-T1 | Separate user-only Prompt History section, full original, Turn navigation, current status and approval priority |
 | E7-T3 | Pre-release | Planned | E7-T2 | Korean IME, keyboard and accessibility on supported layouts |
 

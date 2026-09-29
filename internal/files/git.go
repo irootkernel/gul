@@ -380,7 +380,7 @@ func (s *Service) runGitPrefix(parent context.Context, dir string, limit int64, 
 }
 
 func (s *Service) gitEntries(ctx context.Context, subject, workspaceID string, git gitContext) ([]gitEntry, GitState) {
-	raw, err := s.runGit(ctx, git.repoRoot, MaxGitOutputBytes, "status", "--porcelain=v1", "-z", "--untracked-files=all", "--", ".", ":(exclude,icase)**/.dolgorae", ":(exclude,icase)**/.dolgorae/**")
+	raw, err := s.runGit(ctx, git.repoRoot, MaxGitOutputBytes, "status", "--porcelain=v1", "-z", "--untracked-files=all", "--", ".", ":(exclude,icase)**/"+privateDirectoryName, ":(exclude,icase)**/"+privateDirectoryName+"/**")
 	if err != nil {
 		if errors.Is(err, ErrGitLimit) {
 			return nil, GitLimitExceeded

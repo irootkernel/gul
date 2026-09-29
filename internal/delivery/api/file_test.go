@@ -120,7 +120,8 @@ func TestFileHandlerUsesTrustedSubjectAndHidesPrivatePaths(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer core.Stop(context.Background())
-	handler := &FileHandler{Core: core, Files: files.NewService(fileAttachments{entry})}
+	fileService := files.NewService(fileAttachments{entry})
+	handler := &FileHandler{Core: core, Files: fileService}
 	request := connect.NewRequest(&gulv1.InspectPathRequest{WorkspaceId: "entry", RelativePath: "public.txt"})
 	if _, err := handler.InspectPath(t.Context(), request); connect.CodeOf(err) != connect.CodeUnauthenticated {
 		t.Fatalf("untrusted read = %v", err)
@@ -182,6 +183,16 @@ func TestFileHandlerUsesTrustedSubjectAndHidesPrivatePaths(t *testing.T) {
 	handler.Principal = func(context.Context) (app.Principal, error) { return app.Principal{Subject: "other"}, nil }
 	_, err = handler.InspectPath(t.Context(), request)
 	assertFileCode(t, err, connect.CodeFailedPrecondition, gulv1.ErrorCode_ERROR_CODE_WORKSPACE_IDENTITY_MISMATCH)
+	handler.Principal = func(context.Context) (app.Principal, error) { return app.Principal{Subject: "owner"}, nil }
+	for i := 0; i < files.MaxWorkspaceWatchers; i++ {
+		watchCtx, cancel := context.WithCancel(t.Context())
+		defer cancel()
+		if _, err := fileService.Watch(watchCtx, "owner", "entry"); err != nil {
+			t.Fatalf("watch %d = %v", i, err)
+		}
+	}
+	err = handler.WatchFileChanges(t.Context(), connect.NewRequest(&gulv1.WatchFileChangesRequest{WorkspaceId: "entry"}), nil)
+	assertFileCode(t, err, connect.CodeResourceExhausted, gulv1.ErrorCode_ERROR_CODE_LIMIT_EXCEEDED)
 }
 
 func assertFileCode(t *testing.T, err error, status connect.Code, code gulv1.ErrorCode) {

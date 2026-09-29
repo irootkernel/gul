@@ -11,12 +11,18 @@ import (
 )
 
 const (
-	DefaultPageSize          = gulv1.DefaultPageSize
-	MaximumPageSize          = gulv1.MaximumPageSize
-	MaximumTokenBytes        = gulv1.MaximumTokenBytes
-	MaximumPageMetadataBytes = gulv1.MaximumPageMetadataBytes
-	MaximumPreviewBytes      = gulv1.MaximumPreviewBytes
-	MaximumLivePageTokens    = 4096
+	DefaultPageSize               = gulv1.DefaultPageSize
+	MaximumPageSize               = gulv1.MaximumPageSize
+	MaximumTokenBytes             = gulv1.MaximumTokenBytes
+	MaximumPageMetadataBytes      = gulv1.MaximumPageMetadataBytes
+	MaximumPreviewBytes           = gulv1.MaximumPreviewBytes
+	MaximumFileTextBytes          = gulv1.MaximumFileTextBytes
+	MaximumFileTextLines          = gulv1.MaximumFileTextLines
+	MaximumFileImageBytes         = gulv1.MaximumFileImageBytes
+	MaximumFileImagePixels        = gulv1.MaximumFileImagePixels
+	MaximumFileMarkdownImages     = gulv1.MaximumFileMarkdownImages
+	MaximumFileMarkdownImageBytes = gulv1.MaximumFileMarkdownImageBytes
+	MaximumLivePageTokens         = 4096
 )
 
 var (

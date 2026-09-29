@@ -24,6 +24,8 @@ var (
 	ErrReattachRequired        = errors.New("workspace reattachment required")
 )
 
+const privateDirectoryName = ".dolgorae"
+
 // Attachments supplies the saved, subject-scoped root without contacting the
 // runtime provider. Every open checks that root's filesystem identity again.
 type Attachments interface {
@@ -262,7 +264,7 @@ func walk(root int, rootPath, relative string) (*os.File, string, error) {
 
 func privateComponent(value string) bool {
 	for _, name := range strings.Split(value, string(filepath.Separator)) {
-		if strings.EqualFold(name, ".dolgorae") {
+		if strings.EqualFold(name, privateDirectoryName) {
 			return true
 		}
 	}

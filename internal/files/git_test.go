@@ -86,6 +86,10 @@ func TestGitReviewFixedRevisionsAndPrivateFiltering(t *testing.T) {
 			t.Fatalf("status %s = %+v, %v", tc.path, status, err)
 		}
 	}
+	newFile, err := service.Compare(t.Context(), "owner", "entry", "untracked.txt")
+	if err != nil || newFile.State != GitAvailable || newFile.Change != ChangeUntracked || !newFile.HeadMissing || newFile.WorkingMissing || newFile.Working.Text != "new" {
+		t.Fatalf("untracked compare = %+v, %v", newFile, err)
+	}
 	rootStatus, err := service.GitStatus(t.Context(), "owner", "entry", ".")
 	if err != nil || rootStatus.Aggregate != ChangeMixed {
 		t.Fatalf("root status = %+v, %v", rootStatus, err)
@@ -149,6 +153,10 @@ func TestGitAddedAndNestedDirectoryStatus(t *testing.T) {
 			t.Fatalf("status %s = %+v, %v", tc.path, status, err)
 		}
 	}
+	added, err := service.Compare(t.Context(), "owner", "entry", "nested/added.txt")
+	if err != nil || added.State != GitAvailable || added.Change != ChangeAdded || !added.HeadMissing || added.WorkingMissing || added.Working.Text != "added" {
+		t.Fatalf("added compare = %+v, %v", added, err)
+	}
 }
 
 func TestGitConflictStatus(t *testing.T) {
@@ -191,6 +199,35 @@ func TestGitLimitExceededKeepsWorkingPreview(t *testing.T) {
 	comparison, err := service.Compare(t.Context(), "owner", "entry", "current.txt")
 	if err != nil || comparison.State != GitLimitExceeded || comparison.Working.Text != "current" {
 		t.Fatalf("limit comparison = %+v, %v", comparison, err)
+	}
+}
+
+func TestGitCommandBoundsKeepWorkingPreview(t *testing.T) {
+	root := t.TempDir()
+	initGit(t, root)
+	writePreviewFile(t, root, "current.txt", []byte("current"))
+	gitCommand(t, root, "add", "current.txt")
+	gitCommand(t, root, "commit", "-qm", "base")
+	for _, tc := range []struct {
+		name, command string
+		want          GitState
+	}{
+		{"output-cap", "exec dd if=/dev/zero bs=1048577 count=1 2>/dev/null", GitLimitExceeded},
+		{"timeout", "exec sleep 10", GitUnavailable},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			wrapper := filepath.Join(t.TempDir(), "git-wrapper")
+			script := "#!/bin/sh\ncase \" $* \" in\n  *\" status \"*) " + tc.command + ";;\n  *) exec git \"$@\";;\nesac\n"
+			if err := os.WriteFile(wrapper, []byte(script), 0700); err != nil {
+				t.Fatal(err)
+			}
+			service := NewService(attachmentStore{attachedRoot(t, root)})
+			service.gitBinary = wrapper
+			comparison, err := service.Compare(t.Context(), "owner", "entry", "current.txt")
+			if err != nil || comparison.State != tc.want || comparison.Working.Text != "current" {
+				t.Fatalf("bounded Git comparison = %+v, %v", comparison, err)
+			}
+		})
 	}
 }
 

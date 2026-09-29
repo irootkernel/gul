@@ -20,17 +20,17 @@ import (
 	"time"
 	"unicode/utf8"
 
-	gulv1 "github.com/rootkernel/gul/api/generated/go/gul/v1"
+	"github.com/rootkernel/gul/internal/domain"
 )
 
 const (
-	MaxDirectoryPage      = gulv1.MaximumPageSize
-	MaxTextBytes          = gulv1.MaximumFileTextBytes
-	MaxTextLines          = gulv1.MaximumFileTextLines
-	MaxImageBytes         = gulv1.MaximumFileImageBytes
-	MaxImagePixels        = gulv1.MaximumFileImagePixels
-	MaxMarkdownImages     = gulv1.MaximumFileMarkdownImages
-	MaxMarkdownImageBytes = gulv1.MaximumFileMarkdownImageBytes
+	MaxDirectoryPage      = domain.MaximumPageSize
+	MaxTextBytes          = domain.MaximumFileTextBytes
+	MaxTextLines          = domain.MaximumFileTextLines
+	MaxImageBytes         = domain.MaximumFileImageBytes
+	MaxImagePixels        = domain.MaximumFileImagePixels
+	MaxMarkdownImages     = domain.MaximumFileMarkdownImages
+	MaxMarkdownImageBytes = domain.MaximumFileMarkdownImageBytes
 )
 
 type Entry struct {
@@ -131,7 +131,7 @@ func (s *Service) ListDirectory(ctx context.Context, subject, workspaceID, relat
 			return DirectoryPage{}, ErrUnsupportedPathEncoding
 		}
 		if privateComponent(name) {
-			if name == ".dolgorae" {
+			if name == privateDirectoryName {
 				result.Entries = append(result.Entries, Entry{Name: name, ProviderManagedDenied: true})
 			}
 			continue

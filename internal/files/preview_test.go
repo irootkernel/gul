@@ -135,6 +135,37 @@ func TestDirectoryCursorExpiryAndEviction(t *testing.T) {
 	}
 }
 
+func TestDirectoryCursorRetiresReplacedDirectory(t *testing.T) {
+	root := t.TempDir()
+	oldPath := filepath.Join(root, "nested")
+	if err := os.Mkdir(oldPath, 0700); err != nil {
+		t.Fatal(err)
+	}
+	writePreviewFile(t, oldPath, "a.txt", []byte("old"))
+	writePreviewFile(t, oldPath, "b.txt", []byte("old"))
+	service := NewService(attachmentStore{attachedRoot(t, root)})
+	page, err := service.ListDirectory(t.Context(), "owner", "entry", "nested", 1, "")
+	if err != nil || page.NextToken == "" {
+		t.Fatalf("first page = %+v, %v", page, err)
+	}
+	if _, err := service.ListDirectory(t.Context(), "owner", "entry", ".", 1, page.NextToken); !errors.Is(err, ErrInvalidPageToken) {
+		t.Fatalf("wrong directory binding = %v", err)
+	}
+	if _, err := service.ListDirectory(t.Context(), "owner", "entry", "nested", 2, page.NextToken); !errors.Is(err, ErrInvalidPageToken) {
+		t.Fatalf("wrong page-size binding = %v", err)
+	}
+	if err := os.Rename(oldPath, filepath.Join(t.TempDir(), "moved")); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Mkdir(oldPath, 0700); err != nil {
+		t.Fatal(err)
+	}
+	writePreviewFile(t, oldPath, "replacement.txt", []byte("new"))
+	if resumed, err := service.ListDirectory(t.Context(), "owner", "entry", "nested", 1, page.NextToken); !errors.Is(err, ErrPageTokenExpired) || len(resumed.Entries) != 0 {
+		t.Fatalf("replaced directory cursor = %+v, %v", resumed, err)
+	}
+}
+
 func TestTextPreviewLimitsAndEncoding(t *testing.T) {
 	root := t.TempDir()
 	writePreviewFile(t, root, "source.go", []byte("package main\nfunc main() {}\n"))
