@@ -43,11 +43,14 @@ export function FilePane({workspaceId, client, location, onLocation, writerActiv
   const [busy, setBusy] = useState(false);
   const [directoryLoading, setDirectoryLoading] = useState(false);
   const scope = useRef("");
+  const locationEpoch = useRef(0);
   const focusTarget = useRef<"path" | "back" | "selected" | null>(null);
   const pathRef = useRef<HTMLElement>(null);
   const backRef = useRef<HTMLButtonElement>(null);
   const selectedRef = useRef<HTMLButtonElement>(null);
   scope.current = `${workspaceId}\0${location.directory}\0${location.selected}\0${refresh}`;
+
+  useLayoutEffect(() => {locationEpoch.current++;}, [workspaceId, location.directory, location.selected, location.view]);
 
   useLayoutEffect(() => {
     // These destinations come from clicks in the visible pane, so one focus attempt suffices.
@@ -110,22 +113,27 @@ export function FilePane({workspaceId, client, location, onLocation, writerActiv
   async function review() {
     if (!location.selected || busy) return;
     const requestScope = scope.current;
+    const requestEpoch = locationEpoch.current;
     setBusy(true);
     try {
       const result = await client.compareFixedRevisions({workspaceId, relativePath: location.selected});
-      if (scope.current === requestScope) {setComparison(result); setActionError("");}
-    } catch { if (scope.current === requestScope) setActionError("Git review is unavailable. The current preview remains available."); }
+      if (scope.current === requestScope && locationEpoch.current === requestEpoch) {setComparison(result); setActionError("");}
+    } catch { if (scope.current === requestScope && locationEpoch.current === requestEpoch) setActionError("Git review is unavailable. The current preview remains available."); }
     finally {setBusy(false);}
   }
 
   async function refreshFiles() {
     if (busy) return;
+    const requestScope = scope.current;
+    const requestEpoch = locationEpoch.current;
     setBusy(true);
     try {
       await client.refreshFiles({workspaceId});
-      setRefresh(value => value + 1);
-      setActionError("");
-    } catch {setActionError("File refresh is unavailable. Try again.");}
+      if (scope.current === requestScope && locationEpoch.current === requestEpoch) {
+        setRefresh(value => value + 1);
+        setActionError("");
+      }
+    } catch {if (scope.current === requestScope && locationEpoch.current === requestEpoch) setActionError("File refresh is unavailable. Try again.");}
     finally {setBusy(false);}
   }
 

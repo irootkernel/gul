@@ -14,10 +14,10 @@ let navigation = {workspaceId: "alpha", sessionId: "one"};
 const calls = {navigation: 0, directory: 0, preview: 0, compare: 0, refresh: 0};
 const faults = {workspaceLoad: new URL(location.href).searchParams.has("workspace-fault") ? 1 : 0,
   sessions: 0, directory: 0, more: 0, preview: 0, compare: 0, refresh: 0, navigation: 0,
-  echoCurrentWorkspace: 0, navigationDelayMs: 0, moreDelayMs: 0};
+  echoCurrentWorkspace: 0, navigationDelayMs: 0, moreDelayMs: 0, compareDelayMs: 0, refreshDelayMs: 0};
 Object.assign(window, {fixture: Object.assign(calls, {faults})});
 
-function fails(key: Exclude<keyof typeof faults, "navigationDelayMs" | "moreDelayMs">) {
+function fails(key: Exclude<keyof typeof faults, "navigationDelayMs" | "moreDelayMs" | "compareDelayMs" | "refreshDelayMs">) {
   if (!faults[key]) return false;
   faults[key]--;
   return true;
@@ -81,12 +81,15 @@ const clients: OperatorClients = {
     },
     compareFixedRevisions: async ({relativePath}) => {
       calls.compare++;
+      if (faults.compareDelayMs) await new Promise(resolve => setTimeout(resolve, faults.compareDelayMs));
       if (fails("compare")) throw new Error("Comparison unavailable");
       return create(CompareFixedRevisionsResponseSchema, {state: FileGitState.NOT_REPOSITORY,
         working: create(ReadPreviewResponseSchema, {kind: FilePreviewKind.TEXT, text: `Working ${relativePath}`}),
       });
     },
-    refreshFiles: async () => {calls.refresh++; if (fails("refresh")) throw new Error("Refresh unavailable"); return {};},
+    refreshFiles: async () => {calls.refresh++;
+      if (faults.refreshDelayMs) await new Promise(resolve => setTimeout(resolve, faults.refreshDelayMs));
+      if (fails("refresh")) throw new Error("Refresh unavailable"); return {};},
   },
 };
 

@@ -79,7 +79,7 @@ export function OperatorApp({clients, writerActive = false}: {clients: OperatorC
     setNavigationBusy(true);
     try {
       const next = await clients.workspace.setNavigation({workspaceId: nextWorkspaceId, sessionId: ""});
-      setActivity(undefined);
+      if (next.workspaceId !== workspaceId || next.sessionId !== sessionId) setActivity(undefined);
       setWorkspaceId(next.workspaceId);
       setSessionId(next.sessionId);
       if (next.workspaceId !== workspaceId) setSessions([]);
@@ -95,7 +95,7 @@ export function OperatorApp({clients, writerActive = false}: {clients: OperatorC
     setNavigationBusy(true);
     try {
       const next = await clients.workspace.setNavigation({workspaceId, sessionId: nextSessionId});
-      setActivity(undefined);
+      if (next.sessionId !== sessionId) setActivity(undefined);
       setSessionId(next.sessionId);
       setTab("chat");
       setNavigationError("");

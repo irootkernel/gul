@@ -60,7 +60,8 @@ responsive operator component against explicit typed clients in a temporary
 loopback fixture and exercises desktop panes, iPhone-size
 navigation, session selection, file browsing, preview, degraded Git status,
 pagination and retry, comparison, workspace return, navigation-write isolation,
-explicit refresh, and representative client failures. It is separate from
+explicit refresh, delayed compare and refresh failures after navigation, and
+representative client failures. It is separate from
 `make test` and does not qualify authenticated delivery or a live provider.
 
 The E7-T2 browser check is `python3 frontend/browser/verify-activity.py`.
@@ -69,7 +70,8 @@ It builds an isolated typed-client fixture and checks mobile navigation status,
 pending Interaction priority, chronological conversation across refresh and
 pagination, accepted-user Prompt History with inline and artifact originals,
 linked Turns outside the loaded page, close receipts and transport failure,
-read degradation, and typed external blockers in real Chrome.
+read degradation, bounded pending-card fan-out, same-session status retention,
+and typed external blockers in real Chrome.
 `make test` typechecks the fixture and runs focused artifact integrity,
 provider page limit and typed blocker unit tests. The browser check remains
 separate from `make test`

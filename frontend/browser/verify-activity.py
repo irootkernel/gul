@@ -93,6 +93,24 @@ with tempfile.TemporaryDirectory(prefix="gul-e7-activity-") as directory:
               !status.includes('Policy USER_APPROVAL_REQUIRED') || !status.includes('Requests 1')) throw Error('Mobile navigation status incomplete');
           const action = await page.getByRole('region', {name:'Action required'}).boundingBox();
           if (!action || action.y >= 844) throw Error('Mobile action card needs hidden scrolling');
+          await page.getByRole('button', {name:'Sessions', exact:true}).click();
+          await page.getByRole('button', {name:'Fixture Session'}).click();
+          if (!(await page.locator('.operator__header-status').innerText()).includes('Provider READY'))
+            throw Error('Same-session selection erased the activity summary');
+        }""")
+        cli(directory, "goto", f"http://127.0.0.1:{server.server_port}/?integrated&selection-untyped")
+        cli(directory, "run-code", """async page => {
+          await page.locator('.operator__header-status').waitFor();
+          await page.getByRole('button', {name:'Fixture Session'}).click();
+          await page.getByText('Session selection is unavailable.', {exact:false}).waitFor();
+          if (!(await page.locator('.operator__header-status').innerText()).includes('Provider READY'))
+            throw Error('Failed session selection erased the activity summary');
+        }""")
+        cli(directory, "goto", f"http://127.0.0.1:{server.server_port}/?pending-overflow")
+        cli(directory, "run-code", """async page => {
+          await page.getByText('Some interaction requests are unavailable.', {exact:false}).waitFor();
+          if (await page.evaluate(() => window.fixture.card) !== 100)
+            throw Error('Oversized pending list exceeded the bounded card fan-out');
         }""")
         for code, phrase in [
             ("WORKSPACE_NOT_PROVISIONED", "Provision it in Dolgorae"),
@@ -226,7 +244,8 @@ with tempfile.TemporaryDirectory(prefix="gul-e7-activity-") as directory:
           await page.getByRole('button', {name:'View full original'}).click();
           await page.getByText('Full original is unavailable.', {exact:false}).waitFor();
         }""")
-        for suffix, expected in [("", "Linked Turn: repeat"), ("&linked-missing", "The linked Turn is unavailable."),
+        for suffix, expected in [("", "Linked Turn: repeat"), ("&linked-exact", "Linked Turn: " + "x" * 1024),
+                                 ("&linked-missing", "The linked Turn is unavailable."),
                                  ("&linked-failure", "The linked Turn is unavailable."),
                                  ("&linked-oversize", "The linked Turn is unavailable.")]:
             cli(directory, "goto", f"http://127.0.0.1:{server.server_port}/?linked=1{suffix}")

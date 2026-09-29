@@ -9,6 +9,9 @@ test("conversation page rejects each browser response bound", () => {
   const entry = create(ConversationEntrySchema, {entryId: "entry-1", preview: "ok"});
   const valid = create(ListConversationResponseSchema, {snapshotId: "snapshot", items: [entry], nextPageToken: "next"});
   expect(() => assertConversationPage(valid)).not.toThrow();
+  expect(() => assertConversationPage(create(ListConversationResponseSchema,
+    {...valid, items: Array.from({length: maximumPageSize}, (_, index) =>
+      create(ConversationEntrySchema, {entryId: `entry-${index}`, preview: "x".repeat(maximumPreviewBytes)}))}))).not.toThrow();
   const invalid = [
     {snapshotId: ""},
     {items: Array(maximumPageSize + 1).fill(entry)},

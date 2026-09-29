@@ -110,6 +110,9 @@ func TestBrowserDeliveryHasNoProductAPI(t *testing.T) {
 	if !bytes.Contains(javascript, []byte("Product access remains unavailable until authentication is configured.")) {
 		t.Fatal("delivered JavaScript lost the fail-closed foundation message")
 	}
+	if !bytes.Contains(javascript, []byte("A writer is active. Previews may show intermediate file state.")) {
+		t.Fatal("delivered JavaScript lost the operator file warning")
+	}
 }
 
 func TestBrowserDeliveryRejectsMissingPathsAndWriteMethods(t *testing.T) {

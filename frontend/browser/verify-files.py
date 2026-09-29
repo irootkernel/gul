@@ -168,6 +168,29 @@ with tempfile.TemporaryDirectory(prefix="gul-e7-files-") as directory:
         cli(directory, "click", ref(snap, 'button "Compare HEAD and Working"'))
         snap = snapshot(directory)
         assert "Working docs/README.md" in snap and "Git review is unavailable" not in snap, snap
+        cli(directory, "run-code", """async page => {
+          await page.evaluate(() => {window.fixture.faults.compare = 1; window.fixture.faults.compareDelayMs = 400});
+          await page.getByRole('button', {name:'Compare HEAD and Working'}).click();
+          await page.getByRole('button', {name:'Back to explorer'}).click();
+          await page.getByRole('button', {name:'README.md'}).click();
+          await page.waitForTimeout(550);
+          if (await page.getByText('Git review is unavailable.').count()) throw Error('Late compare failure reached reopened preview');
+          await page.evaluate(() => {window.fixture.faults.compareDelayMs = 0});
+        }""")
+        cli(directory, "run-code", """async page => {
+          await page.evaluate(() => {window.fixture.faults.refresh = 1; window.fixture.faults.refreshDelayMs = 400});
+          await page.getByRole('button', {name:'Refresh files'}).click();
+          await page.getByRole('button', {name:'Back to explorer'}).click();
+          await page.getByRole('button', {name:'Parent directory'}).click();
+          await page.waitForTimeout(550);
+          if (await page.getByText('File refresh is unavailable.').count()) throw Error('Late refresh failure reached new directory');
+          await page.evaluate(() => {window.fixture.faults.refreshDelayMs = 0});
+        }""")
+        snap = snapshot(directory)
+        cli(directory, "click", ref(snap, 'button "▸ docs"'))
+        snap = snapshot(directory)
+        cli(directory, "click", ref(snap, 'button "README.md"'))
+        snap = snapshot(directory)
         cli(directory, "run-code", "async page => { await page.evaluate(() => {window.fixture.faults.refresh = 1}); }")
         cli(directory, "click", ref(snap, 'button "Refresh files"'))
         snap = snapshot(directory)

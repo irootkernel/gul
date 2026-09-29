@@ -1,7 +1,8 @@
 import {expect, test} from "bun:test";
 import {create} from "@bufbuild/protobuf";
 import {GetMetadataResponseSchema, ReadChunkResponseSchema} from "../../api/generated/ts/gul/v1/gul_pb";
-import {readPromptOriginal} from "./prompt-original";
+import {readPromptOriginal, resolvePromptOriginal} from "./prompt-original";
+import {maximumInlineOriginalBytes} from "../../api/generated/ts/gul/v1/bounds";
 
 test("full prompt artifact is decoded only after complete digest verification", async () => {
   const bytes = new TextEncoder().encode("첫째 줄\r\n둘째 줄");
@@ -64,4 +65,16 @@ test("artifact metadata rejects unsupported identity, media, size and digest", a
   changed[0] = changed[0]! ^ 1;
   await expect(readPromptOriginal({...client, readChunk: async () => create(ReadChunkResponseSchema,
     {data: changed, totalLength: BigInt(bytes.length), sha256: digest})}, "session-1", "artifact-3")).rejects.toThrow("integrity");
+});
+
+test("exact prompt original size limits remain admissible", async () => {
+  const inline = "x".repeat(maximumInlineOriginalBytes);
+  const unused = {getMetadata: async () => {throw new Error("unexpected metadata read");},
+    readChunk: async () => {throw new Error("unexpected chunk read");}};
+  expect(await resolvePromptOriginal(unused, "session-1", {case: "inlineUtf8", value: inline})).toBe(inline);
+  await expect(readPromptOriginal({
+    getMetadata: async () => create(GetMetadataResponseSchema,
+      {artifactRef: "artifact-max", mediaType: "text/plain", byteLength: 64n * 1024n * 1024n, sha256: "0".repeat(64)}),
+    readChunk: async () => {throw new Error("chunk requested");},
+  }, "session-1", "artifact-max")).rejects.toThrow("chunk requested");
 });

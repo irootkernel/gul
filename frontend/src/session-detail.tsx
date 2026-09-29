@@ -6,6 +6,7 @@ import {
   type GetCardResponse, type GetExecutionStateResponse, type InteractionCard,
   type ListPendingResponse, type ResolveResponse,
 } from "../../api/generated/ts/gul/v1/gul_pb";
+import {maximumPageSize} from "../../api/generated/ts/gul/v1/bounds";
 import {ConversationPanel, type ConversationClient} from "./conversation-panel";
 import {domainErrorMessage, domainErrorRequiresExternalAction, externalActionRequired, operatorError} from "./domain-errors";
 import {InteractionCardView} from "./interaction-card";
@@ -97,19 +98,21 @@ export function SessionDetail({sessionId, client, onActivity}: {sessionId: strin
         return;
       }
       setPendingCount(pending.value.summaries.length);
-      const loaded = await Promise.allSettled(pending.value.summaries.map(summary => client.getCard({sessionId, interactionId: summary.interactionId})));
+      const admittedSummaries = pending.value.summaries.slice(0, maximumPageSize);
+      const truncated = admittedSummaries.length < pending.value.summaries.length;
+      const loaded = await Promise.allSettled(admittedSummaries.map(summary => client.getCard({sessionId, interactionId: summary.interactionId})));
       if (!current) return;
       setCards(loaded.flatMap((result, index) => {
         if (result.status !== "fulfilled") return [];
         const card = result.value.card;
-        if (!card?.summary || card.summary.interactionId !== pending.value.summaries[index]?.interactionId ||
+        if (!card?.summary || card.summary.interactionId !== admittedSummaries[index]?.interactionId ||
             card.summary.status !== InteractionCardStatus.PENDING) return [];
         return [card];
       }));
       const externalCard = loaded.find(result => result.status === "rejected" && externalActionRequired(result.reason));
       if (externalCard?.status === "rejected") {setCardExternal(true); setCardError(operatorError(externalCard.reason));}
-      else if (loaded.some((result, index) => result.status === "rejected" ||
-          result.value.card?.summary?.interactionId !== pending.value.summaries[index]?.interactionId ||
+      else if (truncated || loaded.some((result, index) => result.status === "rejected" ||
+          result.value.card?.summary?.interactionId !== admittedSummaries[index]?.interactionId ||
           result.value.card?.summary?.status !== InteractionCardStatus.PENDING)) {
         setCardError("Some interaction requests are unavailable. Check current state before acting.");
       }

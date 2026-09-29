@@ -1261,6 +1261,34 @@ behavior remains for E9's actual-device qualification. The serial `make test`
 covers guard state cases, typecheck, the checked bundle, SOT, and foundation
 tests; the selected real-browser check is separate.
 
+### E7 validation corrections (2026-09-30)
+
+The whole-Epic review confirmed a file-pane race: a comparison failure could
+arrive after Back and show a preview-specific alert in the explorer. A late
+RefreshFiles failure could also appear after navigation. Compare and refresh
+now admit results only while the initiating location remains current, including
+when the operator leaves and reopens the same preview. File continuation keeps
+its existing directory scope. The file browser check delays both failures past
+navigation and confirms the old alerts do not appear in the new context.
+
+Successful reselection of the current session now preserves its navigation
+activity summary. The failed-selection path already preserved that summary.
+The selected-session browser check covers both cases. ListPending still reports
+the complete provider request count, while GetCard fan-out is limited to the
+first 100 summaries; an oversized list shows a partial-availability notice.
+The activity browser check verifies the limit. The checked bundle's
+`mountOperator` entry now accepts the writer-active signal and passes it to the
+file pane, and the delivery test checks for the warning in that bundle.
+
+Focused tests admit provider pages, linked Turn previews, and inline originals
+at their exact size limits. An artifact at the 64 MiB metadata limit proceeds
+to a chunk read; the test stops before reading the full body. The corrected
+source passed `make test` and the real Chrome file, activity, accessibility,
+and action checks. These corrections were checked locally after the static
+whole-Epic review; the review covered the preceding committed three-task
+range. Authenticated assembly, live providers, and native device composition
+remain outside E7's acceptance scope.
+
 ## 2. Current development snapshot
 
 | Area | State |

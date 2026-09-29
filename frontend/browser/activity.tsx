@@ -64,6 +64,7 @@ const clients: SessionDetailClient = {
     return create(GetConversationEntryResponseSchema, {entry: params.has("entry-drift") && entryId === answer.entryId ? first
       : entryId === second.entryId && params.has("linked-missing") ? undefined
         : entryId === second.entryId && params.has("linked-oversize") ? create(ConversationEntrySchema, {...second, preview: "x".repeat(1025)})
+          : entryId === second.entryId && params.has("linked-exact") ? create(ConversationEntrySchema, {...second, preview: "x".repeat(1024)})
           : [first, answer, second].find(item => item.entryId === entryId),
       original: create(PromptOriginalSchema, {content: params.has("artifact") || params.has("artifact-mismatch")
         ? {case: "artifactRef", value: entryId === answer.entryId ? "artifact-response" : "artifact-prompt"}
@@ -102,8 +103,12 @@ const clients: SessionDetailClient = {
     mode: WriterAccessMode.READ_ONLY, flags: create(ActionFlagsSchema, {canRequestSessionClose: true, requiresCloseConfirmation: true,
       blockedByOutcomeUnknown: params.has("eligibility-unknown")})})});},
   listPending: async () => {calls.pending++; if (params.has("pending-typed")) throw typedFailure("PROVIDER_BLOCKED");
-    if (params.has("pending-failure")) throw Error("private pending failure"); return create(ListPendingResponseSchema, {summaries: [summary]});},
+    if (params.has("pending-failure")) throw Error("private pending failure");
+    return create(ListPendingResponseSchema, {summaries: params.has("pending-overflow")
+      ? Array.from({length: 101}, (_, index) => create(InteractionCardSummarySchema, {...summary, interactionId: `approval-${index}`}))
+      : [summary]});},
   getCard: async () => {calls.card++; if (params.has("card-typed")) throw typedFailure("PROFILE_MISSING");
+    if (params.has("pending-overflow")) throw Error("private card failure");
     if (params.has("card-failure")) throw Error("private card failure");
     return create(GetCardResponseSchema, {card: params.has("card-mismatch") ? create(InteractionCardSchema, {...card,
       summary: create(InteractionCardSummarySchema, {interactionId: "wrong-card", status: InteractionCardStatus.PENDING})})

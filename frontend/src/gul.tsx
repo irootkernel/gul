@@ -23,8 +23,8 @@ export function mountFoundation(root: HTMLElement | null) {
   );
 }
 
-export function mountOperator(root: HTMLElement | null, clients: OperatorClients) {
-  applicationRoot(root).render(<StrictMode><OperatorApp clients={clients} /></StrictMode>);
+export function mountOperator(root: HTMLElement | null, clients: OperatorClients, writerActive = false) {
+  applicationRoot(root).render(<StrictMode><OperatorApp clients={clients} writerActive={writerActive} /></StrictMode>);
 }
 
 if (typeof document !== "undefined") mountFoundation(document.getElementById("root"));
