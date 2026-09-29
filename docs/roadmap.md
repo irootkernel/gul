@@ -3,9 +3,9 @@
 | Field | Value |
 | --- | --- |
 | Role | Sole authority for task identity, order, status, dependencies, and phase |
-| Revision | 2026-09-29 E6-T1 completion |
+| Revision | 2026-09-29 E6-T2 completion |
 | Active Task | None |
-| Next | E6-T2 |
+| Next | E6-T3 |
 | Required provider | Released Dolgorae v0.1.3 implementing `dolgorae.gul-consumer/v1` |
 
 `Next` names the next queued Task within E6.
@@ -255,7 +255,7 @@ unless the implementation proposes a different accepted rendering policy.
 | Task | Phase | Status | Predecessors | Owned result and verification |
 | --- | --- | --- | --- | --- |
 | E6-T1 | Pre-release | Completed | E3-T1 | Verified-root FileService guards and all private-subtree/escape denial tests using isolated roots |
-| E6-T2 | Pre-release | Planned | E6-T1 | Bounded directory/text/raster/Markdown preview and SVG-safe fallback |
+| E6-T2 | Pre-release | Completed | E6-T1 | Bounded directory/text/raster/Markdown preview and SVG-safe fallback |
 | E6-T3 | Pre-release | Planned | E6-T2 | Refresh, bounded Git review, typed degradation without runtime dependency |
 
 ### E7: Complete the usable responsive interface

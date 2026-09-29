@@ -66,6 +66,13 @@ func TestFileHandlerUsesTrustedSubjectAndHidesPrivatePaths(t *testing.T) {
 	if provider.calls != 0 {
 		t.Fatalf("file inspection called the offline provider %d times", provider.calls)
 	}
+	page, err := handler.ListDirectory(t.Context(), connect.NewRequest(&gulv1.ListDirectoryRequest{WorkspaceId: "entry", RelativePath: ".", PageSize: 10}))
+	if err != nil || len(page.Msg.GetEntries()) != 2 { t.Fatalf("directory = %+v, %v", page, err) }
+	preview, err := handler.ReadPreview(t.Context(), connect.NewRequest(&gulv1.ReadPreviewRequest{WorkspaceId: "entry", RelativePath: "public.txt"}))
+	if err != nil || preview.Msg.GetKind() != gulv1.FilePreviewKind_FILE_PREVIEW_KIND_TEXT || preview.Msg.GetText() != "public" { t.Fatalf("preview = %+v, %v", preview, err) }
+	if provider.calls != 0 { t.Fatalf("file preview called offline provider %d times", provider.calls) }
+	_, err = handler.ReadPreview(t.Context(), connect.NewRequest(&gulv1.ReadPreviewRequest{WorkspaceId: "entry", RelativePath: ".dolgorae/secret"}))
+	assertFileCode(t, err, connect.CodeInvalidArgument, gulv1.ErrorCode_ERROR_CODE_INVALID_REQUEST)
 	for _, relative := range []string{".dolgorae/secret", "../outside", "missing"} {
 		_, err := handler.InspectPath(t.Context(), connect.NewRequest(&gulv1.InspectPathRequest{WorkspaceId: "entry", RelativePath: relative}))
 		assertFileCode(t, err, connect.CodeInvalidArgument, gulv1.ErrorCode_ERROR_CODE_INVALID_REQUEST)

@@ -10,4 +10,10 @@ const (
 	MaximumInlineOriginalBytes = 262144
 	MaximumArtifactChunkBytes = 262144
 	MaximumCloseOutcomeBytes = 16384
+	MaximumFileTextBytes = 262144
+	MaximumFileTextLines = 4000
+	MaximumFileImageBytes = 4194304
+	MaximumFileImagePixels = 25165824
+	MaximumFileMarkdownImages = 8
+	MaximumFileMarkdownImageBytes = 8388608
 )

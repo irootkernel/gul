@@ -6,5 +6,11 @@
   "maximum_preview_bytes": 1024,
   "maximum_inline_original_bytes": 262144,
   "maximum_artifact_chunk_bytes": 262144,
-  "maximum_close_outcome_bytes": 16384
+  "maximum_close_outcome_bytes": 16384,
+  "maximum_file_text_bytes": 262144,
+  "maximum_file_text_lines": 4000,
+  "maximum_file_image_bytes": 4194304,
+  "maximum_file_image_pixels": 25165824,
+  "maximum_file_markdown_images": 8,
+  "maximum_file_markdown_image_bytes": 8388608
 }

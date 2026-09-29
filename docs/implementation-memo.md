@@ -1067,6 +1067,37 @@ remains with its later owner. The shared accessor is the required entry point
 for those consumers, and neither a live provider nor an authenticated product
 route is claimed by this task.
 
+### E6-T2 bounded file preview (2026-09-29)
+
+The unmounted FileService API now lists live directories in pages of at most
+100 entries through short-lived, bounded descriptor cursors. Each page reads
+at most 101 raw names, including one lookahead. It reads bounded text, source,
+Markdown and raster previews
+through the T1 guarded descriptor. Invalid-byte entry names fail with the
+typed unsupported-path error; private-root aliases never become browser
+entries. Text has 256 KiB and 4,000-line limits with truncation indicated.
+Raster bytes are capped at 4 MiB and checked for PNG, JPEG, GIF or WebP MIME
+and dimensions before the browser receives an inert data image. Invalid,
+binary or oversized content uses a controlled unavailable preview.
+
+Markdown uses the established HTML-free renderer with a separate, explicit
+raster-asset allowance for FileService content. Code-fence references are not
+loaded. At most eight local images and
+8 MiB aggregate asset bytes are read through the same root guard; external,
+escaping and private references remain literal. Assets and Markdown are read
+from the selected Working revision for this task. A writer can change Working
+between reads, so this is not an atomic filesystem snapshot. E6-T3 adds fixed
+`HEAD` comparison and refresh. ADR-0018 accepts escaped source-only SVG;
+no SVG is rendered as an image or document.
+
+Isolated filesystem and API tests cover large listing pages, private aliases,
+invalid encodings, truncation, all four raster formats, oversize content and
+offline provider independence. React tests check inert Markdown, source SVG
+and source highlighting. The affected component requirements are
+`REQ-FILE-004..008` and `REQ-FILE-012`; no assembled file pane or authenticated
+route is claimed. The serial `make test` and generated API/frontend drift
+checks verify this task candidate.
+
 ## 2. Current development snapshot
 
 | Area | State |
@@ -1074,13 +1105,13 @@ route is claimed by this task.
 | Five Gul SOT documents | E0-T4 completed the consumer alignment and Gate A reproduction; E0-T8 completed toolchain/ADR alignment; E0-T7 completed Gate B |
 | Toolchain and developer-command artifacts | E0-T8 accepted one pin manifest and read-only host checks; E0-T7 adds checked contract generation/drift delegates; E1-T1 adds the root Go module; E1-T2 adds root Bun pin validation and checked frontend generation/drift commands; E1-T3 adds checked Gul API/error-catalog generation; no installer |
 | Contract boundary | E12-T1 pins TASK-053 and regenerates checked clients/maps/fake transport for 36 known, 27 required, and 9 unavailable methods; E13-T1 adds an explicit stateful scenario provider over the 27-method port |
-| Production source | E1 shared core, bundle, API declarations, isolated SQLite and Wails shell; E3 adds Workspace attachment and presentation; E4 adds typed observation, Interactions, actions and bounded history/result/artifact reads; E5 adds safe close, reconnect and operation-specific replay; E6-T1 adds a verified-root local FileService guard and typed inspection handler; handlers remain unmounted |
+| Production source | E1 shared core, bundle, API declarations, isolated SQLite and Wails shell; E3 adds Workspace attachment and presentation; E4 adds typed observation, Interactions, actions and bounded history/result/artifact reads; E5 adds safe close, reconnect and operation-specific replay; E6-T1/T2 add verified-root local FileService guards, bounded previews and typed handlers; handlers remain unmounted |
 | Wails host/frontend | One React foundation bundle and isolated Wails shell foundation implemented; E3-T4 launch selector is unmounted and authenticated attach is not implemented |
 | ConnectRPC schema/services | Gul Runtime, DirectSession, ArtifactPresentation and WorkspacePresentation declarations and generated clients exist; isolated handlers remain unmounted |
 | Gul SQLite schema | Gul-owned version 8 schema with Workspace attachment, favorites, Primary binding, event metadata, session-close attempts, mutation-attempt details and Writer reconciliation baselines; production startup integration pending |
 | Dolgorae RPC supervisor/provider | Bounded restart policy implemented against an injected lifecycle; production process ownership and live provider remain pending |
 | Controller credential store | Caller-owned mechanism selected by ADR-0047; not implemented |
-| FileService/auth/PWA/Tailscale integration | E6-T1 local guard and unmounted inspection API implemented; bounded preview, Git, watcher and product integration pending |
+| FileService/auth/PWA/Tailscale integration | E6-T1/T2 local guard, bounded preview and unmounted APIs implemented; Git, watcher and product integration pending |
 | Current State promotions | Prior E0/E12/E1/E13/E3/E4/E5 entries plus component-scoped REQ-FILE-001..003; no assembled-product or released-provider claim |
 
 The repository contains the shared-core and single-bundle delivery foundations,
@@ -1208,7 +1239,7 @@ the safe first-release default unless a later accepted ADR changes it.
 | Dolgorae executable and live compatibility | Historical E0 contract evidence exists; the new immutable contract starts at TASK-053 and the exact release follows TASK-026 plus RC QA | Complete the pre-release Epic sequence through E14 before E2-T0 pins the released executable, lifecycle, version, binary identity, and smoke evidence. | E2-T0 release-gated; does not block pre-release work |
 | Gorae release scope | Deferred by ADR-0030 | Explicit SOT/ADR approval required to enter v0.1. | Deferred epic |
 | Local draft Direct Session behavior | Resolved by E3-T3 | No Gul draft before an accepted provider session; repeat binding reuses the Gul ID and preserves local presentation. | E3-T3 |
-| SVG preview | ADR-0018 Proposed | Select source-only, rasterization, or isolated sanitization. | Active SVG preview |
+| SVG preview | ADR-0018 Accepted | Escaped source-only rendering is the first-release policy. | None |
 
 No unresolved item is silently decided by this memo. Source-only SVG remains the safe fallback, and explicit refresh remains the Release-tier behavior beneath the Recommended-tier watcher.
 
@@ -1312,7 +1343,7 @@ Rows dated before 2026-08-23 are historical. E0-T4 lifecycle evidence remains re
 | Requirement ownership coverage | Only E0-T4, the documentation Task, owns no requirement | Passed 2026-08-19 corrective rerun |
 | Release tier assignment | Four Recommended-tier IDs are named in Section 5 with a Release-tier fallback each; every other requirement is Release tier by default | Passed, post-review rerun |
 | Product invariants | Invariants number contiguously 1 through 46 | Passed 2026-08-19 corrective rerun |
-| ADR index/body | 54 index IDs and 54 body IDs/statuses match; only ADR-0018 remains `Proposed`; ADR-0054 defines the current host-version policy | Passed 2026-09-22 prerequisite rerun |
+| ADR index/body | 54 index IDs and 54 body IDs/statuses match; ADR-0018 accepts source-only SVG and ADR-0054 defines the host-version policy | E6-T2 source review |
 | Roadmap active Task | 36 executable Tasks plus retired E0-T9: all three E0 Tasks `Completed`, E2-T0 `Blocked`, and zero Active Tasks | Passed 2026-08-23 completion transition |
 | Bootstrap pins | One data-only manifest records the exact Go version, minimum versions for other host tools, and exact project dependency and generator versions; manifest validation rejects missing or malformed authority | Passed `make test` 2026-09-22 |
 | Clean-host and drift behavior | Minimum-version fixtures accept newer hosts and reject old or missing Wails; project validation and generation still reject pin or output drift | Passed fixture and current-host check 2026-09-22 |
@@ -1534,4 +1565,4 @@ The initial documentation assumed Gul would manage one Codex App Server, map Ses
 
 ## 12. Handoff
 
-E12, E1, E13, E3, E4 and E5 are complete. The TASK-053 consumer lock and generated contract tooling remain authoritative. E6-T1 adds guarded local FileService inspection over E3's saved Workspace attachment. E6-T2 is next for bounded previews; E6-T3 owns Git and invalidation. E2-T0 remains blocked on an accepted compatible Dolgorae executable and live smoke evidence. No product route or live-provider behavior is activated automatically.
+E12, E1, E13, E3, E4 and E5 are complete. The TASK-053 consumer lock and generated contract tooling remain authoritative. E6-T1/T2 add guarded local FileService inspection and bounded preview over E3's saved Workspace attachment. E6-T3 is next for Git and invalidation. E2-T0 remains blocked on an accepted compatible Dolgorae executable and live smoke evidence. No product route or live-provider behavior is activated automatically.

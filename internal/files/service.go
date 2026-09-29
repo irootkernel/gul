@@ -10,6 +10,7 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
+	"sync"
 	"syscall"
 	"unicode/utf8"
 
@@ -31,6 +32,8 @@ type Attachments interface {
 
 type Service struct {
 	attachments Attachments
+	cursorMu    sync.Mutex
+	cursors     map[string]*directoryCursor
 }
 
 func NewService(attachments Attachments) *Service {

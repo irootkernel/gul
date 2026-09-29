@@ -5,7 +5,7 @@
 | Role | Durable architecture decisions and supersession history |
 | Product | Gul |
 | Version | 0.1-dolgorae-consumer-v1 |
-| Last updated | 2026-09-22 |
+| Last updated | 2026-09-29 |
 
 ## 1. Status model
 
@@ -39,7 +39,7 @@ ADR-0050 explicitly amends the product/child-presentation scope in ADR-0021/0022
 | ADR-0015 | Promote requirements only after task acceptance | Accepted | None |
 | ADR-0016 | Select a Gul background-process policy | Superseded | ADR-0026 |
 | ADR-0017 | Select SQLite driver and concurrency settings | Accepted | None |
-| ADR-0018 | Select SVG preview policy | Proposed | None |
+| ADR-0018 | Select SVG preview policy | Accepted | None |
 | ADR-0019 | Separate upstream cursors and Gul delivery sequences | Accepted, modified | None |
 | ADR-0020 | Use bounded host Git for read-only artifact review | Accepted | None |
 | ADR-0021 | Gul is an LLM-free remote operator interface | Accepted | None |
@@ -691,15 +691,19 @@ project output without making a developer install an older compatible host tool.
 This decision amends ADR-0001 and ADR-0053. Historical completed-run evidence and
 the exact versions recorded for those runs remain unchanged.
 
-## 6. Proposed decisions
+## 6. SVG preview decision
 
 ### ADR-0018: Select SVG preview policy
 
-**Status:** Proposed
+**Status:** Accepted
 
 **Deadline:** E6-T2
 
-Options are source-only, trusted host rasterization, or sanitized isolated rendering. Direct same-origin rendering is rejected without evidence. Source-only is the required fallback.
+Gul renders SVG as escaped source text only. It never passes SVG bytes to an
+image element, document frame, or same-origin active renderer. This keeps
+script, external resources, and active links inert without a sanitizer or host
+rasterizer. A different policy requires a new accepted decision and security
+fixtures. Direct same-origin rendering is rejected.
 
 ## 7. ADR migration matrix
 

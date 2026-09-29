@@ -875,6 +875,8 @@ message ActionFailure { ActionBlocker blocker = 1; }
 // handlers remain unmounted until authenticated product route assembly.
 service FileService {
   rpc InspectPath(InspectPathRequest) returns (InspectPathResponse);
+  rpc ListDirectory(ListDirectoryRequest) returns (ListDirectoryResponse);
+  rpc ReadPreview(ReadPreviewRequest) returns (ReadPreviewResponse);
 }
 
 message InspectPathRequest {
@@ -891,4 +893,53 @@ enum FileNodeKind {
 message InspectPathResponse {
   FileNodeKind kind = 1;
   uint64 byte_length = 2;
+}
+
+message ListDirectoryRequest {
+  string workspace_id = 1;
+  string relative_path = 2;
+  uint32 page_size = 3;
+  string page_token = 4;
+}
+
+message FileEntry {
+  string name = 1;
+  FileNodeKind kind = 2;
+  uint64 byte_length = 3;
+  bool provider_managed_denied = 4;
+}
+
+message ListDirectoryResponse {
+  repeated FileEntry entries = 1;
+  string next_page_token = 2;
+}
+
+message ReadPreviewRequest {
+  string workspace_id = 1;
+  string relative_path = 2;
+}
+
+enum FilePreviewKind {
+  FILE_PREVIEW_KIND_UNSPECIFIED = 0;
+  FILE_PREVIEW_KIND_TEXT = 1;
+  FILE_PREVIEW_KIND_MARKDOWN = 2;
+  FILE_PREVIEW_KIND_RASTER = 3;
+  FILE_PREVIEW_KIND_SVG_SOURCE = 4;
+  FILE_PREVIEW_KIND_UNSUPPORTED = 5;
+}
+
+message MarkdownImage {
+  string reference = 1;
+  string mime_type = 2;
+  bytes data = 3;
+}
+
+message ReadPreviewResponse {
+  FilePreviewKind kind = 1;
+  string text = 2;
+  bytes image = 3;
+  string mime_type = 4;
+  string language = 5;
+  bool truncated = 6;
+  repeated MarkdownImage markdown_images = 7;
 }

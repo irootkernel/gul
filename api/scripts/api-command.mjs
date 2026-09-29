@@ -16,6 +16,12 @@ const boundNames = {
   maximum_inline_original_bytes: "MaximumInlineOriginalBytes",
   maximum_artifact_chunk_bytes: "MaximumArtifactChunkBytes",
   maximum_close_outcome_bytes: "MaximumCloseOutcomeBytes",
+  maximum_file_text_bytes: "MaximumFileTextBytes",
+  maximum_file_text_lines: "MaximumFileTextLines",
+  maximum_file_image_bytes: "MaximumFileImageBytes",
+  maximum_file_image_pixels: "MaximumFileImagePixels",
+  maximum_file_markdown_images: "MaximumFileMarkdownImages",
+  maximum_file_markdown_image_bytes: "MaximumFileMarkdownImageBytes",
 };
 
 export function normalizeGeneratedTS(source) {

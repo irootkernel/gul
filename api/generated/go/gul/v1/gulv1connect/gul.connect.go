@@ -157,6 +157,11 @@ const (
 	WriterActionServiceReleaseWriterProcedure = "/gul.v1.WriterActionService/ReleaseWriter"
 	// FileServiceInspectPathProcedure is the fully-qualified name of the FileService's InspectPath RPC.
 	FileServiceInspectPathProcedure = "/gul.v1.FileService/InspectPath"
+	// FileServiceListDirectoryProcedure is the fully-qualified name of the FileService's ListDirectory
+	// RPC.
+	FileServiceListDirectoryProcedure = "/gul.v1.FileService/ListDirectory"
+	// FileServiceReadPreviewProcedure is the fully-qualified name of the FileService's ReadPreview RPC.
+	FileServiceReadPreviewProcedure = "/gul.v1.FileService/ReadPreview"
 )
 
 // RuntimeServiceClient is a client for the gul.v1.RuntimeService service.
@@ -1385,6 +1390,8 @@ func (UnimplementedWriterActionServiceHandler) ReleaseWriter(context.Context, *c
 // FileServiceClient is a client for the gul.v1.FileService service.
 type FileServiceClient interface {
 	InspectPath(context.Context, *connect.Request[v1.InspectPathRequest]) (*connect.Response[v1.InspectPathResponse], error)
+	ListDirectory(context.Context, *connect.Request[v1.ListDirectoryRequest]) (*connect.Response[v1.ListDirectoryResponse], error)
+	ReadPreview(context.Context, *connect.Request[v1.ReadPreviewRequest]) (*connect.Response[v1.ReadPreviewResponse], error)
 }
 
 // NewFileServiceClient constructs a client for the gul.v1.FileService service. By default, it uses
@@ -1404,12 +1411,26 @@ func NewFileServiceClient(httpClient connect.HTTPClient, baseURL string, opts ..
 			connect.WithSchema(fileServiceMethods.ByName("InspectPath")),
 			connect.WithClientOptions(opts...),
 		),
+		listDirectory: connect.NewClient[v1.ListDirectoryRequest, v1.ListDirectoryResponse](
+			httpClient,
+			baseURL+FileServiceListDirectoryProcedure,
+			connect.WithSchema(fileServiceMethods.ByName("ListDirectory")),
+			connect.WithClientOptions(opts...),
+		),
+		readPreview: connect.NewClient[v1.ReadPreviewRequest, v1.ReadPreviewResponse](
+			httpClient,
+			baseURL+FileServiceReadPreviewProcedure,
+			connect.WithSchema(fileServiceMethods.ByName("ReadPreview")),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
 // fileServiceClient implements FileServiceClient.
 type fileServiceClient struct {
-	inspectPath *connect.Client[v1.InspectPathRequest, v1.InspectPathResponse]
+	inspectPath   *connect.Client[v1.InspectPathRequest, v1.InspectPathResponse]
+	listDirectory *connect.Client[v1.ListDirectoryRequest, v1.ListDirectoryResponse]
+	readPreview   *connect.Client[v1.ReadPreviewRequest, v1.ReadPreviewResponse]
 }
 
 // InspectPath calls gul.v1.FileService.InspectPath.
@@ -1417,9 +1438,21 @@ func (c *fileServiceClient) InspectPath(ctx context.Context, req *connect.Reques
 	return c.inspectPath.CallUnary(ctx, req)
 }
 
+// ListDirectory calls gul.v1.FileService.ListDirectory.
+func (c *fileServiceClient) ListDirectory(ctx context.Context, req *connect.Request[v1.ListDirectoryRequest]) (*connect.Response[v1.ListDirectoryResponse], error) {
+	return c.listDirectory.CallUnary(ctx, req)
+}
+
+// ReadPreview calls gul.v1.FileService.ReadPreview.
+func (c *fileServiceClient) ReadPreview(ctx context.Context, req *connect.Request[v1.ReadPreviewRequest]) (*connect.Response[v1.ReadPreviewResponse], error) {
+	return c.readPreview.CallUnary(ctx, req)
+}
+
 // FileServiceHandler is an implementation of the gul.v1.FileService service.
 type FileServiceHandler interface {
 	InspectPath(context.Context, *connect.Request[v1.InspectPathRequest]) (*connect.Response[v1.InspectPathResponse], error)
+	ListDirectory(context.Context, *connect.Request[v1.ListDirectoryRequest]) (*connect.Response[v1.ListDirectoryResponse], error)
+	ReadPreview(context.Context, *connect.Request[v1.ReadPreviewRequest]) (*connect.Response[v1.ReadPreviewResponse], error)
 }
 
 // NewFileServiceHandler builds an HTTP handler from the service implementation. It returns the path
@@ -1435,10 +1468,26 @@ func NewFileServiceHandler(svc FileServiceHandler, opts ...connect.HandlerOption
 		connect.WithSchema(fileServiceMethods.ByName("InspectPath")),
 		connect.WithHandlerOptions(opts...),
 	)
+	fileServiceListDirectoryHandler := connect.NewUnaryHandler(
+		FileServiceListDirectoryProcedure,
+		svc.ListDirectory,
+		connect.WithSchema(fileServiceMethods.ByName("ListDirectory")),
+		connect.WithHandlerOptions(opts...),
+	)
+	fileServiceReadPreviewHandler := connect.NewUnaryHandler(
+		FileServiceReadPreviewProcedure,
+		svc.ReadPreview,
+		connect.WithSchema(fileServiceMethods.ByName("ReadPreview")),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/gul.v1.FileService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case FileServiceInspectPathProcedure:
 			fileServiceInspectPathHandler.ServeHTTP(w, r)
+		case FileServiceListDirectoryProcedure:
+			fileServiceListDirectoryHandler.ServeHTTP(w, r)
+		case FileServiceReadPreviewProcedure:
+			fileServiceReadPreviewHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -1450,4 +1499,12 @@ type UnimplementedFileServiceHandler struct{}
 
 func (UnimplementedFileServiceHandler) InspectPath(context.Context, *connect.Request[v1.InspectPathRequest]) (*connect.Response[v1.InspectPathResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("gul.v1.FileService.InspectPath is not implemented"))
+}
+
+func (UnimplementedFileServiceHandler) ListDirectory(context.Context, *connect.Request[v1.ListDirectoryRequest]) (*connect.Response[v1.ListDirectoryResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("gul.v1.FileService.ListDirectory is not implemented"))
+}
+
+func (UnimplementedFileServiceHandler) ReadPreview(context.Context, *connect.Request[v1.ReadPreviewRequest]) (*connect.Response[v1.ReadPreviewResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("gul.v1.FileService.ReadPreview is not implemented"))
 }

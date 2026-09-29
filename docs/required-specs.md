@@ -381,7 +381,7 @@ scope. E2/E9 still own actual-provider proof.
 | REQ-FILE-005 | Text and source files MUST render read-only with syntax highlighting where identifiable. A provider path containing non-UTF8 bytes MUST produce `NonUtf8PathUnsupported` without lossy conversion, manipulable browser path, or raw-byte logging. | UTF-8 renders; binary and unsupported encodings use a controlled fallback; invalid-byte path fixtures expose no replacement-character alias. | E6-T2 |
 | REQ-FILE-006 | Large text MUST be bounded or paged with truncation indicated. | Byte/line limits prevent server or browser exhaustion. | E6-T2 |
 | REQ-FILE-007 | Supported raster images MUST render only after MIME and size validation. | PNG, JPEG, WebP, and GIF fixtures pass. | E6-T2 |
-| REQ-FILE-008 | SVG MUST NOT execute active content in the application origin. | The accepted ADR policy blocks script, external resources, and active links; source-only rendering is required until ADR-0018 is accepted. | E6-T2 |
+| REQ-FILE-008 | SVG MUST NOT execute active content in the application origin. | ADR-0018 selects escaped source-only rendering; script, external resources, and active links remain inert. | E6-T2 |
 | REQ-FILE-009 | File changes MUST be reflected without a full application reload. | Explicit refresh invalidates affected nodes and previews and satisfies this requirement on its own; the REQ-FILE-016 watcher is the Recommended-tier enhancement over it. | E6-T3 |
 | REQ-FILE-010 | File preview MUST remain read-only. | No save, rename, delete, upload, or drag-and-drop mutation exists. | E6-T3 |
 | REQ-FILE-011 | FileService MUST expose Git status per file and accessible aggregate status for ancestors. | `MODIFIED`, `ADDED`, `UNTRACKED`, `DELETED`, `RENAMED`, `CONFLICTED`, and `CLEAN`, including combined staged/unstaged state, use color plus a non-color indicator; provider-private paths contribute neither direct nor aggregate status. | E6-T3 |
@@ -511,6 +511,11 @@ E6-T1 adds a local, read-only FileService guard over subject-scoped verified
 Workspace attachments and one unmounted typed inspection handler. Its accepted
 scope is isolated root access; preview, Git, watcher and assembled product
 surfaces remain with E6-T2/T3 and later integration owners.
+E6-T2 adds bounded listing, text and raster preview, safe Markdown image
+embedding, and source-only SVG at the same unmounted component boundary.
+Working-tree reads may observe intermediate writer state; fixed `HEAD`
+comparison, invalidation, and assembled file-pane navigation remain with
+E6-T3 and E7.
 
 | Requirement | Accepted Current State | Evidence |
 |---|---|---|
@@ -532,6 +537,12 @@ surfaces remain with E6-T2/T3 and later integration owners.
 | REQ-FILE-001 | Local FileService inspection reads a saved verified Workspace root without a Turn or provider call; component scope, unmounted | E6-T1; isolated filesystem and API tests; serial `make test`; implementation memo |
 | REQ-FILE-002 | The typed inspection API accepts only a Workspace Entry ID and normalized relative path, with no browser absolute path or provider identity; component scope, unmounted | E6-T1; generated API drift and negative request tests; serial `make test`; implementation memo |
 | REQ-FILE-003 | The shared guarded accessor rechecks the root identity, resolves in-root symlinks through anchored descriptors, and rejects escape or replacement before reading; component scope, unmounted | E6-T1; isolated root, nested symlink, alias, replacement and API tests; serial `make test`; implementation memo |
+| REQ-FILE-004 | Directory listing reads one bounded page and exposes continuation without materializing the tree; component scope, unmounted | E6-T2; large-directory page fixture; serial `make test`; implementation memo |
+| REQ-FILE-005 | UTF-8 source preview is inert and highlights known keywords; binary text falls back and invalid-byte directory names return a typed error without an alias; component scope, unmounted | E6-T2; Go and React preview fixtures; serial `make test`; implementation memo |
+| REQ-FILE-006 | Text preview caps bytes at 256 KiB and lines at 4,000 with a visible truncation marker; component scope, unmounted | E6-T2; over-limit fixtures; serial `make test`; implementation memo |
+| REQ-FILE-007 | PNG, JPEG, WebP and GIF previews pass MIME, byte and dimension checks before inert data-image rendering; component scope, unmounted | E6-T2; image fixtures and oversize fallback; serial `make test`; implementation memo |
+| REQ-FILE-008 | ADR-0018 source-only SVG is escaped in the preview component; component scope, unmounted | E6-T2; active SVG fixture; serial `make test`; implementation memo |
+| REQ-FILE-012 | Markdown is rendered through an HTML-free allowlist; at most eight same-working-revision raster assets pass the guarded FileService accessor and external or private references remain literal; component scope, unmounted | E6-T2; Markdown asset and external/private fixtures; serial `make test`; implementation memo |
 | REQ-DIRECT-001 | Each locally accepted Primary Run has one persisted subject-scoped Direct Session binding; three Runs list and reopen without a Codex thread field | E3-T3 scenario-backed binding and SQLite reopen test; `make test` |
 | REQ-DIRECT-003 | Permanent shared read-only launch requires an explicit lane choice, visible warning and acknowledgement before configuration check | E3-T4 React selection, authenticated handler and domain tests; `make test` |
 | REQ-DIRECT-007 | Direct Session name, favorite, archive and last navigation selection are subject-scoped SQLite presentation; offline actions invoke no provider method | E3-T2; restart, isolation and offline handler tests; `make test` |
