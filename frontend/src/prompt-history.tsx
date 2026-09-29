@@ -87,8 +87,10 @@ export function PromptHistoryPanel({sessionId, client, onOpenTurn}: {
     <ol>{items.map(item => <li key={item.promptItemId}>
       <p>#{item.ordinal.toString()} · {acceptedAt(item)}</p>
       <p>{item.preview}{item.previewTruncated ? "…" : ""}</p>
-      <button type="button" onClick={() => {setSelected(item.promptItemId); setOriginalReload(value => value + 1);}}>View full original</button>
-      <button type="button" onClick={() => onOpenTurn(item.conversationEntryId)}>Open matching Turn</button>
+      <button type="button" aria-label={`View full original prompt ${item.ordinal.toString()}`}
+        onClick={() => {setSelected(item.promptItemId); setOriginalReload(value => value + 1);}}>View full original</button>
+      <button type="button" aria-label={`Open matching Turn for prompt ${item.ordinal.toString()}`}
+        onClick={() => onOpenTurn(item.conversationEntryId)}>Open matching Turn</button>
       {selected === item.promptItemId && <div aria-label="Full original prompt">
         {originalLoading ? <p role="status">Loading original…</p> : originalError ? <p role="alert">{originalError}</p> : <pre>{original}</pre>}
       </div>}

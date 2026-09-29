@@ -3,6 +3,7 @@ import {
   InteractionCardDecision, InteractionCardStatus, InteractionResolutionOutcome,
   type InteractionCard, type ResolveResponse, type UserInputCard,
 } from "../../api/generated/ts/gul/v1/gul_pb";
+import {useImeSubmitGuard} from "./ime-submit";
 
 type Respond = (body: Uint8Array) => Promise<ResolveResponse>;
 const responseLimit = 64 * 1024;
@@ -40,6 +41,7 @@ function InteractionCardContent({card, respond, actionable = true}: {card: Inter
   const [feedback, setFeedback] = useState<{basis: InteractionCard; outcome: InteractionOutcome}>();
   const outcome = feedback?.basis === card ? feedback.outcome : undefined;
   const inFlight = useRef(false);
+  const ime = useImeSubmitGuard();
   const active = actionable && card.summary?.status === InteractionCardStatus.PENDING && card.actions?.canResolveInteraction === true && (!outcome || outcome === "pending");
   const detail = card.detail;
 
@@ -61,7 +63,7 @@ function InteractionCardContent({card, respond, actionable = true}: {card: Inter
 
   function answer(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (detail.case !== "userInput" || inFlight.current || !active) return;
+    if (detail.case !== "userInput" || inFlight.current || !active || ime.blocksSubmit()) return;
     const form = event.currentTarget;
     const values = new FormData(form);
     const answers = collectAnswers(values, detail.value.questions);
@@ -88,13 +90,18 @@ function InteractionCardContent({card, respond, actionable = true}: {card: Inter
       {detail.value.changes.map((change, index) => <div key={index}><p>{change.kind}: {change.relativePath}{change.relativeMovePath ? ` → ${change.relativeMovePath}` : ""}</p><pre>{change.unifiedDiff}</pre></div>)}
       {detail.value.verifiedDiff && <pre>{detail.value.verifiedDiff}</pre>}
     </>}
-    {detail.case === "userInput" && <form key={card.summary?.interactionId} onSubmit={answer} autoComplete="off">
+    {detail.case === "userInput" && <form key={card.summary?.interactionId} onSubmit={answer} autoComplete="off"
+      onCompositionStart={ime.onCompositionStart} onCompositionEnd={ime.onCompositionEnd}
+      onKeyDown={ime.onKeyDown} onKeyUp={ime.onKeyUp}>
       {detail.value.questions.map((question, index) => <fieldset key={question.questionId} disabled={!active || busy}>
         <legend>{question.header}</legend><p>{question.question}</p>
         {question.choices.map(choice => <label key={choice.label}><input type="checkbox" name={`answer-${index}`} value={choice.label} />{choice.label} — {choice.description}</label>)}
-        {(question.allowsOther || !question.choices.length) && <label>Answer<input name={`answer-${index}`} type={question.isSecret ? "password" : "text"} autoComplete="off" /></label>}
+        {(question.allowsOther || !question.choices.length) && <label>Answer<input name={`answer-${index}`}
+          aria-label={`Answer for question ${index + 1}: ${question.header}`} type={question.isSecret ? "password" : "text"}
+          autoComplete="off" onBlur={ime.onInputBlur} /></label>}
       </fieldset>)}
-      <button disabled={!active || busy} type="submit">Send answer</button>
+      <button disabled={!active || busy} type="submit" onPointerDown={ime.explicitSubmit}
+        onKeyDown={ime.onSubmitButtonKeyDown}>Send answer</button>
     </form>}
     {detail.case === "unsupported" && <p role="alert">{detail.value.blocker}</p>}
     {!detail.case && <p role="alert">Request details are unavailable.</p>}

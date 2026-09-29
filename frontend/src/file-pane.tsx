@@ -43,7 +43,20 @@ export function FilePane({workspaceId, client, location, onLocation, writerActiv
   const [busy, setBusy] = useState(false);
   const [directoryLoading, setDirectoryLoading] = useState(false);
   const scope = useRef("");
+  const focusTarget = useRef<"path" | "back" | "selected" | null>(null);
+  const pathRef = useRef<HTMLElement>(null);
+  const backRef = useRef<HTMLButtonElement>(null);
+  const selectedRef = useRef<HTMLButtonElement>(null);
   scope.current = `${workspaceId}\0${location.directory}\0${location.selected}\0${refresh}`;
+
+  useLayoutEffect(() => {
+    // These destinations come from clicks in the visible pane, so one focus attempt suffices.
+    if (focusTarget.current === "path" && location.view === "explorer") pathRef.current?.focus();
+    else if (focusTarget.current === "back" && location.view === "preview") backRef.current?.focus();
+    else if (focusTarget.current === "selected" && location.view === "explorer")
+      (selectedRef.current ?? pathRef.current)?.focus();
+    focusTarget.current = null;
+  }, [location.directory, location.selected, location.view]);
 
   useEffect(() => {
     let current = true;
@@ -57,6 +70,8 @@ export function FilePane({workspaceId, client, location, onLocation, writerActiv
       .finally(() => {if (current) setDirectoryLoading(false);});
     return () => {current = false;};
   }, [client, workspaceId, location.directory, refresh]);
+
+  useEffect(() => {setActionError("");}, [workspaceId, location.directory, location.selected, location.view]);
 
   useLayoutEffect(() => {
     let current = true;
@@ -123,7 +138,7 @@ export function FilePane({workspaceId, client, location, onLocation, writerActiv
     {writerActive && <p className="file-pane__warning" role="status">A writer is active. Previews may show intermediate file state.</p>}
     {actionError && <p role="alert">{actionError}</p>}
     {location.view === "preview" && location.selected ? <>
-      <button type="button" onClick={() => onLocation({...location, view: "explorer"})}>Back to explorer</button>
+      <button type="button" ref={backRef} onClick={() => {focusTarget.current = "selected"; onLocation({...location, view: "explorer"});}}>Back to explorer</button>
       <h3>{selectedName}</h3>
       {status && <FileStatus status={status} />}
       {gitError && <p role="status">{gitError}</p>}
@@ -132,8 +147,8 @@ export function FilePane({workspaceId, client, location, onLocation, writerActiv
       <button type="button" disabled={busy || !preview} onClick={() => void review()}>Compare HEAD and Working</button>
       {comparison && <FileComparison comparison={comparison} />}
     </> : <>
-      <nav aria-label="File path" className="file-pane__path">
-        {location.directory && <button type="button" onClick={() => onLocation({directory: parentPath(location.directory), selected: "", view: "explorer"})}>Parent directory</button>}
+      <nav aria-label="File path" className="file-pane__path" ref={pathRef} tabIndex={-1}>
+        {location.directory && <button type="button" onClick={() => {focusTarget.current = "path"; onLocation({directory: parentPath(location.directory), selected: "", view: "explorer"});}}>Parent directory</button>}
         <span>{location.directory || "Workspace root"}</span>
       </nav>
       {directoryError && <p role="alert">{directoryError}</p>}
@@ -141,10 +156,12 @@ export function FilePane({workspaceId, client, location, onLocation, writerActiv
       <ul className="file-pane__list">
         {entries.map(entry => <li key={entry.name}>
           {entry.providerManagedDenied ? <span aria-label={`${entry.name}, provider managed, unavailable`}>{entry.name} · Provider managed</span> :
-            <button type="button" aria-current={location.selected === childPath(location.directory, entry.name) ? "true" : undefined}
-              onClick={() => entry.kind === FileNodeKind.DIRECTORY
-                ? onLocation({directory: childPath(location.directory, entry.name), selected: "", view: "explorer"})
-                : onLocation({directory: location.directory, selected: childPath(location.directory, entry.name), view: "preview"})}>
+            <button type="button" ref={location.selected === childPath(location.directory, entry.name) ? selectedRef : undefined}
+              aria-current={location.selected === childPath(location.directory, entry.name) ? "true" : undefined}
+              onClick={() => {focusTarget.current = entry.kind === FileNodeKind.DIRECTORY ? "path" : "back";
+                onLocation(entry.kind === FileNodeKind.DIRECTORY
+                  ? {directory: childPath(location.directory, entry.name), selected: "", view: "explorer"}
+                  : {directory: location.directory, selected: childPath(location.directory, entry.name), view: "preview"});}}>
               {entry.kind === FileNodeKind.DIRECTORY ? "▸ " : ""}{entry.name}
             </button>}
         </li>)}

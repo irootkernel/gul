@@ -13,13 +13,15 @@ import {
 
 // Explicit fake boundary for browser behavior; this fixture is never bundled in the app.
 const scenario = new URLSearchParams(location.search).get("case") ?? "approval";
-const evidence = {calls: 0, cleared: false, keys: [] as string[], matched: false, consent: false};
+const evidence = {calls: 0, cleared: false, keys: [] as string[], matched: false, consent: false, prompt: ""};
 Object.assign(window, {fixture: evidence});
 const card = create(InteractionCardSchema, {
   summary: {interactionId: scenario, status: scenario === "expiration" ? InteractionCardStatus.STALE : InteractionCardStatus.PENDING},
   actions: {canResolveInteraction: true},
   decisions: [InteractionCardDecision.ACCEPT_ONCE, InteractionCardDecision.DECLINE, InteractionCardDecision.CANCEL],
-  detail: scenario === "answer" ? {case: "userInput", value: {questions: [
+  detail: scenario === "answer_ime" ? {case: "userInput", value: {questions: [
+    {questionId: "ko", header: "Korean answer", question: "Enter Korean text", isSecret: false},
+  ]}} : scenario === "answer" ? {case: "userInput", value: {questions: [
     {questionId: "__proto__", header: "Prototype question", question: "First answer", isSecret: true},
     {questionId: "reset", header: "Reset question", question: "Second answer", isSecret: true},
   ]}} : {case: "commandApproval", value: {title: "Command request", command: ["fixture"]}},
@@ -27,14 +29,16 @@ const card = create(InteractionCardSchema, {
 function Controls() {
   const [state, setState] = useState(create(ActionStateSchema, {
     blocker: scenario === "prompt" ? ActionBlocker.ACTIVE_TURN_DRAFT : ActionBlocker.NONE,
-    flags: {canReleaseWriter: scenario === "writer", canAcquireWriter: scenario === "busy", canSubmitWrite: scenario.startsWith("prompt_write_")},
+    flags: {canReleaseWriter: scenario === "writer", canAcquireWriter: scenario === "busy",
+      canSubmitRead: scenario === "prompt_ime", canSubmitWrite: scenario.startsWith("prompt_write_")},
     writer: {owner: scenario === "writer" ? WriterOwner.THIS_SESSION : WriterOwner.UNOWNED, generation: 8n, authority: WriterAuthority.ACTIVE, effectiveAccess: WriterEffectiveAccess.WRITE, policyVerification: WriterPolicyVerification.VERIFIED},
   }));
   const [consent, setConsent] = useState(false);
   return <>
     {scenario.startsWith("prompt") ? <>
-      <PromptDraft state={state} write={scenario !== "prompt"} send={async () => {
+      <PromptDraft state={state} write={scenario.startsWith("prompt_write_")} send={async text => {
         evidence.calls++;
+        evidence.prompt = text;
         if (scenario === "prompt_write_unknown") throw new Error("private diagnostic");
         if (scenario.startsWith("prompt_write_")) throw new ConnectError("private diagnostic", Code.FailedPrecondition, undefined, [{desc: ActionFailureSchema, value: create(ActionFailureSchema, {blocker: scenario === "prompt_write_busy" ? ActionBlocker.WRITER_BUSY : ActionBlocker.UNSUPPORTED_TRANSITION})}]);
       }} />
@@ -51,6 +55,10 @@ function Controls() {
 }
 createRoot(document.getElementById("root")!).render(scenario === "artifact" ? <SafeMarkdown text={'# Verified result\n\n<script>window.pwned=1</script>\n<img src="https://example.invalid/leak">\n![image](https://example.invalid/image)\n[run](javascript:alert(1))\n../../etc/passwd\n한글 原文\n\n```html\n<iframe src="file:///etc/passwd"></iframe>\n```'} /> : (["writer", "busy"].includes(scenario) || scenario.startsWith("prompt")) ? <Controls /> : <InteractionCardView card={card} respond={async body => {
   evidence.calls++;
+  if (scenario === "answer_ime") {
+    const value = JSON.parse(new TextDecoder().decode(body));
+    evidence.matched = value.answers.ko?.answers[0] === "한글 입력";
+  }
   if (scenario === "answer") {
     const value = JSON.parse(new TextDecoder().decode(body));
     evidence.keys = Object.keys(value.answers);

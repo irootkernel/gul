@@ -5,6 +5,7 @@ import {
   WriterPolicyVerification, WriterOwner, LaunchExecutionLane, LaunchAssurance,
   WriterAccessMode, type ActionState,
 } from "../../api/generated/ts/gul/v1/gul_pb";
+import {useImeSubmitGuard} from "./ime-submit";
 
 const blockers: Partial<Record<ActionBlocker, string>> = {
   [ActionBlocker.PROVIDER_INCOMPATIBLE]: "Provider state is incompatible or incomplete.",
@@ -77,18 +78,22 @@ export function PromptDraft({state, write, send}: {state: ActionState; write: bo
   const [failure, setFailure] = useState<{basis: ActionState; blocker: ActionBlocker}>();
   const [busy, setBusy] = useState(false);
   const inFlight = useRef(false);
+  const ime = useImeSubmitGuard();
   const allowed = failure?.basis !== state && (write ? state.flags?.canSubmitWrite : state.flags?.canSubmitRead);
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!allowed || !draft || inFlight.current) return;
+    if (!allowed || !draft || inFlight.current || ime.blocksSubmit()) return;
     inFlight.current = true; setBusy(true);
     try {await send(draft); setDraft("");} catch (error) {setFailure({basis: state, blocker: failureBlocker(error)});}
     finally {inFlight.current = false; setBusy(false);}
   }
-  return <form onSubmit={submit} aria-label="Prompt draft">
-    <label>Prompt<textarea value={draft} disabled={busy} onChange={event => setDraft(event.currentTarget.value)} /></label>
+  return <form onSubmit={submit} aria-label="Prompt draft" onCompositionStart={ime.onCompositionStart}
+    onCompositionEnd={ime.onCompositionEnd} onKeyDown={ime.onKeyDown} onKeyUp={ime.onKeyUp}>
+    <label>Prompt<textarea value={draft} disabled={busy} onBlur={ime.onInputBlur}
+      onChange={event => setDraft(event.currentTarget.value)} /></label>
     <ActionBlockerMessage blocker={failure?.basis === state ? failure.blocker : state.blocker} />
-    <button disabled={!allowed || busy || !draft} type="submit">Send prompt</button>
+    <button disabled={!allowed || busy || !draft} type="submit" onPointerDown={ime.explicitSubmit}
+      onKeyDown={ime.onSubmitButtonKeyDown}>Send prompt</button>
   </form>;
 }
 

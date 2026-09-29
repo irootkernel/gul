@@ -1164,8 +1164,8 @@ the small-screen layout and native controls render. The serial `make test`,
 frontend bundle regeneration and reproducibility check passed. This evidence
 does not establish iPhone Safari interaction behavior, authenticated delivery,
 or released-provider compatibility. E7-T2 adds current activity, conversation,
-Prompt History, and approval controls; E7-T3 verifies accessibility and Korean
-IME on supported layouts.
+Prompt History, and approval controls; E7-T3 adds browser-scoped keyboard and
+Korean input checks on supported layouts.
 `REQ-UI-001`, `REQ-UI-002`, and `REQ-UI-004` are accepted at this fake-client
 browser boundary. The Chrome fixture supplies their behavior assertions;
 `make test` supplies typechecking, bundle reproducibility, and existing
@@ -1219,6 +1219,48 @@ behavior remains a separate selected check. This is fake-client presentation
 evidence, not authenticated assembly, live provider, or supported-device
 interaction qualification.
 
+### E7-T3 Korean input and keyboard access (2026-09-30)
+
+The prompt draft and user-input Interaction card now reject submission while
+Korean composition is active and while the Enter that committed it remains
+pressed. Their contents stay intact until a later explicit submission. The
+guard handles both Enter-before-compositionend and compositionend-before-Enter
+event orders. It expires when keyup is lost. Input blur releases a guard stranded
+by a missing composition-end event, so a later pointer or keyboard button action
+can submit. A deliberate Enter within 250 ms of a non-Enter composition commit
+may be treated as its commit key and require a second Enter. The draft still
+has no mounted SubmitTurn route in the operator view.
+
+Selecting a session focuses the Chat heading. Prompt History links move focus
+to the matching conversation Turn, including an entry fetched outside the
+loaded page, or to its read error. Reopening the same Turn moves focus again;
+refreshing the conversation leaves focus on Refresh; a linked Turn fetched while
+the panel is hidden receives focus when the panel reopens. If the operator
+focuses another control while a Turn read is pending, the result leaves that
+control focused. File navigation focuses
+the new path, preview Back control, or restored selected file and clears an old
+comparison error on returning to the explorer. Repeated history,
+response, and user-input controls have distinct accessible names, and keyboard
+focus is visibly outlined.
+
+`python3 frontend/browser/verify-accessibility.py` passed in real Chrome. Its
+injected-client fixtures exercised both synthetic commit orders at desktop
+size and the Chrome-order commit plus explicit Korean submission at desktop,
+tablet, and phone sizes. They checked repeated Turn links and destination
+focus at all three sizes; unloaded, failed, and hidden-during-fetch Turn links
+at desktop size; and a delayed Turn read while an answer input retained focus.
+They also checked submission after lost keyup or composition end, distinct
+labels, and visible focus on the workspace recovery button. The existing E4
+action and E7-T1/T2 browser checks passed after the change. A macOS Safari
+accessibility inspection found the named prompt field and button; entering
+Korean text into the field and activating
+Send cleared the draft. Safari also focused Chat after session selection and
+the linked Turn after the first history navigation. Its accessibility input
+did not exercise native composition events. Native iPad and iPhone browser
+behavior remains for E9's actual-device qualification. The serial `make test`
+covers guard state cases, typecheck, the checked bundle, SOT, and foundation
+tests; the selected real-browser check is separate.
+
 ## 2. Current development snapshot
 
 | Area | State |
@@ -1226,14 +1268,14 @@ interaction qualification.
 | Five Gul SOT documents | E0-T4 completed the consumer alignment and Gate A reproduction; E0-T8 completed toolchain/ADR alignment; E0-T7 completed Gate B |
 | Toolchain and developer-command artifacts | E0-T8 accepted one pin manifest and read-only host checks; E0-T7 adds checked contract generation/drift delegates; E1-T1 adds the root Go module; E1-T2 adds root Bun pin validation and checked frontend generation/drift commands; E1-T3 adds checked Gul API/error-catalog generation; no installer |
 | Contract boundary | E12-T1 pins TASK-053 and regenerates checked clients/maps/fake transport for 36 known, 27 required, and 9 unavailable methods; E13-T1 adds an explicit stateful scenario provider over the 27-method port |
-| Production source | E1 shared core, bundle, API declarations, isolated SQLite and Wails shell; E3 adds Workspace attachment and presentation; E4 adds typed observation, Interactions, actions and bounded history/result/artifact reads; E5 adds safe close, reconnect and operation-specific replay; E6 adds verified-root local FileService, bounded previews, refresh, watcher and Git review; E7-T1/T2 add the responsive operator, files and session presentation through injected clients; handlers remain unmounted |
-| Wails host/frontend | One checked React bundle includes the E7-T1/T2 operator components and fail-closed foundation; isolated Wails shell foundation exists, E3-T4 launch selector is unmounted, and authenticated attach is not implemented |
+| Production source | E1 shared core, bundle, API declarations, isolated SQLite and Wails shell; E3 adds Workspace attachment and presentation; E4 adds typed observation, Interactions, actions and bounded history/result/artifact reads; E5 adds safe close, reconnect and operation-specific replay; E6 adds verified-root local FileService, bounded previews, refresh, watcher and Git review; E7-T1/T2/T3 add the responsive operator, files, session presentation, composition guard, and keyboard focus through injected clients; handlers remain unmounted |
+| Wails host/frontend | One checked React bundle includes the E7-T1/T2/T3 operator components and fail-closed foundation; isolated Wails shell foundation exists, E3-T4 launch selector is unmounted, and authenticated attach is not implemented |
 | ConnectRPC schema/services | Gul Runtime, DirectSession, ArtifactPresentation, WorkspacePresentation and FileService declarations and generated clients exist; isolated handlers remain unmounted |
 | Gul SQLite schema | Gul-owned version 8 schema with Workspace attachment, favorites, Primary binding, event metadata, session-close attempts, mutation-attempt details and Writer reconciliation baselines; production startup integration pending |
 | Dolgorae RPC supervisor/provider | Bounded restart policy implemented against an injected lifecycle; production process ownership and live provider remain pending |
 | Controller credential store | Caller-owned mechanism selected by ADR-0047; not implemented |
 | FileService/auth/PWA/Tailscale integration | E6 local guard, bounded preview, refresh, watcher and Git review implemented behind unmounted APIs; E7-T1 file presentation uses injected clients; authenticated product integration pending |
-| Current State promotions | Prior E0/E12/E1/E13/E3/E4/E5 entries plus component-scoped REQ-FILE-001..014 and REQ-FILE-016; E7-T1 fake-client REQ-UI-001/002/004 and E7-T2 fake-client REQ-OUT-001/002/004/007, REQ-UI-003/006/009/010 and REQ-PROMPT-001; cross-surface REQ-FILE-015 pending; no assembled-product or released-provider claim |
+| Current State promotions | Prior E0/E12/E1/E13/E3/E4/E5 entries plus component-scoped REQ-FILE-001..014 and REQ-FILE-016; E7-T1 fake-client REQ-UI-001/002/004, E7-T2 fake-client REQ-OUT-001/002/004/007, REQ-UI-003/006/009/010 and REQ-PROMPT-001, and E7-T3 browser/component-scoped REQ-OUT-006 and REQ-UI-008; cross-surface REQ-FILE-015 pending; no assembled-product or released-provider claim |
 
 The repository contains the shared-core and single-bundle delivery foundations,
 declared but inactive Gul APIs, isolated Gul-owned SQLite repositories, bootstrap

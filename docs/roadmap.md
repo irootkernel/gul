@@ -3,12 +3,12 @@
 | Field | Value |
 | --- | --- |
 | Role | Sole authority for task identity, order, status, dependencies, and phase |
-| Revision | 2026-09-29 E7-T2 completion candidate |
+| Revision | 2026-09-30 E7-T3 completion candidate |
 | Active Task | None |
-| Next | E7-T3 |
+| Next | E8-T1 |
 | Required provider | Released Dolgorae v0.1.3 implementing `dolgorae.gul-consumer/v1` |
 
-`Next` names the next queued Task after E7-T2 completion.
+`Next` names the next queued Task after E7-T3 completion.
 
 ## 1. Status and execution rules
 
@@ -269,7 +269,7 @@ remote/PWA installation packaging belong to E8, not E7's scoped UI acceptance.
 | --- | --- | --- | --- | --- |
 | E7-T1 | Pre-release | Completed | E1-T2, E3-T3, E6-T3 | Desktop panes/mobile navigation, actual file-pane integration with the writer-active preview warning, and preserved presentation context |
 | E7-T2 | Pre-release | Completed | E7-T1, E4-T2, E4-T3, E4-T5, E5-T1 | Separate user-only Prompt History section, full original, Turn navigation, current status and approval priority |
-| E7-T3 | Pre-release | Planned | E7-T2 | Korean IME, keyboard and accessibility on supported layouts |
+| E7-T3 | Pre-release | Completed | E7-T2 | Korean IME, keyboard and accessibility on supported layouts |
 
 ### E8: Complete authentication and deployment packaging
 

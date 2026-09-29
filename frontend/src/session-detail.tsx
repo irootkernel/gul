@@ -58,6 +58,7 @@ export function SessionDetail({sessionId, client, onActivity}: {sessionId: strin
   const [reload, setReload] = useState(0);
   const [view, setView] = useState<"conversation" | "history">("conversation");
   const [focusEntryId, setFocusEntryId] = useState("");
+  const [focusRequest, setFocusRequest] = useState(0);
   const [interrupt, setInterrupt] = useState(false);
   const [closeMessage, setCloseMessage] = useState("");
   const [closeAttemptRecorded, setCloseAttemptRecorded] = useState(false);
@@ -66,6 +67,7 @@ export function SessionDetail({sessionId, client, onActivity}: {sessionId: strin
   const closePending = useRef(false);
   const actionGeneration = useRef(0);
   const lastConsent = useRef(interrupt);
+  const conversationTab = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     let current = true;
@@ -207,11 +209,15 @@ export function SessionDetail({sessionId, client, onActivity}: {sessionId: strin
       </>}
     </div>
     <div className="session-detail__tabs" role="group" aria-label="Conversation sections">
-      <button type="button" aria-current={view === "conversation" ? "page" : undefined} onClick={() => setView("conversation")}>Conversation</button>
+      <button type="button" ref={conversationTab} aria-current={view === "conversation" ? "page" : undefined} onClick={() => setView("conversation")}>Conversation</button>
       <button type="button" aria-current={view === "history" ? "page" : undefined} onClick={() => setView("history")}>Prompt History</button>
     </div>
-    <div hidden={view !== "conversation"}><ConversationPanel sessionId={sessionId} client={client} focusEntryId={focusEntryId} /></div>
-    <div hidden={view !== "history"}><PromptHistoryPanel sessionId={sessionId} client={client} onOpenTurn={entryId => {setFocusEntryId(entryId); setView("conversation");}} /></div>
+    <div hidden={view !== "conversation"}><ConversationPanel sessionId={sessionId} client={client}
+      focusEntryId={focusEntryId} focusRequest={focusRequest} active={view === "conversation"}
+      focusAnchor={conversationTab} /></div>
+    <div hidden={view !== "history"}><PromptHistoryPanel sessionId={sessionId} client={client}
+      onOpenTurn={entryId => {setFocusEntryId(entryId); setFocusRequest(value => value + 1);
+        setView("conversation"); conversationTab.current?.focus();}} /></div>
     {action && actionsCurrent && <WriterPanel state={action} acquire={() => changeWriter("acquire")} release={() => changeWriter("release")} onState={setAction} />}
     <section aria-label="Session close">
       <h3>Close session</h3>

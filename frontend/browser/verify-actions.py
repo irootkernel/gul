@@ -51,7 +51,7 @@ with tempfile.TemporaryDirectory(prefix="gul-actions-browser-") as directory:
             cli(directory, "goto", url + "?case=" + case)
             snap = snapshot(directory)
             if case == "answer":
-                inputs = re.findall(r'textbox "Answer" \[ref=(e\d+)\]', snap)
+                inputs = re.findall(r'textbox "Answer for question [12]: (?:Prototype|Reset) question" \[ref=(e\d+)\]', snap)
                 assert len(inputs) == 2, snap
                 cli(directory, "fill", inputs[0], "first-fixture")
                 cli(directory, "fill", inputs[1], "second-fixture")

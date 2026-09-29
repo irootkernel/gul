@@ -369,7 +369,7 @@ scope. E2/E9 still own actual-provider proof.
 | REQ-OUT-003 | Reasoning, thinking, hidden chain-of-thought, and reasoning summaries MUST NOT be delivered, persisted, or logged. | Provider fixtures and Gul allowlists reject these fields. | E9-T2 |
 | REQ-OUT-004 | Normal conversation MUST omit command streams and raw diffs except fields needed for an interaction. | File review remains available only through FileService. | E7-T2 |
 | REQ-OUT-005 | Errors MUST be bounded, redacted, and free of unrestricted paths or runtime secrets. | Security fixtures pass. | E9-T2 |
-| REQ-OUT-006 | Prompt input MUST be Korean IME-safe. | macOS, iPad, and iPhone composition tests pass. | E7-T3 |
+| REQ-OUT-006 | Prompt input MUST be Korean IME-safe. | E7-T3 browser fixtures pass Korean composition tests at macOS, iPad, and iPhone layout sizes; E9-T3 verifies native composition on actual supported devices. | E7-T3 |
 | REQ-OUT-007 | Browser-visible prompts and final responses MUST appear in chronological provider order. | Snapshot/reconnect tests preserve order without duplication. | E7-T2 |
 | REQ-OUT-008 | ArtifactCapability MUST be a required v0.1 capability for oversized final responses, large approval diffs, Controller-only review material, and replay. | Missing capability is a compatibility blocker rather than a truncated-success presentation. | E4-T5 |
 | REQ-OUT-009 | Artifact reads MUST use unary chunks bounded by both the provider maximum and Gul's preferred 256 KiB size, enforce `min(provider maximum artifact size, Gul's 64 MiB cap)`, and validate metadata, authorization, exact byte length, and SHA-256. The 256 KiB inline threshold is Gul browser presentation policy, not a provider wire limit; a larger provider-inline response MAY be converted to a bounded presentation object. | Provider/Gul bound combinations, 300 KiB inline input, truncation, digest mismatch, oversize, cancellation, stale reference, and authorization fixtures produce the specified behavior. | E4-T5 |
@@ -534,6 +534,12 @@ requires fresh eligibility and explicit interruption consent; an ambiguous
 response disables another request in the current view. External-action blockers
 name the provider-side step and suppress an in-product retry. This is fake-client
 browser acceptance, with no authenticated route or live provider.
+E7-T3 guards the prompt draft and user-input card against composition-time
+submission. The operator view keeps keyboard focus on the selected session,
+linked Turn, and file navigation destination. Its controls have accessible
+names and visible keyboard focus. These checks exercise injected clients and
+browser fixtures; actual supported-device and assembled-product acceptance
+remain with E9.
 
 | Requirement | Accepted Current State | Evidence |
 |---|---|---|
@@ -572,11 +578,13 @@ browser acceptance, with no authenticated route or live provider.
 | REQ-UI-003 | Selected-session navigation shows typed provider, activity, writer, policy, assurance and pending-request state, including the mobile header | E7-T2; integrated Chrome mobile activity fixture; `make test` typecheck; implementation memo |
 | REQ-UI-004 | Explorer, preview and fixed-revision comparison retain the current directory and selected file across pane and Workspace changes | E7-T1; Chrome file navigation and degradation fixture; `make test` typecheck and bundle drift only; implementation memo |
 | REQ-UI-006 | Pending Interaction cards precede passive activity and conversation, with the card visible in the checked mobile viewport | E7-T2; Chrome mobile priority fixture; implementation memo |
+| REQ-UI-008 | Primary injected-client flows use semantic controls, named actions, visible focus, and destination focus after session, Turn, and file navigation | E7-T3; real Chrome desktop/tablet/phone keyboard and accessibility fixture; macOS Safari accessibility observation; implementation memo |
 | REQ-UI-009 | Typed workspace, Profile, Controller, provider-root, and incompatibility blockers have distinct safe explanations | E7-T2; typed-error unit and Chrome fixtures; implementation memo |
 | REQ-UI-010 | External-action blockers name the provider-side repair and suppress in-product retry; ambiguous close is distinct and cannot be resubmitted in the same view | E7-T2; typed-error and Chrome negative fixtures; implementation memo |
 | REQ-OUT-001 | Current activity and aggregate pending approvals come from GetExecutionState; navigation request count comes from ListPending and shows Unavailable when that read fails | E7-T2; Chrome activity and degradation fixtures; implementation memo |
 | REQ-OUT-002 | Final assistant content is fetched from the provider-backed history projection and reloaded after refresh; browser memory holds presentation only | E7-T2; Chrome original-and-refresh fixture; artifact digest test; implementation memo |
 | REQ-OUT-004 | Normal conversation renders bounded human/assistant previews and interaction titles; command arguments appear only in the separate Interaction card | E7-T2; Chrome conversation and card fixture; implementation memo |
+| REQ-OUT-006 | Prompt draft and user-input card retain Korean text and block submission during composition or a suspected commit Enter; a button action after input blur can recover a missing composition-end event. A deliberate Enter within 250 ms of a non-Enter commit may require a second Enter; explicit button submission sends once | E7-T3; real Chrome synthetic composition fixture for both commit orders at desktop size and Chrome order at tablet/phone sizes; serial guard state tests; implementation memo. Native Safari composition remains for E9-T3 |
 | REQ-OUT-007 | Chronological provider page order survives refresh and continuation without identity duplication | E7-T2; Chrome refresh and pagination fixture; implementation memo |
 | REQ-PROMPT-001 | Accepted user-only Prompt History shows distinct IDs for same-text inputs, ordinals, provider times, full originals and linked Turn navigation | E7-T2; Chrome history fixture; artifact digest test; implementation memo |
 | REQ-DIRECT-001 | Each locally accepted Primary Run has one persisted subject-scoped Direct Session binding; three Runs list and reopen without a Codex thread field | E3-T3 scenario-backed binding and SQLite reopen test; `make test` |

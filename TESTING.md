@@ -74,3 +74,13 @@ read degradation, and typed external blockers in real Chrome.
 provider page limit and typed blocker unit tests. The browser check remains
 separate from `make test`
 and does not qualify authenticated delivery or a live provider.
+
+The E7-T3 browser check is `python3 frontend/browser/verify-accessibility.py`.
+It requires existing Bun, `playwright-cli`, and Chrome. It builds isolated
+typed-client fixtures and checks Korean composition in both commit event
+orders, explicit pointer and keyboard submission after lost keyup or composition
+end, keyboard focus after session, Turn, and file navigation, distinct accessible controls,
+and visible focus at desktop,
+tablet, and phone sizes. It is separate from
+`make test`; actual supported-device and assembled-product acceptance remain
+with E9.

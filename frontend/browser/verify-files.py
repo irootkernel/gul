@@ -150,6 +150,21 @@ with tempfile.TemporaryDirectory(prefix="gul-e7-files-") as directory:
         cli(directory, "click", ref(snap, 'button "Compare HEAD and Working"'))
         snap = snapshot(directory)
         assert "Git review is unavailable" in snap and "Preview of docs/README.md" in snap, snap
+        cli(directory, "click", ref(snap, 'button "Back to explorer"'))
+        snap = snapshot(directory)
+        assert "Git review is unavailable" not in snap, snap
+        cli(directory, "click", ref(snap, 'button "README.md"'))
+        snap = snapshot(directory)
+        assert "Git review is unavailable" not in snap, snap
+        cli(directory, "click", ref(snap, 'button "Back to explorer"'))
+        snap = snapshot(directory)
+        cli(directory, "click", ref(snap, 'button "Parent directory"'))
+        snap = snapshot(directory)
+        assert "Git review is unavailable" not in snap, snap
+        cli(directory, "click", ref(snap, 'button "▸ docs"'))
+        snap = snapshot(directory)
+        cli(directory, "click", ref(snap, 'button "README.md"'))
+        snap = snapshot(directory)
         cli(directory, "click", ref(snap, 'button "Compare HEAD and Working"'))
         snap = snapshot(directory)
         assert "Working docs/README.md" in snap and "Git review is unavailable" not in snap, snap

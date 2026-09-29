@@ -90,7 +90,7 @@ h1 {
 .operator__pane button, .operator__pane select, .operator__mobile-nav button { font: inherit; }
 .operator__pane button { color: #eef2f6; background: #263548; border: 1px solid #536981; border-radius: 0.35rem; padding: 0.4rem 0.65rem; cursor: pointer; }
 .operator__pane button:disabled { opacity: 0.55; cursor: default; }
-.operator__pane button:focus-visible, .operator__pane select:focus-visible, .operator__mobile-nav button:focus-visible { outline: 3px solid #91baff; outline-offset: 2px; }
+.operator :is(button, select, input, textarea, [tabindex="-1"]):focus-visible { outline: 3px solid #91baff; outline-offset: 2px; }
 .operator__pane button[aria-current] { border-color: #91baff; }
 .operator__pane select { display: block; width: 100%; margin: 0.4rem 0; padding: 0.45rem; }
 .operator__pane ul { list-style: none; padding: 0; }

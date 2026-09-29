@@ -45,8 +45,10 @@ const prompts = [create(PromptHistoryItemSchema, {promptItemId: "prompt-1", ordi
   create(PromptHistoryItemSchema, {promptItemId: "prompt-2", ordinal: 2n, acceptedAt: timestampFromDate(new Date("2026-09-29T12:01:00Z")), preview: "repeat", conversationEntryId: second.entryId})];
 const summary = create(InteractionCardSummarySchema, {interactionId: "approval-1", status: InteractionCardStatus.PENDING});
 const card = create(InteractionCardSchema, {summary, actions: create(ActionFlagsSchema, {canResolveInteraction: true}),
-  decisions: [InteractionCardDecision.ACCEPT_ONCE], detail: {case: "commandApproval",
-    value: create(CommandApprovalCardSchema, {title: "Approve command", message: "Needs your decision", command: ["make", "test"]})}});
+  decisions: [InteractionCardDecision.ACCEPT_ONCE], detail: params.has("input-card")
+    ? {case: "userInput", value: {questions: [{questionId: "ko", header: "Korean answer", question: "Enter Korean text", isSecret: false}]}}
+    : {case: "commandApproval",
+      value: create(CommandApprovalCardSchema, {title: "Approve command", message: "Needs your decision", command: ["make", "test"]})}});
 const artifactBodies = new Map(["artifact-prompt", "artifact-response"].map(ref => [ref, new TextEncoder().encode(ref === "artifact-prompt" ? "# 한글 prompt original" : "# Complete final answer")]));
 const artifactDigests = new Map(await Promise.all([...artifactBodies].map(async ([ref, bytes]) => [ref,
   Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", bytes))).map(byte => byte.toString(16).padStart(2, "0")).join("")] as const)));
@@ -57,6 +59,7 @@ const clients: SessionDetailClient = {
       items: params.has("conversation-overlap") ? [answer, second] : [second], traversalComplete: true}
       : {snapshotId: "conversation-1", items: params.has("entry-interaction") ? [first, opened, answer] : [first, answer], nextPageToken: "more", traversalComplete: params.has("invalid-page")});},
   getConversationEntry: async ({entryId}) => {calls.entry++;
+    if (entryId === second.entryId && params.has("linked-delay")) await new Promise(resolve => setTimeout(resolve, 500));
     if (entryId === second.entryId && params.has("linked-failure")) throw Error("fixture linked failure");
     return create(GetConversationEntryResponseSchema, {entry: params.has("entry-drift") && entryId === answer.entryId ? first
       : entryId === second.entryId && params.has("linked-missing") ? undefined

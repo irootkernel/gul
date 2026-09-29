@@ -38,6 +38,7 @@ export function OperatorApp({clients, writerActive = false}: {clients: OperatorC
   const [activity, setActivity] = useState<SessionActivity>();
   const onActivity = useCallback((value: SessionActivity | undefined) => setActivity(value), []);
   const navigationPending = useRef(false);
+  const chatHeading = useRef<HTMLHeadingElement>(null);
 
   useEffect(() => {
     let current = true;
@@ -98,6 +99,7 @@ export function OperatorApp({clients, writerActive = false}: {clients: OperatorC
       setSessionId(next.sessionId);
       setTab("chat");
       setNavigationError("");
+      requestAnimationFrame(() => chatHeading.current?.focus());
     } catch (reason) {setNavigationError(operatorError(reason, "Session selection is unavailable. Try again."));}
     finally {navigationPending.current = false; setNavigationBusy(false);}
   }
@@ -137,13 +139,13 @@ export function OperatorApp({clients, writerActive = false}: {clients: OperatorC
         {workspaceId && !sessionsLoading && !sessionsError && !sessions.length && <p>No sessions in this workspace.</p>}
       </aside>
       <section className="operator__pane operator__chat" aria-label="Conversation">
-        <h2>Chat</h2>
+        <h2 ref={chatHeading} tabIndex={-1}>Chat</h2>
         {session ? <><p>{session.displayName}</p>{clients.details
           ? <SessionDetail key={sessionId} sessionId={sessionId} client={clients.details} onActivity={onActivity} />
           : <p>Current session presentation is unavailable.</p>}</> : <p>Select a session to view its conversation.</p>}
       </section>
       <div className="operator__pane operator__files">
-        {workspaceId ? <FilePane key={`${workspaceId}\0${location.directory}`} workspaceId={workspaceId} client={clients.files} location={location}
+        {workspaceId ? <FilePane key={workspaceId} workspaceId={workspaceId} client={clients.files} location={location}
           onLocation={next => setFileLocations(current => ({...current, [workspaceId]: next}))} writerActive={writerActive} />
           : <section aria-label="Workspace files"><h2>Files</h2><p>Select a workspace to browse files.</p></section>}
       </div>
