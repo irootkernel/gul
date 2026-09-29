@@ -7,7 +7,7 @@
 | Consumer contract | `dolgorae.gul-consumer/v1` |
 | Producer source | Dolgorae `docs/specs/gul-consumer-v1.md` |
 | Target provider | Exact released Dolgorae v0.1.3 artifact |
-| Updated | 2026-09-25 |
+| Updated | 2026-09-29 |
 
 ## 1. Scope
 
@@ -58,10 +58,11 @@ E13's scenario tests need no future UI; E14's tests must exercise the real Gul
 application, not just replay the E13 provider drivers.
 
 E6-T1 supplies the local, read-only FileService guard over E3's saved verified
-Workspace attachment. E6-T2/T3 must route preview, Markdown assets, Git reads
-and watcher invalidations through that guard before `REQ-FILE-015` can be
-promoted across E6. E2 retains Submit-image integration; E7 owns the assembled
-file pane, and E14 owns authenticated application acceptance.
+Workspace attachment. E6-T2/T3 route preview, Markdown assets, Git reads,
+and watcher invalidations through that guard. E2-T3 owns the final
+cross-surface `REQ-FILE-015` promotion, including Submit-image integration;
+E7 owns the assembled file pane, and E14 owns authenticated application
+acceptance.
 
 ## 2. Producer order and evidence boundary
 

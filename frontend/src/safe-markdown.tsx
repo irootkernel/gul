@@ -37,8 +37,8 @@ function inlineImages(text: string, images: ReadonlyMap<string, SafeImage> | und
  return result;
 }
 
-// A small presentation allowlist: text, paragraphs, headings and fenced code.
-// HTML, links, images and embedded resources remain literal text.
+// A small presentation allowlist: text, paragraphs, headings, fenced code, and verified raster images.
+// HTML, links, unverified images, and embedded resources remain literal text.
 export function SafeMarkdown({text, images}: {text: string; images?: ReadonlyMap<string, SafeImage>}) {
  const blocks: ReactNode[] = [];
  const remaining = {count: maximumFileMarkdownImages};

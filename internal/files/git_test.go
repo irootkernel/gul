@@ -121,6 +121,59 @@ func TestGitReviewFixedRevisionsAndPrivateFiltering(t *testing.T) {
 	}
 }
 
+func TestGitAddedAndNestedDirectoryStatus(t *testing.T) {
+	root := t.TempDir()
+	initGit(t, root)
+	for _, dir := range []string{"nested", "sibling"} {
+		if err := os.Mkdir(filepath.Join(root, dir), 0700); err != nil {
+			t.Fatal(err)
+		}
+		writePreviewFile(t, filepath.Join(root, dir), "base.txt", []byte("base"))
+	}
+	gitCommand(t, root, "add", "-A")
+	gitCommand(t, root, "commit", "-qm", "base")
+	writePreviewFile(t, filepath.Join(root, "nested"), "added.txt", []byte("added"))
+	gitCommand(t, root, "add", "nested/added.txt")
+	service := NewService(attachmentStore{attachedRoot(t, root)})
+	for _, tc := range []struct {
+		path              string
+		direct, aggregate ChangeKind
+		staged, unstaged  bool
+	}{
+		{"nested/added.txt", ChangeAdded, ChangeAdded, true, false},
+		{"nested", ChangeClean, ChangeAdded, false, false},
+		{"sibling", ChangeClean, ChangeClean, false, false},
+	} {
+		status, err := service.GitStatus(t.Context(), "owner", "entry", tc.path)
+		if err != nil || status.State != GitAvailable || status.Direct != tc.direct || status.Aggregate != tc.aggregate || status.Staged != tc.staged || status.Unstaged != tc.unstaged {
+			t.Fatalf("status %s = %+v, %v", tc.path, status, err)
+		}
+	}
+}
+
+func TestGitConflictStatus(t *testing.T) {
+	root := t.TempDir()
+	initGit(t, root)
+	writePreviewFile(t, root, "conflict.txt", []byte("base\n"))
+	gitCommand(t, root, "add", "conflict.txt")
+	gitCommand(t, root, "commit", "-qm", "base")
+	gitCommand(t, root, "checkout", "-qb", "side")
+	writePreviewFile(t, root, "conflict.txt", []byte("side\n"))
+	gitCommand(t, root, "commit", "-qam", "side")
+	gitCommand(t, root, "checkout", "-q", "-")
+	writePreviewFile(t, root, "conflict.txt", []byte("main\n"))
+	gitCommand(t, root, "commit", "-qam", "main")
+	merge := exec.CommandContext(t.Context(), "git", "-C", root, "merge", "side")
+	if output, err := merge.CombinedOutput(); err == nil {
+		t.Fatalf("expected merge conflict: %s", output)
+	}
+	service := NewService(attachmentStore{attachedRoot(t, root)})
+	status, err := service.GitStatus(t.Context(), "owner", "entry", "conflict.txt")
+	if err != nil || status.State != GitAvailable || status.Direct != ChangeConflicted || status.Aggregate != ChangeConflicted || !status.Staged || !status.Unstaged {
+		t.Fatalf("conflict status = %+v, %v", status, err)
+	}
+}
+
 func TestGitLimitExceededKeepsWorkingPreview(t *testing.T) {
 	root := t.TempDir()
 	initGit(t, root)

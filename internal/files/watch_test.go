@@ -70,6 +70,19 @@ func TestWatcherNodeCountIsBounded(t *testing.T) {
 	}
 }
 
+func TestWatcherInvalidationQueueKeepsLatest(t *testing.T) {
+	out := make(chan Invalidation, 1)
+	for revision := uint64(1); revision <= 3; revision++ {
+		sendInvalidation(out, Invalidation{Revision: revision, RelativePath: "."})
+	}
+	if len(out) != 1 {
+		t.Fatalf("queued invalidations = %d", len(out))
+	}
+	if event := <-out; event.Revision != 3 || event.RelativePath != "." {
+		t.Fatalf("latest invalidation = %+v", event)
+	}
+}
+
 func TestWatcherSlotLimitAndReleaseOnCancel(t *testing.T) {
 	root := t.TempDir()
 	writePreviewFile(t, root, "public.txt", []byte("x"))

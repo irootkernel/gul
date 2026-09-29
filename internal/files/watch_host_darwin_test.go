@@ -55,6 +55,22 @@ func TestDarwinWatchScanHasIndependentDirectoryOffset(t *testing.T) {
 	}
 }
 
+func TestDarwinWatchScanRejectsOversizedDirectory(t *testing.T) {
+	root := t.TempDir()
+	for i := 0; i <= MaxWatchScannedEntries; i++ {
+		writePreviewFile(t, root, fmt.Sprintf("file-%04d", i), []byte("x"))
+	}
+	service := NewService(attachmentStore{attachedRoot(t, root)})
+	file, _, err := service.Open(t.Context(), "owner", "entry", ".")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer file.Close()
+	if _, err := publicChildren(int(file.Fd())); err != ErrWatchLimit {
+		t.Fatalf("oversized directory scan = %v", err)
+	}
+}
+
 func TestDarwinWatcherTracksOnlyExplicitNodes(t *testing.T) {
 	root := t.TempDir()
 	if err := os.Mkdir(filepath.Join(root, ".dolgorae"), 0700); err != nil {

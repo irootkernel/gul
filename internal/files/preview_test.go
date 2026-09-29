@@ -18,6 +18,7 @@ import (
 	"strings"
 	"syscall"
 	"testing"
+	"time"
 )
 
 func writePreviewFile(t *testing.T, root, name string, body []byte) {
@@ -99,6 +100,38 @@ func TestDirectoryRejectsOpaqueByteNamesWithoutBrowserAlias(t *testing.T) {
 	page, err := service.ListDirectory(t.Context(), "owner", "entry", ".", 10, "")
 	if !errors.Is(err, ErrUnsupportedPathEncoding) || len(page.Entries) != 0 {
 		t.Fatalf("opaque name = %+v, %v", page, err)
+	}
+}
+
+func TestDirectoryCursorExpiryAndEviction(t *testing.T) {
+	root := t.TempDir()
+	writePreviewFile(t, root, "a.txt", []byte("a"))
+	writePreviewFile(t, root, "b.txt", []byte("b"))
+	service := NewService(attachmentStore{attachedRoot(t, root)})
+	first, err := service.ListDirectory(t.Context(), "owner", "entry", ".", 1, "")
+	if err != nil || first.NextToken == "" {
+		t.Fatalf("first page = %+v, %v", first, err)
+	}
+	service.cursorMu.Lock()
+	service.cursors[first.NextToken].expires = time.Now().Add(-time.Second)
+	service.cursorMu.Unlock()
+	if _, err := service.ListDirectory(t.Context(), "owner", "entry", ".", 1, first.NextToken); !errors.Is(err, ErrPageTokenExpired) {
+		t.Fatalf("expired cursor = %v", err)
+	}
+
+	tokens := make([]string, maxDirectoryCursors+1)
+	for i := range tokens {
+		page, err := service.ListDirectory(t.Context(), "owner", "entry", ".", 1, "")
+		if err != nil || page.NextToken == "" {
+			t.Fatalf("cursor %d = %+v, %v", i, page, err)
+		}
+		tokens[i] = page.NextToken
+	}
+	if _, err := service.ListDirectory(t.Context(), "owner", "entry", ".", 1, tokens[0]); !errors.Is(err, ErrPageTokenExpired) {
+		t.Fatalf("evicted cursor = %v", err)
+	}
+	if page, err := service.ListDirectory(t.Context(), "owner", "entry", ".", 1, tokens[len(tokens)-1]); err != nil || len(page.Entries) != 1 {
+		t.Fatalf("retained newest cursor = %+v, %v", page, err)
 	}
 }
 
