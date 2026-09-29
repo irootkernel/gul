@@ -3,6 +3,7 @@ package files
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"image"
 	"image/color"
 	"image/png"
@@ -110,9 +111,48 @@ func TestGitReviewFixedRevisionsAndPrivateFiltering(t *testing.T) {
 	if err != nil || len(markdown.Head.MarkdownImages) != 1 || len(markdown.Working.MarkdownImages) != 1 || bytes.Equal(markdown.Head.MarkdownImages[0].Data, markdown.Working.MarkdownImages[0].Data) {
 		t.Fatalf("Markdown revision assets = %+v, %v", markdown, err)
 	}
+	raster, err := service.Compare(t.Context(), "owner", "entry", "img.png")
+	if err != nil || raster.State != GitAvailable || raster.Head.Kind != PreviewRaster || raster.Working.Kind != PreviewRaster || !bytes.Equal(raster.Head.Image, rasterFixture(t, 10)) || !bytes.Equal(raster.Working.Image, rasterFixture(t, 200)) {
+		t.Fatalf("raster revisions = %+v, %v", raster, err)
+	}
 	literal, err := service.Compare(t.Context(), "owner", "entry", "[a].txt")
 	if err != nil || literal.Head.Text != "literal base\n" || literal.Working.Text != "literal working\n" {
 		t.Fatalf("literal filename compare = %+v, %v", literal, err)
+	}
+}
+
+func TestGitLimitExceededKeepsWorkingPreview(t *testing.T) {
+	root := t.TempDir()
+	initGit(t, root)
+	writePreviewFile(t, root, "current.txt", []byte("current"))
+	gitCommand(t, root, "add", "current.txt")
+	gitCommand(t, root, "commit", "-qm", "base")
+	for i := 0; i <= MaxGitEntries; i++ {
+		writePreviewFile(t, root, fmt.Sprintf("untracked-%04d", i), []byte("x"))
+	}
+	service := NewService(attachmentStore{attachedRoot(t, root)})
+	status, err := service.GitStatus(t.Context(), "owner", "entry", "current.txt")
+	if err != nil || status.State != GitLimitExceeded {
+		t.Fatalf("limit status = %+v, %v", status, err)
+	}
+	comparison, err := service.Compare(t.Context(), "owner", "entry", "current.txt")
+	if err != nil || comparison.State != GitLimitExceeded || comparison.Working.Text != "current" {
+		t.Fatalf("limit comparison = %+v, %v", comparison, err)
+	}
+}
+
+func TestOversizeHeadRasterRetainsWorkingRaster(t *testing.T) {
+	root := t.TempDir()
+	initGit(t, root)
+	writePreviewFile(t, root, "img.png", bytes.Repeat([]byte{'x'}, MaxImageBytes+1))
+	gitCommand(t, root, "add", "img.png")
+	gitCommand(t, root, "commit", "-qm", "base")
+	working := rasterFixture(t, 42)
+	writePreviewFile(t, root, "img.png", working)
+	service := NewService(attachmentStore{attachedRoot(t, root)})
+	comparison, err := service.Compare(t.Context(), "owner", "entry", "img.png")
+	if err != nil || comparison.State != GitAvailable || comparison.Head.Kind != PreviewUnsupported || comparison.Working.Kind != PreviewRaster || !bytes.Equal(comparison.Working.Image, working) {
+		t.Fatalf("oversize HEAD raster = %+v, %v", comparison, err)
 	}
 }
 

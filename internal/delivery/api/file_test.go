@@ -4,13 +4,17 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"sync/atomic"
 	"syscall"
 	"testing"
+	"time"
 
 	"connectrpc.com/connect"
 	gulv1 "github.com/rootkernel/gul/api/generated/go/gul/v1"
+	"github.com/rootkernel/gul/api/generated/go/gul/v1/gulv1connect"
 	"github.com/rootkernel/gul/internal/app"
 	"github.com/rootkernel/gul/internal/files"
 	"github.com/rootkernel/gul/internal/workspace"
@@ -23,6 +27,69 @@ func (s fileAttachments) Attachment(_ context.Context, subject, id string) (work
 		return workspace.Attachment{}, workspace.ErrAttachmentNotFound
 	}
 	return s.entry, nil
+}
+
+func TestFileWatchStreamRechecksPrincipalOnInvalidation(t *testing.T) {
+	root := t.TempDir()
+	name := filepath.Join(root, "public.txt")
+	if err := os.WriteFile(name, []byte("initial"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	info, err := os.Stat(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	identity := info.Sys().(*syscall.Stat_t)
+	canonical, err := filepath.EvalSymlinks(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	entry := workspace.Attachment{SubjectID: "owner", ID: "entry", ProviderID: "provider-workspace", CanonicalRoot: canonical,
+		FileDevice: fmt.Sprint(identity.Dev), FileInode: fmt.Sprint(identity.Ino)}
+	core := app.NewCore(app.Dependencies{Provider: &unavailableCounter{}, Persistence: ready{}, Authorization: allow{}})
+	if err := core.Start(t.Context()); err != nil {
+		t.Fatal(err)
+	}
+	defer core.Stop(context.Background())
+	var changed atomic.Bool
+	handler := &FileHandler{Core: core, Files: files.NewService(fileAttachments{entry}), Principal: func(context.Context) (app.Principal, error) {
+		if changed.Load() {
+			return app.Principal{Subject: "other"}, nil
+		}
+		return app.Principal{Subject: "owner"}, nil
+	}}
+	_, route := gulv1connect.NewFileServiceHandler(handler)
+	server := httptest.NewServer(route)
+	defer server.Close()
+	client := gulv1connect.NewFileServiceClient(server.Client(), server.URL)
+	ctx, cancel := context.WithTimeout(t.Context(), 5*time.Second)
+	defer cancel()
+	writerCtx, stopWriter := context.WithCancel(ctx)
+	defer stopWriter()
+	go func() {
+		ticker := time.NewTicker(150 * time.Millisecond)
+		defer ticker.Stop()
+		for i := 0; ; i++ {
+			select {
+			case <-writerCtx.Done():
+				return
+			case <-ticker.C:
+				_ = os.WriteFile(name, []byte(fmt.Sprint(i)), 0600)
+			}
+		}
+	}()
+	stream, err := client.WatchFileChanges(ctx, connect.NewRequest(&gulv1.WatchFileChangesRequest{WorkspaceId: "entry"}))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer stream.Close()
+	if !stream.Receive() || stream.Msg().GetRevision() == 0 {
+		t.Fatalf("first invalidation = %v", stream.Err())
+	}
+	changed.Store(true)
+	if stream.Receive() || connect.CodeOf(stream.Err()) != connect.CodePermissionDenied {
+		t.Fatalf("changed principal stream = %v", stream.Err())
+	}
 }
 
 func TestFileHandlerUsesTrustedSubjectAndHidesPrivatePaths(t *testing.T) {

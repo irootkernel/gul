@@ -16,6 +16,13 @@ const changeLabels: Partial<Record<FileChangeKind, [string, string]>> = {
  [FileChangeKind.MIXED]: ["◆", "Mixed changes"],
 };
 
+const gitStateReasons: Partial<Record<FileGitState, string>> = {
+ [FileGitState.NOT_REPOSITORY]: "This workspace is not a Git repository.",
+ [FileGitState.UNBORN_HEAD]: "This repository has no HEAD commit yet.",
+ [FileGitState.UNAVAILABLE]: "Git review is unavailable.",
+ [FileGitState.LIMIT_EXCEEDED]: "Git review exceeded the file limit.",
+};
+
 export function FileChangeBadge({kind, aggregate = false}: {kind: FileChangeKind; aggregate?: boolean}) {
  const [symbol, label] = changeLabels[kind] ?? ["?", "Status unavailable"];
  return <span className={`file-change file-change--${FileChangeKind[kind]?.toLowerCase() ?? "unknown"}`} aria-label={`${aggregate ? "Contained changes" : "File status"}: ${label}`}>
@@ -24,7 +31,7 @@ export function FileChangeBadge({kind, aggregate = false}: {kind: FileChangeKind
 }
 
 export function FileStatus({status}: {status: GetGitStatusResponse}) {
- if (status.state !== FileGitState.AVAILABLE) return <p role="status">Git review is unavailable. Current file browsing remains available.</p>;
+ if (status.state !== FileGitState.AVAILABLE) return <p role="status">{gitStateReasons[status.state] ?? "Git status is unavailable."} Current file browsing remains available.</p>;
  return <div className="file-status">
   <FileChangeBadge kind={status.direct} />
   <FileChangeBadge kind={status.aggregate} aggregate />
@@ -57,7 +64,7 @@ export function FileComparison({comparison}: {comparison: CompareFixedRevisionsR
     <Revision name={selected} preview={selected === "HEAD" ? comparison.head : comparison.working} missing={selected === "HEAD" ? comparison.headMissing : comparison.workingMissing} />
    </div>
   </> : <>
-   <p role="status">Git comparison is unavailable. Current file preview remains available.</p>
+   <p role="status">{gitStateReasons[comparison.state] ?? "Git comparison is unavailable."} Current file preview remains available.</p>
    <Revision name="Working" preview={comparison.working} missing={comparison.workingMissing} />
   </>}
  </section>;

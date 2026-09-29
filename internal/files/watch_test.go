@@ -70,6 +70,48 @@ func TestWatcherNodeCountIsBounded(t *testing.T) {
 	}
 }
 
+func TestWatcherSlotLimitAndReleaseOnCancel(t *testing.T) {
+	root := t.TempDir()
+	writePreviewFile(t, root, "public.txt", []byte("x"))
+	service := NewService(attachmentStore{attachedRoot(t, root)})
+	cancels := make([]context.CancelFunc, 0, MaxWorkspaceWatchers)
+	var first <-chan Invalidation
+	for i := 0; i < MaxWorkspaceWatchers; i++ {
+		ctx, cancel := context.WithCancel(t.Context())
+		changes, err := service.Watch(ctx, "owner", "entry")
+		if err != nil {
+			cancel()
+			t.Fatalf("watch %d = %v", i, err)
+		}
+		cancels = append(cancels, cancel)
+		if i == 0 {
+			first = changes
+		}
+	}
+	defer func() {
+		for _, cancel := range cancels {
+			cancel()
+		}
+	}()
+	if changes, err := service.Watch(t.Context(), "owner", "entry"); changes != nil || !errors.Is(err, ErrWatchLimit) {
+		t.Fatalf("ninth watch = %v, %v", changes, err)
+	}
+	cancels[0]()
+	select {
+	case _, open := <-first:
+		if open {
+			t.Fatal("cancelled watch emitted an event")
+		}
+	case <-time.After(2 * time.Second):
+		t.Fatal("cancelled watch did not release its slot")
+	}
+	ctx, cancel := context.WithCancel(t.Context())
+	defer cancel()
+	if _, err := service.Watch(ctx, "owner", "entry"); err != nil {
+		t.Fatalf("replacement watch = %v", err)
+	}
+}
+
 func TestWatcherReattachesAfterDirectoryReplacement(t *testing.T) {
 	root := t.TempDir()
 	if err := os.Mkdir(filepath.Join(root, "dir"), 0700); err != nil {

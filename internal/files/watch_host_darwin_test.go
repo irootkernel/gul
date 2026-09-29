@@ -4,13 +4,56 @@ package files
 
 import (
 	"context"
+	"fmt"
+	"io"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
 	"golang.org/x/sys/unix"
 )
+
+func TestDarwinWatchScanHasIndependentDirectoryOffset(t *testing.T) {
+	root := t.TempDir()
+	for i := 0; i < 300; i++ {
+		writePreviewFile(t, root, fmt.Sprintf("%03d-%s", i, strings.Repeat("x", 80)), []byte("x"))
+	}
+	service := NewService(attachmentStore{attachedRoot(t, root)})
+	file, _, err := service.Open(t.Context(), "owner", "entry", ".")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer file.Close()
+	scan, err := openWatchScan(file)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer scan.Close()
+	first, err := scan.Readdirnames(64)
+	if err != nil || len(first) != 64 {
+		t.Fatalf("first scan = %d names, %v", len(first), err)
+	}
+	if _, err := publicChildren(int(file.Fd())); err != nil {
+		t.Fatal(err)
+	}
+	count := len(first)
+	for {
+		names, err := scan.Readdirnames(64)
+		count += len(names)
+		if err == nil {
+			continue
+		}
+		if err != io.EOF {
+			t.Fatal(err)
+		}
+		break
+	}
+	if count != 300 {
+		t.Fatalf("snapshot read displaced watch scan: %d of 300", count)
+	}
+}
 
 func TestDarwinWatcherTracksOnlyExplicitNodes(t *testing.T) {
 	root := t.TempDir()

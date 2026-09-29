@@ -13,6 +13,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/fsnotify/fsnotify"
+	"golang.org/x/sys/unix"
 )
 
 var ErrWatchLimit = errors.New("file watcher limit reached")
@@ -174,6 +175,14 @@ func (s *Service) addWatchTree(ctx context.Context, watcher hostWatcher, paths m
 	if len(paths) >= MaxWatchNodes {
 		return ErrWatchLimit
 	}
+	var scan *os.File
+	if info.IsDir() {
+		scan, err = openWatchScan(file)
+		if err != nil {
+			return ErrWatchUnavailable
+		}
+		defer scan.Close()
+	}
 	if err := watcher.Add(actual, file); err != nil {
 		if errors.Is(err, ErrWatchLimit) {
 			return ErrWatchLimit
@@ -184,12 +193,9 @@ func (s *Service) addWatchTree(ctx context.Context, watcher hostWatcher, paths m
 	if !info.IsDir() {
 		return nil
 	}
-	if _, err := file.Seek(0, io.SeekStart); err != nil {
-		return ErrWatchUnavailable
-	}
 	scanned := 0
 	for {
-		names, readErr := file.Readdirnames(64)
+		names, readErr := scan.Readdirnames(64)
 		if readErr != nil && !errors.Is(readErr, io.EOF) {
 			return ErrWatchUnavailable
 		}
@@ -216,6 +222,16 @@ func (s *Service) addWatchTree(ctx context.Context, watcher hostWatcher, paths m
 			return nil
 		}
 	}
+}
+
+// A new open file description keeps the tree scan independent of snapshot reads
+// on a watcher descriptor duplicated from file.
+func openWatchScan(file *os.File) (*os.File, error) {
+	fd, err := unix.Openat(int(file.Fd()), ".", unix.O_RDONLY|unix.O_DIRECTORY|unix.O_CLOEXEC, 0)
+	if err != nil {
+		return nil, err
+	}
+	return os.NewFile(uintptr(fd), "watch-scan"), nil
 }
 
 func removeWatchSubtree(watcher hostWatcher, paths map[string]watchedNode, aliases map[string]struct{}, name string) {

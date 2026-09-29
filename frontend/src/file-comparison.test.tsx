@@ -39,6 +39,22 @@ test("Git degradation retains the current preview", () => {
   working: create(ReadPreviewResponseSchema, {kind: FilePreviewKind.TEXT, text: "current"}),
  });
  const html = renderToStaticMarkup(<FileComparison comparison={result} />);
- expect(html).toContain("Git comparison is unavailable");
+ expect(html).toContain("This workspace is not a Git repository.");
  expect(html).toContain("current");
+});
+
+test("Git degradation explains each typed state", () => {
+ for (const [state, reason] of [
+  [FileGitState.NOT_REPOSITORY, "not a Git repository"],
+  [FileGitState.UNBORN_HEAD, "no HEAD commit"],
+  [FileGitState.UNAVAILABLE, "Git review is unavailable"],
+  [FileGitState.LIMIT_EXCEEDED, "exceeded the file limit"],
+ ] as const) {
+  const status = create(GetGitStatusResponseSchema, {state});
+  const comparison = create(CompareFixedRevisionsResponseSchema, {state, working: create(ReadPreviewResponseSchema, {kind: FilePreviewKind.TEXT, text: "current"})});
+  expect(renderToStaticMarkup(<FileStatus status={status} />)).toContain(reason);
+  const html = renderToStaticMarkup(<FileComparison comparison={comparison} />);
+  expect(html).toContain(reason);
+  expect(html).toContain("current");
+ }
 });
