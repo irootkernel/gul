@@ -89,6 +89,18 @@ func TestFileHandlerUsesTrustedSubjectAndHidesPrivatePaths(t *testing.T) {
 	if err != nil || refresh.Msg.GetRevision() != 1 {
 		t.Fatalf("offline refresh = %+v, %v", refresh, err)
 	}
+	page, err = handler.ListDirectory(t.Context(), connect.NewRequest(&gulv1.ListDirectoryRequest{WorkspaceId: "entry", RelativePath: ".", PageSize: 1}))
+	if err != nil || page.Msg.GetNextPageToken() == "" {
+		t.Fatalf("paged directory = %+v, %v", page, err)
+	}
+	_, err = handler.ListDirectory(t.Context(), connect.NewRequest(&gulv1.ListDirectoryRequest{WorkspaceId: "entry", RelativePath: ".", PageSize: 1, PageToken: "bad"}))
+	assertFileCode(t, err, connect.CodeInvalidArgument, gulv1.ErrorCode_ERROR_CODE_INVALID_PAGE_TOKEN)
+	_, err = handler.RefreshFiles(t.Context(), connect.NewRequest(&gulv1.RefreshFilesRequest{WorkspaceId: "entry"}))
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, err = handler.ListDirectory(t.Context(), connect.NewRequest(&gulv1.ListDirectoryRequest{WorkspaceId: "entry", RelativePath: ".", PageSize: 1, PageToken: page.Msg.GetNextPageToken()}))
+	assertFileCode(t, err, connect.CodeInvalidArgument, gulv1.ErrorCode_ERROR_CODE_PAGE_TOKEN_EXPIRED)
 	if provider.calls != 0 {
 		t.Fatalf("file review or refresh called offline provider %d times", provider.calls)
 	}

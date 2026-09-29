@@ -232,6 +232,13 @@ func fileError(err error) error {
 	switch {
 	case errors.Is(err, files.ErrUnsupportedPathEncoding):
 		code = gulv1.ErrorCode_ERROR_CODE_UNSUPPORTED_PATH_ENCODING
+	case errors.Is(err, files.ErrInvalidPageToken):
+		code = gulv1.ErrorCode_ERROR_CODE_INVALID_PAGE_TOKEN
+		message = "invalid file page token"
+	case errors.Is(err, files.ErrPageTokenExpired):
+		code = gulv1.ErrorCode_ERROR_CODE_PAGE_TOKEN_EXPIRED
+		action = gulv1.ActionClass_ACTION_CLASS_REFRESH_SNAPSHOT
+		message = "file page token expired; restart listing"
 	case errors.Is(err, files.ErrReattachRequired):
 		code = gulv1.ErrorCode_ERROR_CODE_WORKSPACE_IDENTITY_MISMATCH
 		action = gulv1.ActionClass_ACTION_CLASS_REFRESH_SNAPSHOT

@@ -23,7 +23,7 @@ func TestExplicitRefreshInvalidatesDirectoryCursorOffline(t *testing.T) {
 	if err != nil || revision != 1 {
 		t.Fatalf("refresh = %d, %v", revision, err)
 	}
-	if _, err := service.ListDirectory(t.Context(), "owner", "entry", ".", 1, page.NextToken); !errors.Is(err, ErrPathUnavailable) {
+	if _, err := service.ListDirectory(t.Context(), "owner", "entry", ".", 1, page.NextToken); !errors.Is(err, ErrPageTokenExpired) {
 		t.Fatalf("stale cursor = %v", err)
 	}
 }

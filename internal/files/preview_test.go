@@ -2,9 +2,12 @@ package files
 
 import (
 	"bytes"
+	"context"
 	"encoding/base64"
+	"encoding/binary"
 	"errors"
 	"fmt"
+	"hash/crc32"
 	"image"
 	"image/color"
 	"image/gif"
@@ -67,8 +70,8 @@ func TestDirectoryPagesStayBoundedAndHidePrivateAliases(t *testing.T) {
 			t.Fatalf("cursor token is not opaque: %q", page.NextToken)
 		}
 		if token == "" {
-			if _, err := service.ListDirectory(t.Context(), "other", "entry", ".", 40, page.NextToken); err == nil {
-				t.Fatal("foreign subject used cursor")
+			if _, err := service.ListDirectory(t.Context(), "other", "entry", ".", 40, page.NextToken); !errors.Is(err, ErrInvalidPageToken) {
+				t.Fatalf("foreign subject cursor = %v", err)
 			}
 		}
 		token = page.NextToken
@@ -79,8 +82,8 @@ func TestDirectoryPagesStayBoundedAndHidePrivateAliases(t *testing.T) {
 	if _, err := service.ListDirectory(t.Context(), "owner", "entry", ".", 101, ""); err == nil {
 		t.Fatal("unbounded page accepted")
 	}
-	if _, err := service.ListDirectory(t.Context(), "owner", "entry", ".", 10, "999999999"); err == nil {
-		t.Fatal("invalid cursor accepted")
+	if _, err := service.ListDirectory(t.Context(), "owner", "entry", ".", 10, "999999999"); !errors.Is(err, ErrInvalidPageToken) {
+		t.Fatalf("invalid cursor = %v", err)
 	}
 }
 
@@ -198,5 +201,81 @@ func TestRasterAndMarkdownAssetsUseGuardedReads(t *testing.T) {
 	}
 	if _, err := service.ReadPreview(t.Context(), "owner", "entry", "private.png"); !errors.Is(err, ErrPathUnavailable) {
 		t.Fatalf("private alias = %v", err)
+	}
+}
+
+func TestRasterRejectsDeclaredOversizeDimensions(t *testing.T) {
+	root := t.TempDir()
+	img := image.NewRGBA(image.Rect(0, 0, 1, 1))
+	var encoded bytes.Buffer
+	if err := png.Encode(&encoded, img); err != nil {
+		t.Fatal(err)
+	}
+	largePNG := bytes.Clone(encoded.Bytes())
+	binary.BigEndian.PutUint32(largePNG[16:20], 6000)
+	binary.BigEndian.PutUint32(largePNG[20:24], 5000)
+	binary.BigEndian.PutUint32(largePNG[29:33], crc32.ChecksumIEEE(largePNG[12:29]))
+	writePreviewFile(t, root, "huge.png", largePNG)
+	largeWebP := make([]byte, 30)
+	copy(largeWebP, "RIFF")
+	binary.LittleEndian.PutUint32(largeWebP[4:8], 22)
+	copy(largeWebP[8:], "WEBPVP8X")
+	largeWebP[24], largeWebP[25] = 0x6f, 0x17 // width 6000
+	largeWebP[27], largeWebP[28] = 0x87, 0x13 // height 5000
+	writePreviewFile(t, root, "huge.webp", largeWebP)
+	service := NewService(attachmentStore{attachedRoot(t, root)})
+	for _, name := range []string{"huge.png", "huge.webp"} {
+		preview, err := service.ReadPreview(t.Context(), "owner", "entry", name)
+		if err != nil || preview.Kind != PreviewUnsupported || len(preview.Image) != 0 {
+			t.Fatalf("%s = %+v, %v", name, preview, err)
+		}
+	}
+}
+
+func TestMarkdownImageCountAndAggregateBudget(t *testing.T) {
+	var source strings.Builder
+	for i := 0; i < MaxMarkdownImages+1; i++ {
+		fmt.Fprintf(&source, "![image](%d.png)\n", i)
+	}
+	calls := 0
+	images, err := markdownImages(context.Background(), "page.md", source.String(), func(_ context.Context, _ string, _ int64) ([]byte, string, error) {
+		calls++
+		return []byte("image"), "image/png", nil
+	})
+	if err != nil || len(images) != MaxMarkdownImages || calls != MaxMarkdownImages {
+		t.Fatalf("count cap: %d assets, %d loads, %v", len(images), calls, err)
+	}
+	data := bytes.Repeat([]byte{'x'}, 3<<20)
+	var limits []int64
+	images, err = markdownImages(context.Background(), "page.md", "![a](a.png)\n![b](b.png)\n![c](c.png)\n", func(_ context.Context, _ string, limit int64) ([]byte, string, error) {
+		limits = append(limits, limit)
+		if int64(len(data)) > limit {
+			return nil, "", ErrPathUnavailable
+		}
+		return data, "image/png", nil
+	})
+	if err != nil || len(images) != 2 || len(limits) != 3 || limits[2] != MaxMarkdownImageBytes-2*int64(len(data)) {
+		t.Fatalf("aggregate cap: %d assets, limits %v, %v", len(images), limits, err)
+	}
+}
+
+func TestMarkdownImageReferenceGrammar(t *testing.T) {
+	for _, tc := range []struct {
+		text, reference string
+	}{
+		{"![x](a.png)", "a.png"},
+		{"![" + strings.Repeat("a", 256) + "](a.png)", "a.png"},
+		{"![x](" + strings.Repeat("a", 512) + ")", strings.Repeat("a", 512)},
+		{"![" + strings.Repeat("a", 257) + "](a.png)", ""},
+		{"![x](" + strings.Repeat("a", 513) + ")", ""},
+	} {
+		match := markdownImagePattern.FindStringSubmatch(tc.text)
+		if tc.reference == "" {
+			if match != nil {
+				t.Fatalf("unexpected match for %d-byte reference", len(tc.text))
+			}
+		} else if len(match) != 2 || match[1] != tc.reference {
+			t.Fatalf("reference %q = %v", tc.reference, match)
+		}
 	}
 }

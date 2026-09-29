@@ -56,6 +56,9 @@ type directoryCursor struct {
 const maxDirectoryCursors = 128
 const directoryCursorTTL = 2 * time.Minute
 
+var ErrInvalidPageToken = errors.New("invalid file page token")
+var ErrPageTokenExpired = errors.New("file page token expired")
+
 type PreviewKind string
 
 const (
@@ -175,23 +178,23 @@ func (s *Service) directoryCursor(ctx context.Context, subject, workspaceID, rel
 		return &directoryCursor{dir: dir, subject: subject, workspaceID: workspaceID, relative: relative, pageSize: pageSize}, nil
 	}
 	if len(token) != 32 {
-		return nil, ErrPathUnavailable
+		return nil, ErrInvalidPageToken
 	}
 	s.cursorMu.Lock()
 	cursor := s.cursors[token]
 	if cursor == nil {
 		s.cursorMu.Unlock()
-		return nil, ErrPathUnavailable
+		return nil, ErrPageTokenExpired
 	}
 	if cursor.subject != subject || cursor.workspaceID != workspaceID || cursor.relative != relative || cursor.pageSize != pageSize {
 		s.cursorMu.Unlock()
-		return nil, ErrPathUnavailable
+		return nil, ErrInvalidPageToken
 	}
 	delete(s.cursors, token)
 	s.cursorMu.Unlock()
 	if time.Now().After(cursor.expires) {
 		cursor.dir.Close()
-		return nil, ErrPathUnavailable
+		return nil, ErrPageTokenExpired
 	}
 	// A cursor is reusable only while the same directory is still reachable
 	// through the verified Workspace path and subject-scoped attachment.
@@ -205,7 +208,7 @@ func (s *Service) directoryCursor(ctx context.Context, subject, workspaceID, rel
 	current.Close()
 	if currentErr != nil || cursorErr != nil || !os.SameFile(currentInfo, cursorInfo) {
 		cursor.dir.Close()
-		return nil, ErrPathUnavailable
+		return nil, ErrPageTokenExpired
 	}
 	return cursor, nil
 }

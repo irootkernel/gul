@@ -915,7 +915,7 @@ First-release crash-safe canonical request material for unresolved `StartRun` at
 
 ## 12. FileService and Git boundary
 
-FileService remains a Gul-owned read-only boundary and does not route ordinary reads through Dolgorae. It resolves Workspace Entry, loads its verified root, normalizes a relative path, safely resolves symlinks, proves containment, denies any fully resolved path within `.dolgorae/**`, applies MIME/size/line/image bounds, and performs no mutation or arbitrary command. `.dolgorae` appears only as one non-expandable provider-managed node. Missing, moved, or unverifiable roots fail closed. A provider path containing opaque non-UTF8 bytes yields `NonUtf8PathUnsupported`; Gul neither performs lossy conversion nor logs raw bytes or exposes a manipulable browser path. The UI warns that previews may observe intermediate state while a writer is active.
+FileService remains a Gul-owned read-only boundary and does not route ordinary reads through Dolgorae. It resolves Workspace Entry, loads its verified root, normalizes a relative path, safely resolves symlinks, proves containment, denies any fully resolved path within `.dolgorae/**`, applies MIME/size/line/image bounds, and performs no mutation or arbitrary command. `.dolgorae` appears only as one non-expandable provider-managed node. Missing, moved, or unverifiable roots fail closed. A provider path containing opaque non-UTF8 bytes yields `ERROR_CODE_UNSUPPORTED_PATH_ENCODING`; Gul neither performs lossy conversion nor logs raw bytes or exposes a manipulable browser path. The UI warns that previews may observe intermediate state while a writer is active.
 
 The bounded host Git adapter may provide status and compare only fixed `HEAD` and Working revisions. It is shell-free and cannot accept arbitrary refs, object IDs, repository paths, or absolute paths. A repository root outside the Workspace never expands visibility. Non-Git workspaces retain normal browsing.
 
@@ -1113,7 +1113,9 @@ Symlinks resolving outside the root and every resolved `.dolgorae/**` path fail
 with the same unavailable-path result as a missing target. The typed
 `InspectPath`, `ListDirectory`, and `ReadPreview` handlers use the local access
 gate. Directory pages return at most 100 entries and retain at most 128
-short-lived directory cursors; unsupported
+short-lived directory cursors. Invalid tokens receive `ERROR_CODE_INVALID_PAGE_TOKEN`;
+expired or refresh-invalidated tokens receive `ERROR_CODE_PAGE_TOKEN_EXPIRED` and
+must restart from the first page. Unsupported
 byte encodings return a typed error without an alias. Text is bounded to
 256 KiB and 4,000 lines. Raster previews require checked dimensions, a known
 MIME type, and a 4 MiB limit. Markdown embeds at most eight contained raster
