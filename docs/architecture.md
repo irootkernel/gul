@@ -1052,9 +1052,9 @@ The serial command facade is `toolchain-check`, `generate-contract`, `contract-c
 
 ## 19. Current snapshot
 
-**Snapshot date:** 2026-09-29 (E6-T3)
+**Snapshot date:** 2026-09-29 (E6 closeout)
 
-**Roadmap point:** E0 is `Completed`, E12 is `Completed`, E1 is `Completed`, and E13 is `Completed`; E1-T1 is `Completed` and E1-T2/T3/T4/T5 are `Completed`. E3 and E3-T1/T2/T3/T4 are `Completed`. E4 and E4-T1/T2/T3/T5 are `Completed`. E4-T4 remains Deferred outside its epic. E5 and E5-T1/T2/T3 are `Completed`. E6 is `In Progress` with E6-T1/T2/T3 `Completed` pending Epic closeout. Former E12-T2/T3 remain Retired. E14 owns pre-release application acceptance. No live-provider or assembled-application acceptance is implied.
+**Roadmap point:** E0 is `Completed`, E12 is `Completed`, E1 is `Completed`, and E13 is `Completed`; E1-T1 is `Completed` and E1-T2/T3/T4/T5 are `Completed`. E3 and E3-T1/T2/T3/T4 are `Completed`. E4 and E4-T1/T2/T3/T5 are `Completed`. E4-T4 remains Deferred outside its epic. E5 and E5-T1/T2/T3 are `Completed`. E6 and E6-T1/T2/T3 are `Completed`. Former E12-T2/T3 remain Retired. E14 owns pre-release application acceptance. No live-provider or assembled-application acceptance is implied.
 
 **Maturity:** delivery-independent Go core, shared React bundle, declared but disabled Gul API, typed provider ports and explicit scenario harness, isolated SQLite repositories with fake-scoped Workspace attachment, local presentation and passive session reads, and a Wails shell foundation. E4 adds typed observation, Interaction cards, action eligibility and bounded history/result/artifact reads. E5 adds whole-session close, reconnect convergence and operation-specific recovery against fakes. E6 adds verified-root local FileService inspection, bounded previews, refresh, watcher and Git review through unmounted typed APIs; product assembly and live-provider qualification remain pending.
 

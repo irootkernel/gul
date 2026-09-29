@@ -1129,6 +1129,18 @@ assembled file-pane behavior remain with their designated integration owners.
 E2-T3 owns the Submit-image handoff and final REQ-FILE-015 promotion; E6-T1
 supplied its shared local guard.
 
+### E6 epic closeout (2026-09-29)
+
+E6-T1, E6-T2 and E6-T3 are complete. Final whole-epic audit and independent
+review found no remaining task or seam defect on committed candidate
+`85b75da`. Serial `make test`, focused Go race tests and source-of-truth checks
+passed. The audit corrected REQ-FILE-015 ownership to E2-T3 because its full
+acceptance includes Submit images; the shared E6 guard is complete, but that
+cross-surface requirement remains Required State. E6's accepted Current State
+covers the unmounted FileService component. E7/E8/E14 retain assembled product
+and authentication work, E2 retains live provider integration, and the shared
+consumer dossier remains available to those pending epics.
+
 ## 2. Current development snapshot
 
 | Area | State |
@@ -1596,4 +1608,4 @@ The initial documentation assumed Gul would manage one Codex App Server, map Ses
 
 ## 12. Handoff
 
-E12, E1, E13, E3, E4 and E5 are complete. The TASK-053 consumer lock and generated contract tooling remain authoritative. E6-T1/T2/T3 add guarded local FileService inspection, bounded preview, refresh and Git review over E3's saved Workspace attachment. E2-T0 remains blocked on an accepted compatible Dolgorae executable and live smoke evidence. No product route or live-provider behavior is activated automatically.
+E12, E1, E13, E3, E4, E5 and E6 are complete. The TASK-053 consumer lock and generated contract tooling remain authoritative. E6 provides guarded local FileService inspection, bounded preview, refresh and Git review over E3's saved Workspace attachment. E2-T3 retains the Submit-image handoff and final REQ-FILE-015 acceptance. E2-T0 remains blocked on an accepted compatible Dolgorae executable and live smoke evidence. No product route or live-provider behavior is activated automatically.
