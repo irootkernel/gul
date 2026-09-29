@@ -4,12 +4,12 @@
   "files": [
     {
       "path": "assets/gul.css",
-      "sha256": "6d03db3a2c6739d1e8f5b980e47b5840bfd63e1dde7d1b2b396e4e0a5034bf2a",
-      "size": 815
+      "sha256": "72e5ce9ecc3105e404502f26ca8defad1dc920c9d509510f50d9ce37ef932a5d",
+      "size": 1428
     },
     {
       "path": "assets/gul.js",
-      "sha256": "afcead6a0a46ba747de9c4bc5e1640c42a87da385c094557d18a7eda953e3f90",
+      "sha256": "2a9c72f594d10d265b0ed43c4e4f365b58c5035ed438ebe480e86961aabfd625",
       "size": 183333
     },
     {

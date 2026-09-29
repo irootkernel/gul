@@ -516,6 +516,10 @@ embedding, and source-only SVG at the same unmounted component boundary.
 Working-tree reads may observe intermediate writer state; fixed `HEAD`
 comparison, invalidation, and assembled file-pane navigation remain with
 E6-T3 and E7.
+E6-T3 adds explicit refresh, a bounded host watcher, and fixed `HEAD` versus
+Working Git review through unmounted FileService handlers. Git status, private
+path denial, and typed degradation are accepted at this component boundary;
+E7/E8/E14 own the assembled pane and authenticated delivery.
 
 | Requirement | Accepted Current State | Evidence |
 |---|---|---|
@@ -543,6 +547,12 @@ E6-T3 and E7.
 | REQ-FILE-007 | PNG, JPEG, WebP and GIF previews pass MIME, byte and dimension checks before inert data-image rendering; component scope, unmounted | E6-T2; image fixtures and oversize fallback; serial `make test`; implementation memo |
 | REQ-FILE-008 | ADR-0018 source-only SVG is escaped in the preview component; component scope, unmounted | E6-T2; active SVG fixture; serial `make test`; implementation memo |
 | REQ-FILE-012 | Markdown is rendered through an HTML-free allowlist; at most eight same-working-revision raster assets pass the guarded FileService accessor and external or private references remain literal; component scope, unmounted | E6-T2; Markdown asset and external/private fixtures; serial `make test`; implementation memo |
+| REQ-FILE-009 | Explicit refresh invalidates retained directory pages and increments a Workspace revision without a provider call; component scope, unmounted | E6-T3; cursor invalidation test; serial `make test`; implementation memo |
+| REQ-FILE-010 | FileService review APIs expose reads and invalidation only; no file mutation API exists; component scope, unmounted | E6-T3; API surface review; serial `make test`; implementation memo |
+| REQ-FILE-011 | Contained Git status reports direct and ancestor changes, staged/unstaged flags, and color plus text labels; private paths are filtered; component scope, unmounted | E6-T3; Git fixture and React status test; serial `make test`; implementation memo |
+| REQ-FILE-013 | Fixed `HEAD` and Working text, Markdown, and raster revisions render side by side or through an explicit narrow-screen switch, including missing and rename cases; component scope, unmounted | E6-T3; revision fixture and React comparison test; serial `make test`; implementation memo |
+| REQ-FILE-014 | Non-Git, unborn `HEAD`, and unavailable Git return typed degradation while retaining Working preview; component scope, unmounted | E6-T3; degradation fixture; serial `make test`; implementation memo |
+| REQ-FILE-016 | Root-scoped host watcher bounds node count, scan count, queue depth, and coalescing interval; private events do not invalidate; component scope, unmounted | E6-T3; watcher isolation and limit tests; serial `make test`; implementation memo |
 | REQ-DIRECT-001 | Each locally accepted Primary Run has one persisted subject-scoped Direct Session binding; three Runs list and reopen without a Codex thread field | E3-T3 scenario-backed binding and SQLite reopen test; `make test` |
 | REQ-DIRECT-003 | Permanent shared read-only launch requires an explicit lane choice, visible warning and acknowledgement before configuration check | E3-T4 React selection, authenticated handler and domain tests; `make test` |
 | REQ-DIRECT-007 | Direct Session name, favorite, archive and last navigation selection are subject-scoped SQLite presentation; offline actions invoke no provider method | E3-T2; restart, isolation and offline handler tests; `make test` |

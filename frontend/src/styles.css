@@ -52,3 +52,28 @@ h1 {
   font-size: 0.875rem;
   line-height: 1.5;
 }
+
+.file-comparison__wide {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.file-comparison__wide > section,
+.file-comparison__narrow > section {
+  min-width: 0;
+  overflow: auto;
+}
+
+.file-comparison__narrow { display: none; }
+.file-status { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+.file-change { font-weight: 600; }
+.file-change--modified, .file-change--mixed { color: #f2b84b; }
+.file-change--added, .file-change--untracked { color: #85d3a0; }
+.file-change--deleted, .file-change--conflicted { color: #f09494; }
+.file-change--renamed { color: #91baff; }
+
+@media (max-width: 42rem) {
+  .file-comparison__wide { display: none; }
+  .file-comparison__narrow { display: block; }
+}

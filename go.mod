@@ -6,6 +6,7 @@ toolchain go1.27.1
 
 require (
 	connectrpc.com/connect v1.20.0
+	github.com/fsnotify/fsnotify v1.10.1
 	github.com/rootkernel/gul/contract v0.0.0
 	github.com/wailsapp/wails/v3 v3.0.0-beta.24
 	golang.org/x/sys v0.47.0

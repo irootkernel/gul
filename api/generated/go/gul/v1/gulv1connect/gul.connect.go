@@ -162,6 +162,18 @@ const (
 	FileServiceListDirectoryProcedure = "/gul.v1.FileService/ListDirectory"
 	// FileServiceReadPreviewProcedure is the fully-qualified name of the FileService's ReadPreview RPC.
 	FileServiceReadPreviewProcedure = "/gul.v1.FileService/ReadPreview"
+	// FileServiceRefreshFilesProcedure is the fully-qualified name of the FileService's RefreshFiles
+	// RPC.
+	FileServiceRefreshFilesProcedure = "/gul.v1.FileService/RefreshFiles"
+	// FileServiceGetGitStatusProcedure is the fully-qualified name of the FileService's GetGitStatus
+	// RPC.
+	FileServiceGetGitStatusProcedure = "/gul.v1.FileService/GetGitStatus"
+	// FileServiceCompareFixedRevisionsProcedure is the fully-qualified name of the FileService's
+	// CompareFixedRevisions RPC.
+	FileServiceCompareFixedRevisionsProcedure = "/gul.v1.FileService/CompareFixedRevisions"
+	// FileServiceWatchFileChangesProcedure is the fully-qualified name of the FileService's
+	// WatchFileChanges RPC.
+	FileServiceWatchFileChangesProcedure = "/gul.v1.FileService/WatchFileChanges"
 )
 
 // RuntimeServiceClient is a client for the gul.v1.RuntimeService service.
@@ -1392,6 +1404,10 @@ type FileServiceClient interface {
 	InspectPath(context.Context, *connect.Request[v1.InspectPathRequest]) (*connect.Response[v1.InspectPathResponse], error)
 	ListDirectory(context.Context, *connect.Request[v1.ListDirectoryRequest]) (*connect.Response[v1.ListDirectoryResponse], error)
 	ReadPreview(context.Context, *connect.Request[v1.ReadPreviewRequest]) (*connect.Response[v1.ReadPreviewResponse], error)
+	RefreshFiles(context.Context, *connect.Request[v1.RefreshFilesRequest]) (*connect.Response[v1.RefreshFilesResponse], error)
+	GetGitStatus(context.Context, *connect.Request[v1.GetGitStatusRequest]) (*connect.Response[v1.GetGitStatusResponse], error)
+	CompareFixedRevisions(context.Context, *connect.Request[v1.CompareFixedRevisionsRequest]) (*connect.Response[v1.CompareFixedRevisionsResponse], error)
+	WatchFileChanges(context.Context, *connect.Request[v1.WatchFileChangesRequest]) (*connect.ServerStreamForClient[v1.FileChange], error)
 }
 
 // NewFileServiceClient constructs a client for the gul.v1.FileService service. By default, it uses
@@ -1423,14 +1439,42 @@ func NewFileServiceClient(httpClient connect.HTTPClient, baseURL string, opts ..
 			connect.WithSchema(fileServiceMethods.ByName("ReadPreview")),
 			connect.WithClientOptions(opts...),
 		),
+		refreshFiles: connect.NewClient[v1.RefreshFilesRequest, v1.RefreshFilesResponse](
+			httpClient,
+			baseURL+FileServiceRefreshFilesProcedure,
+			connect.WithSchema(fileServiceMethods.ByName("RefreshFiles")),
+			connect.WithClientOptions(opts...),
+		),
+		getGitStatus: connect.NewClient[v1.GetGitStatusRequest, v1.GetGitStatusResponse](
+			httpClient,
+			baseURL+FileServiceGetGitStatusProcedure,
+			connect.WithSchema(fileServiceMethods.ByName("GetGitStatus")),
+			connect.WithClientOptions(opts...),
+		),
+		compareFixedRevisions: connect.NewClient[v1.CompareFixedRevisionsRequest, v1.CompareFixedRevisionsResponse](
+			httpClient,
+			baseURL+FileServiceCompareFixedRevisionsProcedure,
+			connect.WithSchema(fileServiceMethods.ByName("CompareFixedRevisions")),
+			connect.WithClientOptions(opts...),
+		),
+		watchFileChanges: connect.NewClient[v1.WatchFileChangesRequest, v1.FileChange](
+			httpClient,
+			baseURL+FileServiceWatchFileChangesProcedure,
+			connect.WithSchema(fileServiceMethods.ByName("WatchFileChanges")),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
 // fileServiceClient implements FileServiceClient.
 type fileServiceClient struct {
-	inspectPath   *connect.Client[v1.InspectPathRequest, v1.InspectPathResponse]
-	listDirectory *connect.Client[v1.ListDirectoryRequest, v1.ListDirectoryResponse]
-	readPreview   *connect.Client[v1.ReadPreviewRequest, v1.ReadPreviewResponse]
+	inspectPath           *connect.Client[v1.InspectPathRequest, v1.InspectPathResponse]
+	listDirectory         *connect.Client[v1.ListDirectoryRequest, v1.ListDirectoryResponse]
+	readPreview           *connect.Client[v1.ReadPreviewRequest, v1.ReadPreviewResponse]
+	refreshFiles          *connect.Client[v1.RefreshFilesRequest, v1.RefreshFilesResponse]
+	getGitStatus          *connect.Client[v1.GetGitStatusRequest, v1.GetGitStatusResponse]
+	compareFixedRevisions *connect.Client[v1.CompareFixedRevisionsRequest, v1.CompareFixedRevisionsResponse]
+	watchFileChanges      *connect.Client[v1.WatchFileChangesRequest, v1.FileChange]
 }
 
 // InspectPath calls gul.v1.FileService.InspectPath.
@@ -1448,11 +1492,35 @@ func (c *fileServiceClient) ReadPreview(ctx context.Context, req *connect.Reques
 	return c.readPreview.CallUnary(ctx, req)
 }
 
+// RefreshFiles calls gul.v1.FileService.RefreshFiles.
+func (c *fileServiceClient) RefreshFiles(ctx context.Context, req *connect.Request[v1.RefreshFilesRequest]) (*connect.Response[v1.RefreshFilesResponse], error) {
+	return c.refreshFiles.CallUnary(ctx, req)
+}
+
+// GetGitStatus calls gul.v1.FileService.GetGitStatus.
+func (c *fileServiceClient) GetGitStatus(ctx context.Context, req *connect.Request[v1.GetGitStatusRequest]) (*connect.Response[v1.GetGitStatusResponse], error) {
+	return c.getGitStatus.CallUnary(ctx, req)
+}
+
+// CompareFixedRevisions calls gul.v1.FileService.CompareFixedRevisions.
+func (c *fileServiceClient) CompareFixedRevisions(ctx context.Context, req *connect.Request[v1.CompareFixedRevisionsRequest]) (*connect.Response[v1.CompareFixedRevisionsResponse], error) {
+	return c.compareFixedRevisions.CallUnary(ctx, req)
+}
+
+// WatchFileChanges calls gul.v1.FileService.WatchFileChanges.
+func (c *fileServiceClient) WatchFileChanges(ctx context.Context, req *connect.Request[v1.WatchFileChangesRequest]) (*connect.ServerStreamForClient[v1.FileChange], error) {
+	return c.watchFileChanges.CallServerStream(ctx, req)
+}
+
 // FileServiceHandler is an implementation of the gul.v1.FileService service.
 type FileServiceHandler interface {
 	InspectPath(context.Context, *connect.Request[v1.InspectPathRequest]) (*connect.Response[v1.InspectPathResponse], error)
 	ListDirectory(context.Context, *connect.Request[v1.ListDirectoryRequest]) (*connect.Response[v1.ListDirectoryResponse], error)
 	ReadPreview(context.Context, *connect.Request[v1.ReadPreviewRequest]) (*connect.Response[v1.ReadPreviewResponse], error)
+	RefreshFiles(context.Context, *connect.Request[v1.RefreshFilesRequest]) (*connect.Response[v1.RefreshFilesResponse], error)
+	GetGitStatus(context.Context, *connect.Request[v1.GetGitStatusRequest]) (*connect.Response[v1.GetGitStatusResponse], error)
+	CompareFixedRevisions(context.Context, *connect.Request[v1.CompareFixedRevisionsRequest]) (*connect.Response[v1.CompareFixedRevisionsResponse], error)
+	WatchFileChanges(context.Context, *connect.Request[v1.WatchFileChangesRequest], *connect.ServerStream[v1.FileChange]) error
 }
 
 // NewFileServiceHandler builds an HTTP handler from the service implementation. It returns the path
@@ -1480,6 +1548,30 @@ func NewFileServiceHandler(svc FileServiceHandler, opts ...connect.HandlerOption
 		connect.WithSchema(fileServiceMethods.ByName("ReadPreview")),
 		connect.WithHandlerOptions(opts...),
 	)
+	fileServiceRefreshFilesHandler := connect.NewUnaryHandler(
+		FileServiceRefreshFilesProcedure,
+		svc.RefreshFiles,
+		connect.WithSchema(fileServiceMethods.ByName("RefreshFiles")),
+		connect.WithHandlerOptions(opts...),
+	)
+	fileServiceGetGitStatusHandler := connect.NewUnaryHandler(
+		FileServiceGetGitStatusProcedure,
+		svc.GetGitStatus,
+		connect.WithSchema(fileServiceMethods.ByName("GetGitStatus")),
+		connect.WithHandlerOptions(opts...),
+	)
+	fileServiceCompareFixedRevisionsHandler := connect.NewUnaryHandler(
+		FileServiceCompareFixedRevisionsProcedure,
+		svc.CompareFixedRevisions,
+		connect.WithSchema(fileServiceMethods.ByName("CompareFixedRevisions")),
+		connect.WithHandlerOptions(opts...),
+	)
+	fileServiceWatchFileChangesHandler := connect.NewServerStreamHandler(
+		FileServiceWatchFileChangesProcedure,
+		svc.WatchFileChanges,
+		connect.WithSchema(fileServiceMethods.ByName("WatchFileChanges")),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/gul.v1.FileService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case FileServiceInspectPathProcedure:
@@ -1488,6 +1580,14 @@ func NewFileServiceHandler(svc FileServiceHandler, opts ...connect.HandlerOption
 			fileServiceListDirectoryHandler.ServeHTTP(w, r)
 		case FileServiceReadPreviewProcedure:
 			fileServiceReadPreviewHandler.ServeHTTP(w, r)
+		case FileServiceRefreshFilesProcedure:
+			fileServiceRefreshFilesHandler.ServeHTTP(w, r)
+		case FileServiceGetGitStatusProcedure:
+			fileServiceGetGitStatusHandler.ServeHTTP(w, r)
+		case FileServiceCompareFixedRevisionsProcedure:
+			fileServiceCompareFixedRevisionsHandler.ServeHTTP(w, r)
+		case FileServiceWatchFileChangesProcedure:
+			fileServiceWatchFileChangesHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -1507,4 +1607,20 @@ func (UnimplementedFileServiceHandler) ListDirectory(context.Context, *connect.R
 
 func (UnimplementedFileServiceHandler) ReadPreview(context.Context, *connect.Request[v1.ReadPreviewRequest]) (*connect.Response[v1.ReadPreviewResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("gul.v1.FileService.ReadPreview is not implemented"))
+}
+
+func (UnimplementedFileServiceHandler) RefreshFiles(context.Context, *connect.Request[v1.RefreshFilesRequest]) (*connect.Response[v1.RefreshFilesResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("gul.v1.FileService.RefreshFiles is not implemented"))
+}
+
+func (UnimplementedFileServiceHandler) GetGitStatus(context.Context, *connect.Request[v1.GetGitStatusRequest]) (*connect.Response[v1.GetGitStatusResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("gul.v1.FileService.GetGitStatus is not implemented"))
+}
+
+func (UnimplementedFileServiceHandler) CompareFixedRevisions(context.Context, *connect.Request[v1.CompareFixedRevisionsRequest]) (*connect.Response[v1.CompareFixedRevisionsResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("gul.v1.FileService.CompareFixedRevisions is not implemented"))
+}
+
+func (UnimplementedFileServiceHandler) WatchFileChanges(context.Context, *connect.Request[v1.WatchFileChangesRequest], *connect.ServerStream[v1.FileChange]) error {
+	return connect.NewError(connect.CodeUnimplemented, errors.New("gul.v1.FileService.WatchFileChanges is not implemented"))
 }

@@ -34,10 +34,13 @@ type Service struct {
 	attachments Attachments
 	cursorMu    sync.Mutex
 	cursors     map[string]*directoryCursor
+	revisions   map[string]uint64
+	watchers    int
+	gitBinary   string
 }
 
 func NewService(attachments Attachments) *Service {
-	return &Service{attachments: attachments}
+	return &Service{attachments: attachments, gitBinary: "git"}
 }
 
 type Node struct {

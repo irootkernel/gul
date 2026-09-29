@@ -877,6 +877,10 @@ service FileService {
   rpc InspectPath(InspectPathRequest) returns (InspectPathResponse);
   rpc ListDirectory(ListDirectoryRequest) returns (ListDirectoryResponse);
   rpc ReadPreview(ReadPreviewRequest) returns (ReadPreviewResponse);
+  rpc RefreshFiles(RefreshFilesRequest) returns (RefreshFilesResponse);
+  rpc GetGitStatus(GetGitStatusRequest) returns (GetGitStatusResponse);
+  rpc CompareFixedRevisions(CompareFixedRevisionsRequest) returns (CompareFixedRevisionsResponse);
+  rpc WatchFileChanges(WatchFileChangesRequest) returns (stream FileChange);
 }
 
 message InspectPathRequest {
@@ -942,4 +946,60 @@ message ReadPreviewResponse {
   string language = 5;
   bool truncated = 6;
   repeated MarkdownImage markdown_images = 7;
+}
+
+message RefreshFilesRequest { string workspace_id = 1; }
+message RefreshFilesResponse { uint64 revision = 1; }
+
+enum FileGitState {
+  FILE_GIT_STATE_UNSPECIFIED = 0;
+  FILE_GIT_STATE_AVAILABLE = 1;
+  FILE_GIT_STATE_NOT_REPOSITORY = 2;
+  FILE_GIT_STATE_UNBORN_HEAD = 3;
+  FILE_GIT_STATE_UNAVAILABLE = 4;
+  FILE_GIT_STATE_LIMIT_EXCEEDED = 5;
+}
+
+enum FileChangeKind {
+  FILE_CHANGE_KIND_UNSPECIFIED = 0;
+  FILE_CHANGE_KIND_CLEAN = 1;
+  FILE_CHANGE_KIND_MODIFIED = 2;
+  FILE_CHANGE_KIND_ADDED = 3;
+  FILE_CHANGE_KIND_UNTRACKED = 4;
+  FILE_CHANGE_KIND_DELETED = 5;
+  FILE_CHANGE_KIND_RENAMED = 6;
+  FILE_CHANGE_KIND_CONFLICTED = 7;
+  FILE_CHANGE_KIND_MIXED = 8;
+}
+
+message GetGitStatusRequest {
+  string workspace_id = 1;
+  string relative_path = 2;
+}
+message GetGitStatusResponse {
+  FileGitState state = 1;
+  FileChangeKind direct = 2;
+  FileChangeKind aggregate = 3;
+  bool staged = 4;
+  bool unstaged = 5;
+}
+
+message CompareFixedRevisionsRequest {
+  string workspace_id = 1;
+  string relative_path = 2;
+}
+message CompareFixedRevisionsResponse {
+  FileGitState state = 1;
+  FileChangeKind change = 2;
+  ReadPreviewResponse head = 3;
+  ReadPreviewResponse working = 4;
+  bool head_missing = 5;
+  bool working_missing = 6;
+  string previous_relative_path = 7;
+}
+
+message WatchFileChangesRequest { string workspace_id = 1; }
+message FileChange {
+  uint64 revision = 1;
+  string relative_path = 2;
 }

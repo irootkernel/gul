@@ -67,10 +67,31 @@ func TestFileHandlerUsesTrustedSubjectAndHidesPrivatePaths(t *testing.T) {
 		t.Fatalf("file inspection called the offline provider %d times", provider.calls)
 	}
 	page, err := handler.ListDirectory(t.Context(), connect.NewRequest(&gulv1.ListDirectoryRequest{WorkspaceId: "entry", RelativePath: ".", PageSize: 10}))
-	if err != nil || len(page.Msg.GetEntries()) != 2 { t.Fatalf("directory = %+v, %v", page, err) }
+	if err != nil || len(page.Msg.GetEntries()) != 2 {
+		t.Fatalf("directory = %+v, %v", page, err)
+	}
 	preview, err := handler.ReadPreview(t.Context(), connect.NewRequest(&gulv1.ReadPreviewRequest{WorkspaceId: "entry", RelativePath: "public.txt"}))
-	if err != nil || preview.Msg.GetKind() != gulv1.FilePreviewKind_FILE_PREVIEW_KIND_TEXT || preview.Msg.GetText() != "public" { t.Fatalf("preview = %+v, %v", preview, err) }
-	if provider.calls != 0 { t.Fatalf("file preview called offline provider %d times", provider.calls) }
+	if err != nil || preview.Msg.GetKind() != gulv1.FilePreviewKind_FILE_PREVIEW_KIND_TEXT || preview.Msg.GetText() != "public" {
+		t.Fatalf("preview = %+v, %v", preview, err)
+	}
+	if provider.calls != 0 {
+		t.Fatalf("file preview called offline provider %d times", provider.calls)
+	}
+	gitStatus, err := handler.GetGitStatus(t.Context(), connect.NewRequest(&gulv1.GetGitStatusRequest{WorkspaceId: "entry", RelativePath: "public.txt"}))
+	if err != nil || gitStatus.Msg.GetState() != gulv1.FileGitState_FILE_GIT_STATE_NOT_REPOSITORY {
+		t.Fatalf("non-Git status = %+v, %v", gitStatus, err)
+	}
+	comparison, err := handler.CompareFixedRevisions(t.Context(), connect.NewRequest(&gulv1.CompareFixedRevisionsRequest{WorkspaceId: "entry", RelativePath: "public.txt"}))
+	if err != nil || comparison.Msg.GetState() != gulv1.FileGitState_FILE_GIT_STATE_NOT_REPOSITORY || comparison.Msg.GetWorking().GetText() != "public" {
+		t.Fatalf("non-Git compare = %+v, %v", comparison, err)
+	}
+	refresh, err := handler.RefreshFiles(t.Context(), connect.NewRequest(&gulv1.RefreshFilesRequest{WorkspaceId: "entry"}))
+	if err != nil || refresh.Msg.GetRevision() != 1 {
+		t.Fatalf("offline refresh = %+v, %v", refresh, err)
+	}
+	if provider.calls != 0 {
+		t.Fatalf("file review or refresh called offline provider %d times", provider.calls)
+	}
 	_, err = handler.ReadPreview(t.Context(), connect.NewRequest(&gulv1.ReadPreviewRequest{WorkspaceId: "entry", RelativePath: ".dolgorae/secret"}))
 	assertFileCode(t, err, connect.CodeInvalidArgument, gulv1.ErrorCode_ERROR_CODE_INVALID_REQUEST)
 	for _, relative := range []string{".dolgorae/secret", "../outside", "missing"} {

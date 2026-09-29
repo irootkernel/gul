@@ -5,7 +5,7 @@
 | Role | Target and Current Architecture source of truth |
 | Product | Gul |
 | Version | 0.1-dolgorae-consumer-v1 |
-| Status | Approved target rebaseline; current implementation through E6-T2 within the declared component scope |
+| Status | Approved target rebaseline; current implementation through E6-T3 within the declared component scope |
 | Last updated | 2026-09-29 |
 
 ## 1. Purpose and change control
@@ -712,8 +712,8 @@ ArtifactPresentationService
   GetMetadata, ReadChunk
 
 FileService
-  ListDirectory, ReadText, ReadImage, Refresh,
-  GetGitStatus, CompareFixedRevisions
+  InspectPath, ListDirectory, ReadPreview, RefreshFiles,
+  GetGitStatus, CompareFixedRevisions, WatchFileChanges
 
 ClientEventService
   Subscribe(after_delivery_sequence)
@@ -1052,11 +1052,11 @@ The serial command facade is `toolchain-check`, `generate-contract`, `contract-c
 
 ## 19. Current snapshot
 
-**Snapshot date:** 2026-09-29 (E6-T2)
+**Snapshot date:** 2026-09-29 (E6-T3)
 
-**Roadmap point:** E0 is `Completed`, E12 is `Completed`, E1 is `Completed`, and E13 is `Completed`; E1-T1 is `Completed` and E1-T2/T3/T4/T5 are `Completed`. E3 and E3-T1/T2/T3/T4 are `Completed`. E4 and E4-T1/T2/T3/T5 are `Completed`. E4-T4 remains Deferred outside its epic. E5 and E5-T1/T2/T3 are `Completed`. E6 is `In Progress`, E6-T1/T2 are `Completed`, and E6-T3 remains `Planned`. Former E12-T2/T3 remain Retired. E14 owns pre-release application acceptance. No live-provider or assembled-application acceptance is implied.
+**Roadmap point:** E0 is `Completed`, E12 is `Completed`, E1 is `Completed`, and E13 is `Completed`; E1-T1 is `Completed` and E1-T2/T3/T4/T5 are `Completed`. E3 and E3-T1/T2/T3/T4 are `Completed`. E4 and E4-T1/T2/T3/T5 are `Completed`. E4-T4 remains Deferred outside its epic. E5 and E5-T1/T2/T3 are `Completed`. E6 is `In Progress` with E6-T1/T2/T3 `Completed` pending Epic closeout. Former E12-T2/T3 remain Retired. E14 owns pre-release application acceptance. No live-provider or assembled-application acceptance is implied.
 
-**Maturity:** delivery-independent Go core, shared React bundle, declared but disabled Gul API, typed provider ports and explicit scenario harness, isolated SQLite repositories with fake-scoped Workspace attachment, local presentation and passive session reads, and a Wails shell foundation. E4 adds typed observation, Interaction cards, action eligibility and bounded history/result/artifact reads. E5 adds whole-session close, reconnect convergence and operation-specific recovery against fakes. E6-T1/T2 add verified-root local FileService inspection, bounded previews and unmounted typed APIs; Git, watcher, product assembly and live-provider qualification remain pending.
+**Maturity:** delivery-independent Go core, shared React bundle, declared but disabled Gul API, typed provider ports and explicit scenario harness, isolated SQLite repositories with fake-scoped Workspace attachment, local presentation and passive session reads, and a Wails shell foundation. E4 adds typed observation, Interaction cards, action eligibility and bounded history/result/artifact reads. E5 adds whole-session close, reconnect convergence and operation-specific recovery against fakes. E6 adds verified-root local FileService inspection, bounded previews, refresh, watcher and Git review through unmounted typed APIs; product assembly and live-provider qualification remain pending.
 
 ### 19.1 Implemented components
 
@@ -1117,9 +1117,13 @@ short-lived directory cursors; unsupported
 byte encodings return a typed error without an alias. Text is bounded to
 256 KiB and 4,000 lines. Raster previews require checked dimensions, a known
 MIME type, and a 4 MiB limit. Markdown embeds at most eight contained raster
-assets through the same guarded accessor. SVG is escaped source only. No
-FileService route is mounted yet; E6-T3 adds Git and invalidation, and
-E7/E8/E14 own assembled presentation and delivery.
+assets through the same guarded accessor. SVG is escaped source only. Explicit
+refresh closes retained pages and advances a Workspace revision. A bounded host
+watcher tracks verified nodes and coalesces public changes independently of the
+provider. Direct Git commands report contained direct and ancestor status and
+compare fixed `HEAD` with current Working previews. Typed Git degradation
+preserves Working preview. No FileService route is mounted yet; E7/E8/E14 own
+assembled presentation and delivery.
 
 `internal/presentation` changes only subject-scoped Gul metadata. Attached
 Workspace names, favorites and hidden state are independent of their directory

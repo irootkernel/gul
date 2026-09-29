@@ -1098,6 +1098,35 @@ and source highlighting. The affected component requirements are
 route is claimed. The serial `make test` and generated API/frontend drift
 checks verify this task candidate.
 
+### E6-T3 refresh and fixed Git review (2026-09-29)
+
+The unmounted FileService now exposes explicit refresh, bounded host file
+watching, direct Git status, and fixed `HEAD` versus Working comparison.
+Refresh invalidates retained directory cursors and increments a Workspace
+revision without contacting Dolgorae. The watcher tracks at most 512 verified
+nodes across at most eight subscriptions, scans at most 4,096 entries per
+directory, coalesces changes every 100 ms, and holds one queued invalidation.
+On macOS it registers only guarded descriptors with kqueue, avoiding implicit
+child watches during directory registration. Resolved private paths do not
+join the watch set or trigger updates. A watcher
+failure is typed; explicit refresh remains available.
+
+Git commands use bounded output and a five-second timeout under a repository
+root contained within the verified Workspace. Status preserves direct and
+ancestor changes, including staged and unstaged flags. The comparison pins one
+`HEAD` commit for text, Markdown assets, and supported raster previews, then
+reads Working through the existing guarded accessor. Added, deleted, renamed,
+and missing sides remain explicit. Non-Git, unborn `HEAD`, and unavailable Git
+return typed states with the current Working preview. The read-only UI
+component shows side-by-side revisions on wide screens, a revision switch on
+small screens, and status labels alongside color.
+
+Filesystem, Git, API, and React fixtures cover private filtering, offline
+refresh, watcher limits, combined status, revision assets, and degraded Git.
+`REQ-FILE-009..011`, `REQ-FILE-013..014`, and `REQ-FILE-016` are accepted at
+the unmounted component boundary. Complete cross-surface `REQ-FILE-015` and
+assembled file-pane behavior remain with their designated integration owners.
+
 ## 2. Current development snapshot
 
 | Area | State |
@@ -1105,14 +1134,14 @@ checks verify this task candidate.
 | Five Gul SOT documents | E0-T4 completed the consumer alignment and Gate A reproduction; E0-T8 completed toolchain/ADR alignment; E0-T7 completed Gate B |
 | Toolchain and developer-command artifacts | E0-T8 accepted one pin manifest and read-only host checks; E0-T7 adds checked contract generation/drift delegates; E1-T1 adds the root Go module; E1-T2 adds root Bun pin validation and checked frontend generation/drift commands; E1-T3 adds checked Gul API/error-catalog generation; no installer |
 | Contract boundary | E12-T1 pins TASK-053 and regenerates checked clients/maps/fake transport for 36 known, 27 required, and 9 unavailable methods; E13-T1 adds an explicit stateful scenario provider over the 27-method port |
-| Production source | E1 shared core, bundle, API declarations, isolated SQLite and Wails shell; E3 adds Workspace attachment and presentation; E4 adds typed observation, Interactions, actions and bounded history/result/artifact reads; E5 adds safe close, reconnect and operation-specific replay; E6-T1/T2 add verified-root local FileService guards, bounded previews and typed handlers; handlers remain unmounted |
+| Production source | E1 shared core, bundle, API declarations, isolated SQLite and Wails shell; E3 adds Workspace attachment and presentation; E4 adds typed observation, Interactions, actions and bounded history/result/artifact reads; E5 adds safe close, reconnect and operation-specific replay; E6 adds verified-root local FileService, bounded previews, refresh, watcher and Git review; handlers remain unmounted |
 | Wails host/frontend | One React foundation bundle and isolated Wails shell foundation implemented; E3-T4 launch selector is unmounted and authenticated attach is not implemented |
 | ConnectRPC schema/services | Gul Runtime, DirectSession, ArtifactPresentation and WorkspacePresentation declarations and generated clients exist; isolated handlers remain unmounted |
 | Gul SQLite schema | Gul-owned version 8 schema with Workspace attachment, favorites, Primary binding, event metadata, session-close attempts, mutation-attempt details and Writer reconciliation baselines; production startup integration pending |
 | Dolgorae RPC supervisor/provider | Bounded restart policy implemented against an injected lifecycle; production process ownership and live provider remain pending |
 | Controller credential store | Caller-owned mechanism selected by ADR-0047; not implemented |
-| FileService/auth/PWA/Tailscale integration | E6-T1/T2 local guard, bounded preview and unmounted APIs implemented; Git, watcher and product integration pending |
-| Current State promotions | Prior E0/E12/E1/E13/E3/E4/E5 entries plus component-scoped REQ-FILE-001..003; no assembled-product or released-provider claim |
+| FileService/auth/PWA/Tailscale integration | E6 local guard, bounded preview, refresh, watcher and Git review implemented behind unmounted APIs; product integration pending |
+| Current State promotions | Prior E0/E12/E1/E13/E3/E4/E5 entries plus component-scoped REQ-FILE-001..014 and REQ-FILE-016; cross-surface REQ-FILE-015 pending; no assembled-product or released-provider claim |
 
 The repository contains the shared-core and single-bundle delivery foundations,
 declared but inactive Gul APIs, isolated Gul-owned SQLite repositories, bootstrap
@@ -1565,4 +1594,4 @@ The initial documentation assumed Gul would manage one Codex App Server, map Ses
 
 ## 12. Handoff
 
-E12, E1, E13, E3, E4 and E5 are complete. The TASK-053 consumer lock and generated contract tooling remain authoritative. E6-T1/T2 add guarded local FileService inspection and bounded preview over E3's saved Workspace attachment. E6-T3 is next for Git and invalidation. E2-T0 remains blocked on an accepted compatible Dolgorae executable and live smoke evidence. No product route or live-provider behavior is activated automatically.
+E12, E1, E13, E3, E4 and E5 are complete. The TASK-053 consumer lock and generated contract tooling remain authoritative. E6-T1/T2/T3 add guarded local FileService inspection, bounded preview, refresh and Git review over E3's saved Workspace attachment. E2-T0 remains blocked on an accepted compatible Dolgorae executable and live smoke evidence. No product route or live-provider behavior is activated automatically.

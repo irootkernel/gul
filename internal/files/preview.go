@@ -254,9 +254,27 @@ func (s *Service) ReadPreview(ctx context.Context, subject, workspaceID, relativ
 	if err != nil || !info.Mode().IsRegular() {
 		return Preview{}, ErrPathUnavailable
 	}
+	load := func(ctx context.Context, asset string, limit int64) ([]byte, string, error) {
+		file, _, err := s.Open(ctx, subject, workspaceID, asset)
+		if err != nil {
+			return nil, "", err
+		}
+		defer file.Close()
+		stat, err := file.Stat()
+		if err != nil || !stat.Mode().IsRegular() || stat.Size() > limit {
+			return nil, "", ErrPathUnavailable
+		}
+		return readRaster(file, stat.Size())
+	}
+	return previewReader(ctx, relative, file, info.Size(), load)
+}
+
+type rasterLoader func(context.Context, string, int64) ([]byte, string, error)
+
+func previewReader(ctx context.Context, relative string, reader io.Reader, size int64, load rasterLoader) (Preview, error) {
 	ext := strings.ToLower(path.Ext(relative))
 	if ext == ".png" || ext == ".jpg" || ext == ".jpeg" || ext == ".webp" || ext == ".gif" {
-		data, kind, err := readRaster(file, info.Size())
+		data, kind, err := readRaster(reader, size)
 		if err != nil {
 			return Preview{Kind: PreviewUnsupported}, nil
 		}
@@ -265,7 +283,7 @@ func (s *Service) ReadPreview(ctx context.Context, subject, workspaceID, relativ
 		}
 		return Preview{Kind: PreviewRaster, Image: data, MIME: kind}, nil
 	}
-	data, err := io.ReadAll(io.LimitReader(file, MaxTextBytes+1))
+	data, err := io.ReadAll(io.LimitReader(reader, MaxTextBytes+1))
 	if err != nil {
 		return Preview{}, ErrPathUnavailable
 	}
@@ -305,7 +323,7 @@ func (s *Service) ReadPreview(ctx context.Context, subject, workspaceID, relativ
 	}
 	if ext == ".md" || ext == ".markdown" {
 		result.Kind = PreviewMarkdown
-		result.MarkdownImages, err = s.markdownImages(ctx, subject, workspaceID, relative, result.Text)
+		result.MarkdownImages, err = markdownImages(ctx, relative, result.Text, load)
 		if err != nil {
 			return Preview{}, err
 		}
@@ -340,7 +358,7 @@ func sourceLanguage(ext string) string {
 	}
 }
 
-func readRaster(file *os.File, size int64) ([]byte, string, error) {
+func readRaster(file io.Reader, size int64) ([]byte, string, error) {
 	if size <= 0 || size > MaxImageBytes {
 		return nil, "", ErrPathUnavailable
 	}
@@ -397,7 +415,7 @@ func webpSize(data []byte) (int, int) {
 
 var markdownImagePattern = regexp.MustCompile(`!\[[^\]\n]{0,256}\]\(([^)\n]{1,512})\)`)
 
-func (s *Service) markdownImages(ctx context.Context, subject, workspaceID, relative, content string) ([]MarkdownImage, error) {
+func markdownImages(ctx context.Context, relative, content string, load rasterLoader) ([]MarkdownImage, error) {
 	result := make([]MarkdownImage, 0)
 	seen := make(map[string]bool)
 	total := 0
@@ -428,17 +446,7 @@ func (s *Service) markdownImages(ctx context.Context, subject, workspaceID, rela
 			if !fs.ValidPath(asset) || asset == "." {
 				continue
 			}
-			file, _, err := s.Open(ctx, subject, workspaceID, asset)
-			if err != nil {
-				continue
-			}
-			stat, err := file.Stat()
-			if err != nil || !stat.Mode().IsRegular() || stat.Size() > MaxMarkdownImageBytes-int64(total) {
-				file.Close()
-				continue
-			}
-			data, kind, err := readRaster(file, stat.Size())
-			file.Close()
+			data, kind, err := load(ctx, asset, MaxMarkdownImageBytes-int64(total))
 			if err != nil {
 				continue
 			}
