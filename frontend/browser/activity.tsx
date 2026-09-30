@@ -21,7 +21,7 @@ import {SessionDetail, type SessionDetailClient} from "../src/session-detail";
 import {OperatorApp, type OperatorClients} from "../src/operator-app";
 import "../src/styles.css";
 
-const calls = {close: 0, resolve: 0, conversation: 0, history: 0, original: 0, entry: 0, action: 0, pending: 0, card: 0, execution: 0};
+const calls = {close: 0, resolve: 0, conversation: 0, history: 0, original: 0, entry: 0, originalFailureSettled: 0, action: 0, pending: 0, card: 0, execution: 0};
 const params = new URL(location.href).searchParams;
 const faults = {history: params.has("history-failure") ? 1 : 0};
 const blocker = params.get("blocker");
@@ -34,6 +34,9 @@ const first = create(ConversationEntrySchema, {entryId: "entry-1", kind: Convers
   status: ConversationStatus.ACCEPTED, preview: "repeat", hasOriginal: true});
 const answer = create(ConversationEntrySchema, {entryId: "entry-2", kind: ConversationKind.ASSISTANT,
   status: ConversationStatus.FINAL, preview: "final preview", previewTruncated: true, hasOriginal: true});
+const otherAnswer = create(ConversationEntrySchema, {entryId: "entry-other", kind: ConversationKind.ASSISTANT,
+  status: ConversationStatus.FINAL, preview: "other final preview", hasOriginal: true});
+let originalReads = 0;
 const opened = create(ConversationEntrySchema, {entryId: "entry-opened", kind: ConversationKind.INTERACTION_OPENED,
   status: ConversationStatus.OPENED, title: "Approval opened", interactionRef: "approval-1"});
 const second = create(ConversationEntrySchema, {entryId: "entry-3", kind: ConversationKind.HUMAN,
@@ -61,19 +64,25 @@ const clients: SessionDetailClient = {
       ? {snapshotId: "conversation-1", items: [opened], nextPageToken: "last"}
       : request.pageToken ? {snapshotId: params.has("conversation-snapshot-change") ? "conversation-2" : "conversation-1",
       items: params.has("conversation-overlap") ? [answer, second] : [second], traversalComplete: true}
-      : {snapshotId: "conversation-1", items: params.has("entry-interaction") ? [first, opened, answer] : [first, answer], nextPageToken: "more", traversalComplete: params.has("invalid-page")});},
+      : {snapshotId: "conversation-1", items: params.has("original-race") ? [first, answer, otherAnswer]
+        : params.has("entry-interaction") ? [first, opened, answer] : [first, answer], nextPageToken: "more", traversalComplete: params.has("invalid-page")});},
   getConversationEntry: async ({entryId}) => {calls.entry++;
+    if (entryId === answer.entryId && params.has("original-race") && ++originalReads === 1) {
+      await new Promise(resolve => setTimeout(resolve, 500));
+      calls.originalFailureSettled++;
+      throw Error("fixture delayed original failure");
+    }
     if (entryId === second.entryId && params.has("linked-delay")) await new Promise(resolve => setTimeout(resolve, 500));
     if (entryId === second.entryId && params.has("linked-failure")) throw Error("fixture linked failure");
     return create(GetConversationEntryResponseSchema, {entry: params.has("entry-drift") && entryId === answer.entryId ? first
       : entryId === second.entryId && params.has("linked-missing") ? undefined
         : entryId === second.entryId && params.has("linked-oversize") ? create(ConversationEntrySchema, {...second, preview: "x".repeat(1025)})
           : entryId === second.entryId && params.has("linked-exact") ? create(ConversationEntrySchema, {...second, preview: "x".repeat(1024)})
-          : [first, answer, second].find(item => item.entryId === entryId),
+          : [first, answer, second, otherAnswer].find(item => item.entryId === entryId),
       original: create(PromptOriginalSchema, {content: params.has("artifact") || params.has("artifact-mismatch")
         ? {case: "artifactRef", value: entryId === answer.entryId ? "artifact-response" : "artifact-prompt"}
         : {case: "inlineUtf8", value: params.has("inline-oversize") ? "x".repeat(262145)
-          : entryId === answer.entryId ? "Complete final answer" : `Exact ${entryId}`}})});
+          : entryId === answer.entryId ? "Complete final answer" : entryId === otherAnswer.entryId ? "Other final answer" : `Exact ${entryId}`}})});
   },
   listPromptHistory: async request => {
     calls.history++;

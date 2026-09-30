@@ -236,6 +236,37 @@ with tempfile.TemporaryDirectory(prefix="gul-e7-activity-") as directory:
           await page.getByRole('button', {name:'View full original'}).click();
           await page.getByText('# 한글 prompt original').waitFor();
         }""")
+        for mode in ["different-entry", "retry", "refresh"]:
+            cli(directory, "goto", f"http://127.0.0.1:{server.server_port}/?original-race")
+            cli(directory, "run-code", f"""async page => {{
+              const first = page.getByRole('button', {{name:'View full response for conversation entry 2', exact:true}});
+              await first.click();
+              await page.waitForFunction(() => window.fixture.entry === 1);
+              if ('{mode}' === 'different-entry') {{
+                await page.getByRole('button', {{name:'View full response for conversation entry 3', exact:true}}).click();
+                await page.getByText('Other final answer', {{exact:true}}).waitFor();
+              }} else {{
+                if ('{mode}' === 'refresh') {{
+                  await page.getByRole('button', {{name:'Refresh conversation', exact:true}}).click();
+                  await page.waitForFunction(() => window.fixture.conversation === 2 &&
+                    document.querySelectorAll('[aria-label="Conversation timeline"] ol li').length === 3);
+                }}
+                await first.click();
+                await page.getByText('Complete final answer', {{exact:true}}).waitFor();
+              }}
+              await page.waitForFunction(() => window.fixture.originalFailureSettled === 1);
+              await page.waitForTimeout(50);
+              const timeline = page.getByRole('region', {{name:'Conversation timeline'}});
+              if ('{mode}' === 'different-entry') {{
+                if (await page.locator('#conversation-entry-2 [role="alert"]').count() !== 1 ||
+                    await page.locator('#conversation-entry-other [role="alert"]').count() ||
+                    await timeline.locator(':scope > [role="alert"]').count())
+                  throw Error('Original failure was not attributed to its conversation entry');
+              }} else if (await timeline.getByRole('alert').count() ||
+                         !await page.getByText('Complete final answer', {{exact:true}}).count()) {{
+                throw Error('Superseded original failure displaced a successful retry or refresh');
+              }}
+            }}""")
         cli(directory, "goto", f"http://127.0.0.1:{server.server_port}/?artifact-mismatch")
         cli(directory, "run-code", """async page => {
           await page.getByRole('button', {name:'View full response'}).click();

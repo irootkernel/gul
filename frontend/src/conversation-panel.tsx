@@ -35,8 +35,9 @@ export function ConversationPanel({sessionId, client, focusEntryId, focusRequest
   const [focused, setFocused] = useState<ConversationEntry>();
   const [focusError, setFocusError] = useState<{entryId: string; message: string}>();
   const [expanded, setExpanded] = useState<Record<string, string>>({});
-  const [expandError, setExpandError] = useState("");
+  const [expandErrors, setExpandErrors] = useState<Record<string, string>>({});
   const generation = useRef(0);
+  const originalRequests = useRef<Record<string, object>>({});
   const requestedFocus = useRef<{entryId: string; generation: number} | undefined>(undefined);
   const linkedStatus = useRef<HTMLParagraphElement>(null);
   const linkedError = useRef<HTMLParagraphElement>(null);
@@ -55,7 +56,7 @@ export function ConversationPanel({sessionId, client, focusEntryId, focusRequest
   useEffect(() => {
     let current = true;
     generation.current++;
-    setLoading(true); setBusy(false); setEntries([]); setNextToken(""); setSnapshotId(""); setFocused(undefined); setFocusError(undefined); requestedFocus.current = undefined; setError(""); setExpanded({}); setExpandError("");
+    setLoading(true); setBusy(false); setEntries([]); setNextToken(""); setSnapshotId(""); setFocused(undefined); setFocusError(undefined); requestedFocus.current = undefined; setError(""); setExpanded({}); setExpandErrors({}); originalRequests.current = {};
     void client.listConversation({sessionId, pageSize: 50}).then(page => {
       if (!current) return;
       assertConversationPage(page);
@@ -98,13 +99,16 @@ export function ConversationPanel({sessionId, client, focusEntryId, focusRequest
 
   async function openOriginal(entry: ConversationEntry) {
     const currentGeneration = generation.current;
-    setExpandError("");
+    const request = {};
+    originalRequests.current[entry.entryId] = request;
+    const isCurrent = () => currentGeneration === generation.current && originalRequests.current[entry.entryId] === request;
+    setExpandErrors(current => ({...current, [entry.entryId]: ""}));
     try {
       const result = await client.getConversationEntry({sessionId, entryId: entry.entryId});
       if (result.entry?.entryId !== entry.entryId || result.entry.kind !== entry.kind) throw new Error("Entry changed");
       const original = await resolvePromptOriginal(client, sessionId, result.original?.content);
-      if (currentGeneration === generation.current) setExpanded(current => ({...current, [entry.entryId]: original}));
-    } catch {if (currentGeneration === generation.current) setExpandError("Full response is unavailable. Refresh current state before trying again.");}
+      if (isCurrent()) setExpanded(current => ({...current, [entry.entryId]: original}));
+    } catch {if (isCurrent()) setExpandErrors(current => ({...current, [entry.entryId]: "Full response is unavailable. Refresh current state before trying again."}));}
   }
 
   return <section aria-label="Conversation timeline">
@@ -112,7 +116,6 @@ export function ConversationPanel({sessionId, client, focusEntryId, focusRequest
     <button type="button" onClick={() => setReload(value => value + 1)}>Refresh conversation</button>
     {loading && <p role="status">Loading conversation…</p>}
     {error && <p role="alert">{error}</p>}
-    {expandError && <p role="alert">{expandError}</p>}
     {focusError && <p role="alert" ref={linkedError} tabIndex={-1}>{focusError.message}</p>}
     {focused && <p role="status" ref={linkedStatus} tabIndex={-1}>Linked Turn: {focused.preview}{!entries.some(entry => entry.entryId === focused.entryId) && " (outside the loaded conversation page)"}</p>}
     {!loading && !entries.length && !error && <p>No conversation entries yet.</p>}
@@ -124,6 +127,7 @@ export function ConversationPanel({sessionId, client, focusEntryId, focusRequest
           {entry.kind === ConversationKind.ASSISTANT && entry.hasOriginal && <>
             <button type="button" aria-label={`View full response for conversation entry ${index + 1}`}
               onClick={() => void openOriginal(entry)}>View full response</button>
+            {expandErrors[entry.entryId] && <p role="alert">{expandErrors[entry.entryId]}</p>}
             {expanded[entry.entryId] !== undefined && <pre>{expanded[entry.entryId]}</pre>}
           </>}</>
         : <p>{entry.title || ConversationStatus[entry.status] || "Update"}</p>}
