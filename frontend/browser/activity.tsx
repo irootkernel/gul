@@ -21,7 +21,7 @@ import {SessionDetail, type SessionDetailClient} from "../src/session-detail";
 import {OperatorApp, type OperatorClients} from "../src/operator-app";
 import "../src/styles.css";
 
-const calls = {close: 0, resolve: 0, conversation: 0, history: 0, original: 0, entry: 0, originalFailureSettled: 0, action: 0, pending: 0, card: 0, execution: 0};
+const calls = {close: 0, resolve: 0, conversation: 0, history: 0, original: 0, entry: 0, originalFailureSettled: 0, originalSuccessSettled: 0, action: 0, pending: 0, card: 0, execution: 0};
 const params = new URL(location.href).searchParams;
 const faults = {history: params.has("history-failure") ? 1 : 0};
 const blocker = params.get("blocker");
@@ -71,6 +71,11 @@ const clients: SessionDetailClient = {
       await new Promise(resolve => setTimeout(resolve, 500));
       calls.originalFailureSettled++;
       throw Error("fixture delayed original failure");
+    }
+    if (entryId === answer.entryId && params.has("original-success-race")) {
+      if (++originalReads === 2) throw Error("fixture newer original failure");
+      await new Promise(resolve => setTimeout(resolve, 500));
+      calls.originalSuccessSettled++;
     }
     if (entryId === second.entryId && params.has("linked-delay")) await new Promise(resolve => setTimeout(resolve, 500));
     if (entryId === second.entryId && params.has("linked-failure")) throw Error("fixture linked failure");

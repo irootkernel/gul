@@ -267,6 +267,19 @@ with tempfile.TemporaryDirectory(prefix="gul-e7-activity-") as directory:
                 throw Error('Superseded original failure displaced a successful retry or refresh');
               }}
             }}""")
+        cli(directory, "goto", f"http://127.0.0.1:{server.server_port}/?original-success-race")
+        cli(directory, "run-code", """async page => {
+          const original = page.getByRole('button', {name:'View full response for conversation entry 2', exact:true});
+          await original.click();
+          await page.waitForFunction(() => window.fixture.entry === 1);
+          await original.click();
+          const entry = page.locator('#conversation-entry-2');
+          await entry.getByRole('alert').waitFor();
+          await page.waitForFunction(() => window.fixture.originalSuccessSettled === 1);
+          await page.waitForTimeout(50);
+          if (await entry.getByRole('alert').count() !== 1 || await entry.locator('pre').count())
+            throw Error('Superseded original success displaced a newer failure');
+        }""")
         cli(directory, "goto", f"http://127.0.0.1:{server.server_port}/?artifact-mismatch")
         cli(directory, "run-code", """async page => {
           await page.getByRole('button', {name:'View full response'}).click();
