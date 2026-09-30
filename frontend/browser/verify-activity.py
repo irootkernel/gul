@@ -236,7 +236,7 @@ with tempfile.TemporaryDirectory(prefix="gul-e7-activity-") as directory:
           await page.getByRole('button', {name:'View full original'}).click();
           await page.getByText('# 한글 prompt original').waitFor();
         }""")
-        for mode in ["different-entry", "retry", "refresh"]:
+        for mode in ["different-entry", "retry", "refresh", "visible-error-retry"]:
             cli(directory, "goto", f"http://127.0.0.1:{server.server_port}/?original-race")
             cli(directory, "run-code", f"""async page => {{
               const first = page.getByRole('button', {{name:'View full response for conversation entry 2', exact:true}});
@@ -246,6 +246,9 @@ with tempfile.TemporaryDirectory(prefix="gul-e7-activity-") as directory:
                 await page.getByRole('button', {{name:'View full response for conversation entry 3', exact:true}}).click();
                 await page.getByText('Other final answer', {{exact:true}}).waitFor();
               }} else {{
+                if ('{mode}' === 'visible-error-retry') {{
+                  await page.locator('#conversation-entry-2').getByRole('alert').waitFor();
+                }}
                 if ('{mode}' === 'refresh') {{
                   await page.getByRole('button', {{name:'Refresh conversation', exact:true}}).click();
                   await page.waitForFunction(() => window.fixture.conversation === 2 &&

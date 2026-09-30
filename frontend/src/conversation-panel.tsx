@@ -2,7 +2,7 @@ import {useEffect, useRef, useState, type RefObject} from "react";
 import {ConversationKind, ConversationStatus, type ConversationEntry, type GetConversationEntryResponse,
   type ListConversationResponse} from "../../api/generated/ts/gul/v1/gul_pb";
 import {resolvePromptOriginal, type PromptArtifactClient} from "./prompt-original";
-import {maximumPreviewBytes} from "../../api/generated/ts/gul/v1/bounds";
+import {defaultPageSize, maximumPreviewBytes} from "../../api/generated/ts/gul/v1/bounds";
 import {appendDistinctPage, assertConversationPage, assertSnapshot} from "./paged-provider-list";
 
 export type ConversationClient = PromptArtifactClient & {
@@ -57,7 +57,7 @@ export function ConversationPanel({sessionId, client, focusEntryId, focusRequest
     let current = true;
     generation.current++;
     setLoading(true); setBusy(false); setEntries([]); setNextToken(""); setSnapshotId(""); setFocused(undefined); setFocusError(undefined); requestedFocus.current = undefined; setError(""); setExpanded({}); setExpandErrors({}); originalRequests.current = {};
-    void client.listConversation({sessionId, pageSize: 50}).then(page => {
+    void client.listConversation({sessionId, pageSize: defaultPageSize}).then(page => {
       if (!current) return;
       assertConversationPage(page);
       setEntries(page.items); setSnapshotId(page.snapshotId); setNextToken(page.nextPageToken ?? "");
@@ -87,7 +87,7 @@ export function ConversationPanel({sessionId, client, focusEntryId, focusRequest
     const currentGeneration = generation.current;
     setBusy(true);
     try {
-      const page = await client.listConversation({sessionId, pageToken: nextToken, pageSize: 50});
+      const page = await client.listConversation({sessionId, pageToken: nextToken, pageSize: defaultPageSize});
       if (currentGeneration !== generation.current) return;
       assertConversationPage(page);
       assertSnapshot(snapshotId, page.snapshotId);

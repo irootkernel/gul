@@ -21,19 +21,20 @@ export function appendDistinctPage<T>(current: T[], items: T[], identity: (item:
 
 const byteLength = (value: string) => new TextEncoder().encode(value).length;
 
-function assertPage(page: ListConversationResponse | ListPromptHistoryResponse, encodedLength: number) {
+function assertPage(page: ListConversationResponse | ListPromptHistoryResponse, encodedLength: () => number) {
   if (!page.snapshotId || page.items.length > maximumPageSize ||
       byteLength(page.nextPageToken ?? "") > maximumTokenBytes ||
-      (page.traversalComplete && !!page.nextPageToken) || encodedLength > maximumPageMetadataBytes ||
-      page.items.some(item => byteLength(item.preview) > maximumPreviewBytes)) {
+      (page.traversalComplete && !!page.nextPageToken) ||
+      page.items.some(item => byteLength(item.preview) > maximumPreviewBytes) ||
+      encodedLength() > maximumPageMetadataBytes) {
     throw new Error("Provider page is invalid");
   }
 }
 
 export function assertConversationPage(page: ListConversationResponse) {
-  assertPage(page, toBinary(ListConversationResponseSchema, page).length);
+  assertPage(page, () => toBinary(ListConversationResponseSchema, page).length);
 }
 
 export function assertHistoryPage(page: ListPromptHistoryResponse) {
-  assertPage(page, toBinary(ListPromptHistoryResponseSchema, page).length);
+  assertPage(page, () => toBinary(ListPromptHistoryResponseSchema, page).length);
 }

@@ -1,5 +1,6 @@
 import {useEffect, useRef, useState} from "react";
 import type {GetPromptHistoryItemResponse, ListPromptHistoryResponse, PromptHistoryItem} from "../../api/generated/ts/gul/v1/gul_pb";
+import {defaultPageSize} from "../../api/generated/ts/gul/v1/bounds";
 import {resolvePromptOriginal, type PromptArtifactClient} from "./prompt-original";
 import {appendDistinctPage, assertHistoryPage, assertSnapshot} from "./paged-provider-list";
 
@@ -37,7 +38,7 @@ export function PromptHistoryPanel({sessionId, client, onOpenTurn}: {
     let current = true;
     generation.current++;
     setItems([]); setSnapshotId(""); setNextToken(""); setSelected(""); setOriginal(""); setError(""); setLoading(true); setBusy(false);
-    void client.listPromptHistory({sessionId, pageSize: 50}).then(page => {
+    void client.listPromptHistory({sessionId, pageSize: defaultPageSize}).then(page => {
       if (!current) return;
       assertHistoryPage(page);
       setItems(page.items); setSnapshotId(page.snapshotId); setNextToken(page.nextPageToken ?? "");
@@ -67,7 +68,7 @@ export function PromptHistoryPanel({sessionId, client, onOpenTurn}: {
     const currentGeneration = generation.current;
     setBusy(true);
     try {
-      const page = await client.listPromptHistory({sessionId, pageToken: nextToken, pageSize: 50});
+      const page = await client.listPromptHistory({sessionId, pageToken: nextToken, pageSize: defaultPageSize});
       if (currentGeneration !== generation.current) return;
       assertHistoryPage(page);
       assertSnapshot(snapshotId, page.snapshotId);

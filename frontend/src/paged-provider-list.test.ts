@@ -32,3 +32,23 @@ test("Prompt History page uses the same bounded admission", () => {
   expect(() => assertHistoryPage(create(ListPromptHistoryResponseSchema,
     {...valid, items: [create(PromptHistoryItemSchema, {...item, preview: "x".repeat(maximumPreviewBytes + 1)})]}))).toThrow("Provider page is invalid");
 });
+
+test("oversized conversation and history pages reject before visiting entries", () => {
+  const conversation = create(ListConversationResponseSchema, {
+    snapshotId: "snapshot",
+    items: Array.from({length: maximumPageSize + 1}, (_, index) =>
+      create(ConversationEntrySchema, {entryId: `entry-${index}`, preview: "ok"})),
+  });
+  const history = create(ListPromptHistoryResponseSchema, {
+    snapshotId: "snapshot",
+    items: Array.from({length: maximumPageSize + 1}, (_, index) =>
+      create(PromptHistoryItemSchema, {promptItemId: `prompt-${index}`, preview: "ok"})),
+  });
+  for (const page of [conversation, history]) {
+    Object.defineProperty(page.items[0], "preview", {get() {
+      throw new Error("Entry visited before page count rejection");
+    }});
+  }
+  expect(() => assertConversationPage(conversation)).toThrow("Provider page is invalid");
+  expect(() => assertHistoryPage(history)).toThrow("Provider page is invalid");
+});

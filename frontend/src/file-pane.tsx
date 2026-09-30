@@ -1,6 +1,7 @@
 import {useEffect, useLayoutEffect, useRef, useState} from "react";
 import {FileNodeKind, type CompareFixedRevisionsResponse, type FileEntry,
   type GetGitStatusResponse, type ReadPreviewResponse} from "../../api/generated/ts/gul/v1/gul_pb";
+import {defaultPageSize} from "../../api/generated/ts/gul/v1/bounds";
 import {FileComparison, FileStatus} from "./file-comparison";
 import {FilePreview} from "./file-preview";
 
@@ -67,7 +68,7 @@ export function FilePane({workspaceId, client, location, onLocation, writerActiv
     setNextPageToken("");
     setDirectoryError("");
     setDirectoryLoading(true);
-    void client.listDirectory({workspaceId, relativePath: location.directory, pageSize: 50, pageToken: ""})
+    void client.listDirectory({workspaceId, relativePath: location.directory, pageSize: defaultPageSize, pageToken: ""})
       .then(page => { if (current) {setEntries(page.entries); setNextPageToken(page.nextPageToken);} })
       .catch(() => { if (current) setDirectoryError("Directory is unavailable. Refresh to try again."); })
       .finally(() => {if (current) setDirectoryLoading(false);});
@@ -100,7 +101,7 @@ export function FilePane({workspaceId, client, location, onLocation, writerActiv
     const requestScope = scope.current;
     setBusy(true);
     try {
-      const page = await client.listDirectory({workspaceId, relativePath: location.directory, pageSize: 50, pageToken: token});
+      const page = await client.listDirectory({workspaceId, relativePath: location.directory, pageSize: defaultPageSize, pageToken: token});
       if (scope.current === requestScope) {
         setEntries(items => [...items, ...page.entries]);
         setNextPageToken(page.nextPageToken);

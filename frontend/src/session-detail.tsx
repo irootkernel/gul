@@ -6,7 +6,6 @@ import {
   type GetCardResponse, type GetExecutionStateResponse, type InteractionCard,
   type ListPendingResponse, type ResolveResponse,
 } from "../../api/generated/ts/gul/v1/gul_pb";
-import {maximumPageSize} from "../../api/generated/ts/gul/v1/bounds";
 import {ConversationPanel, type ConversationClient} from "./conversation-panel";
 import {domainErrorMessage, domainErrorRequiresExternalAction, externalActionRequired, operatorError} from "./domain-errors";
 import {InteractionCardView} from "./interaction-card";
@@ -27,6 +26,8 @@ export type SessionDetailClient = ConversationClient & PromptHistoryClient & {
 };
 
 export type SessionActivity = {provider: string; activity: string; writer: string; policy: string; assurance: string; interactions: number | undefined};
+
+const maximumPendingCards = 100;
 
 const closeOutcomeUnknown = "Close outcome unresolved. Inspect provider state; do not repeat the request.";
 const closeRecoveryRequired = "Close recovery required. Follow provider recovery outside Gul.";
@@ -98,7 +99,7 @@ export function SessionDetail({sessionId, client, onActivity}: {sessionId: strin
         return;
       }
       setPendingCount(pending.value.summaries.length);
-      const admittedSummaries = pending.value.summaries.slice(0, maximumPageSize);
+      const admittedSummaries = pending.value.summaries.slice(0, maximumPendingCards);
       const truncated = admittedSummaries.length < pending.value.summaries.length;
       const loaded = await Promise.allSettled(admittedSummaries.map(summary => client.getCard({sessionId, interactionId: summary.interactionId})));
       if (!current) return;

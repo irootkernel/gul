@@ -1,7 +1,7 @@
 import {Freshness, ProviderState} from "../../api/generated/ts/gul/v1/gul_pb";
 
 // Provider observation health never grants mutation authority or changes the
-// displayed Run lifecycle. Product composition remains with E7/E8.
+// displayed Run lifecycle. Authenticated product composition remains with E8/E14.
 export function ProviderStatus({state, freshness}: {state: ProviderState; freshness: Freshness}) {
   const label = state === ProviderState.READY ? "Connected"
     : state === ProviderState.DISCONNECTED ? "Disconnected"
