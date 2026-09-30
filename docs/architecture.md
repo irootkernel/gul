@@ -1181,8 +1181,10 @@ bounded journal replay, and snapshot-required notifications when replay exceeds
 256 entries. It checks the subject and session on each read. The shared writer
 rule displays WRITE only for fresh active owner authority with verified write
 policy; only an explicit write intent sets the upstream write flag. The writer
-status component renders the backend mode. These components are tested against
-explicit fakes and remain unmounted.
+status component renders the backend mode in `SessionDetail`'s injected-client
+presentation. These paths are tested against explicit fakes; the ClientEvent
+handler remains unmounted. Authenticated product assembly remains with E8 and
+E14.
 E5 owns reconnect coordination and fresh aggregate convergence.
 
 `internal/interaction` provides observer summaries, Controller-authorized typed
