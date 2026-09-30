@@ -5,8 +5,8 @@
 | Role | Target and Current Architecture source of truth |
 | Product | Gul |
 | Version | 0.1-dolgorae-consumer-v1 |
-| Status | Approved target rebaseline; current implementation through E6-T3 within the declared component scope |
-| Last updated | 2026-09-29 |
+| Status | Approved target rebaseline; current implementation through E7 and E8-T1 within their declared component scope |
+| Last updated | 2026-09-30 |
 
 ## 1. Purpose and change control
 
@@ -865,6 +865,7 @@ The current versioned schema contains these Gul-owned logical tables:
 
 ```text
 app_account
+password_account
 web_sessions
 runtime_attachments
 workspace_entries
@@ -898,7 +899,7 @@ adds `observation_checkpoint_stamps`, `observation_refreshes`, and
 `client_projection_notifications`. Migration 6 adds `session_close_attempts`
 and `session_close_operations`. Migration 7 adds `mutation_attempt_details`,
 and migration 8 adds `writer_attempt_details` with pre-call Writer revision,
-generation and dispatch completion.
+generation and dispatch completion. Migration 9 adds `password_account`.
 The remaining tables were created by the initial migration.
 
 Prohibited authoritative tables/aggregates include Codex threads, Turns, workspace writer locks, writer generations, pending runtime interactions, native subagents, background processes, and runtime recovery state. A projection table is named and documented as a cache.
@@ -926,7 +927,14 @@ File invalidation uses the ADR-0038 bounded host filesystem watcher scoped to th
 
 ## 13. Authentication and security
 
-Gul has one local account, server-side browser sessions, password hashing, rate limiting, Origin/CSRF protection, loopback HTTP/ConnectRPC, and Tailscale Serve HTTPS. Funnel is forbidden. The browser never connects directly to Dolgorae and never receives its Unix socket, Controller carrier, private worker identifier, or App Server detail.
+Gul has one local account, server-side browser sessions, password hashing, rate limiting, Origin/CSRF protection, loopback HTTPS/ConnectRPC, and Tailscale Serve HTTPS. Funnel is forbidden. The browser never connects directly to Dolgorae and never receives its Unix socket, Controller carrier, private worker identifier, or App Server detail.
+
+ADR-0013 defines host-authorized setup in the local Gul app, bounded Argon2id
+hashing, exact UTF-8 password policy and fixed seven-day sessions. The native
+shell pins Gul's protected local certificate without adding system trust; remote
+browsers use Tailscale Serve's tailnet certificate. Neither network origin nor a
+loopback source authorizes first setup. A native setup grant is distinct from a
+browser session and from every Dolgorae Controller capability.
 
 The RPC socket root is `~/Library/Caches/Gul/runtime/`, owner-only and outside Workspaces. Every relevant component must be absolute, current-user-owned, restrictive, and non-symlinked. The path is supervisor state, not a user-controlled SQLite field. No TCP fallback or Tailscale exposure exists.
 
@@ -1052,13 +1060,28 @@ The serial command facade is `toolchain-check`, `generate-contract`, `contract-c
 
 ## 19. Current snapshot
 
-**Snapshot date:** 2026-09-30 (E7 epic closeout)
+**Snapshot date:** 2026-09-30 (E8-T1 completed)
 
-**Roadmap point:** E0 is `Completed`, E12 is `Completed`, E1 is `Completed`, and E13 is `Completed`; E1-T1 is `Completed` and E1-T2/T3/T4/T5 are `Completed`. E3 and E3-T1/T2/T3/T4 are `Completed`. E4 and E4-T1/T2/T3/T5 are `Completed`. E4-T4 remains Deferred outside its epic. E5 and E5-T1/T2/T3 are `Completed`. E6 and E6-T1/T2/T3 are `Completed`. E7 and E7-T1/T2/T3 are `Completed`. Former E12-T2/T3 remain Retired. E14 owns pre-release application acceptance. No live-provider or assembled-application acceptance is implied.
+**Roadmap point:** E0 is `Completed`, E12 is `Completed`, E1 is `Completed`, and E13 is `Completed`; E1-T1 is `Completed` and E1-T2/T3/T4/T5 are `Completed`. E3 and E3-T1/T2/T3/T4 are `Completed`. E4 and E4-T1/T2/T3/T5 are `Completed`. E4-T4 remains Deferred outside its epic. E5 and E5-T1/T2/T3 are `Completed`. E6 and E6-T1/T2/T3 are `Completed`. E7 and E7-T1/T2/T3 are `Completed`. E8 is `In Progress`; E8-T1 is `Completed` and E8-T2/T3 are `Planned`. Former E12-T2/T3 remain Retired. E14 owns pre-release application acceptance. No live-provider or assembled-application acceptance is implied.
 
-**Maturity:** delivery-independent Go core, shared React bundle, declared but disabled Gul API, typed provider ports and explicit scenario harness, isolated SQLite repositories with fake-scoped Workspace attachment, local presentation and passive session reads, and a Wails shell foundation. E4 adds typed observation, Interaction cards, action eligibility and bounded history/result/artifact reads. E5 adds whole-session close, reconnect convergence and operation-specific recovery against fakes. E6 adds verified-root local FileService inspection, bounded previews, refresh, watcher and Git review through unmounted typed APIs. E7-T1 adds three responsive panes, workspace/session navigation and read-only FileService presentation through injected typed clients. E7-T2 adds provider-projected activity, prioritized Interaction cards, conversation and accepted-user Prompt History, and guarded whole-session close to that injected-client view. E7-T3 adds composition-safe input and keyboard focus behavior to the same component scope. Authenticated product assembly and live-provider qualification remain pending.
+**Maturity:** delivery-independent Go core, shared React bundle, declared but disabled Gul API, typed provider ports and explicit scenario harness, isolated SQLite repositories with fake-scoped Workspace attachment, local presentation and passive session reads, and a Wails shell foundation. E4 adds typed observation, Interaction cards, action eligibility and bounded history/result/artifact reads. E5 adds whole-session close, reconnect convergence and operation-specific recovery against fakes. E6 adds verified-root local FileService inspection, bounded previews, refresh, watcher and Git review through unmounted typed APIs. E7-T1 adds three responsive panes, workspace/session navigation and read-only FileService presentation through injected typed clients. E7-T2 adds provider-projected activity, prioritized Interaction cards, conversation and accepted-user Prompt History, and guarded whole-session close to that injected-client view. E7-T3 adds composition-safe input and keyboard focus behavior to the same component scope. E8-T1 adds isolated local account setup, bounded password hashing and the injected first-run form. Authenticated product assembly and live-provider qualification remain pending.
 
 ### 19.1 Implemented components
+
+`internal/auth` implements the E8-T1 local setup permission, bounded Argon2id
+hashing and saved-subject password verification. SQLite migration 9 adds the
+singleton password record. Setup commits the account and hash atomically,
+retains the sole foundation subject, refuses ambiguous data, and cannot add a
+second password account. Password hashing runs before the write transaction;
+the service serializes hash work and sanitizes repository failures.
+
+`frontend/src/first-run-setup.tsx` supplies an injected local setup form with
+no username. Remote views have no setup controls. The password stays out of
+React state and browser storage, clears before submission, and is never shown
+in an error. The E7 composition guard protects this form too. These components
+are exercised by isolated Go/SQLite and Chrome checks. The checked entry still
+mounts the fail-closed foundation. E8-T2 owns AuthService transport and session
+protection; E8-T3 owns native bootstrap, HTTPS and authenticated host assembly.
 
 `internal/app` implements the shared delivery-independent core lifecycle and
 explicit lifecycle, provider, persistence and authorization ports. Missing

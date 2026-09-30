@@ -397,7 +397,7 @@ func TestExplicitReconcileCanInspectControllerWithUnknownSubmitAttempt(t *testin
 func TestCloseMigrationFromVersionFivePreservesBinding(t *testing.T) {
 	s, filename := openTestStore(t)
 	b := closeBound(t, s)
-	for _, query := range []string{`DROP TABLE writer_attempt_details`, `DROP TABLE mutation_attempt_details`, `DROP TABLE session_close_operations`, `DROP TABLE session_close_attempts`, `DELETE FROM schema_migrations WHERE version IN (6,7,8)`, `PRAGMA user_version=5`} {
+	for _, query := range []string{`DROP TABLE password_account`, `DROP TABLE writer_attempt_details`, `DROP TABLE mutation_attempt_details`, `DROP TABLE session_close_operations`, `DROP TABLE session_close_attempts`, `DELETE FROM schema_migrations WHERE version IN (6,7,8,9)`, `PRAGMA user_version=5`} {
 		if _, err := s.writer.ExecContext(t.Context(), query); err != nil {
 			t.Fatal(err)
 		}

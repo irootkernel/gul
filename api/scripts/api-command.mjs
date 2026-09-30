@@ -22,6 +22,8 @@ const boundNames = {
   maximum_file_image_pixels: "MaximumFileImagePixels",
   maximum_file_markdown_images: "MaximumFileMarkdownImages",
   maximum_file_markdown_image_bytes: "MaximumFileMarkdownImageBytes",
+  minimum_password_characters: "MinimumPasswordCharacters",
+  maximum_password_bytes: "MaximumPasswordBytes",
 };
 
 export function normalizeGeneratedTS(source) {

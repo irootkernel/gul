@@ -8,7 +8,7 @@
 | Subtitle | Remote operator interface for local development runtimes |
 | Version | 0.1-dolgorae-consumer-v1 |
 | Status | Approved Required State; E1-T1 through E1-T5 foundations completed without assembled product acceptance |
-| Last updated | 2026-09-29 |
+| Last updated | 2026-09-30 |
 | Target | macOS host; modern desktop, iPad, and iPhone browsers |
 
 ## 1. Purpose, authority, and lifecycle
@@ -214,12 +214,12 @@ scope. E2/E9 still own actual-provider proof.
 | REQ-HOST-003 | Gul APIs MUST use Protobuf-defined ConnectRPC services. | Generated Go and TypeScript clients compile without handwritten feature REST APIs. | E1-T3 |
 | REQ-HOST-005 | Gul MUST pin Go, project dependencies, and active generators exactly; enforce minimum versions without upper bounds for other host executables; and report target Runtime Provider compatibility. | `toolchain/versions.env` is the single bootstrap authority; `make toolchain-check` enforces the exact Go version and minimum versions for other host executables while project manifests pin dependencies and active generators exactly. Missing and incompatible host fixtures, project-pin validation, and generated-output drift checks pass without installing or rewriting tools. | E0-T8 |
 | REQ-HOST-006 | Runtime diagnostics MUST fail closed or display a blocker for unsupported or unverifiable dependencies. | Missing, changed, and incompatible dependency fixtures never enable runtime mutations. | E9-T2 |
-| REQ-AUTH-001 | Gul MUST support exactly one local password-authenticated account. | No username, team, or second-account creation surface exists. | E8-T1 |
-| REQ-AUTH-002 | Password material MUST use an approved salted password hash and never be persisted or logged in plaintext. | Security tests and source review pass. | E8-T1 |
+| REQ-AUTH-001 | Gul MUST support exactly one local password-authenticated account. | Host-authorized local first-run setup atomically retains or creates one stable subject; remote, expired, foreign and reused setup grants are denied. No username, team, or second-account creation surface exists. | E8-T1 |
+| REQ-AUTH-002 | Password material MUST use an approved salted password hash and never be persisted or logged in plaintext. | ADR-0013 pins bounded Argon2id costs and exact UTF-8 password policy. Independent salts, malformed-record refusal, rollback, reopen/backup, password clearing and sanitized-error tests pass with source review. | E8-T1 |
 | REQ-AUTH-003 | Login MUST create a revocable server-side session represented by a `Secure`, `HttpOnly`, `SameSite=Strict` cookie. | Cookie, expiry, logout, and revocation tests pass. | E8-T2 |
 | REQ-AUTH-004 | Login and mutations MUST resist brute force, CSRF, and cross-origin abuse. | Rate-limit, Origin, CSRF, and negative tests pass. | E8-T2 |
 | REQ-NET-001 | Remote access MUST remain tailnet-only through Tailscale Serve; Funnel is prohibited. | Deployment inspection finds no public exposure. | E8-T3 |
-| REQ-NET-002 | HTTP and ConnectRPC listeners MUST bind to loopback by default. | Tests reject accidental non-loopback binding. | E8-T3 |
+| REQ-NET-002 | The shared HTTPS/ConnectRPC listener MUST bind to loopback by default. | Tests reject accidental non-loopback binding. | E8-T3 |
 | REQ-NET-003 | Remote browser access MUST use HTTPS. | PWA and ConnectRPC operate without mixed content through Tailscale Serve. | E8-T3 |
 | REQ-NET-004 | Startup and diagnostics MUST verify that Tailscale Serve targets the authenticated loopback listener and that Funnel is disabled; the Dolgorae Unix socket MUST never be a Serve target. | Misrouted Serve and Funnel fixtures block remote-ready status. | E8-T3 |
 
@@ -542,9 +542,18 @@ names and visible keyboard focus. These checks exercise injected clients and
 browser fixtures; actual supported-device and assembled-product acceptance
 remain with E9.
 
+E8-T1 adds isolated host-authorized first-run setup, one stable password account,
+bounded Argon2id storage and an injected setup form. Its accepted scope is the
+account service, SQLite repository and browser component. Cookie sessions and
+authenticated routes remain with E8-T2; native bootstrap and shared HTTPS delivery
+remain with E8-T3. The form is unmounted, and assembled-product and live-provider
+acceptance remain with E14 and E9.
+
 | Requirement | Accepted Current State | Evidence |
 |---|---|---|
 | REQ-HOST-005 | Exact Go toolchain with minimum-compatible non-Go host tools, exact project dependency and generator pins, and read-only host reporting | E0-T8; ADR-0054; `toolchain/versions.env`; checker fixtures; serial `make test` |
+| REQ-AUTH-001 | Host-authorized one-use setup atomically retains or creates one stable subject, denies invalid grants and ambiguous data, and provides a username-free injected local setup form; account/service/component scope only | E8-T1; `internal/auth` and `internal/storage` race, grant, rollback and retained-identity tests; `frontend/browser/verify-setup.py`; completion source review |
+| REQ-AUTH-002 | ADR-0013 bounded salted Argon2id, exact UTF-8 bounds, strict record decoding, constant-time verification, hashes-only persistence, input clearing and sanitized component errors; transport remains E8-T2-owned | E8-T1; independent hash-cost vectors and malformed-record tests; reopen/backup plaintext scans; real Chrome component checks; serial `make test` and completion source review |
 | REQ-RUNTIME-011 | Versioned public gRPC inventory, exact semantic-operation ownership, generated clients, descriptor-derived fake server, exhaustive maps, and separate Machine CLI fixture | E0-T7 historical digests recorded in the implementation memo; current live lock paths are E12-T1 evidence; contract validator; fake-server tests |
 | REQ-RUNTIME-022 | Independently typed projection inputs, public enum/event inventory, convergence and fail-closed compatibility fixtures | E0-T7 historical digests recorded in the implementation memo; current live policy maps are E12-T1 evidence; conformance pin |
 | REQ-CONSUMER-001 | Immutable TASK-053 consumer source, 36-method descriptor inventory, explicit 27-required/9-unavailable profile, generated clients/maps/fake transport, and close/sourceability fixtures; no runtime-support claim | E12-T1; dependency/generated locks; additive descriptor check; contract validator |

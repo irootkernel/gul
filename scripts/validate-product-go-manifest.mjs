@@ -11,6 +11,7 @@ export function validateProductGoManifest(goManifest, versionManifest) {
   requireExactly(lines, `github.com/wailsapp/wails/v3 v${versionManifest.GUL_WAILS_GO_VERSION}`, "product Wails Go pin");
   requireExactly(lines, `google.golang.org/protobuf v${versionManifest.GUL_PROTOBUF_GO_VERSION}`, "product Protobuf Go pin");
   requireExactly(lines, `modernc.org/sqlite v${versionManifest.GUL_MODERNC_SQLITE_VERSION}`, "product SQLite pin");
+  requireExactly(lines, `golang.org/x/crypto v${versionManifest.GUL_CRYPTO_GO_VERSION}`, "product crypto pin");
   requireExactly(lines, "replace github.com/rootkernel/gul/contract => ./contract", "checked local contract replacement");
 
   if (lines.some(line => /^exclude\b/.test(line) || (/^replace\b/.test(line) && line !== "replace github.com/rootkernel/gul/contract => ./contract"))) {

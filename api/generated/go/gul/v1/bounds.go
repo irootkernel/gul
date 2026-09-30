@@ -16,4 +16,6 @@ const (
 	MaximumFileImagePixels = 25165824
 	MaximumFileMarkdownImages = 8
 	MaximumFileMarkdownImageBytes = 8388608
+	MinimumPasswordCharacters = 15
+	MaximumPasswordBytes = 1024
 )

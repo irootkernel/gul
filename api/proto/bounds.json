@@ -12,5 +12,7 @@
   "maximum_file_image_bytes": 4194304,
   "maximum_file_image_pixels": 25165824,
   "maximum_file_markdown_images": 8,
-  "maximum_file_markdown_image_bytes": 8388608
+  "maximum_file_markdown_image_bytes": 8388608,
+  "minimum_password_characters": 15,
+  "maximum_password_bytes": 1024
 }

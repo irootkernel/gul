@@ -183,10 +183,8 @@ func TestPrimaryBindingsAndAuthoritativeState(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer func() { store.Close() }()
-	for _, subject := range []string{"owner", "other"} {
-		if err := store.Auth().CreateAccount(ctx, subject, time.Now()); err != nil {
-			t.Fatal(err)
-		}
+	if err := store.Auth().CreateAccount(ctx, "owner", time.Now()); err != nil {
+		t.Fatal(err)
 	}
 	h := scenario.New(time.Date(2026, 9, 25, 0, 0, 0, 0, time.UTC))
 	provider := &changingProvider{Harness: h}

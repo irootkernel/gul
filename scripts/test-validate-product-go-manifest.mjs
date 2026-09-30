@@ -10,6 +10,7 @@ const versions = {
   GUL_WAILS_GO_VERSION: "3.0.0-beta.24",
   GUL_PROTOBUF_GO_VERSION: "1.36.12",
   GUL_MODERNC_SQLITE_VERSION: "1.57.0",
+  GUL_CRYPTO_GO_VERSION: "0.57.0",
 };
 const valid = `module github.com/rootkernel/gul
 
@@ -23,6 +24,7 @@ require (
   github.com/wailsapp/wails/v3 v3.0.0-beta.24
   google.golang.org/protobuf v1.36.12
   modernc.org/sqlite v1.57.0
+  golang.org/x/crypto v0.57.0
 )
 replace github.com/rootkernel/gul/contract => ./contract
 `;
@@ -51,6 +53,7 @@ for (const [name, manifest, pattern] of [
   ["wrong local contract path", valid.replace("=> ./contract", "=> ../contract"), /checked local contract replacement/],
   ["wrong Protobuf pin", valid.replace("protobuf v1.36.12", "protobuf v1.36.11"), /Protobuf Go pin/],
   ["wrong SQLite pin", valid.replace("sqlite v1.57.0", "sqlite v1.57.1"), /SQLite pin/],
+  ["wrong crypto pin", valid.replace("crypto v0.57.0", "crypto v0.58.0"), /crypto pin/],
   ["replace directive", `${valid}replace example.test/a => ../a\n`, /unapproved replace or exclude/],
   ["exclude directive", `${valid}exclude example.test/a v1.0.0\n`, /unapproved replace or exclude/],
 ]) {

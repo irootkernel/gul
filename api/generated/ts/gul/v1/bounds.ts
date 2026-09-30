@@ -13,3 +13,5 @@ export const maximumFileImageBytes = 4194304;
 export const maximumFileImagePixels = 25165824;
 export const maximumFileMarkdownImages = 8;
 export const maximumFileMarkdownImageBytes = 8388608;
+export const minimumPasswordCharacters = 15;
+export const maximumPasswordBytes = 1024;

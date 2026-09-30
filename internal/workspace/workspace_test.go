@@ -50,9 +50,6 @@ func testRepository(t *testing.T) workspace.Repository {
 	if err := store.Auth().CreateAccount(t.Context(), "owner", time.Now()); err != nil {
 		t.Fatal(err)
 	}
-	if err := store.Auth().CreateAccount(t.Context(), "other", time.Now()); err != nil {
-		t.Fatal(err)
-	}
 	return store.Presentation()
 }
 
@@ -378,8 +375,8 @@ func TestAttachmentsAreSubjectScoped(t *testing.T) {
 		t.Fatalf("foreign attachment revalidation = %v", err)
 	}
 	other, err := service.RegisterFromAllowlistPath(t.Context(), "other", "root-1", "project")
-	if err != nil || other.ID == owner.ID {
-		t.Fatalf("other subject registration = %+v, %v", other, err)
+	if err == nil || other.ID != "" {
+		t.Fatalf("unregistered subject created an attachment = %+v, %v", other, err)
 	}
 }
 

@@ -5,7 +5,7 @@
 | Role | Durable architecture decisions and supersession history |
 | Product | Gul |
 | Version | 0.1-dolgorae-consumer-v1 |
-| Last updated | 2026-09-29 |
+| Last updated | 2026-09-30 |
 
 ## 1. Status model
 
@@ -34,7 +34,7 @@ ADR-0050 explicitly amends the product/child-presentation scope in ADR-0021/0022
 | ADR-0010 | Filter raw App Server output in Gul | Superseded | ADR-0023 |
 | ADR-0011 | Use a guarded Go FileService | Accepted, modified | None |
 | ADR-0012 | Share one responsive React frontend | Accepted | None |
-| ADR-0013 | Use Tailscale Serve plus password authentication | Accepted | None |
+| ADR-0013 | Use Tailscale Serve plus password authentication | Accepted, modified | None |
 | ADR-0014 | Use unary commands and streamed Gul events | Accepted, modified | None |
 | ADR-0015 | Promote requirements only after task acceptance | Accepted | None |
 | ADR-0016 | Select a Gul background-process policy | Superseded | ADR-0026 |
@@ -60,7 +60,7 @@ ADR-0050 explicitly amends the product/child-presentation scope in ADR-0021/0022
 | ADR-0036 | Gate in-place write intent on provider access-policy transition support | Accepted | None |
 | ADR-0037 | Decode provider responses under pinned schemas and fail closed on unknown decisive values | Accepted | None |
 | ADR-0038 | Invalidate FileService from a bounded host filesystem watcher | Accepted | None |
-| ADR-0039 | Separate the Wails shell from the core and loopback listener | Accepted | None |
+| ADR-0039 | Separate the Wails shell from the core and loopback listener | Accepted, modified 2026-09-30 | None |
 | ADR-0040 | Register workspaces from a configured root allowlist as well as the host picker | Accepted | None |
 | ADR-0041 | Use release tiers and require every Task complete at release | Accepted | None |
 | ADR-0042 | Record the accepted product identity and its rename history | Accepted | None |
@@ -117,9 +117,30 @@ Wails, desktop browser, iPad PWA, and iPhone PWA use one React/TypeScript fronte
 
 ### ADR-0013: Use Tailscale Serve plus password authentication
 
-**Status:** Accepted
+**Status:** Accepted, modified 2026-09-30
 
 Gul binds loopback, uses one local password-authenticated account and server-side browser sessions, and exposes tailnet-only HTTPS through Tailscale Serve. Funnel is prohibited.
+
+First-run setup takes place in the local Gul app. The trusted host grants a
+service-bound, ten-minute, one-use setup permission; neither a remote request nor
+a loopback address grants it. Setup retains the sole existing foundation subject,
+or generates a random UUID when none exists, and commits that subject with its
+password hash atomically. Ambiguous legacy subjects block setup. The browser
+chooses no subject, username or team, and there is no second-account surface.
+
+Passwords contain at least 15 Unicode characters and at most 1024 UTF-8 bytes.
+Gul preserves their exact bytes without trimming or normalization. Hashes use
+Argon2id version 19 with 19 MiB, two iterations, one lane, a random 16-byte salt
+and a 32-byte key. The decoder accepts only that bounded canonical encoding;
+damaged data cannot choose new hash costs. Repository calls receive hashes only.
+
+The approved E8 delivery uses fixed seven-day server-side sessions. E8-T2 owns
+cookie, revocation, CSRF, Origin and rate-limit enforcement. E8-T3 supplies a
+shared loopback HTTPS listener and a protected local certificate pinned by the
+native shell without installing system trust. Tailscale Serve forwards to that
+authenticated listener; local shell use does not require Tailscale. The
+`https+insecure` Serve backend is permitted only for the verified loopback target
+using Gul's local certificate. Remote browsers use tailnet HTTPS.
 
 ### ADR-0014: Use unary commands and streamed Gul events
 
@@ -366,9 +387,9 @@ This decision is retained as history. Its protected-file direction remains, but 
 
 ### ADR-0039: Separate the Wails shell from the core and loopback listener
 
-**Status:** Accepted
+**Status:** Accepted, modified 2026-09-30
 
-The Go core, ports, configuration, lifecycle, persistence, authenticated loopback HTTP/ConnectRPC listener, Dolgorae supervisor, event aggregation, and FileService run as production `gul serve` without Wails. The desktop shell is a separate task that either starts the same core in-process or attaches to the verified existing user-wide core, then adds WebView delivery and host-native affordances.
+The Go core, ports, configuration, lifecycle, persistence, authenticated loopback HTTPS/ConnectRPC listener, Dolgorae supervisor, event aggregation, and FileService run as production `gul serve` without Wails. ADR-0013 governs the local certificate and native trust. The desktop shell is a separate task that either starts the same core in-process or attaches to the verified existing user-wide core, then adds WebView delivery and host-native affordances.
 
 One core per user and data directory owns the singleton lock, loopback port, supervised Dolgorae child, and socket runtime. A second `gul serve` exits with an already-running result. Gul.app verifies and attaches to a healthy existing core instead of starting a second runtime. A loopback port occupied by an unverified process is a blocker, never an invitation to choose another port silently.
 

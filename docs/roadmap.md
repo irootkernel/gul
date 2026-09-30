@@ -3,18 +3,18 @@
 | Field | Value |
 | --- | --- |
 | Role | Sole authority for task identity, order, status, dependencies, and phase |
-| Revision | 2026-09-30 E7 epic closeout |
+| Revision | 2026-09-30 E8-T1 completion |
 | Active Task | None |
-| Next | E8-T1 |
+| Next | E8-T2 |
 | Required provider | Released Dolgorae v0.1.3 implementing `dolgorae.gul-consumer/v1` |
 
-`Next` names the next queued Task after E7 completion.
+`Next` names the next queued Task after the completed E8-T1.
 
 ## 1. Status and execution rules
 
 Allowed executable states are `Planned`, `In Progress`, `In Review`, `Completed`,
 `Blocked`, and `Deferred`. `Retired` preserves a historical non-executable ID.
-At most one Task is In Progress or In Review globally. No Task is active.
+At most one Task is In Progress or In Review globally. None is active.
 A Task completes only after its scoped outputs, verification, documentation,
 review, and ordinary completion commit requirements pass. No status implies live
 credentials, staging, commit, publication, or installation authorization.
@@ -135,7 +135,7 @@ second owner of membership, order or status.
 | E5 | Completed | Safe whole-session close, projection convergence and ambiguous-outcome handling | [Roadmap](#e5-complete-safe-close-and-recovery); [Memo](implementation-memo.md#e5-epic-closeout-2026-09-28) |
 | E6 | Completed | Read-only FileService and bounded preview/review | [Roadmap](#e6-complete-read-only-files-and-review); [Memo](implementation-memo.md#e6-epic-closeout-2026-09-29) |
 | E7 | Completed | Responsive UI, mandatory Prompt History, accessibility and IME | [Roadmap](#e7-complete-the-usable-responsive-interface); [Memo](implementation-memo.md#e7-epic-closeout-2026-09-30) |
-| E8 | Planned | Authentication, browser protection and headless/PWA/tailnet packaging together | [Shared](todo/GUL-CONSUMER-REBASELINE.md) |
+| E8 | In Progress | Authentication, browser protection and headless/PWA/tailnet packaging together | [Shared](todo/GUL-CONSUMER-REBASELINE.md) |
 | E14 | Planned | Assembled pre-release application acceptance and live handoff; E14-T1 | [Shared](todo/GUL-CONSUMER-REBASELINE.md) |
 | E2 | Planned | Released provider qualification and real integration | [Shared](todo/GUL-CONSUMER-REBASELINE.md) |
 | E9 | Planned | Actual-provider fault/security/E2E and Gul release qualification | [Shared](todo/GUL-CONSUMER-REBASELINE.md) |
@@ -282,7 +282,7 @@ live Tailscale changes. Actual-provider deployment qualification remains E9.
 
 | Task | Phase | Status | Predecessors | Owned result and verification |
 | --- | --- | --- | --- | --- |
-| E8-T1 | Pre-release | Planned | E1-T4 | One-account setup and protected password storage |
+| E8-T1 | Pre-release | Completed | E1-T4 | One-account setup and protected password storage |
 | E8-T2 | Pre-release | Planned | E8-T1, E1-T3 | Cookie sessions, revocation, CSRF/Origin and rate-limit tests across completed feature routes |
 | E8-T3 | Pre-release | Planned | E8-T2, E1-T5, E7-T3 | Authenticated shell/headless singleton and verified attach, launchd/PWA/Serve packaging and negative deployment fixtures, no real provider-ready claim |
 

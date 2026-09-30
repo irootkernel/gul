@@ -12,6 +12,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/rootkernel/gul/internal/auth"
 	"github.com/rootkernel/gul/internal/operation"
 	"github.com/rootkernel/gul/internal/presentation"
 )
@@ -30,11 +31,20 @@ func (s *Store) Cache() CacheRepository               { return CacheRepository{s
 func (s *Store) Attempts() AttemptRepository          { return AttemptRepository{s} }
 func (s *Store) Delivery() DeliveryRepository         { return DeliveryRepository{s} }
 
+// CreateAccount retains the foundation subject-seeding port, without allowing
+// a second subject. Password provisioning uses InitializePasswordAccount.
 func (r AuthRepository) CreateAccount(ctx context.Context, subjectID string, createdAt time.Time) error {
 	if subjectID == "" || createdAt.IsZero() {
 		return errors.New("invalid account")
 	}
-	_, err := r.store.writer.ExecContext(ctx, "INSERT INTO app_account(subject_id, created_at) VALUES (?, ?)", subjectID, timestamp(createdAt))
+	result, err := r.store.writer.ExecContext(ctx, "INSERT INTO app_account(subject_id, created_at) SELECT ?, ? WHERE NOT EXISTS (SELECT 1 FROM app_account)", subjectID, timestamp(createdAt))
+	if err != nil {
+		return err
+	}
+	count, err := result.RowsAffected()
+	if err == nil && count != 1 {
+		return auth.ErrAlreadyConfigured
+	}
 	return err
 }
 

@@ -192,9 +192,7 @@ func TestPresentationWritesPreserveSessionMetadata(t *testing.T) {
 	if err := store.reader.QueryRowContext(ctx, "SELECT credential_key, expected_controller_id, health FROM controller_binding_references WHERE binding_id = ?", binding.BindingID).Scan(&key, &controller, &health); err != nil || key != binding.CredentialKey || controller != binding.ExpectedControllerID || health != binding.Health {
 		t.Fatalf("updated binding = %q, %q, %q, %v", key, controller, health, err)
 	}
-	if err := store.Auth().CreateAccount(ctx, "foreign", time.Now()); err != nil {
-		t.Fatal(err)
-	}
+	seedSubjectFixture(t, store, "foreign")
 	binding.SubjectID = "foreign"
 	if err := store.Presentation().PutBinding(ctx, binding); !errors.Is(err, sql.ErrNoRows) {
 		t.Fatalf("binding reassignment = %v", err)

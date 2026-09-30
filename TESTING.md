@@ -88,3 +88,14 @@ and visible focus at desktop,
 tablet, and phone sizes. It is separate from
 `make test`; actual supported-device and assembled-product acceptance remain
 with E9.
+
+The E8-T1 component check is `python3 frontend/browser/verify-setup.py`. It uses
+existing Bun, `playwright-cli`, and Chrome in an isolated temporary loopback
+fixture. It checks remote setup refusal, exact Unicode input, password bounds,
+clearing before a pending request, duplicate suppression, sanitized failures and
+keyboard focus recovery,
+Korean composition, and absence of browser storage. It uses a fake callback,
+creates no real account, and closes its browser and server. Run it separately
+from `make test`; the serial facade covers the auth service and SQLite race,
+rollback, migration, reopen and backup tests. Authenticated transport and native
+bootstrap are E8-T2/T3 checks.

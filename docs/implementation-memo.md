@@ -5,7 +5,7 @@
 | Role | Non-normative implementation observations, dependencies, risks, and handoff |
 | Product | Gul |
 | Version | 0.1-dolgorae-consumer-v1 |
-| Last updated | 2026-09-29 |
+| Last updated | 2026-09-30 |
 
 ## 1. Boundary
 
@@ -1306,6 +1306,66 @@ device and live-provider qualification, and E14 owns assembled pre-release
 acceptance. The shared consumer dossier remains linked from those pending
 Epics. E8-T1 is the next queued Task.
 
+### E8-T1 account and password completion (2026-09-30)
+
+`internal/auth` accepts a host-issued, service-bound, one-use setup grant valid
+for ten minutes. It rejects missing, forged, foreign, expired and reused grants.
+The trusted local app is the approved setup surface. E8-T2/T3 must carry this
+permission through the protected native bootstrap; loopback, Origin and a
+browser boolean are insufficient authority.
+
+Passwords use the exact policy in ADR-0013: at least 15 Unicode characters,
+at most 1024 UTF-8 bytes, and no normalization or trimming. Argon2id uses
+version 19, 19 MiB, two iterations, one lane, a random 16-byte salt and a
+32-byte key. `api/proto/bounds.json` generates the password character and byte
+limits for Go and TypeScript; error and form copy use those constants.
+`golang.org/x/crypto` is pinned at `v0.57.0`; its dependency raises
+`golang.org/x/sys` to `v0.48.0`. The strict decoder refuses malformed hashes
+and different costs before invoking Argon2. Verification returns the durable
+subject rather than accepting a browser identity. The service serializes hash
+work and returns safe fixed errors for dependency failures.
+
+SQLite migration 9 preserves prior migration bytes and adds `password_account`
+with a singleton key and a unique account reference. First setup uses one
+immediate transaction for subject and credential insertion. It retains the
+sole pre-existing foundation subject, creates a UUID only when no subject
+exists, and refuses multiple legacy subjects. `CreateAccount` also refuses a
+second subject; subject-isolation fixtures deliberately seed adversarial rows
+through test-only SQL. Password hashing does not hold the writer transaction.
+Storage receives the encoded hash only.
+
+The injected `FirstRunSetup` form has no username or second-account flow and
+omits controls for remote views. It clears the uncontrolled password input
+before calling the client, suppresses duplicate pending requests, sanitizes
+errors, and uses the existing IME guard. The browser flag affects presentation
+only; it cannot authorize the server. Closed local failure categories distinguish
+unavailable account data and an already-configured account without displaying
+an exception. E8-T2 must map the service's stable categories to these errors,
+clear converted password buffers, and exclude passwords from every log.
+A failed or cancelled setup call can race a durable commit; check saved account
+state before offering another setup attempt. The form remains separate from the
+checked fail-closed entry until E8-T2/T3 mount authenticated delivery.
+
+Focused `go test -race ./internal/auth ./internal/storage` and the real Chrome
+`python3 frontend/browser/verify-setup.py` passed. Tests cover independent salts,
+strict hash decoding, password byte/character bounds, denied setup grants,
+concurrent setup within and across services, atomic rollback, retained identity,
+reopen and owner-only backup, damaged data refusal, input clearing and generic
+errors. A fixed canonical Argon2id answer and an independently derived random-salt
+answer pin the actual hash and verification costs. Regression tests also deny a
+grant that expires during hashing and sanitize failures during grant issuance.
+The browser check verifies both password bounds, closed error categories,
+composition protection, failure focus recovery and no browser storage. The serial
+`make test` passed after adapting Session and Workspace
+fixtures to deny registration by an unregistered subject. It covers both Go
+modules, frontend typechecks and unit tests, manifests, checked-output drift,
+SOT and the public toolchain-checker fixture. That last fixture is tooling E2E,
+not authenticated-product E2E. Six-role static completion review confirmed the
+component criteria and the focus correction. Final comment and documentation
+corrections passed SOT and whitespace checks.
+E8-T1 is complete within this component scope; no authenticated route, native
+HTTPS or deployment acceptance is claimed. Release notes are not enrolled.
+
 ## 2. Current development snapshot
 
 | Area | State |
@@ -1313,14 +1373,14 @@ Epics. E8-T1 is the next queued Task.
 | Five Gul SOT documents | E0-T4 completed the consumer alignment and Gate A reproduction; E0-T8 completed toolchain/ADR alignment; E0-T7 completed Gate B |
 | Toolchain and developer-command artifacts | E0-T8 accepted one pin manifest and read-only host checks; E0-T7 adds checked contract generation/drift delegates; E1-T1 adds the root Go module; E1-T2 adds root Bun pin validation and checked frontend generation/drift commands; E1-T3 adds checked Gul API/error-catalog generation; no installer |
 | Contract boundary | E12-T1 pins TASK-053 and regenerates checked clients/maps/fake transport for 36 known, 27 required, and 9 unavailable methods; E13-T1 adds an explicit stateful scenario provider over the 27-method port |
-| Production source | E1 shared core, bundle, API declarations, isolated SQLite and Wails shell; E3 adds Workspace attachment and presentation; E4 adds typed observation, Interactions, actions and bounded history/result/artifact reads; E5 adds safe close, reconnect and operation-specific replay; E6 adds verified-root local FileService, bounded previews, refresh, watcher and Git review; E7-T1/T2/T3 add the responsive operator, files, session presentation, composition guard, and keyboard focus through injected clients; handlers remain unmounted |
+| Production source | E1 shared core, bundle, API declarations, isolated SQLite and Wails shell; E3 adds Workspace attachment and presentation; E4 adds typed observation, Interactions, actions and bounded history/result/artifact reads; E5 adds safe close, reconnect and operation-specific replay; E6 adds verified-root local FileService, bounded previews, refresh, watcher and Git review; E7-T1/T2/T3 add the responsive operator, files, session presentation, composition guard, and keyboard focus through injected clients; E8-T1 adds isolated local auth, bounded Argon2id storage and the injected first-run setup form; handlers remain unmounted |
 | Wails host/frontend | One checked React bundle includes the E7-T1/T2/T3 operator components and fail-closed foundation; isolated Wails shell foundation exists, E3-T4 launch selector is unmounted, and authenticated attach is not implemented |
 | ConnectRPC schema/services | Gul Runtime, DirectSession, ArtifactPresentation, WorkspacePresentation and FileService declarations and generated clients exist; isolated handlers remain unmounted |
-| Gul SQLite schema | Gul-owned version 8 schema with Workspace attachment, favorites, Primary binding, event metadata, session-close attempts, mutation-attempt details and Writer reconciliation baselines; production startup integration pending |
+| Gul SQLite schema | Gul-owned version 9 schema with Workspace attachment, favorites, Primary binding, event metadata, session-close attempts, mutation-attempt details, Writer reconciliation baselines and a singleton password record; production startup integration pending |
 | Dolgorae RPC supervisor/provider | Bounded restart policy implemented against an injected lifecycle; production process ownership and live provider remain pending |
 | Controller credential store | Caller-owned mechanism selected by ADR-0047; not implemented |
 | FileService/auth/PWA/Tailscale integration | E6 local guard, bounded preview, refresh, watcher and Git review implemented behind unmounted APIs; E7-T1 file presentation uses injected clients; authenticated product integration pending |
-| Current State promotions | Prior E0/E12/E1/E13/E3/E4/E5 entries plus component-scoped REQ-FILE-001..014 and REQ-FILE-016; E7-T1 fake-client REQ-UI-001/002/004, E7-T2 fake-client REQ-OUT-001/002/004/007, REQ-UI-003/006/009/010 and REQ-PROMPT-001, and E7-T3 browser/component-scoped REQ-OUT-006 and REQ-UI-008; cross-surface REQ-FILE-015 pending; no assembled-product or released-provider claim |
+| Current State promotions | Prior E0/E12/E1/E13/E3/E4/E5 entries plus component-scoped REQ-FILE-001..014 and REQ-FILE-016; E7-T1 fake-client REQ-UI-001/002/004, E7-T2 fake-client REQ-OUT-001/002/004/007, REQ-UI-003/006/009/010 and REQ-PROMPT-001, and E7-T3 browser/component-scoped REQ-OUT-006 and REQ-UI-008; E8-T1 account/service/component-scoped REQ-AUTH-001/002; cross-surface REQ-FILE-015 pending; no assembled-product or released-provider claim |
 
 The repository contains the shared-core and single-bundle delivery foundations,
 declared but inactive Gul APIs, isolated Gul-owned SQLite repositories, bootstrap
@@ -1773,4 +1833,11 @@ The initial documentation assumed Gul would manage one Codex App Server, map Ses
 
 ## 12. Handoff
 
-E12, E1, E13, E3, E4, E5 and E6 are complete. The TASK-053 consumer lock and generated contract tooling remain authoritative. E6 provides guarded local FileService inspection, bounded preview, refresh and Git review over E3's saved Workspace attachment. E2-T3 retains the Submit-image handoff and final REQ-FILE-015 acceptance. E2-T0 remains blocked on an accepted compatible Dolgorae executable and live smoke evidence. No product route or live-provider behavior is activated automatically.
+E12, E1, E13, E3, E4, E5, E6 and E7 are complete. E8 is in progress, with
+E8-T1 complete within its account/password component scope and E8-T2 next. The
+TASK-053 consumer lock and generated contract tooling remain authoritative. E6 provides guarded local FileService
+inspection, bounded preview, refresh and Git review over E3's saved Workspace
+attachment. E2-T3 retains the Submit-image handoff and final REQ-FILE-015
+acceptance. E2-T0 remains blocked on an accepted compatible Dolgorae executable
+and live smoke evidence. No product route or live-provider behavior is activated
+automatically.

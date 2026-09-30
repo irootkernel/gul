@@ -5,7 +5,6 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/rootkernel/gul/internal/presentation"
 	"github.com/rootkernel/gul/internal/workspace"
@@ -14,9 +13,7 @@ import (
 func TestLocalPresentationPersistsAndIsSubjectScoped(t *testing.T) {
 	store, filename := openTestStore(t)
 	for _, subject := range []string{"owner", "other"} {
-		if err := store.Auth().CreateAccount(t.Context(), subject, time.Now()); err != nil {
-			t.Fatal(err)
-		}
+		seedSubjectFixture(t, store, subject)
 		if err := store.Presentation().CreateAttachment(t.Context(), workspace.Attachment{
 			SubjectID: subject, ID: "workspace", CanonicalRoot: filepath.Join(t.TempDir(), "workspace"),
 			ProviderID: "provider-workspace", FileDevice: "1", FileInode: "2", DisplayName: "Original",
