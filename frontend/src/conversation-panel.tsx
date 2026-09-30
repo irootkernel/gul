@@ -55,7 +55,7 @@ export function ConversationPanel({sessionId, client, focusEntryId, focusRequest
   useEffect(() => {
     let current = true;
     generation.current++;
-    setLoading(true); setBusy(false); setEntries([]); setNextToken(""); setSnapshotId(""); setFocused(undefined); setFocusError(undefined); requestedFocus.current = undefined; setError(""); setExpanded({});
+    setLoading(true); setBusy(false); setEntries([]); setNextToken(""); setSnapshotId(""); setFocused(undefined); setFocusError(undefined); requestedFocus.current = undefined; setError(""); setExpanded({}); setExpandError("");
     void client.listConversation({sessionId, pageSize: 50}).then(page => {
       if (!current) return;
       assertConversationPage(page);

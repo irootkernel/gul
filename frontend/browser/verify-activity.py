@@ -240,6 +240,11 @@ with tempfile.TemporaryDirectory(prefix="gul-e7-activity-") as directory:
         cli(directory, "run-code", """async page => {
           await page.getByRole('button', {name:'View full response'}).click();
           await page.getByText('Full response is unavailable.', {exact:false}).waitFor();
+          await page.getByRole('button', {name:'Refresh conversation'}).click();
+          await page.waitForFunction(() => window.fixture.conversation === 2 && document.querySelectorAll('[aria-label="Conversation timeline"] ol li').length === 2);
+          if (await page.getByText('Full response is unavailable.', {exact:false}).count()) throw Error('Superseded original error survived refresh');
+          await page.getByRole('button', {name:'View full response'}).click();
+          await page.getByText('Full response is unavailable.', {exact:false}).waitFor();
           await page.getByRole('button', {name:'Prompt History', exact:true}).click();
           await page.getByRole('button', {name:'View full original'}).click();
           await page.getByText('Full original is unavailable.', {exact:false}).waitFor();
