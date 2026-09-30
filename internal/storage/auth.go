@@ -17,6 +17,29 @@ password_hash TEXT NOT NULL
 )`,
 }
 
+func (r AuthRepository) LookupSession(ctx context.Context, digest string, now time.Time) (auth.Session, error) {
+	if !sha256Hex.MatchString(digest) || now.IsZero() {
+		return auth.Session{}, auth.ErrInvalidSession
+	}
+	var session auth.Session
+	var expiry, hash string
+	err := r.store.reader.QueryRowContext(ctx, `SELECT s.subject_id,s.expires_at,p.password_hash
+FROM web_sessions s JOIN password_account p ON p.subject_id=s.subject_id
+WHERE s.token_sha256=? AND s.expires_at>? AND s.revoked_at IS NULL
+AND p.singleton=1 AND (SELECT COUNT(*) FROM app_account)=1`, digest, timestamp(now)).Scan(&session.SubjectID, &expiry, &hash)
+	if errors.Is(err, sql.ErrNoRows) {
+		return auth.Session{}, auth.ErrInvalidSession
+	}
+	if err != nil {
+		return auth.Session{}, err
+	}
+	session.ExpiresAt, err = time.Parse(time.RFC3339Nano, expiry)
+	if err != nil || session.SubjectID == "" || !auth.ValidPasswordHash(hash) || !now.Before(session.ExpiresAt) {
+		return auth.Session{}, auth.ErrUnavailable
+	}
+	return session, nil
+}
+
 func (r AuthRepository) PasswordAccount(ctx context.Context) (auth.PasswordAccount, error) {
 	var account auth.PasswordAccount
 	err := r.store.reader.QueryRowContext(ctx, `SELECT p.subject_id,p.password_hash

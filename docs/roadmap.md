@@ -3,18 +3,18 @@
 | Field | Value |
 | --- | --- |
 | Role | Sole authority for task identity, order, status, dependencies, and phase |
-| Revision | 2026-09-30 E8-T1 completion |
+| Revision | 2026-09-30 E8-T2 completion |
 | Active Task | None |
-| Next | E8-T2 |
+| Next | E8-T3 |
 | Required provider | Released Dolgorae v0.1.3 implementing `dolgorae.gul-consumer/v1` |
 
-`Next` names the next queued Task after the completed E8-T1.
+`Next` names the next ready Task, E8-T3.
 
 ## 1. Status and execution rules
 
 Allowed executable states are `Planned`, `In Progress`, `In Review`, `Completed`,
 `Blocked`, and `Deferred`. `Retired` preserves a historical non-executable ID.
-At most one Task is In Progress or In Review globally. None is active.
+At most one Task is In Progress or In Review globally. No Task is active.
 A Task completes only after its scoped outputs, verification, documentation,
 review, and ordinary completion commit requirements pass. No status implies live
 credentials, staging, commit, publication, or installation authorization.
@@ -283,7 +283,7 @@ live Tailscale changes. Actual-provider deployment qualification remains E9.
 | Task | Phase | Status | Predecessors | Owned result and verification |
 | --- | --- | --- | --- | --- |
 | E8-T1 | Pre-release | Completed | E1-T4 | One-account setup and protected password storage |
-| E8-T2 | Pre-release | Planned | E8-T1, E1-T3 | Cookie sessions, revocation, CSRF/Origin and rate-limit tests across completed feature routes |
+| E8-T2 | Pre-release | Completed | E8-T1, E1-T3 | Cookie sessions, revocation, CSRF/Origin and rate-limit tests across completed feature routes |
 | E8-T3 | Pre-release | Planned | E8-T2, E1-T5, E7-T3 | Authenticated shell/headless singleton and verified attach, launchd/PWA/Serve packaging and negative deployment fixtures, no real provider-ready claim |
 
 ### E14: Accept the assembled pre-release application

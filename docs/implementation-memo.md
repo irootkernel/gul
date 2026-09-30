@@ -1366,6 +1366,95 @@ corrections passed SOT and whitespace checks.
 E8-T1 is complete within this component scope; no authenticated route, native
 HTTPS or deployment acceptance is claimed. Release notes are not enrolled.
 
+### E8-T2 authentication implementation (2026-09-30)
+
+The candidate adds AuthService FirstRunSetup, Login, Logout and GetSession to
+the Gul-owned Protobuf contract and regenerates its Go/Connect and TypeScript
+outputs. Password fields are bounded UTF-8 bytes, cleared on every handler exit.
+The service returns only fixed errors and closed browser session state, never a
+bearer, browser-selected subject or repository diagnostic.
+
+`internal/auth/session.go` creates random 256-bit bearers, retains their SHA-256
+digests and uses a fixed seven-day expiry. SQLite's existing web_sessions table
+needs no new migration. Lookup requires the sole saved password subject and a
+valid bounded hash. Reopen preserves sessions; a revoked or expired row denies
+access. Context binding limits concurrent calls, bounds their lifetime, cancels
+calls during local revocation, and checks durable state every 250 ms for idle
+streams. Storage failures close streams too. Expiry never extends on reads.
+
+`internal/delivery/api/auth.go` owns exact HTTPS Origin/Host agreement, the
+custom browser header, CSRF, protected cookies and fixed process-local rate
+windows recorded in ADR-0013. It ignores forwarded identity, denies missing or
+duplicate cookies, and requires a separate native credential for setup on the
+loopback-IP origin. The host-only grant API supersedes the prior transport
+secret. No RPC can mint this permission. `routes.go` registers AuthService and
+only supplied completed services behind this boundary; copied handlers share
+the server resolver even when a caller supplied a foreign one. Core authorization
+requires that same bound context. Missing components remain absent or deny access.
+
+The checked frontend exports `mountAuthenticated` and `createBrowserAuth`.
+Password fields are uncontrolled, clear before submission and never enter React
+state or browser storage. The typed same-origin HTTPS transport keeps CSRF and
+bootstrap authority in memory, clears converted UTF-8 buffers, and checks saved
+setup state after a failed reply before offering setup again. Login errors use
+fixed categories; the existing IME and failure-focus behavior apply. Expiry,
+unauthenticated feature errors and logout remove product content and abort
+active feature calls. Server cancellation or a denied feature call rechecks saved session state,
+refreshing a rotated cookie/CSRF pair without replaying the failed action. Auth
+RPCs have a ten-second deadline. Logout removes protected content and aborts
+feature calls before awaiting revocation; an uncertain reply offers a retry and
+retains only the CSRF needed to revoke the saved cookie.
+
+Focused Go race tests cover cookie flags, fixed expiry, rotation, logout, reopen,
+hash-only rows, ambiguous/damaged account refusal, every declared feature route's
+anonymous/Origin/CSRF rejection, auth and feature body limits, shared setup/login
+rate windows, local-only setup and
+active event/file stream revocation. The first idle-file-stream test waited for
+response headers before producing an event, which deadlocked this no-initial-item
+stream; the fixture now starts the call concurrently and produces a bounded
+invalidation before asserting idle revocation. Bun transport tests and
+`python3 frontend/browser/verify-auth.py` cover exact Unicode, setup reconciliation,
+CSRF forwarding and rotation recovery, real idle expiry, converted-buffer
+clearing, bounded stalled logout, no early product render, pending duplicate
+suppression, sanitized failures, focus, Korean IME, expiry and uncertain logout
+retry. Chrome uses injected auth; Go uses isolated TLS RPC and SQLite fixtures.
+
+The initial serial `make test` passed before review. Review remediation adds
+CSRF rotation recovery, bounded auth deadlines, immediate logout clearing and
+regression assertions for request limits, idle expiry and password buffers.
+The corrected candidate passed serial `make test` and the Chrome auth check.
+The second review confirmed those corrections and identified a setup-failure
+readback that incorrectly switched an unconfigured account to sign-in, plus a
+missing negative test for the native loopback-IP guard. The setup gate now
+retains its form and failure focus after unconfigured readback; exhausted setup
+attempts use a fixed wait message. Tests distinguish the IP guard from generic
+URL rejection and check ignored forwarded headers and malformed native
+authority. The Current topology now distinguishes isolated route registration
+from production host mounting, including its SOT validation fixture. These
+corrections passed focused Go race, Bun and Chrome checks, serial `make test`,
+and the third corrected-target review. That review established three remaining
+required evidence gaps: missing/duplicate CSRF and malformed cookie rejection
+at the HTTP boundary, browser stream-error session readback, and damaged or
+unavailable account state refusing setup. The correction adds tests on the
+existing API and browser transport test surfaces. Focused Go race and Bun checks
+pass; the frozen evidence correction passed restricted confirmation and serial
+`make test`. A service inventory label and already-configured setup instruction received wording-only
+corrections. The serial gate includes both Go
+modules with race detection, Bun/type checks,
+reproducible contract/API/frontend checks, SOT and the toolchain-checker fixture.
+That fixture is tooling E2E. Updated review-state documentation also passed
+SOT and whitespace checks. E8-T2 is complete within its authenticated
+route/component scope. E8-T3 must create the shared HTTPS host,
+validate loopback and Serve origins, deliver bootstrap authority without URL,
+log or storage exposure, supply the same boundary to core authorization and all
+routes, and mount the checked auth entry. The default entry remains fail-closed.
+No authenticated host, Tailscale, native installation, real provider or assembled
+product acceptance is claimed. E14 and E9 retain their acceptance boundaries.
+Canonical follow-up entries E8-FB-001 through E8-FB-008 retain independent
+availability, maintenance and optional UX risks.
+No current correctness or required acceptance is deferred. Release notes are
+not enrolled.
+
 ## 2. Current development snapshot
 
 | Area | State |
@@ -1373,9 +1462,9 @@ HTTPS or deployment acceptance is claimed. Release notes are not enrolled.
 | Five Gul SOT documents | E0-T4 completed the consumer alignment and Gate A reproduction; E0-T8 completed toolchain/ADR alignment; E0-T7 completed Gate B |
 | Toolchain and developer-command artifacts | E0-T8 accepted one pin manifest and read-only host checks; E0-T7 adds checked contract generation/drift delegates; E1-T1 adds the root Go module; E1-T2 adds root Bun pin validation and checked frontend generation/drift commands; E1-T3 adds checked Gul API/error-catalog generation; no installer |
 | Contract boundary | E12-T1 pins TASK-053 and regenerates checked clients/maps/fake transport for 36 known, 27 required, and 9 unavailable methods; E13-T1 adds an explicit stateful scenario provider over the 27-method port |
-| Production source | E1 shared core, bundle, API declarations, isolated SQLite and Wails shell; E3 adds Workspace attachment and presentation; E4 adds typed observation, Interactions, actions and bounded history/result/artifact reads; E5 adds safe close, reconnect and operation-specific replay; E6 adds verified-root local FileService, bounded previews, refresh, watcher and Git review; E7-T1/T2/T3 add the responsive operator, files, session presentation, composition guard, and keyboard focus through injected clients; E8-T1 adds isolated local auth, bounded Argon2id storage and the injected first-run setup form; handlers remain unmounted |
+| Production source | E1 shared core, bundle, API declarations, isolated SQLite and Wails shell; E3 adds Workspace attachment and presentation; E4 adds typed observation, Interactions, actions and bounded history/result/artifact reads; E5 adds safe close, reconnect and operation-specific replay; E6 adds verified-root local FileService, bounded previews, refresh, watcher and Git review; E7-T1/T2/T3 add the responsive operator, files, session presentation, composition guard, and keyboard focus through injected clients; E8-T1 adds isolated local auth, bounded Argon2id storage and the injected first-run setup form; E8-T2 adds durable cookie sessions, protected route assembly and the browser auth gate within isolated delivery scope; production host mounting remains E8-T3-owned |
 | Wails host/frontend | One checked React bundle includes the E7-T1/T2/T3 operator components and fail-closed foundation; isolated Wails shell foundation exists, E3-T4 launch selector is unmounted, and authenticated attach is not implemented |
-| ConnectRPC schema/services | Gul Runtime, DirectSession, ArtifactPresentation, WorkspacePresentation and FileService declarations and generated clients exist; isolated handlers remain unmounted |
+| ConnectRPC schema/services | Gul AuthService and completed feature declarations and generated clients exist; E8-T2 adds protected route assembly; host mounting remains E8-T3-owned |
 | Gul SQLite schema | Gul-owned version 9 schema with Workspace attachment, favorites, Primary binding, event metadata, session-close attempts, mutation-attempt details, Writer reconciliation baselines and a singleton password record; production startup integration pending |
 | Dolgorae RPC supervisor/provider | Bounded restart policy implemented against an injected lifecycle; production process ownership and live provider remain pending |
 | Controller credential store | Caller-owned mechanism selected by ADR-0047; not implemented |
@@ -1834,7 +1923,9 @@ The initial documentation assumed Gul would manage one Codex App Server, map Ses
 ## 12. Handoff
 
 E12, E1, E13, E3, E4, E5, E6 and E7 are complete. E8 is in progress, with
-E8-T1 complete within its account/password component scope and E8-T2 next. The
+E8-T1 and E8-T2 complete within their account/password and authenticated
+route/component scopes. E8-T3 is next for native bootstrap and shared HTTPS
+host assembly, singleton/verified attach, PWA and tailnet packaging fixtures. The
 TASK-053 consumer lock and generated contract tooling remain authoritative. E6 provides guarded local FileService
 inspection, bounded preview, refresh and Git review over E3's saved Workspace
 attachment. E2-T3 retains the Submit-image handoff and final REQ-FILE-015

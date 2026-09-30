@@ -272,10 +272,10 @@ expectFailure('current state promotes a requirement before its owner completes',
 
 expectFailure('architecture drops an E1-T1 delivery boundary', root => {
   write(root, 'docs/architecture.md', text => text.replace(
-    'ConnectRPC services are declared and generated but not registered.',
+    'ConnectRPC services are declared and generated; isolated protected route assembly exists, but production host mounting is not enabled.',
     'ConnectRPC delivery state is unspecified.',
   ));
-}, /Architecture must distinguish declared from registered ConnectRPC services/);
+}, /Architecture must distinguish isolated ConnectRPC route assembly from production host mounting/);
 
 expectFailure('pre-E1-T3 state requires ConnectRPC absence', root => {
   write(root, 'docs/roadmap.md', text => text

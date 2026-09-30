@@ -9,7 +9,7 @@ const passwordPolicy = `Use at least ${minPasswordCharacters} characters and at 
 // The transport maps only the service's closed error categories to this type.
 // Raw exception messages never become setup UI text.
 export class LocalSetupFailure extends Error {
-  constructor(readonly kind: "unavailable" | "denied" | "already-configured") {
+  constructor(readonly kind: "unavailable" | "denied" | "already-configured" | "rate-limit") {
     super("Local Gul setup failed");
   }
 }
@@ -58,8 +58,10 @@ export function FirstRunSetup({localSetupAllowed, onSetup}: Props) {
       // Never render a transport exception, request body or password.
       if (failure instanceof LocalSetupFailure && failure.kind === "unavailable") {
         setError("Gul cannot safely access its account data. Close Gul and check a verified backup before retrying.");
+      } else if (failure instanceof LocalSetupFailure && failure.kind === "rate-limit") {
+        setError("Too many setup attempts. Wait a minute before trying again.");
       } else if (failure instanceof LocalSetupFailure && failure.kind === "already-configured") {
-        setError("Gul already has a password. Close setup and sign in locally.");
+        setError("Gul already has a password. Close and reopen Gul locally to sign in.");
       } else {
         setError("Setup could not finish. Reopen Gul locally to try again.");
       }

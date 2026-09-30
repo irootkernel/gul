@@ -21,6 +21,8 @@ import (
 const _ = connect.IsAtLeastVersion1_13_0
 
 const (
+	// AuthServiceName is the fully-qualified name of the AuthService service.
+	AuthServiceName = "gul.v1.AuthService"
 	// RuntimeServiceName is the fully-qualified name of the RuntimeService service.
 	RuntimeServiceName = "gul.v1.RuntimeService"
 	// WorkspacePresentationServiceName is the fully-qualified name of the WorkspacePresentationService
@@ -50,6 +52,15 @@ const (
 // reflection-formatted method names, remove the leading slash and convert the remaining slash to a
 // period.
 const (
+	// AuthServiceFirstRunSetupProcedure is the fully-qualified name of the AuthService's FirstRunSetup
+	// RPC.
+	AuthServiceFirstRunSetupProcedure = "/gul.v1.AuthService/FirstRunSetup"
+	// AuthServiceLoginProcedure is the fully-qualified name of the AuthService's Login RPC.
+	AuthServiceLoginProcedure = "/gul.v1.AuthService/Login"
+	// AuthServiceLogoutProcedure is the fully-qualified name of the AuthService's Logout RPC.
+	AuthServiceLogoutProcedure = "/gul.v1.AuthService/Logout"
+	// AuthServiceGetSessionProcedure is the fully-qualified name of the AuthService's GetSession RPC.
+	AuthServiceGetSessionProcedure = "/gul.v1.AuthService/GetSession"
 	// RuntimeServiceListRuntimeProfilesProcedure is the fully-qualified name of the RuntimeService's
 	// ListRuntimeProfiles RPC.
 	RuntimeServiceListRuntimeProfilesProcedure = "/gul.v1.RuntimeService/ListRuntimeProfiles"
@@ -175,6 +186,154 @@ const (
 	// WatchFileChanges RPC.
 	FileServiceWatchFileChangesProcedure = "/gul.v1.FileService/WatchFileChanges"
 )
+
+// AuthServiceClient is a client for the gul.v1.AuthService service.
+type AuthServiceClient interface {
+	FirstRunSetup(context.Context, *connect.Request[v1.FirstRunSetupRequest]) (*connect.Response[v1.FirstRunSetupResponse], error)
+	Login(context.Context, *connect.Request[v1.LoginRequest]) (*connect.Response[v1.LoginResponse], error)
+	Logout(context.Context, *connect.Request[v1.LogoutRequest]) (*connect.Response[v1.LogoutResponse], error)
+	GetSession(context.Context, *connect.Request[v1.GetSessionRequest]) (*connect.Response[v1.GetSessionResponse], error)
+}
+
+// NewAuthServiceClient constructs a client for the gul.v1.AuthService service. By default, it uses
+// the Connect protocol with the binary Protobuf Codec, asks for gzipped responses, and sends
+// uncompressed requests. To use the gRPC or gRPC-Web protocols, supply the connect.WithGRPC() or
+// connect.WithGRPCWeb() options.
+//
+// The URL supplied here should be the base URL for the Connect or gRPC server (for example,
+// http://api.acme.com or https://acme.com/grpc).
+func NewAuthServiceClient(httpClient connect.HTTPClient, baseURL string, opts ...connect.ClientOption) AuthServiceClient {
+	baseURL = strings.TrimRight(baseURL, "/")
+	authServiceMethods := v1.File_gul_v1_gul_proto.Services().ByName("AuthService").Methods()
+	return &authServiceClient{
+		firstRunSetup: connect.NewClient[v1.FirstRunSetupRequest, v1.FirstRunSetupResponse](
+			httpClient,
+			baseURL+AuthServiceFirstRunSetupProcedure,
+			connect.WithSchema(authServiceMethods.ByName("FirstRunSetup")),
+			connect.WithClientOptions(opts...),
+		),
+		login: connect.NewClient[v1.LoginRequest, v1.LoginResponse](
+			httpClient,
+			baseURL+AuthServiceLoginProcedure,
+			connect.WithSchema(authServiceMethods.ByName("Login")),
+			connect.WithClientOptions(opts...),
+		),
+		logout: connect.NewClient[v1.LogoutRequest, v1.LogoutResponse](
+			httpClient,
+			baseURL+AuthServiceLogoutProcedure,
+			connect.WithSchema(authServiceMethods.ByName("Logout")),
+			connect.WithClientOptions(opts...),
+		),
+		getSession: connect.NewClient[v1.GetSessionRequest, v1.GetSessionResponse](
+			httpClient,
+			baseURL+AuthServiceGetSessionProcedure,
+			connect.WithSchema(authServiceMethods.ByName("GetSession")),
+			connect.WithClientOptions(opts...),
+		),
+	}
+}
+
+// authServiceClient implements AuthServiceClient.
+type authServiceClient struct {
+	firstRunSetup *connect.Client[v1.FirstRunSetupRequest, v1.FirstRunSetupResponse]
+	login         *connect.Client[v1.LoginRequest, v1.LoginResponse]
+	logout        *connect.Client[v1.LogoutRequest, v1.LogoutResponse]
+	getSession    *connect.Client[v1.GetSessionRequest, v1.GetSessionResponse]
+}
+
+// FirstRunSetup calls gul.v1.AuthService.FirstRunSetup.
+func (c *authServiceClient) FirstRunSetup(ctx context.Context, req *connect.Request[v1.FirstRunSetupRequest]) (*connect.Response[v1.FirstRunSetupResponse], error) {
+	return c.firstRunSetup.CallUnary(ctx, req)
+}
+
+// Login calls gul.v1.AuthService.Login.
+func (c *authServiceClient) Login(ctx context.Context, req *connect.Request[v1.LoginRequest]) (*connect.Response[v1.LoginResponse], error) {
+	return c.login.CallUnary(ctx, req)
+}
+
+// Logout calls gul.v1.AuthService.Logout.
+func (c *authServiceClient) Logout(ctx context.Context, req *connect.Request[v1.LogoutRequest]) (*connect.Response[v1.LogoutResponse], error) {
+	return c.logout.CallUnary(ctx, req)
+}
+
+// GetSession calls gul.v1.AuthService.GetSession.
+func (c *authServiceClient) GetSession(ctx context.Context, req *connect.Request[v1.GetSessionRequest]) (*connect.Response[v1.GetSessionResponse], error) {
+	return c.getSession.CallUnary(ctx, req)
+}
+
+// AuthServiceHandler is an implementation of the gul.v1.AuthService service.
+type AuthServiceHandler interface {
+	FirstRunSetup(context.Context, *connect.Request[v1.FirstRunSetupRequest]) (*connect.Response[v1.FirstRunSetupResponse], error)
+	Login(context.Context, *connect.Request[v1.LoginRequest]) (*connect.Response[v1.LoginResponse], error)
+	Logout(context.Context, *connect.Request[v1.LogoutRequest]) (*connect.Response[v1.LogoutResponse], error)
+	GetSession(context.Context, *connect.Request[v1.GetSessionRequest]) (*connect.Response[v1.GetSessionResponse], error)
+}
+
+// NewAuthServiceHandler builds an HTTP handler from the service implementation. It returns the path
+// on which to mount the handler and the handler itself.
+//
+// By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf
+// and JSON codecs. They also support gzip compression.
+func NewAuthServiceHandler(svc AuthServiceHandler, opts ...connect.HandlerOption) (string, http.Handler) {
+	authServiceMethods := v1.File_gul_v1_gul_proto.Services().ByName("AuthService").Methods()
+	authServiceFirstRunSetupHandler := connect.NewUnaryHandler(
+		AuthServiceFirstRunSetupProcedure,
+		svc.FirstRunSetup,
+		connect.WithSchema(authServiceMethods.ByName("FirstRunSetup")),
+		connect.WithHandlerOptions(opts...),
+	)
+	authServiceLoginHandler := connect.NewUnaryHandler(
+		AuthServiceLoginProcedure,
+		svc.Login,
+		connect.WithSchema(authServiceMethods.ByName("Login")),
+		connect.WithHandlerOptions(opts...),
+	)
+	authServiceLogoutHandler := connect.NewUnaryHandler(
+		AuthServiceLogoutProcedure,
+		svc.Logout,
+		connect.WithSchema(authServiceMethods.ByName("Logout")),
+		connect.WithHandlerOptions(opts...),
+	)
+	authServiceGetSessionHandler := connect.NewUnaryHandler(
+		AuthServiceGetSessionProcedure,
+		svc.GetSession,
+		connect.WithSchema(authServiceMethods.ByName("GetSession")),
+		connect.WithHandlerOptions(opts...),
+	)
+	return "/gul.v1.AuthService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case AuthServiceFirstRunSetupProcedure:
+			authServiceFirstRunSetupHandler.ServeHTTP(w, r)
+		case AuthServiceLoginProcedure:
+			authServiceLoginHandler.ServeHTTP(w, r)
+		case AuthServiceLogoutProcedure:
+			authServiceLogoutHandler.ServeHTTP(w, r)
+		case AuthServiceGetSessionProcedure:
+			authServiceGetSessionHandler.ServeHTTP(w, r)
+		default:
+			http.NotFound(w, r)
+		}
+	})
+}
+
+// UnimplementedAuthServiceHandler returns CodeUnimplemented from all methods.
+type UnimplementedAuthServiceHandler struct{}
+
+func (UnimplementedAuthServiceHandler) FirstRunSetup(context.Context, *connect.Request[v1.FirstRunSetupRequest]) (*connect.Response[v1.FirstRunSetupResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("gul.v1.AuthService.FirstRunSetup is not implemented"))
+}
+
+func (UnimplementedAuthServiceHandler) Login(context.Context, *connect.Request[v1.LoginRequest]) (*connect.Response[v1.LoginResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("gul.v1.AuthService.Login is not implemented"))
+}
+
+func (UnimplementedAuthServiceHandler) Logout(context.Context, *connect.Request[v1.LogoutRequest]) (*connect.Response[v1.LogoutResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("gul.v1.AuthService.Logout is not implemented"))
+}
+
+func (UnimplementedAuthServiceHandler) GetSession(context.Context, *connect.Request[v1.GetSessionRequest]) (*connect.Response[v1.GetSessionResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("gul.v1.AuthService.GetSession is not implemented"))
+}
 
 // RuntimeServiceClient is a client for the gul.v1.RuntimeService service.
 type RuntimeServiceClient interface {

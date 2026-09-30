@@ -79,7 +79,7 @@ func (r AuthRepository) RevokeSession(ctx context.Context, tokenSHA256 string, a
 		return err
 	}
 	if count != 1 {
-		return sql.ErrNoRows
+		return errors.Join(sql.ErrNoRows, auth.ErrInvalidSession)
 	}
 	return nil
 }

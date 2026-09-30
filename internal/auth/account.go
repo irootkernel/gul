@@ -146,3 +146,19 @@ func (s *Service) VerifyPassword(ctx context.Context, password []byte) (string, 
 	}
 	return account.SubjectID, nil
 }
+
+// AccountConfigured reports only the saved setup state, with no credential data.
+func (s *Service) AccountConfigured(ctx context.Context) (bool, error) {
+	if err := s.enter(ctx); err != nil {
+		return false, err
+	}
+	defer s.leave()
+	account, err := s.repository.PasswordAccount(ctx)
+	if errors.Is(err, ErrNotConfigured) {
+		return false, nil
+	}
+	if err != nil || account.SubjectID == "" || !ValidPasswordHash(account.Hash) {
+		return false, ErrUnavailable
+	}
+	return true, nil
+}

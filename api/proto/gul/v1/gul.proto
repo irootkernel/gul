@@ -7,7 +7,33 @@ option go_package = "github.com/rootkernel/gul/api/generated/go/gul/v1;gulv1";
 import "google/protobuf/timestamp.proto";
 
 // These declarations are a browser contract, not an enabled product route.
-// Some handlers exist but remain unmounted until authenticated route assembly.
+// Handlers remain unmounted until authenticated host assembly (E8-T3).
+service AuthService {
+  rpc FirstRunSetup(FirstRunSetupRequest) returns (FirstRunSetupResponse);
+  rpc Login(LoginRequest) returns (LoginResponse);
+  rpc Logout(LogoutRequest) returns (LogoutResponse);
+  rpc GetSession(GetSessionRequest) returns (GetSessionResponse);
+}
+
+// Password bytes are bounded UTF-8 and cleared by the handler after use.
+// Setup authority travels in a protected host-delivered header, never a URL.
+message FirstRunSetupRequest { bytes password = 1; }
+message FirstRunSetupResponse { BrowserSession session = 1; }
+message LoginRequest { bytes password = 1; }
+message LoginResponse { BrowserSession session = 1; }
+message LogoutRequest {}
+message LogoutResponse {}
+message GetSessionRequest {}
+message GetSessionResponse { BrowserSession session = 1; }
+
+// No bearer token or client-selected subject is exposed by the browser API.
+message BrowserSession {
+  bool account_configured = 1;
+  bool authenticated = 2;
+  string csrf_token = 3;
+  google.protobuf.Timestamp expires_at = 4;
+}
+
 service RuntimeService {
   rpc ListRuntimeProfiles(ListRuntimeProfilesRequest) returns (ListRuntimeProfilesResponse);
   rpc CheckCompatibility(CheckCompatibilityRequest) returns (CheckCompatibilityResponse);

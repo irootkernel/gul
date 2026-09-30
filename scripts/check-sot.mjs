@@ -286,8 +286,8 @@ export function validateRepository(root, options = {}) {
   }
   if (tasks.get('E1-T3')?.state === 'Planned') {
     if (!architecture.includes('No ConnectRPC service exists.')) errors.push('Architecture must retain the pre-E1-T3 ConnectRPC absence boundary');
-  } else if (!architecture.includes('ConnectRPC services are declared and generated but not registered.')) {
-    errors.push('Architecture must distinguish declared from registered ConnectRPC services');
+  } else if (!architecture.includes('ConnectRPC services are declared and generated; isolated protected route assembly exists, but production host mounting is not enabled.')) {
+    errors.push('Architecture must distinguish isolated ConnectRPC route assembly from production host mounting');
   }
   if (tasks.get('E1-T2')?.state === 'Completed') {
     const architectureCommands = section(architecture, '### 17.1 ', '## 18.', errors);

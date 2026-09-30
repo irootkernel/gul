@@ -99,3 +99,14 @@ creates no real account, and closes its browser and server. Run it separately
 from `make test`; the serial facade covers the auth service and SQLite race,
 rollback, migration, reopen and backup tests. Authenticated transport and native
 bootstrap are E8-T2/T3 checks.
+
+The E8-T2 component check is `python3 frontend/browser/verify-auth.py`. It
+checks setup-to-login, sanitized login and rate-limit failures, password
+clearing, pending duplicate suppression, focus/IME, removal of product content
+on expiry/logout and retry after uncertain logout. It uses injected auth in
+Chrome and creates no account or deployment. Bun transport tests separately
+exercise typed Protobuf encoding, CSRF headers, setup-response reconciliation
+and cancellation. The serial Go checks use real isolated TLS ConnectRPC and
+SQLite fixtures for cookies, all declared feature-route guards, durable sessions,
+rate bounds and active event/file stream revocation. Host/native/Serve assembly
+remains E8-T3-owned and assembled application acceptance remains E14-owned.

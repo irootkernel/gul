@@ -5,7 +5,7 @@
 | Role | Target and Current Architecture source of truth |
 | Product | Gul |
 | Version | 0.1-dolgorae-consumer-v1 |
-| Status | Approved target rebaseline; current implementation through E7 and E8-T1 within their declared component scope |
+| Status | Approved target rebaseline; current implementation through E8-T2 within component scope |
 | Last updated | 2026-09-30 |
 
 ## 1. Purpose and change control
@@ -1060,11 +1060,11 @@ The serial command facade is `toolchain-check`, `generate-contract`, `contract-c
 
 ## 19. Current snapshot
 
-**Snapshot date:** 2026-09-30 (E8-T1 completed)
+**Snapshot date:** 2026-09-30 (E8-T2 complete)
 
-**Roadmap point:** E0 is `Completed`, E12 is `Completed`, E1 is `Completed`, and E13 is `Completed`; E1-T1 is `Completed` and E1-T2/T3/T4/T5 are `Completed`. E3 and E3-T1/T2/T3/T4 are `Completed`. E4 and E4-T1/T2/T3/T5 are `Completed`. E4-T4 remains Deferred outside its epic. E5 and E5-T1/T2/T3 are `Completed`. E6 and E6-T1/T2/T3 are `Completed`. E7 and E7-T1/T2/T3 are `Completed`. E8 is `In Progress`; E8-T1 is `Completed` and E8-T2/T3 are `Planned`. Former E12-T2/T3 remain Retired. E14 owns pre-release application acceptance. No live-provider or assembled-application acceptance is implied.
+**Roadmap point:** E0 is `Completed`, E12 is `Completed`, E1 is `Completed`, and E13 is `Completed`; E1-T1 is `Completed` and E1-T2/T3/T4/T5 are `Completed`. E3 and E3-T1/T2/T3/T4 are `Completed`. E4 and E4-T1/T2/T3/T5 are `Completed`. E4-T4 remains Deferred outside its epic. E5 and E5-T1/T2/T3 are `Completed`. E6 and E6-T1/T2/T3 are `Completed`. E7 and E7-T1/T2/T3 are `Completed`. E8 is `In Progress`; E8-T1 is `Completed` and E8-T2 is `Completed` and E8-T3 is `Planned`. Former E12-T2/T3 remain Retired. E14 owns pre-release application acceptance. No live-provider or assembled-application acceptance is implied.
 
-**Maturity:** delivery-independent Go core, shared React bundle, declared but disabled Gul API, typed provider ports and explicit scenario harness, isolated SQLite repositories with fake-scoped Workspace attachment, local presentation and passive session reads, and a Wails shell foundation. E4 adds typed observation, Interaction cards, action eligibility and bounded history/result/artifact reads. E5 adds whole-session close, reconnect convergence and operation-specific recovery against fakes. E6 adds verified-root local FileService inspection, bounded previews, refresh, watcher and Git review through unmounted typed APIs. E7-T1 adds three responsive panes, workspace/session navigation and read-only FileService presentation through injected typed clients. E7-T2 adds provider-projected activity, prioritized Interaction cards, conversation and accepted-user Prompt History, and guarded whole-session close to that injected-client view. E7-T3 adds composition-safe input and keyboard focus behavior to the same component scope. E8-T1 adds isolated local account setup, bounded password hashing and the injected first-run form. Authenticated product assembly and live-provider qualification remain pending.
+**Maturity:** delivery-independent Go core, shared React bundle, declared but disabled Gul API, typed provider ports and explicit scenario harness, isolated SQLite repositories with fake-scoped Workspace attachment, local presentation and passive session reads, and a Wails shell foundation. E4 adds typed observation, Interaction cards, action eligibility and bounded history/result/artifact reads. E5 adds whole-session close, reconnect convergence and operation-specific recovery against fakes. E6 adds verified-root local FileService inspection, bounded previews, refresh, watcher and Git review through unmounted typed APIs. E7-T1 adds three responsive panes, workspace/session navigation and read-only FileService presentation through injected typed clients. E7-T2 adds provider-projected activity, prioritized Interaction cards, conversation and accepted-user Prompt History, and guarded whole-session close to that injected-client view. E7-T3 adds composition-safe input and keyboard focus behavior to the same component scope. E8-T1 adds isolated local account setup, bounded password hashing and the injected first-run form. E8-T2 adds protected session routes and the checked auth entry within isolated delivery scope. Authenticated product assembly and live-provider qualification remain pending.
 
 ### 19.1 Implemented components
 
@@ -1083,6 +1083,28 @@ are exercised by isolated Go/SQLite and Chrome checks. The checked entry still
 mounts the fail-closed foundation. E8-T2 owns AuthService transport and session
 protection; E8-T3 owns native bootstrap, HTTPS and authenticated host assembly.
 
+E8-T2 supplies checked AuthService declarations, hash-only durable browser
+sessions, one shared HTTP/ConnectRPC protection boundary, and explicit route
+assembly for all eight completed feature services. Route construction replaces
+every injected principal resolver with the same server-session resolver. The
+core authorization port accepts only a matching bound request context. Login
+sets a host-only Secure/HttpOnly/SameSite=Strict cookie for seven days; logout,
+rotation, expiry and durable revocation remove access, including idle event and
+file streams. ADR-0013 records the fixed rate, request and concurrency bounds.
+
+The checked bundle exports the authentication mount and same-origin typed
+transport. It shows setup only with a host-delivered permission, checks saved
+setup state after an uncertain response, clears password buffers and fields,
+and removes the operator view on expiry or logout. Feature calls share in-memory
+CSRF and cancellation. Server cancellation or denial rechecks saved session
+state without replaying a failed action. Auth RPCs have a ten-second deadline;
+logout removes protected content and active requests before awaiting revocation.
+An uncertain logout keeps only the CSRF needed for a retry. Automatic entry still
+mounts the foundation. The host must select verified HTTPS origins, transfer
+the native setup credential privately, supply the shared core and completed
+service dependencies, and mount the routes and bundle in E8-T3. T2's TLS RPC,
+SQLite and Chrome component tests do not qualify that host or a live provider.
+
 `internal/app` implements the shared delivery-independent core lifecycle and
 explicit lifecycle, provider, persistence and authorization ports. Missing
 dependencies are composed with fail-closed defaults: startup performs no
@@ -1091,11 +1113,12 @@ availability is not implied. The core does not import Wails; the desktop
 foundation hosts it, while assembled headless and authenticated delivery remain
 future work.
 
-`api/proto` declares Gul-owned Runtime, WorkspacePresentation, DirectSession,
-ArtifactPresentation and FileService browser
+`api/proto` declares Gul-owned Auth, Runtime, WorkspacePresentation, DirectSession,
+ClientEventService, Interaction, Writer, ArtifactPresentation and FileService browser
 contracts. Its `bounds.json` is the shared authority for generated Go and
 TypeScript page/content limits. Generated clients are checked for drift. The
-declarations are not registered as routes. `contract/port` defines the exact
+declarations are registered by the isolated E8-T2 protected route assembly;
+production host mounting remains E8-T3-owned. `contract/port` defines the exact
 27-method typed consumer interface and a closed provider-error translation
 catalog; the root Go module consumes this checked local module through one
 explicit local replacement. `contract/scenario` supplies a stateful test
@@ -1410,7 +1433,7 @@ service, live provider adapter, or live provider behavior exists.
 Shared Go core composition and lifecycle exist without assembled delivery.
 One checked React bundle and shared browser/shell asset delivery exist.
 An isolated Wails shell foundation reuses the shared core and checked bundle; authenticated attach is not enabled.
-ConnectRPC services are declared and generated but not registered.
+ConnectRPC services are declared and generated; isolated protected route assembly exists, but production host mounting is not enabled.
 Gul-only SQLite schema and repositories exist in isolated tests; no production database lifecycle is enabled.
 No Runtime Provider adapter, RPC supervisor, Controller credential store, timeline adapter, or Artifact adapter exists in the assembled product. Isolated Workspace, session, launch, observation, Interaction, action and history/artifact adapters use the pinned provider port with explicit fakes.
 ```

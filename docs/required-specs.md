@@ -544,16 +544,25 @@ remain with E9.
 
 E8-T1 adds isolated host-authorized first-run setup, one stable password account,
 bounded Argon2id storage and an injected setup form. Its accepted scope is the
-account service, SQLite repository and browser component. Cookie sessions and
-authenticated routes remain with E8-T2; native bootstrap and shared HTTPS delivery
-remain with E8-T3. The form is unmounted, and assembled-product and live-provider
-acceptance remain with E14 and E9.
+account service, SQLite repository and browser component. E8-T2 supplies cookie
+sessions and authenticated route assembly; native bootstrap and shared HTTPS
+delivery remain with E8-T3. Production host mounting remains disabled, and
+assembled-product and live-provider acceptance remain with E14 and E9.
+
+E8-T2 adds AuthService, durable browser sessions and shared Origin/CSRF/rate
+protection for completed feature routes. Its accepted scope is the isolated
+route assembly, checked browser auth mount and TLS/SQLite/component fixtures.
+The ledger records REQ-AUTH-003/004 and transport-scoped REQ-AUTH-002 within that scope.
+E8-T3 retains native bootstrap and HTTPS host mounting; E14 and E9 retain
+assembled-product and live-provider acceptance.
 
 | Requirement | Accepted Current State | Evidence |
 |---|---|---|
 | REQ-HOST-005 | Exact Go toolchain with minimum-compatible non-Go host tools, exact project dependency and generator pins, and read-only host reporting | E0-T8; ADR-0054; `toolchain/versions.env`; checker fixtures; serial `make test` |
 | REQ-AUTH-001 | Host-authorized one-use setup atomically retains or creates one stable subject, denies invalid grants and ambiguous data, and provides a username-free injected local setup form; account/service/component scope only | E8-T1; `internal/auth` and `internal/storage` race, grant, rollback and retained-identity tests; `frontend/browser/verify-setup.py`; completion source review |
-| REQ-AUTH-002 | ADR-0013 bounded salted Argon2id, exact UTF-8 bounds, strict record decoding, constant-time verification, hashes-only persistence, input clearing and sanitized component errors; transport remains E8-T2-owned | E8-T1; independent hash-cost vectors and malformed-record tests; reopen/backup plaintext scans; real Chrome component checks; serial `make test` and completion source review |
+| REQ-AUTH-002 | ADR-0013 bounded salted Argon2id, exact UTF-8 bounds, strict record decoding, constant-time verification, hashes-only persistence, input clearing and sanitized component errors; E8-T2 adds bounded UTF-8 transport buffers cleared on every exit and fixed typed delivery errors in isolated protected routes | E8-T1/T2; independent hash-cost vectors and malformed-record tests; reopen/backup plaintext scans; real Chrome component checks; serial `make test` and completion source review |
+| REQ-AUTH-003 | Fixed seven-day digest-only server sessions, saved-subject login rotation and host-only Secure/HttpOnly/SameSite=Strict cookie; expiry, logout and revocation remove access and terminate idle streams in isolated authenticated delivery | E8-T2; auth/storage/API race tests, actual TLS stream and reopen fixtures, Bun expiry/logout/stream tests, Chrome component checks, serial `make test` and completion/correction source reviews |
+| REQ-AUTH-004 | Exact HTTPS Origin/Host/custom-header and session-bound CSRF across completed feature routes, native-only setup permission, fixed process-local rate windows and body/concurrency bounds; no production host qualification | E8-T2; generated-route negative matrix, brute-force/window/body/loopback tests, malformed/duplicate cookie and missing/duplicate CSRF tests, serial `make test` and completion/correction source reviews |
 | REQ-RUNTIME-011 | Versioned public gRPC inventory, exact semantic-operation ownership, generated clients, descriptor-derived fake server, exhaustive maps, and separate Machine CLI fixture | E0-T7 historical digests recorded in the implementation memo; current live lock paths are E12-T1 evidence; contract validator; fake-server tests |
 | REQ-RUNTIME-022 | Independently typed projection inputs, public enum/event inventory, convergence and fail-closed compatibility fixtures | E0-T7 historical digests recorded in the implementation memo; current live policy maps are E12-T1 evidence; conformance pin |
 | REQ-CONSUMER-001 | Immutable TASK-053 consumer source, 36-method descriptor inventory, explicit 27-required/9-unavailable profile, generated clients/maps/fake transport, and close/sourceability fixtures; no runtime-support claim | E12-T1; dependency/generated locks; additive descriptor check; contract validator |

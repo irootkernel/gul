@@ -142,6 +142,27 @@ authenticated listener; local shell use does not require Tailscale. The
 `https+insecure` Serve backend is permitted only for the verified loopback target
 using Gul's local certificate. Remote browsers use tailnet HTTPS.
 
+E8-T2 uses random 256-bit session bearers and persists their SHA-256 digests.
+Login rotates a presented session, expiry never slides, and logout revokes the
+saved row before clearing the host-only cookie. All RPCs require exact configured
+HTTPS Origin/Host agreement and a custom browser header; authenticated feature
+calls and logout also require a session-bound, domain-separated CSRF token.
+No CORS allowance or forwarded-header identity is accepted. Host bootstrap
+credentials authorize setup only on the verified loopback-IP origin.
+
+One shared boundary limits setup/login to five attempts per minute across the
+single account, authenticated feature calls to 120 per minute, and session
+state/logout calls to 120 per minute. These fixed process-local windows use no
+IP or browser-supplied bucket key. Password hashing retains T1's single-worker
+bound. Auth request bodies are limited to 4 KiB before decoding; completed
+feature requests are limited to 256 KiB. At most 128 authenticated calls are
+bound concurrently. Active calls expire with their saved session; idle streams
+recheck durable revocation every 250 ms and fail closed on storage failure.
+Browser auth RPCs have a ten-second deadline. Sign-out removes protected content
+and cancels feature calls before awaiting durable revocation; an uncertain reply
+retains only the CSRF needed to retry. A denied feature call rechecks saved session
+state to recover a rotated cookie/CSRF pair without replaying the failed action.
+
 ### ADR-0014: Use unary commands and streamed Gul events
 
 **Status:** Accepted, modified
