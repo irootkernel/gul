@@ -1124,8 +1124,9 @@ refresh closes retained pages and advances a Workspace revision. A bounded host
 watcher tracks verified nodes and coalesces public changes independently of the
 provider. Direct Git commands report contained direct and ancestor status and
 compare fixed `HEAD` with current Working previews. Typed Git degradation
-preserves Working preview. No FileService route is mounted yet; E7/E8/E14 own
-assembled presentation and delivery.
+preserves Working preview. No FileService route is mounted yet. E7 supplies
+the injected-client file pane; E8/E14 own authenticated delivery and assembled
+application acceptance.
 
 `internal/presentation` changes only subject-scoped Gul metadata. Attached
 Workspace names, favorites and hidden state are independent of their directory
@@ -1204,9 +1205,11 @@ member Runs, Spawns, pending approvals and accepted unfinished tasks. A pending
 local call blocks recovery even when another matching attempt has an unknown
 outcome. Backend Acquire and Release re-evaluate these facts before one provider
 call; accepted projections require a fresh read before another mutation.
-The generated WriterAction handler, writer panel, prompt draft and interrupt
-consent components remain unmounted. E2 owns Submit/Interrupt execution, E5 owns
-Close coordination, and E7/E8 own product assembly.
+The generated WriterAction handler remains unmounted. E7 composes the writer
+panel and interrupt consent into the injected-client operator view and verifies
+the separate prompt draft component in browser fixtures. E2 owns Submit/Interrupt
+execution and E5 supplies Close coordination at their checked adapter boundaries.
+E8/E14 own authenticated assembly and application acceptance.
 
 The observer connects live-window selection to per-session unary polling at a
 five-second interval with a five-second total deadline. Independent workers
@@ -1214,8 +1217,9 @@ prevent a slow Run from starving other Runs. Polling needs no Controller; it
 reads Run and pending Interaction snapshots and emits coalesced invalidations
 through the existing Gul journal without moving provider event checkpoints.
 Read failures invalidate the visible projection rather than enabling actions.
-The generated InteractionPresentation handler and React cards remain unmounted;
-E8 owns authenticated registration and E2/E9 own live transport qualification.
+The generated InteractionPresentation handler remains unmounted; E7 composes
+the React cards into the injected-client operator view. E8 owns authenticated
+registration and E2/E9 own live transport qualification.
 
 `internal/history` supplies Controller-authorized conversation, prompt and public
 Specialist-result reads through the checked contract adapter. Page tokens bind
@@ -1234,8 +1238,9 @@ rebuilds them; reconstruction preserves the same item IDs. SQLite stores only
 the existing subject-scoped session binding. The generated history/conversation
 and ArtifactPresentation handlers remain unmounted. The shared Markdown renderer
 allows paragraphs, headings and fenced code; HTML, links and images stay literal.
-E5 owns reconnect scheduling, E7 the integrated conversation/history UI, and E8
-route registration. These components use explicit fake evidence, not live RPCs.
+E5 supplies reconnect scheduling and E7 supplies the integrated conversation
+and history UI through injected clients. E8 owns authenticated route registration.
+These components use explicit fake evidence, not live RPCs.
 
 `internal/storage` requires an owner-only database directory and file, then
 opens the pinned SQLite driver with one writer and at most four read-only
@@ -1327,9 +1332,9 @@ and its owner matches the requested effect. Reconciliation rechecks the cache
 and attempt under one transaction; old attempts without a pre-call baseline
 remain unknown. A later fresh Interaction card can settle a matching protected-response attempt.
 Database reopen also turns unfinished Close and other pending attempts into
-observable uncertainty. These services and adapters remain unmounted; E7/E8
-own authenticated product routes and startup assembly, while E2/E9 own live
-provider evidence.
+observable uncertainty. These services and adapters remain unmounted. E8 owns
+authenticated product routes and startup assembly, E14 owns assembled application
+acceptance, and E2/E9 own live provider evidence.
 
 `internal/desktop` starts and stops the same core through its lifecycle boundary,
 then runs a Wails v3 window over the checked bundle's existing asset handler.

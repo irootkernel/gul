@@ -513,13 +513,14 @@ scope is isolated root access; preview, Git, watcher and assembled product
 surfaces remain with E6-T2/T3 and later integration owners.
 E6-T2 adds bounded listing, text and raster preview, safe Markdown image
 embedding, and source-only SVG at the same unmounted component boundary.
-Working-tree reads may observe intermediate writer state; fixed `HEAD`
-comparison, invalidation, and assembled file-pane navigation remain with
-E6-T3 and E7.
+Working-tree reads may observe intermediate writer state. E6-T3 supplies fixed
+`HEAD` comparison and invalidation; E7 supplies injected-client file-pane
+navigation. Authenticated application assembly remains with E8/E14.
 E6-T3 adds explicit refresh, a bounded host watcher, and fixed `HEAD` versus
 Working Git review through unmounted FileService handlers. Git status, private
 path denial, and typed degradation are accepted at this component boundary;
-E7/E8/E14 own the assembled pane and authenticated delivery. E6-T1 established
+E7 supplies the injected-client pane; E8/E14 own authenticated delivery and
+assembled application acceptance. E6-T1 established
 the guard used by E6-T2/T3. E2-T3 owns the Submit-image handoff and final
 cross-surface promotion of REQ-FILE-015, which remains Required State.
 E7-T1 adds the responsive workspace, conversation and file panes with mobile

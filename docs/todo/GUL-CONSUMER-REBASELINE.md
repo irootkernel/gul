@@ -61,8 +61,8 @@ E6-T1 supplies the local, read-only FileService guard over E3's saved verified
 Workspace attachment. E6-T2/T3 route preview, Markdown assets, Git reads,
 and watcher invalidations through that guard. E2-T3 owns the final
 cross-surface `REQ-FILE-015` promotion, including Submit-image integration;
-E7 owns the assembled file pane, and E14 owns authenticated application
-acceptance.
+E7 supplies the injected-client file pane, E8 owns authenticated routes and
+delivery, and E14 owns assembled application acceptance.
 
 ## 2. Producer order and evidence boundary
 
