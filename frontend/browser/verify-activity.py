@@ -23,7 +23,7 @@ class QuietHandler(http.server.SimpleHTTPRequestHandler):
 
 with tempfile.TemporaryDirectory(prefix="gul-e7-activity-") as directory:
     subprocess.run(["bun", "build", "frontend/browser/activity.tsx", "--target", "browser", "--outdir", directory], cwd=ROOT, check=True)
-    pathlib.Path(directory, "index.html").write_text('<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="activity.css"></head><body><div id="root"></div><script type="module" src="activity.js"></script></body></html>')
+    pathlib.Path(directory, "index.html").write_text('<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="activity.css"></head><body><div id="root"></div><script>sessionStorage.removeItem("gul.presentation.tab");</script><script type="module" src="activity.js"></script></body></html>')
     server = http.server.ThreadingHTTPServer(("127.0.0.1", 0), functools.partial(QuietHandler, directory=directory))
     thread = threading.Thread(target=server.serve_forever, daemon=True)
     thread.start()
@@ -101,6 +101,7 @@ with tempfile.TemporaryDirectory(prefix="gul-e7-activity-") as directory:
         cli(directory, "goto", f"http://127.0.0.1:{server.server_port}/?integrated&selection-untyped")
         cli(directory, "run-code", """async page => {
           await page.locator('.operator__header-status').waitFor();
+          await page.getByRole('button', {name:'Sessions', exact:true}).click();
           await page.getByRole('button', {name:'Fixture Session'}).click();
           await page.getByText('Session selection is unavailable.', {exact:false}).waitFor();
           if (!(await page.locator('.operator__header-status').innerText()).includes('Provider READY'))
@@ -270,6 +271,32 @@ with tempfile.TemporaryDirectory(prefix="gul-e7-activity-") as directory:
                 throw Error('Superseded original failure displaced a successful retry or refresh');
               }}
             }}""")
+        for outcome in ["success", "failure"]:
+            for mode in ["selection", "refresh"]:
+                cli(directory, "goto", f"http://127.0.0.1:{server.server_port}/?prompt-original-race={outcome}")
+                cli(directory, "run-code", f"""async page => {{
+                  await page.getByRole('button', {{name:'Prompt History', exact:true}}).click();
+                  await page.getByRole('button', {{name:'View full original prompt 1', exact:true}}).click();
+                  await page.waitForFunction(() => window.fixture.original === 1);
+                  if ('{mode}' === 'selection') {{
+                    await page.getByRole('button', {{name:'More accepted prompts'}}).click();
+                    await page.getByRole('button', {{name:'View full original prompt 2', exact:true}}).click();
+                    await page.getByText('Exact entry-3', {{exact:true}}).waitFor();
+                  }} else {{
+                    await page.getByRole('button', {{name:'Refresh Prompt History'}}).click();
+                    await page.waitForFunction(() => window.fixture.history === 2 &&
+                      document.querySelectorAll('[aria-label="Prompt History"] li').length === 1);
+                  }}
+                  await page.waitForFunction(() => window.fixture.promptOriginalSettled === 1);
+                  await page.waitForTimeout(50);
+                  const panel = page.getByRole('region', {{name:'Prompt History'}});
+                  if (await panel.getByRole('alert').count() || await panel.getByText('Exact entry-1', {{exact:true}}).count())
+                    throw Error('Superseded Prompt History original success/failure affected the current view');
+                  if ('{mode}' === 'selection' && !await panel.getByText('Exact entry-3', {{exact:true}}).count())
+                    throw Error('Old original displaced the newly selected prompt');
+                  if ('{mode}' === 'refresh' && await panel.locator('[aria-label="Full original prompt"]').count())
+                    throw Error('Refreshed history retained a superseded original');
+                }}""")
         cli(directory, "goto", f"http://127.0.0.1:{server.server_port}/?original-success-race")
         cli(directory, "run-code", """async page => {
           const original = page.getByRole('button', {name:'View full response for conversation entry 2', exact:true});

@@ -110,3 +110,36 @@ and cancellation. The serial Go checks use real isolated TLS ConnectRPC and
 SQLite fixtures for cookies, all declared feature-route guards, durable sessions,
 rate bounds and active event/file stream revocation. Host/native/Serve assembly
 remains E8-T3-owned and assembled application acceptance remains E14-owned.
+
+The E8-T3 host tests use isolated protected directories, actual loopback TLS,
+SQLite and the shared Connect routes. They check contention, verified native
+attachment, bootstrap refusal, certificate mismatch, unsafe state, port collision
+and graceful restart. They also reject expired or damaged persisted certificates
+without rewriting them and require a qualified CLI/daemon version before using
+Tailscale snapshot completeness. CLI tests cover dispatch, read-only diagnostics,
+headless cancellation and both owned and attached desktop close paths without
+opening a native window. Deployment fixtures validate Serve/Funnel configurations
+and render a user launchd agent without loading it. The opt-in native check
+`GUL_RUN_NATIVE_WAILS_TEST=1 GOTOOLCHAIN=local go test -race ./internal/desktop -count=1`
+opens a real Wails/WebKit window against an isolated HTTPS probe to test the
+pin and document-start bootstrap across same-origin navigation. It does not
+exercise the complete operator bundle.
+`python3 frontend/browser/verify-delivery.py` builds the real isolated host and
+opens the checked entry in Chrome, with a temporary profile and a fixture-scoped
+certificate pin. The default run checks login, refresh, offline refusal and
+reconnect, then closes Chrome and the host. It skips actual PWA installation.
+`GUL_RUN_INSTALLED_PWA_TEST=1 python3 frontend/browser/verify-delivery.py`
+additionally uses a temporary persistent Chrome profile and privileged CDP pipe
+to install, launch and uninstall the PWA. On macOS this can create an app shim
+outside the temporary profile and requires explicit approval for those host
+effects before execution. That installed-PWA gate must pass before T3 is
+accepted; manifest and service-worker readiness alone do not satisfy it.
+Both checks are separate from `make test`; live Tailscale, launchd installation,
+system trust and actual-provider qualification remain outside these checks.
+
+FileService Connect transport tests inject canceled watcher setup and unavailable
+setup/stream failures and check status plus DomainError presence. The real service
+also receives an already-canceled context. The Chrome file fixture returns an
+overlapping continuation after a retry and verifies unique rows while retaining
+stale-page and Workspace-context tests. These isolated checks settle the mounted
+FileService re-entry obligations without claiming live provider qualification.

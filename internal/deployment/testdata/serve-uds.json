@@ -1,0 +1,4 @@
+{
+  "TCP": {"443": {"HTTPS": true}},
+  "Web": {"gul.tail123.ts.net:443": {"Handlers": {"/": {"Proxy": "unix:/private/gul.sock"}}}}
+}

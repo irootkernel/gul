@@ -14,7 +14,7 @@ let navigation = {workspaceId: "alpha", sessionId: "one"};
 const calls = {navigation: 0, directory: 0, preview: 0, compare: 0, refresh: 0};
 const faults = {workspaceLoad: new URL(location.href).searchParams.has("workspace-fault") ? 1 : 0,
   sessions: 0, directory: 0, more: 0, preview: 0, compare: 0, refresh: 0, navigation: 0,
-  echoCurrentWorkspace: 0, navigationDelayMs: 0, moreDelayMs: 0, compareDelayMs: 0, refreshDelayMs: 0};
+  echoCurrentWorkspace: 0, overlappingPage: 0, overlappingDirectory: 0, navigationDelayMs: 0, moreDelayMs: 0, compareDelayMs: 0, refreshDelayMs: 0};
 Object.assign(window, {fixture: Object.assign(calls, {faults})});
 
 function fails(key: Exclude<keyof typeof faults, "navigationDelayMs" | "moreDelayMs" | "compareDelayMs" | "refreshDelayMs">) {
@@ -62,7 +62,10 @@ const clients: OperatorClients = {
       if (fails(pageToken ? "more" : "directory")) throw new Error("Directory unavailable");
       if (pageToken && faults.moreDelayMs) await new Promise(resolve => setTimeout(resolve, faults.moreDelayMs));
       return create(ListDirectoryResponseSchema, {entries: workspaceId === "beta"
-        ? [create(FileEntrySchema, {name: pageToken ? "second.txt" : "beta.txt", kind: FileNodeKind.REGULAR_FILE})]
+        ? (pageToken && faults.overlappingPage
+          ? [create(FileEntrySchema, {name: "beta.txt", kind: faults.overlappingDirectory ? FileNodeKind.DIRECTORY : FileNodeKind.REGULAR_FILE, byteLength: 12n}),
+              create(FileEntrySchema, {name: "second.txt", kind: FileNodeKind.REGULAR_FILE})]
+          : [create(FileEntrySchema, {name: pageToken ? "second.txt" : "beta.txt", kind: FileNodeKind.REGULAR_FILE})])
         : relativePath === "docs"
           ? [create(FileEntrySchema, {name: "README.md", kind: FileNodeKind.REGULAR_FILE})]
           : [create(FileEntrySchema, {name: "docs", kind: FileNodeKind.DIRECTORY}),

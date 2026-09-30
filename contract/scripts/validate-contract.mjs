@@ -302,7 +302,14 @@ const architectureText = await readFile(join(contractRoot, "../docs/architecture
 if (!architectureText.includes("~/.dolgorae/controller-carriers/gul/<installation-id>") || !architectureText.includes("no production fake/CLI fallback") || !architectureText.includes("never stores or uses an Operator capability")) throw new Error("carrier-root or production authority boundary is missing from architecture");
 if (operations.operations.some((entry) => entry.verification !== "E12 pinned contract; not runtime/live evidence")) throw new Error("every E12 operation must retain the contract-only verification boundary");
 const requiredSpecsText = await readFile(join(contractRoot, "../docs/required-specs.md"), "utf8");
-if (!requiredSpecsText.includes("E12-T1 has accepted the immutable consumer contract and generated tooling") || !requiredSpecsText.includes("not promote E14-owned REQ-HOST-001/002") || !requiredSpecsText.includes("The Wails shell has no authenticated attach.") || !requiredSpecsText.includes("| REQ-CONSUMER-001 | Immutable TASK-053 consumer source")) throw new Error("REQ-CONSUMER-001 contract-only Current State drifted");
+const roadmapText = await readFile(join(contractRoot, "../docs/roadmap.md"), "utf8");
+const hostTaskRows = roadmapText.split("\n").map(line => line.split("|").map(cell => cell.trim()))
+  .filter(cells => cells[1] === "E8-T3");
+if (hostTaskRows.length !== 1) throw new Error("E8-T3 must have one canonical lifecycle row");
+const shellBoundary = hostTaskRows[0][3] === "Planned"
+  ? "The Wails shell has no authenticated attach."
+  : "the E8-T3 host provides verified authenticated Wails attachment;";
+if (!requiredSpecsText.includes("E12-T1 has accepted the immutable consumer contract and generated tooling") || !requiredSpecsText.includes("not promote E14-owned REQ-HOST-001/002") || !requiredSpecsText.includes(shellBoundary) || !requiredSpecsText.includes("| REQ-CONSUMER-001 | Immutable TASK-053 consumer source")) throw new Error("REQ-CONSUMER-001 contract-only Current State drifted");
 
 if (machineFixture.schema_sha256 !== sha256(machineSchemaBytes)) throw new Error("Machine CLI fixture schema digest drifted");
 if (!schemaValid(machineSchema, machineFixture.valid, machineSchema)) throw new Error("valid Machine CLI comparison fixture failed exact schema validation");

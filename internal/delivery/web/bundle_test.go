@@ -157,6 +157,8 @@ func TestBrowserDeliveryHeadersAndHead(t *testing.T) {
 		{path: "/index.html", contentType: "text/html; charset=utf-8"},
 		{path: "/assets/gul.js", contentType: "text/javascript; charset=utf-8"},
 		{path: "/assets/gul.css", contentType: "text/css; charset=utf-8"},
+		{path: "/manifest.webmanifest", contentType: "application/manifest+json"},
+		{path: "/icons/gul-192.png", contentType: "image/png"},
 	}
 	for _, testCase := range cases {
 		requestPath := testCase.path
@@ -187,7 +189,7 @@ func TestBrowserDeliveryHeadersAndHead(t *testing.T) {
 
 func assertSafetyHeaders(t *testing.T, response *httptest.ResponseRecorder) {
 	t.Helper()
-	if response.Header().Get("Cache-Control") != "no-store" || response.Header().Get("X-Content-Type-Options") != "nosniff" || response.Header().Get("Content-Security-Policy") != "default-src 'none'; script-src 'self'; style-src 'self'; img-src data:; base-uri 'none'; form-action 'none'; frame-ancestors 'none'" {
+	if response.Header().Get("Cache-Control") != "no-store" || response.Header().Get("X-Content-Type-Options") != "nosniff" || response.Header().Get("Content-Security-Policy") != "default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; worker-src 'self'; manifest-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'" {
 		t.Fatalf("response missing browser safety headers: %v", response.Header())
 	}
 }

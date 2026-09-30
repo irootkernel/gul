@@ -29,6 +29,104 @@ func (s fileAttachments) Attachment(_ context.Context, subject, id string) (work
 	return s.entry, nil
 }
 
+type failingFileWatch struct {
+	*files.Service
+	err    error
+	stream bool
+	called atomic.Bool
+}
+
+func (s *failingFileWatch) Watch(_ context.Context, subject, workspaceID string) (<-chan files.Invalidation, error) {
+	if subject != "owner" || workspaceID != "entry" {
+		return nil, files.ErrReattachRequired
+	}
+	s.called.Store(true)
+	if !s.stream {
+		return nil, s.err
+	}
+	changes := make(chan files.Invalidation, 1)
+	changes <- files.Invalidation{Err: s.err}
+	close(changes)
+	return changes, nil
+}
+
+func TestFileWatchErrorsThroughConnectTransport(t *testing.T) {
+	core := app.NewCore(app.Dependencies{Provider: &unavailableCounter{}, Persistence: ready{}, Authorization: allow{}})
+	if err := core.Start(t.Context()); err != nil {
+		t.Fatal(err)
+	}
+	defer core.Stop(context.Background())
+	for _, test := range []struct {
+		name   string
+		err    error
+		stream bool
+		status connect.Code
+	}{
+		{"canceled setup", context.Canceled, false, connect.CodeCanceled},
+		{"unavailable setup", files.ErrWatchUnavailable, false, connect.CodeUnavailable},
+		{"unavailable stream", files.ErrWatchUnavailable, true, connect.CodeUnavailable},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			watch := &failingFileWatch{err: test.err, stream: test.stream}
+			handler := &FileHandler{Core: core, Files: watch, Principal: func(context.Context) (app.Principal, error) {
+				return app.Principal{Subject: "owner"}, nil
+			}}
+			_, route := gulv1connect.NewFileServiceHandler(handler)
+			server := httptest.NewServer(route)
+			defer server.Close()
+			client := gulv1connect.NewFileServiceClient(server.Client(), server.URL)
+			ctx, cancel := context.WithTimeout(t.Context(), 5*time.Second)
+			defer cancel()
+			stream, err := client.WatchFileChanges(ctx, connect.NewRequest(&gulv1.WatchFileChangesRequest{WorkspaceId: "entry"}))
+			if err == nil {
+				defer stream.Close()
+				if stream.Receive() {
+					t.Fatal("unexpected successful invalidation")
+				}
+				err = stream.Err()
+			}
+			if !watch.called.Load() {
+				t.Fatal("request did not reach file watcher")
+			}
+			if test.status == connect.CodeUnavailable {
+				assertFileCode(t, err, test.status, gulv1.ErrorCode_ERROR_CODE_SOURCE_UNAVAILABLE)
+				return
+			}
+			var connectErr *connect.Error
+			if !errors.As(err, &connectErr) || connectErr.Code() != connect.CodeCanceled {
+				t.Fatalf("canceled watch = %v", err)
+			}
+			for _, detail := range connectErr.Details() {
+				value, readErr := detail.Value()
+				if readErr != nil {
+					t.Fatal(readErr)
+				}
+				if _, ok := value.(*gulv1.DomainError); ok {
+					t.Fatal("cancellation acquired a domain error")
+				}
+			}
+		})
+	}
+}
+
+func TestFileWatchCanceledContextUsesNoDomainError(t *testing.T) {
+	core := app.NewCore(app.Dependencies{Provider: &unavailableCounter{}, Persistence: ready{}, Authorization: allow{}})
+	if err := core.Start(t.Context()); err != nil {
+		t.Fatal(err)
+	}
+	defer core.Stop(context.Background())
+	handler := &FileHandler{Core: core, Files: files.NewService(nil), Principal: func(context.Context) (app.Principal, error) {
+		return app.Principal{Subject: "owner"}, nil
+	}}
+	ctx, cancel := context.WithCancel(t.Context())
+	cancel()
+	err := handler.WatchFileChanges(ctx, connect.NewRequest(&gulv1.WatchFileChangesRequest{WorkspaceId: "entry"}), nil)
+	var connectErr *connect.Error
+	if !errors.As(err, &connectErr) || connectErr.Code() != connect.CodeCanceled || len(connectErr.Details()) != 0 {
+		t.Fatalf("canceled context = %v", err)
+	}
+}
+
 func TestFileWatchStreamRechecksPrincipalOnInvalidation(t *testing.T) {
 	root := t.TempDir()
 	name := filepath.Join(root, "public.txt")

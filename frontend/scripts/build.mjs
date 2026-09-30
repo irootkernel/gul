@@ -39,6 +39,12 @@ export async function buildFrontend({
     }
 
     fs.copyFileSync(path.join(repositoryRoot, "frontend/index.html"), path.join(stagingOutput, "index.html"));
+    fs.copyFileSync(path.join(repositoryRoot, "frontend/manifest.webmanifest"), path.join(stagingOutput, "manifest.webmanifest"));
+    fs.copyFileSync(path.join(repositoryRoot, "frontend/service-worker.js"), path.join(stagingOutput, "service-worker.js"));
+    fs.mkdirSync(path.join(stagingOutput, "icons"));
+    for (const size of [192, 512]) {
+      fs.copyFileSync(path.join(repositoryRoot, `frontend/icons/gul-${size}.png`), path.join(stagingOutput, `icons/gul-${size}.png`));
+    }
 
     const files = [];
     for (const [relativePath, bytes] of readTree(stagingOutput)) {

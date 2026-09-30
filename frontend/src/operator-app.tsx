@@ -16,14 +16,23 @@ type SessionClient = {
 
 export type OperatorClients = {workspace: WorkspaceClient; sessions: SessionClient; files: FileClient; details?: SessionDetailClient};
 
-// The caller must supply authenticated clients. The production entrypoint does
-// not construct them before E8 installs its account and listener boundary.
+type OperatorTab = "sessions" | "chat" | "files";
+const tabStorageKey = "gul.presentation.tab";
+function savedTab(): OperatorTab {
+  try {
+    const value = sessionStorage.getItem(tabStorageKey);
+    return value === "chat" || value === "files" ? value : "sessions";
+  } catch { return "sessions"; }
+}
+
+// The caller supplies clients built from the authenticated transport. Saved
+// presentation tab state never replaces fresh server navigation or runtime reads.
 export function OperatorApp({clients, writerActive = false}: {clients: OperatorClients; writerActive?: boolean}) {
   const [workspaces, setWorkspaces] = useState<WorkspaceEntry[]>([]);
   const [sessions, setSessions] = useState<DirectSessionPresentation[]>([]);
   const [workspaceId, setWorkspaceId] = useState("");
   const [sessionId, setSessionId] = useState("");
-  const [tab, setTab] = useState<"sessions" | "chat" | "files">("sessions");
+  const [tab, setTab] = useState<OperatorTab>(savedTab);
   const [fileLocations, setFileLocations] = useState<Record<string, FileLocation>>({});
   const [workspaceError, setWorkspaceError] = useState("");
   const [workspaceExternal, setWorkspaceExternal] = useState(false);
@@ -39,6 +48,8 @@ export function OperatorApp({clients, writerActive = false}: {clients: OperatorC
   const onActivity = useCallback((value: SessionActivity | undefined) => setActivity(value), []);
   const navigationPending = useRef(false);
   const chatHeading = useRef<HTMLHeadingElement>(null);
+
+  useEffect(() => { try { sessionStorage.setItem(tabStorageKey, tab); } catch { /* Storage can be unavailable. */ } }, [tab]);
 
   useEffect(() => {
     let current = true;

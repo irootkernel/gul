@@ -71,6 +71,14 @@ const mutationAdapter = goSourceFiles(path.join(sourceRoot, "internal/mutation/c
   .map(name => fs.readFileSync(name, "utf8")).join("\n");
 const files = goSourceFiles(path.join(sourceRoot, "internal/files"))
   .map(name => fs.readFileSync(name, "utf8")).join("\n");
+const host = goSourceFiles(path.join(sourceRoot, "internal/host"))
+  .map(name => fs.readFileSync(name, "utf8")).join("\n");
+const deployment = goSourceFiles(path.join(sourceRoot, "internal/deployment"))
+  .map(name => fs.readFileSync(name, "utf8")).join("\n");
+const auth = goSourceFiles(path.join(sourceRoot, "internal/auth"))
+  .map(name => fs.readFileSync(name, "utf8")).join("\n");
+const browserHelper = goSourceFiles(path.join(sourceRoot, "frontend/browser"))
+  .map(name => fs.readFileSync(name, "utf8")).join("\n");
 const scenarioImport = /"github\.com\/rootkernel\/gul\/contract\/scenario(?:\/[^\"]+)?"/;
 
 function sourceFiles(directory) {
@@ -124,6 +132,11 @@ const boundaries = [
   ["mutation", mutation, [/"github\.com\/rootkernel\/gul\/internal\/(?:app|delivery|desktop|storage)(?:\/|")/, /"github\.com\/rootkernel\/gul\/(?:contract|api\/generated)(?:\/|")/, /"github\.com\/wailsapp/, /"database\/sql"/, /\bListenAndServe\b/, scenarioImport]],
   ["mutation adapter", mutationAdapter, [/"github\.com\/rootkernel\/gul\/internal\/(?:app|delivery|desktop|storage)(?:\/|")/, /"github\.com\/rootkernel\/gul\/api\/generated(?:\/|")/, /"github\.com\/wailsapp/, /"database\/sql"/, /\bListenAndServe\b/, scenarioImport]],
   ["files", files, [/"github\.com\/rootkernel\/gul\/internal\/(?:app|delivery|desktop|storage)(?:\/|")/, /"github\.com\/rootkernel\/gul\/(?:contract|api\/generated)(?:\/|")/, /"github\.com\/wailsapp/, /"database\/sql"/, /\bListenAndServe\b/, scenarioImport]],
+  ["host", host, [/"github\.com\/wailsapp/, /"database\/sql"/, /"github\.com\/rootkernel\/gul\/(?:contract|api\/generated)(?:\/|")/, /"github\.com\/rootkernel\/gul\/internal\/desktop(?:\/|")/, scenarioImport]],
+  ["deployment", deployment, [/"github\.com\/wailsapp/, /"database\/sql"/, /"github\.com\/rootkernel\/gul\/(?:internal|contract|api)(?:\/|")/, scenarioImport]],
+  // Auth consumes generated password bounds; it owns no runtime adapter.
+  ["auth", auth, [/"github\.com\/wailsapp/, /"database\/sql"/, /"github\.com\/rootkernel\/gul\/contract(?:\/|")/, /"github\.com\/rootkernel\/gul\/internal\/(?:app|delivery|desktop|storage|host)(?:\/|")/, scenarioImport]],
+  ["browser helper", browserHelper, [/"github\.com\/wailsapp/, /"database\/sql"/, scenarioImport]],
 ];
 
 for (const [label, source, forbidden] of boundaries) {
@@ -156,11 +169,16 @@ try {
     ["workspace", '"github.com/rootkernel/gul/contract/port"', boundaries[8][2]],
     ["workspace adapter", '"github.com/rootkernel/gul/internal/storage"', boundaries[9][2]],
     ["presentation", '"github.com/rootkernel/gul/internal/storage"', boundaries[10][2]],
-    ...boundaries.slice(15).flatMap(([label, , forbidden]) => [
+    ...boundaries.slice(15, -4).flatMap(([label, , forbidden]) => [
       [label, '"github.com/rootkernel/gul/internal/storage"', forbidden],
       [label, '"github.com/rootkernel/gul/api/generated/go/gul/v1"', forbidden],
       [label, '"database/sql"', forbidden],
       ...(label.endsWith(" adapter") ? [] : [[label, '"github.com/rootkernel/gul/contract/port"', forbidden]]),
+    ]),
+    ...boundaries.slice(-4).flatMap(([label, , forbidden]) => [
+      [label, '"github.com/wailsapp/wails/v3/pkg/application"', forbidden],
+      [label, '"database/sql"', forbidden],
+      ...(label === "browser helper" ? [] : [[label, '"github.com/rootkernel/gul/contract/generated"', forbidden]]),
     ]),
     ...boundaries.slice(2).map(([label, , forbidden]) => [label, '"github.com/rootkernel/gul/contract/scenario"', forbidden]),
     ...boundaries.slice(2).map(([label, , forbidden]) => [label, '"github.com/rootkernel/gul/contract/scenario/helper"', forbidden]),
@@ -171,4 +189,4 @@ try {
   fs.rmSync(fixture, {recursive: true, force: true});
 }
 
-console.log("frontend, delivery, desktop, command, app, domain, storage, workspace, presentation, session, launch, observation, interaction, action, history, reconnect, sessionclose, recovery, operation, replay, mutation, and files foundation boundaries passed");
+console.log("frontend, delivery, desktop, command, app, domain, storage, workspace, presentation, session, launch, observation, interaction, action, history, reconnect, sessionclose, recovery, operation, replay, mutation, files, host, deployment, auth, and browser helper foundation boundaries passed");

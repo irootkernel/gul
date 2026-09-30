@@ -5,8 +5,8 @@
 | Role | Target and Current Architecture source of truth |
 | Product | Gul |
 | Version | 0.1-dolgorae-consumer-v1 |
-| Status | Approved target rebaseline; current implementation through E8-T2 within component scope |
-| Last updated | 2026-09-30 |
+| Status | Approved target rebaseline; E8-T1/T2/T3 accepted within account, authenticated route and isolated host/delivery scopes; E8 whole-Epic validation pending |
+| Last updated | 2026-10-01 |
 
 ## 1. Purpose and change control
 
@@ -302,7 +302,7 @@ required_assurance = best_effort_personal_alpha
 
 Before StartRun, Gul locally creates and validates a credential carrier under the Dolgorae-owned Gul carrier root, then supplies its derived carrier reference to Dolgorae. Dolgorae verifies and binds the carrier; it does not create the credential or implicitly invent a Gul binding.
 
-E3-T4 provides an unmounted launch selector and authenticated browser handler over
+E3-T4 provides the launch selector and typed browser handler mounted by E8-T3 over
 the user-global Profile registry. It displays compatibility, runtime version,
 models and efforts, supported lanes, maximum assurance, and capability summary.
 The selected model, effort, lane and assurance are checked against a fresh
@@ -311,7 +311,7 @@ preprovisioning; Dolgorae confirms its validity at StartRun. The resulting
 prospective configuration includes both choices. The shared read-only lane
 requires a separate choice and acknowledgement of its permanent effect.
 E2-T3 owns revalidation and the
-actual carrier and StartRun mutation; E8 owns route registration.
+actual carrier and StartRun mutation; the E8-T3 host mounts the Runtime route.
 
 `shared_readonly` is permanent. The first release blocks a later write request with a typed unsupported-transition result and preserves the source. E4-T4 owns any future `CreateWriteContinuation` flow. Starting a fresh Orchestrated Session is a new launch and is never labeled or recorded as lineage continuation.
 
@@ -664,7 +664,7 @@ An operator uses a local terminal outside Gul to reset/provision a Controller ca
 Opening or reconnecting a Direct Session performs `GetRun`, then `ListRunTimelineItems` after the stored timeline checkpoint, validates Run and Turn identities, merges provider chronology into a non-authoritative presentation cache, and publishes one coalesced browser snapshot. Unknown or non-approved timeline kinds are rejected or redacted according to the accepted safe-timeline inventory. Missing TimelineCapability is a compatibility blocker.
 
 The E4-T5 reader also exposes bounded `ListConversation` pages and
-`GetConversationEntry` originals through the unmounted DirectSession handler.
+`GetConversationEntry` originals through the DirectSession handler mounted by E8-T3.
 Conversation entries use Gul IDs and closed kinds/statuses for accepted human
 input, final responses, Interaction openings/resolutions and Turn termination.
 A fresh traversal rebuilds the validated prefix; stable metadata-derived IDs let
@@ -1060,11 +1060,11 @@ The serial command facade is `toolchain-check`, `generate-contract`, `contract-c
 
 ## 19. Current snapshot
 
-**Snapshot date:** 2026-09-30 (E8-T2 complete)
+**Snapshot date:** 2026-10-01 (E8-T3 scoped completion)
 
-**Roadmap point:** E0 is `Completed`, E12 is `Completed`, E1 is `Completed`, and E13 is `Completed`; E1-T1 is `Completed` and E1-T2/T3/T4/T5 are `Completed`. E3 and E3-T1/T2/T3/T4 are `Completed`. E4 and E4-T1/T2/T3/T5 are `Completed`. E4-T4 remains Deferred outside its epic. E5 and E5-T1/T2/T3 are `Completed`. E6 and E6-T1/T2/T3 are `Completed`. E7 and E7-T1/T2/T3 are `Completed`. E8 is `In Progress`; E8-T1 is `Completed` and E8-T2 is `Completed` and E8-T3 is `Planned`. Former E12-T2/T3 remain Retired. E14 owns pre-release application acceptance. No live-provider or assembled-application acceptance is implied.
+**Roadmap point:** E0 is `Completed`, E12 is `Completed`, E1 is `Completed`, and E13 is `Completed`; E1-T1 is `Completed` and E1-T2/T3/T4/T5 are `Completed`. E3 and E3-T1/T2/T3/T4 are `Completed`. E4 and E4-T1/T2/T3/T5 are `Completed`. E4-T4 remains Deferred outside its epic. E5 and E5-T1/T2/T3 are `Completed`. E6 and E6-T1/T2/T3 are `Completed`. E7 and E7-T1/T2/T3 are `Completed`. E8 is `In Review`; E8-T1/T2/T3 are `Completed`. Former E12-T2/T3 remain Retired. E14 owns pre-release application acceptance. No live-provider or assembled-application acceptance is implied.
 
-**Maturity:** delivery-independent Go core, shared React bundle, declared but disabled Gul API, typed provider ports and explicit scenario harness, isolated SQLite repositories with fake-scoped Workspace attachment, local presentation and passive session reads, and a Wails shell foundation. E4 adds typed observation, Interaction cards, action eligibility and bounded history/result/artifact reads. E5 adds whole-session close, reconnect convergence and operation-specific recovery against fakes. E6 adds verified-root local FileService inspection, bounded previews, refresh, watcher and Git review through unmounted typed APIs. E7-T1 adds three responsive panes, workspace/session navigation and read-only FileService presentation through injected typed clients. E7-T2 adds provider-projected activity, prioritized Interaction cards, conversation and accepted-user Prompt History, and guarded whole-session close to that injected-client view. E7-T3 adds composition-safe input and keyboard focus behavior to the same component scope. E8-T1 adds isolated local account setup, bounded password hashing and the injected first-run form. E8-T2 adds protected session routes and the checked auth entry within isolated delivery scope. Authenticated product assembly and live-provider qualification remain pending.
+**Maturity:** delivery-independent Go core, shared React bundle, authenticated Gul API mounted by the E8-T3 host, typed provider ports and explicit scenario harness, host-opened Gul SQLite repositories with fake-scoped runtime attachment, local presentation and passive session reads, and a Wails shell foundation. E4 adds typed observation, Interaction cards, action eligibility and bounded history/result/artifact reads. E5 adds whole-session close, reconnect convergence and operation-specific recovery against fakes. E6 adds verified-root local FileService inspection, bounded previews, refresh, watcher and Git review through component-tested typed APIs mounted by E8-T3. E7-T1 adds three responsive panes, workspace/session navigation and read-only FileService presentation through injected typed clients. E7-T2 adds provider-projected activity, prioritized Interaction cards, conversation and accepted-user Prompt History, and guarded whole-session close to that injected-client view. E7-T3 adds composition-safe input and keyboard focus behavior to the same component scope. E8-T1 adds isolated local account setup, bounded password hashing and the injected first-run form. E8-T2 adds protected session routes and the checked auth entry within isolated delivery scope. E8-T3 accepts the shared authenticated host, verified native attachment, isolated deployment fixtures and installed PWA delivery. Full application and live-provider qualification remain pending.
 
 ### 19.1 Implemented components
 
@@ -1079,9 +1079,8 @@ the service serializes hash work and sanitizes repository failures.
 no username. Remote views have no setup controls. The password stays out of
 React state and browser storage, clears before submission, and is never shown
 in an error. The E7 composition guard protects this form too. These components
-are exercised by isolated Go/SQLite and Chrome checks. The checked entry still
-mounts the fail-closed foundation. E8-T2 owns AuthService transport and session
-protection; E8-T3 owns native bootstrap, HTTPS and authenticated host assembly.
+are exercised by isolated Go/SQLite and Chrome checks. The checked entry starts same-origin authentication and typed protected clients.
+E8-T3 supplies protected native bootstrap and shared HTTPS delivery.
 
 E8-T2 supplies checked AuthService declarations, hash-only durable browser
 sessions, one shared HTTP/ConnectRPC protection boundary, and explicit route
@@ -1099,26 +1098,24 @@ and removes the operator view on expiry or logout. Feature calls share in-memory
 CSRF and cancellation. Server cancellation or denial rechecks saved session
 state without replaying a failed action. Auth RPCs have a ten-second deadline;
 logout removes protected content and active requests before awaiting revocation.
-An uncertain logout keeps only the CSRF needed for a retry. Automatic entry still
-mounts the foundation. The host must select verified HTTPS origins, transfer
-the native setup credential privately, supply the shared core and completed
-service dependencies, and mount the routes and bundle in E8-T3. T2's TLS RPC,
-SQLite and Chrome component tests do not qualify that host or a live provider.
+An uncertain logout keeps only the CSRF needed for a retry. E8-T3 selects the loopback HTTPS origin, transfers native setup permission
+privately and mounts the shared routes and bundle. T2 component tests do not
+qualify native delivery or a live provider; T3 adds isolated host acceptance.
 
 `internal/app` implements the shared delivery-independent core lifecycle and
 explicit lifecycle, provider, persistence and authorization ports. Missing
 dependencies are composed with fail-closed defaults: startup performs no
 external provider work, product access is denied, and provider/persistence
 availability is not implied. The core does not import Wails; the desktop
-foundation hosts it, while assembled headless and authenticated delivery remain
-future work.
+foundation hosts it, while the E8-T3 host owns shared HTTPS and SQLite lifecycle. Released
+provider wiring and complete application acceptance remain E2 and E14 work.
 
 `api/proto` declares Gul-owned Auth, Runtime, WorkspacePresentation, DirectSession,
 ClientEventService, Interaction, Writer, ArtifactPresentation and FileService browser
 contracts. Its `bounds.json` is the shared authority for generated Go and
 TypeScript page/content limits. Generated clients are checked for drift. The
 declarations are registered by the isolated E8-T2 protected route assembly;
-production host mounting remains E8-T3-owned. `contract/port` defines the exact
+the shared E8-T3 host mounts them behind the same session boundary. `contract/port` defines the exact
 27-method typed consumer interface and a closed provider-error translation
 catalog; the root Go module consumes this checked local module through one
 explicit local replacement. `contract/scenario` supplies a stateful test
@@ -1144,8 +1141,8 @@ inspection while retaining its Gul presentation ID and metadata. The pinned
 inspection adapter lives in `internal/workspace/contractprovider`, keeping the
 Workspace service and SQLite adapter independent of generated provider types.
 `internal/delivery/api` exposes typed Runtime, Workspace and Direct Session presentation
-handlers for explicit authenticated composition; no production route is
-registered. Their authentication and authorization rejections preserve the
+handlers mounted by the shared E8-T3 host behind authentication. Their
+authentication and authorization rejections preserve the
 ConnectRPC status and include `UNAUTHORIZED` with the closed `ABORT` action.
 The macOS shell
 has a directory-picker adapter, but no attached product binding. Dismissing the
@@ -1170,9 +1167,9 @@ refresh closes retained pages and advances a Workspace revision. A bounded host
 watcher tracks verified nodes and coalesces public changes independently of the
 provider. Direct Git commands report contained direct and ancestor status and
 compare fixed `HEAD` with current Working previews. Typed Git degradation
-preserves Working preview. No FileService route is mounted yet. E7 supplies
-the injected-client file pane; E8/E14 own authenticated delivery and assembled
-application acceptance.
+preserves Working preview. The authenticated host mounts FileService routes.
+E7 supplies the file pane; E8 owns authenticated delivery, and E14 retains full
+assembled application acceptance.
 
 `internal/presentation` changes only subject-scoped Gul metadata. Attached
 Workspace names, favorites and hidden state are independent of their directory
@@ -1181,7 +1178,7 @@ provider reference without invoking it. Navigation points only to a visible
 attached Workspace and, when selected, its visible Direct Session. Hiding a
 Workspace clears its selection; archiving a session clears that session from
 navigation. The typed handlers use the core's local access gate, so an offline
-provider does not block authenticated presentation edits. They remain unmounted.
+provider does not block authenticated presentation edits. The shared host mounts these presentation handlers behind authentication.
 
 `internal/session` persists one Gul Direct Session binding per accepted provider
 Primary Run. Its trusted bind hook requires a revalidated Workspace and a
@@ -1197,7 +1194,7 @@ unavailable state until a new authoritative observation succeeds.
 Oversized provider snapshots fail validation before persistence. A coalesced
 refresh is bounded independently of any one caller, so cancelling one browser
 read does not cancel another caller's read of the same session.
-The unmounted Direct Session handler
+The mounted Direct Session handler
 lists local bindings and maps aggregate reads to Gul-owned browser types.
 Unavailable reads omit counts and close references. Workspace removal clears
 only local presentation, navigation and binding rows.
@@ -1205,7 +1202,7 @@ only local presentation, navigation and binding rows.
 `internal/launch` reads the global Profile catalog through the pinned
 ListProfiles/GetProfile adapter and checks explicit launch choices against a
 fresh selected Profile. It checks the Policy name against trusted local
-preprovisioning. The unmounted Runtime handler returns a bounded browser
+preprovisioning. The mounted Runtime handler returns a bounded browser
 catalog and prospective configuration, including the shared read-only warning.
 Accepted semantic errors from GetProfile retain `FIX_REQUEST` or
 `USE_SUPPORTED_PROFILE`. Other semantic errors require operator repair.
@@ -1222,15 +1219,15 @@ a failed transaction leaves both stamp and cursor unchanged.
 The shared manager admits at most eight streams with safety priority and
 30-second ordinary demotion hysteresis. Browser notifications retain only Gul
 session/correlation references; slow clients receive the latest invalidation.
-The unmounted ClientEvent handler uses generated ConnectRPC server streaming,
+The mounted ClientEvent handler uses generated ConnectRPC server streaming,
 bounded journal replay, and snapshot-required notifications when replay exceeds
 256 entries. It checks the subject and session on each read. The shared writer
 rule displays WRITE only for fresh active owner authority with verified write
 policy; only an explicit write intent sets the upstream write flag. The writer
 status component renders the backend mode in `SessionDetail`'s injected-client
 presentation. These paths are tested against explicit fakes; the ClientEvent
-handler remains unmounted. Authenticated product assembly remains with E8 and
-E14.
+handler is mounted behind shared authentication. Full authenticated product
+assembly remains with E14; live event-source qualification remains E2/E9.
 E5 owns reconnect coordination and fresh aggregate convergence.
 
 `internal/interaction` provides observer summaries, Controller-authorized typed
@@ -1253,11 +1250,12 @@ member Runs, Spawns, pending approvals and accepted unfinished tasks. A pending
 local call blocks recovery even when another matching attempt has an unknown
 outcome. Backend Acquire and Release re-evaluate these facts before one provider
 call; accepted projections require a fresh read before another mutation.
-The generated WriterAction handler remains unmounted. E7 composes the writer
+The shared host mounts the generated WriterAction handler behind authentication.
+E7 composes the writer
 panel and interrupt consent into the injected-client operator view and verifies
 the separate prompt draft component in browser fixtures. E2 owns Submit/Interrupt
 execution and E5 supplies Close coordination at their checked adapter boundaries.
-E8/E14 own authenticated assembly and application acceptance.
+E8 supplies authenticated delivery; E14 retains full application acceptance.
 
 The observer connects live-window selection to per-session unary polling at a
 five-second interval with a five-second total deadline. Independent workers
@@ -1265,9 +1263,9 @@ prevent a slow Run from starving other Runs. Polling needs no Controller; it
 reads Run and pending Interaction snapshots and emits coalesced invalidations
 through the existing Gul journal without moving provider event checkpoints.
 Read failures invalidate the visible projection rather than enabling actions.
-The generated InteractionPresentation handler remains unmounted; E7 composes
-the React cards into the injected-client operator view. E8 owns authenticated
-registration and E2/E9 own live transport qualification.
+The shared host mounts the generated InteractionPresentation handler behind
+authentication. E7 supplies the React cards in the operator view; E14 retains
+full application acceptance, and E2/E9 own live transport qualification.
 
 `internal/history` supplies Controller-authorized conversation, prompt and public
 Specialist-result reads through the checked contract adapter. Page tokens bind
@@ -1283,11 +1281,13 @@ length and SHA-256 before returning bytes. The service permits two concurrent
 reads with a five-second deadline. Tokens expire after fifteen minutes and on
 restart. Missing item mappings return unavailable until an authorized traversal
 rebuilds them; reconstruction preserves the same item IDs. SQLite stores only
-the existing subject-scoped session binding. The generated history/conversation
-and ArtifactPresentation handlers remain unmounted. The shared Markdown renderer
+the existing subject-scoped session binding. The shared host mounts conversation
+and history reads through DirectSession and ArtifactPresentation handlers behind
+authentication. The shared Markdown renderer
 allows paragraphs, headings and fenced code; HTML, links and images stay literal.
 E5 supplies reconnect scheduling and E7 supplies the integrated conversation
-and history UI through injected clients. E8 owns authenticated route registration.
+and history UI through typed clients. E8 supplies authenticated delivery;
+E14 retains full application acceptance.
 These components use explicit fake evidence, not live RPCs.
 
 `internal/storage` requires an owner-only database directory and file, then
@@ -1299,8 +1299,8 @@ revalidates those keys under a selected owner-only root immediately before its
 caller uses them; no provider RPC is wired yet. Cache stamps become stale
 on reopen. Delivery sequence allocation and journal insertion share one
 immediate transaction. Backup checkpoints WAL and publishes an owner-only
-`VACUUM INTO` image without copying the live file. This repository remains
-unwired to production startup after E1-T4 completion.
+`VACUUM INTO` image without copying the live file. The shared E8-T3 host opens
+these repositories during production startup and closes them after shutdown.
 Its second migration adds a subject-scoped Workspace attachment record; local
 presentation and verified provider reference commit in one transaction.
 Migration 3 adds subject-scoped favorite tables. Direct Session discovery
@@ -1336,8 +1336,9 @@ incompatible, busy and degraded observations retain the last snapshot as stale;
 identity and credential failures remain blocked. The isolated `ProviderStatus`
 component displays health and snapshot freshness without deriving actions.
 `internal/recovery.Supervisor` uses an injected gateway lifecycle, clock and
-random source for the bounded restart policy. Product route registration,
-process startup and live-provider evidence remain with their later owners.
+random source for the bounded restart policy. The shared E8-T3 host mounts
+product routes; provider process startup and live-provider evidence remain
+with E2/E9.
 
 E5-T2 adds `internal/reconnect` with a checked compatibility
 probe, a process-local action gate, independent per-Run refresh and convergence,
@@ -1352,8 +1353,9 @@ notification revokes its gate; a replacement recovery waits for disconnect
 invalidation to finish.
 Only `internal/sessionclose.AggregateRefresher` advances the artifact-verified timeline
 head. Browser reconnect reads presentation, execution state and bounded Gul
-delivery without sending a provider mutation. These components remain
-unmounted pending later product assembly.
+delivery without sending a provider mutation. The shared host mounts Close
+and browser delivery handlers; provider reconnect, observation admission and
+full runtime startup assembly remain with E14/E2.
 
 E5-T3 adds a non-secret mutation-attempt detail table in migration 7 and a
 StartRun-only protected replay store. StartRun stores a bounded canonical
@@ -1380,17 +1382,18 @@ and its owner matches the requested effect. Reconciliation rechecks the cache
 and attempt under one transaction; old attempts without a pre-call baseline
 remain unknown. A later fresh Interaction card can settle a matching protected-response attempt.
 Database reopen also turns unfinished Close and other pending attempts into
-observable uncertainty. These services and adapters remain unmounted. E8 owns
+observable uncertainty. The shared E8 host mounts the completed handlers with
+runtime ports unavailable by default. E8 owns
 authenticated product routes and startup assembly, E14 owns assembled application
 acceptance, and E2/E9 own live provider evidence.
 
-`internal/desktop` starts and stops the same core through its lifecycle boundary,
-then runs a Wails v3 window over the checked bundle's existing asset handler.
-The shell registers no Wails services or product API bindings. Its injected
-window host permits isolated lifecycle and asset smoke tests without opening a
-real WebView. Window shutdown gives the shared core a five-second bounded stop
-context, including when the window caller's context is canceled. Authenticated
-singleton and verified attach remain E8-T3 work.
+The production `internal/desktop` Wails view opens the shared HTTPS host after
+verifying its protected owner and local leaf. It serves no separate asset handler
+and registers no Wails product services. `cmd/gul` starts the core when absent or
+attaches to its verified headless owner. Window close drains only a desktop-owned
+core; it leaves a headless owner running. Isolated configuration probes and the
+opt-in real WebKit probe verify origin/leaf pinning and native bootstrap. The
+older injected shell lifecycle fixtures remain component evidence.
 
 ### 19.2 Verified runtime behavior
 
@@ -1403,9 +1406,10 @@ browser/shell bytes. Gul schema and port fixtures verify generated client drift,
 the 27-method inventory, provider error/action coverage, page-token scope,
 bounded metadata, and CloseOutcome distinctions. The stateful `contract/scenario`
 tests verify deterministic replay, captured pages, faults, streams, and close
-recovery through the frozen port. These checks start no real
-provider and do not establish a listener, authenticated client, Wails host, enabled browser API,
-assembled persistence lifecycle, or live compatibility. Isolated SQLite tests
+recovery through the frozen port. These component checks start no real provider
+and do not establish live compatibility or full application acceptance. E8-T3
+adds isolated authenticated HTTPS, mounted API and SQLite lifecycle checks, plus
+an opt-in real Wails/WebKit probe. Isolated SQLite tests
 exercise migration, schema drift, connection settings, typed records, rollback,
 sequence allocation, cache staleness, and backup publication.
 Workspace tests cover picker and remote registration, canonical aliases, denied
@@ -1423,28 +1427,65 @@ and shared delivery adapter now accompany the five SOT documents, E0-T8
 toolchain authority, and E12-T1 TASK-053 contract artifacts. The serial Make
 facade validates both Go manifests, the root package pins, exact Go 1.27.1, and
 the Bun minimum before running frontend, core, contract, SOT and drift gates.
-Historical E0-T7 facts remain scoped to their original digests. The Wails shell
-has no authenticated attach or enabled product route; no assembled database
-service, live provider adapter, or live provider behavior exists.
+Historical E0-T7 facts remain scoped to their original digests. The E8-T3
+candidate supplies authenticated attachment and mounted product routes against
+one SQLite lifecycle. Full application assembly and live provider acceptance
+remain pending.
 
 ### 19.4 Current topology and data
 
 ```text
-Shared Go core composition and lifecycle exist without assembled delivery.
+Shared Go core composition and lifecycle serve the authenticated host; full application acceptance remains pending.
 One checked React bundle and shared browser/shell asset delivery exist.
-An isolated Wails shell foundation reuses the shared core and checked bundle; authenticated attach is not enabled.
-ConnectRPC services are declared and generated; isolated protected route assembly exists, but production host mounting is not enabled.
-Gul-only SQLite schema and repositories exist in isolated tests; no production database lifecycle is enabled.
+The Wails shell uses the shared authenticated HTTPS host and verified attachment; live-provider qualification remains pending.
+ConnectRPC services are declared, generated and mounted behind the shared authentication boundary; live-provider assembly remains unqualified.
+Gul-only SQLite repositories are opened by the shared authenticated host; live-provider acceptance remains disabled.
 No Runtime Provider adapter, RPC supervisor, Controller credential store, timeline adapter, or Artifact adapter exists in the assembled product. Isolated Workspace, session, launch, observation, Interaction, action and history/artifact adapters use the pinned provider port with explicit fakes.
 ```
 
 ### 19.5 Security posture
 
-No Gul service is running or exposed. The static foundation contains no product
-controls or enabled API, and default core composition denies product access before
-probing provider or persistence availability. Production authentication,
-transport protection and durable security behavior remain Required State.
+E8-T1/T2 supply protected account setup and durable sessions. The E8-T3
+host mounts completed feature handlers behind the shared HTTPS boundary.
+Runtime ports are unavailable by default; assembled fake-provider acceptance and
+live-provider qualification remain with E14 and E2/E9. No service is installed
+or exposed automatically by building the repository.
 
 ## 20. Promotion format
 
 Each completed task records date, implemented components/types/APIs, security and recovery boundaries, verification evidence, accepted limitations, promoted requirement IDs, and ADRs. Required behavior is never described as Current merely because its design or dependency contract exists.
+
+### E8-T3 authenticated host acceptance (2026-10-01)
+
+Accepted Current State covers REQ-HOST-007/009/010, REQ-NET-001..004 and
+REQ-UI-007 within the isolated host and delivery scope recorded in the Required
+Specifications ledger. Existing ADRs remain applicable; no new decision or live
+qualification is implied.
+
+`internal/host` owns the private state directory, stable owner lock, persisted
+loopback certificate, SQLite lifecycle and the authenticated HTTPS listener.
+It binds only 127.0.0.1 at the selected fixed port and refuses a collision.
+A second headless invocation exits; a desktop invocation can attach only after
+checking protected state, lock contention, certificate trust and a fresh private
+nonce exchange. It never signals an unverified process or unlinks a lock inode.
+The shell keeps no lifecycle authority over a pre-existing headless owner.
+
+The Wails WebView pins the protected leaf for its exact local HTTPS origin,
+blocks foreign navigation and new windows, and adds setup permission at document
+start only in that origin. The frontend consumes and deletes this in-memory
+field. Ordinary browser requests cannot mint the permission. Local use needs
+no Tailscale or system trust installation.
+
+The checked bundle starts authentication and shares its protected Connect
+transport across typed operator clients. PWA metadata and icons use the same
+bundle. Its service worker stores no responses; API, account and runtime data
+remain online-only. Refresh restores only the presentation tab, then reads
+current authentication and navigation from the server.
+
+Missing runtime dependencies stay unavailable; no fake or diagnostic CLI is
+selected by production composition. Full feature assembly remains assigned to E14;
+released provider and actual deployment qualification remain E2/E9.
+
+The [host operations guide](operations.md) describes commands, protected logs,
+certificate recovery and the read-only Tailscale gate. It is subordinate to the
+five source-of-truth documents.

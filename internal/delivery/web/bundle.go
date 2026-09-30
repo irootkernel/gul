@@ -14,15 +14,15 @@ var embedded embed.FS
 
 var assets = mustSub(embedded, "dist")
 
-const contentSecurityPolicy = "default-src 'none'; script-src 'self'; style-src 'self'; img-src data:; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"
+const contentSecurityPolicy = "default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; worker-src 'self'; manifest-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"
 
 // Assets returns the one checked frontend bundle used by every delivery host.
 func Assets() fs.FS {
 	return assets
 }
 
-// BrowserHandler serves the same bundle for browser delivery. Authentication
-// and the production listener remain owned by later tasks.
+// BrowserHandler serves public checked assets. The shared host authenticates
+// every RPC; these files contain no user state.
 func BrowserHandler() http.Handler {
 	return http.HandlerFunc(func(response http.ResponseWriter, request *http.Request) {
 		response.Header().Set("Cache-Control", "no-store")
@@ -61,6 +61,10 @@ func contentType(name string) string {
 		return "text/javascript; charset=utf-8"
 	case ".css":
 		return "text/css; charset=utf-8"
+	case ".webmanifest":
+		return "application/manifest+json"
+	case ".png":
+		return "image/png"
 	case ".json":
 		return "application/json"
 	default:

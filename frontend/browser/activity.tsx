@@ -21,7 +21,7 @@ import {SessionDetail, type SessionDetailClient} from "../src/session-detail";
 import {OperatorApp, type OperatorClients} from "../src/operator-app";
 import "../src/styles.css";
 
-const calls = {close: 0, resolve: 0, conversation: 0, history: 0, original: 0, entry: 0, originalFailureSettled: 0, originalSuccessSettled: 0, action: 0, pending: 0, card: 0, execution: 0};
+const calls = {close: 0, resolve: 0, conversation: 0, history: 0, original: 0, entry: 0, originalFailureSettled: 0, originalSuccessSettled: 0, promptOriginalSettled: 0, action: 0, pending: 0, card: 0, execution: 0};
 const params = new URL(location.href).searchParams;
 const faults = {history: params.has("history-failure") ? 1 : 0};
 const blocker = params.get("blocker");
@@ -97,6 +97,11 @@ const clients: SessionDetailClient = {
       : {snapshotId: "prompts-1", items: [prompts[0]!], nextPageToken: "more"});
   },
   getPromptHistoryItem: async ({promptItemId}) => {calls.original++; const item = prompts.find(value => value.promptItemId === promptItemId)!;
+    if (calls.original === 1 && params.has("prompt-original-race")) {
+      await new Promise(resolve => setTimeout(resolve, 500));
+      calls.promptOriginalSettled++;
+      if (params.get("prompt-original-race") === "failure") throw Error("fixture delayed Prompt History original failure");
+    }
     return create(GetPromptHistoryItemResponseSchema, {promptItemId, ordinal: params.has("prompt-drift") ? item.ordinal + 1n : item.ordinal,
       conversationEntryId: item.conversationEntryId,
       original: create(PromptOriginalSchema, {content: params.has("artifact") || params.has("artifact-mismatch")

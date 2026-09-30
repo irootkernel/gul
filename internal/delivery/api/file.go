@@ -15,8 +15,18 @@ import (
 // authentication and listener registration.
 type FileHandler struct {
 	Core      *app.Core
-	Files     *files.Service
+	Files     FileService
 	Principal PrincipalResolver
+}
+
+type FileService interface {
+	Inspect(context.Context, string, string, string) (files.Node, error)
+	ListDirectory(context.Context, string, string, string, uint32, string) (files.DirectoryPage, error)
+	ReadPreview(context.Context, string, string, string) (files.Preview, error)
+	Refresh(context.Context, string, string) (uint64, error)
+	GitStatus(context.Context, string, string, string) (files.GitStatus, error)
+	Compare(context.Context, string, string, string) (files.Comparison, error)
+	Watch(context.Context, string, string) (<-chan files.Invalidation, error)
 }
 
 var _ gulv1connect.FileServiceHandler = (*FileHandler)(nil)

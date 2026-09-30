@@ -24,6 +24,12 @@ function parentPath(directory: string) {
   return directory.slice(0, Math.max(0, directory.lastIndexOf("/")));
 }
 
+function mergeEntries(previous: FileEntry[], next: FileEntry[]) {
+  const entries = new Map(previous.map(entry => [entry.name, entry]));
+  for (const entry of next) entries.set(entry.name, entry);
+  return [...entries.values()];
+}
+
 export function FilePane({workspaceId, client, location, onLocation, writerActive}: {
   workspaceId: string;
   client: FileClient;
@@ -69,7 +75,7 @@ export function FilePane({workspaceId, client, location, onLocation, writerActiv
     setDirectoryError("");
     setDirectoryLoading(true);
     void client.listDirectory({workspaceId, relativePath: location.directory, pageSize: defaultPageSize, pageToken: ""})
-      .then(page => { if (current) {setEntries(page.entries); setNextPageToken(page.nextPageToken);} })
+      .then(page => { if (current) {setEntries(mergeEntries([], page.entries)); setNextPageToken(page.nextPageToken);} })
       .catch(() => { if (current) setDirectoryError("Directory is unavailable. Refresh to try again."); })
       .finally(() => {if (current) setDirectoryLoading(false);});
     return () => {current = false;};
@@ -103,7 +109,7 @@ export function FilePane({workspaceId, client, location, onLocation, writerActiv
     try {
       const page = await client.listDirectory({workspaceId, relativePath: location.directory, pageSize: defaultPageSize, pageToken: token});
       if (scope.current === requestScope) {
-        setEntries(items => [...items, ...page.entries]);
+        setEntries(items => mergeEntries(items, page.entries));
         setNextPageToken(page.nextPageToken);
         setDirectoryError("");
       }

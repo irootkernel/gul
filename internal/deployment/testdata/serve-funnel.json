@@ -1,0 +1,5 @@
+{
+  "TCP": {"443": {"HTTPS": true}},
+  "Web": {"gul.tail123.ts.net:443": {"Handlers": {"/": {"Proxy": "https+insecure://127.0.0.1:18443"}}}},
+  "AllowFunnel": {"gul.tail123.ts.net:443": true}
+}

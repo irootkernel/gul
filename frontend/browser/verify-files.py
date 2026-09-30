@@ -97,10 +97,12 @@ with tempfile.TemporaryDirectory(prefix="gul-e7-files-") as directory:
         cli(directory, "click", ref(snap, 'button "Load more files"'))
         snap = snapshot(directory)
         assert "More files are unavailable" in snap and "second.txt" not in snap, snap
+        cli(directory, "run-code", "async page => { await page.evaluate(() => {window.fixture.faults.overlappingPage = 1}); }")
         cli(directory, "click", ref(snap, 'button "Load more files"'))
         snap = snapshot(directory)
         assert "More files are unavailable" not in snap, snap
         assert "second.txt" in snap, snap
+        cli(directory, "run-code", "async page => { if (await page.getByRole('button', {name:'beta.txt', exact:true}).count() !== 1 || await page.getByRole('button', {name:'second.txt', exact:true}).count() !== 1) throw Error('Overlapping directory page duplicated an entry'); }")
         cli(directory, "click", ref(snap, 'button "beta.txt"'))
         snap = snapshot(directory)
         assert "Preview of beta.txt" in snap and "Git status is unavailable" in snap, snap
@@ -226,6 +228,18 @@ with tempfile.TemporaryDirectory(prefix="gul-e7-files-") as directory:
         snap = snapshot(directory)
         assert "First session" in snap and "Workspace navigation is unavailable" not in snap, snap
         print("PASS real Chrome: desktop panes, mobile navigation, file preview/review, denied node, context preservation, explicit refresh")
+        cli(directory, "goto", f"http://127.0.0.1:{server.server_port}/")
+        cli(directory, "run-code", """async page => {
+          await page.getByRole('button', {name:'Sessions', exact:true}).click();
+          await page.getByRole('combobox', {name:'Workspace'}).selectOption('beta');
+          await page.getByRole('button', {name:'Files', exact:true}).click();
+          await page.getByRole('button', {name:'beta.txt', exact:true}).waitFor();
+          await page.evaluate(() => {window.fixture.faults.overlappingPage = 1; window.fixture.faults.overlappingDirectory = 1;});
+          await page.getByRole('button', {name:'Load more files'}).click();
+          await page.getByRole('button', {name:'▸ beta.txt', exact:true}).waitFor();
+          const names = await page.locator('.file-pane__list button').allTextContents();
+          if (names.join('|') !== '▸ beta.txt|second.txt') throw Error('Overlapping page lost latest metadata or first-seen row order');
+        }""")
     finally:
         try:
             cli(directory, "close")

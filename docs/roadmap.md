@@ -3,12 +3,12 @@
 | Field | Value |
 | --- | --- |
 | Role | Sole authority for task identity, order, status, dependencies, and phase |
-| Revision | 2026-09-30 E8-T2 completion |
+| Revision | 2026-10-01 E8-T3 completion |
 | Active Task | None |
-| Next | E8-T3 |
+| Next | E14-T1 |
 | Required provider | Released Dolgorae v0.1.3 implementing `dolgorae.gul-consumer/v1` |
 
-`Next` names the next ready Task, E8-T3.
+`Next` names E14-T1, which may start after E8 whole-Epic validation and closeout.
 
 ## 1. Status and execution rules
 
@@ -135,7 +135,7 @@ second owner of membership, order or status.
 | E5 | Completed | Safe whole-session close, projection convergence and ambiguous-outcome handling | [Roadmap](#e5-complete-safe-close-and-recovery); [Memo](implementation-memo.md#e5-epic-closeout-2026-09-28) |
 | E6 | Completed | Read-only FileService and bounded preview/review | [Roadmap](#e6-complete-read-only-files-and-review); [Memo](implementation-memo.md#e6-epic-closeout-2026-09-29) |
 | E7 | Completed | Responsive UI, mandatory Prompt History, accessibility and IME | [Roadmap](#e7-complete-the-usable-responsive-interface); [Memo](implementation-memo.md#e7-epic-closeout-2026-09-30) |
-| E8 | In Progress | Authentication, browser protection and headless/PWA/tailnet packaging together | [Shared](todo/GUL-CONSUMER-REBASELINE.md) |
+| E8 | In Review | Authentication, browser protection and headless/PWA/tailnet packaging together | [Shared](todo/GUL-CONSUMER-REBASELINE.md) |
 | E14 | Planned | Assembled pre-release application acceptance and live handoff; E14-T1 | [Shared](todo/GUL-CONSUMER-REBASELINE.md) |
 | E2 | Planned | Released provider qualification and real integration | [Shared](todo/GUL-CONSUMER-REBASELINE.md) |
 | E9 | Planned | Actual-provider fault/security/E2E and Gul release qualification | [Shared](todo/GUL-CONSUMER-REBASELINE.md) |
@@ -277,14 +277,15 @@ Entry: E7 Completed. Execute T1, T2 and T3 together, not in separate early/late
 passes. Completion: actual account/cookie/CSRF protection gates the assembled
 application, with shell/headless singleton, verified attachment, PWA and tailnet
 packaging tests. No remote-ready claim is made before those protections pass.
-Deployment tests use isolated fixtures and do not authorize host installation or
-live Tailscale changes. Actual-provider deployment qualification remains E9.
+Deployment tests use isolated fixtures. The opt-in installed-PWA check requires
+separate approval for temporary macOS app registration and removal; launchd
+installation and live Tailscale changes remain excluded. Actual-provider deployment qualification remains E9.
 
 | Task | Phase | Status | Predecessors | Owned result and verification |
 | --- | --- | --- | --- | --- |
 | E8-T1 | Pre-release | Completed | E1-T4 | One-account setup and protected password storage |
 | E8-T2 | Pre-release | Completed | E8-T1, E1-T3 | Cookie sessions, revocation, CSRF/Origin and rate-limit tests across completed feature routes |
-| E8-T3 | Pre-release | Planned | E8-T2, E1-T5, E7-T3 | Authenticated shell/headless singleton and verified attach, launchd/PWA/Serve packaging and negative deployment fixtures, no real provider-ready claim |
+| E8-T3 | Pre-release | Completed | E8-T2, E1-T5, E7-T3 | Authenticated shell/headless singleton and verified attach, launchd/PWA/Serve packaging and negative deployment fixtures, no real provider-ready claim |
 
 ### E14: Accept the assembled pre-release application
 

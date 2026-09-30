@@ -1,0 +1,7 @@
+{
+  "TCP": {"443": {"HTTPS": true}, "8443": {"HTTPS": true}},
+  "Web": {
+    "gul.tail123.ts.net:443": {"Handlers": {"/": {"Proxy": "https+insecure://127.0.0.1:18443"}}},
+    "other.tail123.ts.net:8443": {"Handlers": {"/": {"Proxy": "http://127.0.0.1:8080"}}}
+  }
+}

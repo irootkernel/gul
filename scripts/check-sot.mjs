@@ -274,19 +274,19 @@ export function validateRepository(root, options = {}) {
   if (tasks.get('E1-T1')?.state === 'Completed') {
     for (const boundary of [
       'No Runtime Provider adapter',
-      'Production authentication,',
+      tasks.get('E8-T3')?.state === 'Planned' ? 'Production authentication,' : 'Runtime ports are unavailable by default;',
     ]) {
       if (!architecture.includes(boundary)) errors.push(`Architecture must retain the E1-T1 boundary: ${boundary}`);
     }
   }
   if (tasks.get('E1-T4')?.state === 'Planned') {
     if (!architecture.includes('No Gul SQLite schema exists.')) errors.push('Architecture must retain the pre-E1-T4 SQLite absence boundary');
-  } else if (!architecture.includes('Gul-only SQLite schema and repositories exist in isolated tests; no production database lifecycle is enabled.')) {
+  } else if (!architecture.includes(tasks.get('E8-T3')?.state === 'Planned' ? 'Gul-only SQLite schema and repositories exist in isolated tests; no production database lifecycle is enabled.' : 'Gul-only SQLite repositories are opened by the shared authenticated host; live-provider acceptance remains disabled.')) {
     errors.push('Architecture must distinguish isolated SQLite repositories from production database lifecycle');
   }
   if (tasks.get('E1-T3')?.state === 'Planned') {
     if (!architecture.includes('No ConnectRPC service exists.')) errors.push('Architecture must retain the pre-E1-T3 ConnectRPC absence boundary');
-  } else if (!architecture.includes('ConnectRPC services are declared and generated; isolated protected route assembly exists, but production host mounting is not enabled.')) {
+  } else if (!architecture.includes(tasks.get('E8-T3')?.state === 'Planned' ? 'ConnectRPC services are declared and generated; isolated protected route assembly exists, but production host mounting is not enabled.' : 'ConnectRPC services are declared, generated and mounted behind the shared authentication boundary; live-provider assembly remains unqualified.')) {
     errors.push('Architecture must distinguish isolated ConnectRPC route assembly from production host mounting');
   }
   if (tasks.get('E1-T2')?.state === 'Completed') {
@@ -301,11 +301,11 @@ export function validateRepository(root, options = {}) {
     }
     if (tasks.get('E1-T5')?.state === 'Planned') {
       if (!architecture.includes('No Wails host exists.')) errors.push('Architecture must retain the pre-E1-T5 Wails absence boundary');
-    } else if (!architecture.includes('An isolated Wails shell foundation reuses the shared core and checked bundle; authenticated attach is not enabled.')) {
+    } else if (!architecture.includes(tasks.get('E8-T3')?.state === 'Planned' ? 'An isolated Wails shell foundation reuses the shared core and checked bundle; authenticated attach is not enabled.' : 'The Wails shell uses the shared authenticated HTTPS host and verified attachment; live-provider qualification remains pending.')) {
       errors.push('Architecture must distinguish the isolated Wails shell from authenticated attach');
     }
-    if (tasks.get('E1-T5')?.state !== 'Planned' && !documents.get('required-specs.md').includes('The Wails shell has no authenticated attach.')) {
-      errors.push('Required Specifications must retain the E1-T5 unauthenticated shell boundary');
+    if (tasks.get('E1-T5')?.state !== 'Planned' && !documents.get('required-specs.md').includes(tasks.get('E8-T3')?.state === 'Planned' ? 'The Wails shell has no authenticated attach.' : 'the E8-T3 host provides verified authenticated Wails attachment;')) {
+      errors.push('Required Specifications must distinguish the E1-T5 shell foundation from E8-T3 authenticated attachment');
     }
     if (!documents.get('required-specs.md').includes('not partial promotion of E14-owned REQ-HOST-001/002')) {
       errors.push('E1-T2 requirement non-promotion boundary is missing from Required Specifications');

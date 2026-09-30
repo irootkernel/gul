@@ -9,13 +9,33 @@
     },
     {
       "path": "assets/gul.js",
-      "sha256": "0b935ad1f6dbf56ddfc9c2e9d23eb6dcf200691c756f23881fe9d146c74519f9",
-      "size": 392631
+      "sha256": "4b5740acb8c0d4a771308a05658eb0024c97370badb6ab310997b82950cf4242",
+      "size": 394219
+    },
+    {
+      "path": "icons/gul-192.png",
+      "sha256": "aeb0996385383689b47117b247c186da2e5e56fae9c9c7def163f66cb9e7cae4",
+      "size": 787
+    },
+    {
+      "path": "icons/gul-512.png",
+      "sha256": "ae23ffdb1eee83ae0386295b6ac0ad459a9ce6a4f410dda74fcd3c6369d13d5b",
+      "size": 3190
     },
     {
       "path": "index.html",
-      "sha256": "749872216ca8b8524d29d76e5087267f4f638953474989c37b42bd9c8a9b3946",
-      "size": 430
+      "sha256": "2bf55b057167dac90724f91206cb9f7c6ffd9f4c1f04c4d4dfadabf6e44f7850",
+      "size": 644
+    },
+    {
+      "path": "manifest.webmanifest",
+      "sha256": "4d30bb8e84583e3c25232f7412d410a1d5e02f7769ec2aa014030cae93fa4eb4",
+      "size": 407
+    },
+    {
+      "path": "service-worker.js",
+      "sha256": "4600beb62284624a1b59df6c6a27ae778b4a4011b5d5e487389b69cd8be633b0",
+      "size": 602
     }
   ]
 }

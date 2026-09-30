@@ -8,7 +8,7 @@
 | Subtitle | Remote operator interface for local development runtimes |
 | Version | 0.1-dolgorae-consumer-v1 |
 | Status | Approved Required State; E1-T1 through E1-T5 foundations completed without assembled product acceptance |
-| Last updated | 2026-09-30 |
+| Last updated | 2026-10-01 |
 | Target | macOS host; modern desktop, iPad, and iPhone browsers |
 
 ## 1. Purpose, authority, and lifecycle
@@ -475,12 +475,21 @@ REQ-WRITER-004 retains its original ID and meaning and is deferred, not supersed
 
 ## 7. Current State ledger
 
+Earlier component entries retain the verification scope accepted at their task
+completion. Their "unmounted" and "disabled" route labels describe that earlier
+scope, not the current host route inventory. The E8-T3 host now mounts AuthService
+and all eight completed feature handlers behind shared authentication, with
+runtime ports unavailable by default. Full application acceptance remains E14-owned; released-provider and
+live deployment qualification remain E2/E9-owned. Architecture Section 19 and
+`internal/host/composition.go` describe the current host composition.
+
 E1-T1 through E1-T5 establish the delivery-independent Go core, one checked
 React bundle, declared but disabled browser API, isolated SQLite repositories,
 and a Wails shell foundation using the shared asset-delivery boundary. They do
 not promote E14-owned REQ-HOST-001/002 or implement a listener, enabled browser
 API, production persistence lifecycle, provider adapter, product route, or
-production authentication. The Wails shell has no authenticated attach.
+production authentication. Those E1 component limits are historical;
+the E8-T3 host provides verified authenticated Wails attachment; its isolated host and delivery scope is accepted.
 E12-T1 has accepted the immutable consumer contract and generated tooling
 boundary; later Tasks still own the remaining product behavior. Former
 E12-T2/T3 are Retired without implementation evidence.
@@ -546,14 +555,14 @@ E8-T1 adds isolated host-authorized first-run setup, one stable password account
 bounded Argon2id storage and an injected setup form. Its accepted scope is the
 account service, SQLite repository and browser component. E8-T2 supplies cookie
 sessions and authenticated route assembly; native bootstrap and shared HTTPS
-delivery remain with E8-T3. Production host mounting remains disabled, and
-assembled-product and live-provider acceptance remain with E14 and E9.
+delivery are accepted within the isolated E8-T3 host and delivery scope.
+Assembled-product and live-provider acceptance remain with E14 and E2/E9.
 
 E8-T2 adds AuthService, durable browser sessions and shared Origin/CSRF/rate
 protection for completed feature routes. Its accepted scope is the isolated
 route assembly, checked browser auth mount and TLS/SQLite/component fixtures.
 The ledger records REQ-AUTH-003/004 and transport-scoped REQ-AUTH-002 within that scope.
-E8-T3 retains native bootstrap and HTTPS host mounting; E14 and E9 retain
+E8-T3 accepts native bootstrap and HTTPS host mounting; E14 and E2/E9 retain
 assembled-product and live-provider acceptance.
 
 | Requirement | Accepted Current State | Evidence |
@@ -562,7 +571,15 @@ assembled-product and live-provider acceptance.
 | REQ-AUTH-001 | Host-authorized one-use setup atomically retains or creates one stable subject, denies invalid grants and ambiguous data, and provides a username-free injected local setup form; account/service/component scope only | E8-T1; `internal/auth` and `internal/storage` race, grant, rollback and retained-identity tests; `frontend/browser/verify-setup.py`; completion source review |
 | REQ-AUTH-002 | ADR-0013 bounded salted Argon2id, exact UTF-8 bounds, strict record decoding, constant-time verification, hashes-only persistence, input clearing and sanitized component errors; E8-T2 adds bounded UTF-8 transport buffers cleared on every exit and fixed typed delivery errors in isolated protected routes | E8-T1/T2; independent hash-cost vectors and malformed-record tests; reopen/backup plaintext scans; real Chrome component checks; serial `make test` and completion source review |
 | REQ-AUTH-003 | Fixed seven-day digest-only server sessions, saved-subject login rotation and host-only Secure/HttpOnly/SameSite=Strict cookie; expiry, logout and revocation remove access and terminate idle streams in isolated authenticated delivery | E8-T2; auth/storage/API race tests, actual TLS stream and reopen fixtures, Bun expiry/logout/stream tests, Chrome component checks, serial `make test` and completion/correction source reviews |
-| REQ-AUTH-004 | Exact HTTPS Origin/Host/custom-header and session-bound CSRF across completed feature routes, native-only setup permission, fixed process-local rate windows and body/concurrency bounds; no production host qualification | E8-T2; generated-route negative matrix, brute-force/window/body/loopback tests, malformed/duplicate cookie and missing/duplicate CSRF tests, serial `make test` and completion/correction source reviews |
+| REQ-AUTH-004 | Exact HTTPS Origin/Host/custom-header and session-bound CSRF across completed feature routes, native-only setup permission, fixed process-local rate windows and body/concurrency bounds; E8-T3 mounts this boundary in the shared HTTPS host without live deployment qualification | E8-T2/T3; generated-route negative matrix, brute-force/window/body/loopback tests, malformed/duplicate cookie and missing/duplicate CSRF tests, serial `make test` and completion/correction source reviews |
+| REQ-HOST-007 | Authenticated Wails starts the shared core or verifies an existing headless owner through protected state, pinned HTTPS and a fresh challenge; the real native probe adds no domain authority | E8-T3; singleton/attach and CLI lifecycle race fixtures; real Wails/WebKit pin, SIGTERM, trust-failure, initial-load deadline and popup checks; isolated native probe, full application acceptance remains E14 |
+| REQ-HOST-009 | One protected stable lock per data directory, fixed listener port, verified existing owner and retained ownership/persistence until uncertain stop succeeds | E8-T3; contention, spoofed-owner, unsafe-path, failed publication, failed-stop retention and durable restart fixtures; serial `make test` |
+| REQ-HOST-010 | Render-only user launchd packaging, protected process/log locations, graceful isolated shutdown/restart, certificate recovery and actionable collision runbooks | E8-T3; launchd/log-permission and host/CLI restart/collision fixtures; `docs/operations.md`; actual login, upgrade and sleep/wake drills remain E9 qualification |
+| REQ-NET-001 | Remote admission requires a current checked Serve snapshot with no Funnel or alternate Gul exposure; local use remains available when remote proof fails | E8-T3; closed deployment/Funnel fixtures, qualified-source proxy spoof fixture and read-only inspector tests; no live tailnet exposure qualification |
+| REQ-NET-002 | Shared fixed-port HTTPS listener binds only IPv4 loopback and refuses collision without fallback | E8-T3; actual TLS host, collision, port and second-owner fixtures |
+| REQ-NET-003 | Same checked browser/PWA bundle and protected Connect clients use HTTPS without mixed-content fallback | E8-T3; isolated actual Chrome HTTPS host and installed standalone PWA checks; live Tailscale/supported-device qualification remains E9 |
+| REQ-NET-004 | Startup and diagnose admit remote readiness only for the verified owner, exact matching CLI/daemon source, exclusive HTTPS proxy to the authenticated selected listener, and disabled Funnel; UDS targets are rejected | E8-T3; valid/misroute/Funnel/UDS/unknown-version/stopped-owner fixtures and proxy-marker tests; no configuration mutation |
+| REQ-UI-007 | Installed PWA refresh preserves only a safe presentation tab and re-reads authentication and navigation; service worker stores no responses and offline access fails closed | E8-T3; actual Chrome temporary installation, standalone refresh, fresh auth/navigation, logout and uninstall checks; full operator assembly remains E14 |
 | REQ-RUNTIME-011 | Versioned public gRPC inventory, exact semantic-operation ownership, generated clients, descriptor-derived fake server, exhaustive maps, and separate Machine CLI fixture | E0-T7 historical digests recorded in the implementation memo; current live lock paths are E12-T1 evidence; contract validator; fake-server tests |
 | REQ-RUNTIME-022 | Independently typed projection inputs, public enum/event inventory, convergence and fail-closed compatibility fixtures | E0-T7 historical digests recorded in the implementation memo; current live policy maps are E12-T1 evidence; conformance pin |
 | REQ-CONSUMER-001 | Immutable TASK-053 consumer source, 36-method descriptor inventory, explicit 27-required/9-unavailable profile, generated clients/maps/fake transport, and close/sourceability fixtures; no runtime-support claim | E12-T1; dependency/generated locks; additive descriptor check; contract validator |

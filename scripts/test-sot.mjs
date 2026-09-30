@@ -215,17 +215,17 @@ expectFailure('architecture drops the completed E1-T2 shared bundle', root => {
 
 expectFailure('E1-T5 shell is not authenticated attach', root => {
   write(root, 'docs/architecture.md', text => text.replace(
-    'An isolated Wails shell foundation reuses the shared core and checked bundle; authenticated attach is not enabled.',
+    'The Wails shell uses the shared authenticated HTTPS host and verified attachment; live-provider qualification remains pending.',
     'The Wails shell provides authenticated attach.',
   ));
 }, /Architecture must distinguish the isolated Wails shell from authenticated attach/);
 
-expectFailure('E1-T5 required state retains the unauthenticated shell boundary', root => {
+expectFailure('required state distinguishes the E8-T3 authenticated attachment', root => {
   write(root, 'docs/required-specs.md', text => text.replace(
+    'the E8-T3 host provides verified authenticated Wails attachment;',
     'The Wails shell has no authenticated attach.',
-    'The Wails shell has authenticated attach.',
   ));
-}, /Required Specifications must retain the E1-T5 unauthenticated shell boundary/);
+}, /Required Specifications must distinguish the E1-T5 shell foundation from E8-T3 authenticated attachment/);
 
 expectFailure('pre-E1-T5 state requires the Wails absence boundary', root => {
   write(root, 'docs/roadmap.md', text => text
@@ -272,7 +272,7 @@ expectFailure('current state promotes a requirement before its owner completes',
 
 expectFailure('architecture drops an E1-T1 delivery boundary', root => {
   write(root, 'docs/architecture.md', text => text.replace(
-    'ConnectRPC services are declared and generated; isolated protected route assembly exists, but production host mounting is not enabled.',
+    'ConnectRPC services are declared, generated and mounted behind the shared authentication boundary; live-provider assembly remains unqualified.',
     'ConnectRPC delivery state is unspecified.',
   ));
 }, /Architecture must distinguish isolated ConnectRPC route assembly from production host mounting/);
@@ -287,10 +287,17 @@ expectFailure('pre-E1-T3 state requires ConnectRPC absence', root => {
 
 expectFailure('E1-T4 storage is not a production database lifecycle', root => {
   write(root, 'docs/architecture.md', text => text.replace(
-    'Gul-only SQLite schema and repositories exist in isolated tests; no production database lifecycle is enabled.',
+    'Gul-only SQLite repositories are opened by the shared authenticated host; live-provider acceptance remains disabled.',
     'Gul database is ready.',
   ));
 }, /Architecture must distinguish isolated SQLite repositories from production database lifecycle/);
+
+expectFailure('runtime ports retain the unqualified provider boundary', root => {
+  write(root, 'docs/architecture.md', text => text.replace(
+    'Runtime ports are unavailable by default;',
+    'Runtime ports are ready.',
+  ));
+}, /Runtime ports|runtime-port|runtime ports/);
 
 expectFailure('retired E12 member becomes deferred', root => {
   write(root, 'docs/roadmap.md', text => text.replace(
