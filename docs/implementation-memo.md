@@ -1923,10 +1923,9 @@ The initial documentation assumed Gul would manage one Codex App Server, map Ses
 
 ## 12. Handoff
 
-E12, E1, E13, E3, E4, E5, E6 and E7 are complete. E8 is in review, with
-E8-T1/T2/T3 complete within their account/password, authenticated route and
-isolated host/delivery scopes. E8 whole-Epic validation and closeout precede
-E14-T1 assembled fake-provider acceptance. The
+E12, E1, E13, E3, E4, E5, E6, E7 and E8 are complete. E8-T1/T2/T3
+are accepted within their account/password, authenticated route and isolated
+host/delivery scopes. E14-T1 assembled fake-provider acceptance is next. The
 TASK-053 consumer lock and generated contract tooling remain authoritative. E6 provides guarded local FileService
 inspection, bounded preview, refresh and Git review over E3's saved Workspace
 attachment. E2-T3 retains the Submit-image handoff and final REQ-FILE-015
@@ -2072,3 +2071,29 @@ loading, login/upgrade/sleep/wake drill, live Tailscale exposure or supported-de
 qualification is inferred. Existing ADRs remain applicable without a new decision.
 Canonical E8 feedback retains explicit future re-entry conditions; no current
 correctness or acceptance work is deferred.
+
+### E8 Epic closeout (2026-10-01)
+
+The committed E8-T1/T2/T3 outcomes pass the whole-Epic requirement and seam
+audit and the six-role completion source assessment. Accepted scope covers
+REQ-AUTH-001..004, REQ-HOST-007/009/010, REQ-NET-001..004 and REQ-UI-007:
+one protected account, authenticated sessions and feature routes, the shared
+loopback HTTPS core, verified native attachment, isolated deployment packaging
+and checked browser/PWA delivery.
+
+Serial `make test` passes on the committed candidate. Separate native and
+browser evidence covers Wails/WebKit pinning, process cancellation, trust and
+load failures, popup denial, installed standalone PWA refresh with fresh
+authentication/navigation, logout and uninstall. File continuation and Prompt
+History race evidence covers the fired E6/E7 integration follow-ups.
+
+All current acceptance criteria are met and every admitted Low disposition is
+complete. Canonical feedback retains future re-entry conditions without
+deferring current correctness. No release, installation, launchd loading, live
+Tailscale exposure, real-provider or supported-device qualification is implied.
+Full fake application acceptance remains E14-owned; released-provider and live
+deployment qualification remain E2/E9-owned.
+
+E8 is Completed, no Task is active, and E14-T1 is next. The shared consumer
+dossier remains for E14, E2 and E9; only E8's roadmap link is replaced by its
+canonical outcomes.

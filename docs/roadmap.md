@@ -3,12 +3,12 @@
 | Field | Value |
 | --- | --- |
 | Role | Sole authority for task identity, order, status, dependencies, and phase |
-| Revision | 2026-10-01 E8-T3 completion |
+| Revision | 2026-10-01 E8 Epic closeout |
 | Active Task | None |
 | Next | E14-T1 |
 | Required provider | Released Dolgorae v0.1.3 implementing `dolgorae.gul-consumer/v1` |
 
-`Next` names E14-T1, which may start after E8 whole-Epic validation and closeout.
+`Next` names the next ready Task, E14-T1.
 
 ## 1. Status and execution rules
 
@@ -135,7 +135,7 @@ second owner of membership, order or status.
 | E5 | Completed | Safe whole-session close, projection convergence and ambiguous-outcome handling | [Roadmap](#e5-complete-safe-close-and-recovery); [Memo](implementation-memo.md#e5-epic-closeout-2026-09-28) |
 | E6 | Completed | Read-only FileService and bounded preview/review | [Roadmap](#e6-complete-read-only-files-and-review); [Memo](implementation-memo.md#e6-epic-closeout-2026-09-29) |
 | E7 | Completed | Responsive UI, mandatory Prompt History, accessibility and IME | [Roadmap](#e7-complete-the-usable-responsive-interface); [Memo](implementation-memo.md#e7-epic-closeout-2026-09-30) |
-| E8 | In Review | Authentication, browser protection and headless/PWA/tailnet packaging together | [Shared](todo/GUL-CONSUMER-REBASELINE.md) |
+| E8 | Completed | Authentication, browser protection and headless/PWA/tailnet packaging together | [Roadmap](#e8-complete-authentication-and-deployment-packaging); [Memo](implementation-memo.md#e8-epic-closeout-2026-10-01) |
 | E14 | Planned | Assembled pre-release application acceptance and live handoff; E14-T1 | [Shared](todo/GUL-CONSUMER-REBASELINE.md) |
 | E2 | Planned | Released provider qualification and real integration | [Shared](todo/GUL-CONSUMER-REBASELINE.md) |
 | E9 | Planned | Actual-provider fault/security/E2E and Gul release qualification | [Shared](todo/GUL-CONSUMER-REBASELINE.md) |

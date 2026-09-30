@@ -226,7 +226,7 @@ state changes. Missing Podway observation cannot block existing functionality.
 - [ ] E14-T1 assembled authenticated pre-release browser proof passes.
 - [ ] Earlier required Epics close before the next Epic starts; no cross-Epic
       Task interleaving is needed.
-- [ ] E8 authentication and packaging run as one complete Epic; earlier product
+- [x] E8 authentication and packaging run as one complete Epic; earlier product
       access remains denied outside isolated test injection.
 - [ ] E12-T2/T3 remain Retired with preserved IDs and no active requirement owner.
 - [ ] No pre-release Task depends on E2 or E9.

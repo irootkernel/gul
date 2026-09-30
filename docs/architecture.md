@@ -5,7 +5,7 @@
 | Role | Target and Current Architecture source of truth |
 | Product | Gul |
 | Version | 0.1-dolgorae-consumer-v1 |
-| Status | Approved target rebaseline; E8-T1/T2/T3 accepted within account, authenticated route and isolated host/delivery scopes; E8 whole-Epic validation pending |
+| Status | Approved target rebaseline; E8-T1/T2/T3 accepted within account, authenticated route and isolated host/delivery scopes; E8 completed after bounded whole-Epic validation |
 | Last updated | 2026-10-01 |
 
 ## 1. Purpose and change control
@@ -1062,7 +1062,7 @@ The serial command facade is `toolchain-check`, `generate-contract`, `contract-c
 
 **Snapshot date:** 2026-10-01 (E8-T3 scoped completion)
 
-**Roadmap point:** E0 is `Completed`, E12 is `Completed`, E1 is `Completed`, and E13 is `Completed`; E1-T1 is `Completed` and E1-T2/T3/T4/T5 are `Completed`. E3 and E3-T1/T2/T3/T4 are `Completed`. E4 and E4-T1/T2/T3/T5 are `Completed`. E4-T4 remains Deferred outside its epic. E5 and E5-T1/T2/T3 are `Completed`. E6 and E6-T1/T2/T3 are `Completed`. E7 and E7-T1/T2/T3 are `Completed`. E8 is `In Review`; E8-T1/T2/T3 are `Completed`. Former E12-T2/T3 remain Retired. E14 owns pre-release application acceptance. No live-provider or assembled-application acceptance is implied.
+**Roadmap point:** E0 is `Completed`, E12 is `Completed`, E1 is `Completed`, and E13 is `Completed`; E1-T1 is `Completed` and E1-T2/T3/T4/T5 are `Completed`. E3 and E3-T1/T2/T3/T4 are `Completed`. E4 and E4-T1/T2/T3/T5 are `Completed`. E4-T4 remains Deferred outside its epic. E5 and E5-T1/T2/T3 are `Completed`. E6 and E6-T1/T2/T3 are `Completed`. E7 and E7-T1/T2/T3 are `Completed`. E8 is `Completed`; E8-T1/T2/T3 are `Completed`. Former E12-T2/T3 remain Retired. E14 owns pre-release application acceptance. No live-provider or assembled-application acceptance is implied.
 
 **Maturity:** delivery-independent Go core, shared React bundle, authenticated Gul API mounted by the E8-T3 host, typed provider ports and explicit scenario harness, host-opened Gul SQLite repositories with fake-scoped runtime attachment, local presentation and passive session reads, and a Wails shell foundation. E4 adds typed observation, Interaction cards, action eligibility and bounded history/result/artifact reads. E5 adds whole-session close, reconnect convergence and operation-specific recovery against fakes. E6 adds verified-root local FileService inspection, bounded previews, refresh, watcher and Git review through component-tested typed APIs mounted by E8-T3. E7-T1 adds three responsive panes, workspace/session navigation and read-only FileService presentation through injected typed clients. E7-T2 adds provider-projected activity, prioritized Interaction cards, conversation and accepted-user Prompt History, and guarded whole-session close to that injected-client view. E7-T3 adds composition-safe input and keyboard focus behavior to the same component scope. E8-T1 adds isolated local account setup, bounded password hashing and the injected first-run form. E8-T2 adds protected session routes and the checked auth entry within isolated delivery scope. E8-T3 accepts the shared authenticated host, verified native attachment, isolated deployment fixtures and installed PWA delivery. Full application and live-provider qualification remain pending.
 
