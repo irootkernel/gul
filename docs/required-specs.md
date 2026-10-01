@@ -477,7 +477,9 @@ REQ-WRITER-004 retains its original ID and meaning and is deferred, not supersed
 
 Earlier component entries retain the verification scope accepted at their task
 completion. Their "unmounted" and "disabled" route labels describe that earlier
-scope, not the current host route inventory. The E8-T3 host now mounts AuthService
+scope, not the current host route inventory. References to later work in those
+component entries also describe their task-completion checkpoint; current status
+follows this opening summary and the roadmap. The E8-T3 host now mounts AuthService
 and all eight completed feature handlers behind shared authentication, with
 runtime ports unavailable by default. E14-T1 adds Diagnostics as
 the ninth feature route, checked-port assembly, and authenticated core/browser/

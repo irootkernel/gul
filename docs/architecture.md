@@ -1113,7 +1113,8 @@ dependencies are composed with fail-closed defaults: startup performs no
 external provider work, product access is denied, and provider/persistence
 availability is not implied. The core does not import Wails; the desktop
 foundation hosts it, while the E8-T3 host owns shared HTTPS and SQLite lifecycle. Released
-provider wiring and complete application acceptance remain E2 and E14 work.
+provider wiring remains E2-owned. E14-T1 accepts checked-port assembly and
+application behavior against explicit fakes.
 
 `api/proto` declares Gul-owned Auth, Runtime, WorkspacePresentation, DirectSession,
 ClientEventService, Interaction, Writer, ArtifactPresentation, FileService and
@@ -1232,8 +1233,8 @@ rule displays WRITE only for fresh active owner authority with verified write
 policy; only an explicit write intent sets the upstream write flag. The writer
 status component renders the backend mode in `SessionDetail`'s injected-client
 presentation. These paths are tested against explicit fakes; the ClientEvent
-handler is mounted behind shared authentication. Full authenticated product
-assembly remains with E14; live event-source qualification remains E2/E9.
+handler is mounted behind shared authentication. E14-T1 accepts full
+authenticated assembly against fakes; live event-source qualification remains E2/E9.
 E5 owns reconnect coordination and fresh aggregate convergence.
 
 `internal/interaction` provides observer summaries, Controller-authorized typed
@@ -1360,8 +1361,9 @@ invalidation to finish.
 Only `internal/sessionclose.AggregateRefresher` advances the artifact-verified timeline
 head. Browser reconnect reads presentation, execution state and bounded Gul
 delivery without sending a provider mutation. The shared host mounts Close
-and browser delivery handlers; provider reconnect, observation admission and
-full runtime startup assembly remain with E14/E2.
+and browser delivery handlers. E14-T1 assembles provider reconnect, observation
+admission and runtime startup against checked fakes; released-provider startup
+remains E2-owned.
 
 E5-T3 adds a non-secret mutation-attempt detail table in migration 7 and a
 StartRun-only protected replay store. StartRun stores a bounded canonical
@@ -1435,26 +1437,26 @@ facade validates both Go manifests, the root package pins, exact Go 1.27.1, and
 the Bun minimum before running frontend, core, contract, SOT and drift gates.
 Historical E0-T7 facts remain scoped to their original digests. The E8-T3
 candidate supplies authenticated attachment and mounted product routes against
-one SQLite lifecycle. Full application assembly and live provider acceptance
-remain pending.
+one SQLite lifecycle. E14-T1 accepts explicit checked-port application assembly
+against fakes; live-provider acceptance remains E2/E9-owned.
 
 ### 19.4 Current topology and data
 
 ```text
-Shared Go core composition and lifecycle serve the authenticated host; full application acceptance remains pending.
+Shared Go core composition and lifecycle serve the authenticated host; E14-T1 accepts explicit checked-port application assembly against fakes.
 One checked React bundle and shared browser/shell asset delivery exist.
 The Wails shell uses the shared authenticated HTTPS host and verified attachment; live-provider qualification remains pending.
 ConnectRPC services are declared, generated and mounted behind the shared authentication boundary; live-provider assembly remains unqualified.
 Gul-only SQLite repositories are opened by the shared authenticated host; live-provider acceptance remains disabled.
-No Runtime Provider adapter, RPC supervisor, Controller credential store, timeline adapter, or Artifact adapter exists in the assembled product. Isolated Workspace, session, launch, observation, Interaction, action and history/artifact adapters use the pinned provider port with explicit fakes.
+Explicit test injection assembles checked provider, timeline and Artifact adapters. No Runtime Provider adapter is wired into production commands, which keep runtime ports unavailable; released-provider supervision and Controller credential-store wiring remain E2-owned.
 ```
 
 ### 19.5 Security posture
 
 E8-T1/T2 supply protected account setup and durable sessions. The E8-T3
 host mounts completed feature handlers behind the shared HTTPS boundary.
-Runtime ports are unavailable by default; assembled fake-provider acceptance and
-live-provider qualification remain with E14 and E2/E9. No service is installed
+Runtime ports are unavailable by default; E14-T1 accepts assembled fake-provider
+behavior, while live-provider qualification remains E2/E9-owned. No service is installed
 or exposed automatically by building the repository.
 
 ## 20. Promotion format
