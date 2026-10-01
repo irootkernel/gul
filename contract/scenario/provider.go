@@ -53,7 +53,7 @@ func (h *Harness) GetCapabilities(_ context.Context, request *publicv1.GetCapabi
 		Features: &publicv1.RuntimeFeatureCapabilities{PersistentRuns: true, ReaderWriterAccess: true,
 			ControllerTimeline: true, DurableWriterAuthority: true, EventReplay: true,
 			ArtifactRetrieval: true, ControllerBinding: true, SafeClientProjection: true,
-			PublicLocalSocket: true, ControlModes: true, BrokeredIndependentSubagentRuns: true},
+			PublicLocalSocket: true, ControlModes: true, BrokeredIndependentSubagentRuns: true, FirstWriteViaSubmitTurn: true},
 		Interactions: scenarioInteractions(),
 		Artifacts: &publicv1.ArtifactCapabilities{MaximumArtifactSize: maximumArtifactSize, MaximumChunkSize: maximumChunkSize,
 			MaximumInlineResponseBytes: 1 << 20,
@@ -189,8 +189,8 @@ func (h *Harness) StartRun(_ context.Context, request *publicv1.StartRunRequest)
 			Kind: publicv1.ControllerKind_CONTROLLER_KIND_INTERACTIVE_CLIENT, InstanceId: "scenario-client"},
 		StateRevision: 1, StateVariant: publicv1.RunStateVariant_RUN_STATE_VARIANT_DEDICATED_UNSTARTED,
 		Recovery: &publicv1.RecoveryProjection{State: publicv1.RecoveryState_RECOVERY_STATE_NOT_REQUIRED, RequiredAction: publicv1.RecoveryAction_RECOVERY_ACTION_NONE},
-		EffectivePolicy: &publicv1.EffectivePolicyProjection{Access: publicv1.EffectiveAccess_EFFECTIVE_ACCESS_READ,
-			Verification: publicv1.PolicyVerification_POLICY_VERIFICATION_VERIFIED},
+		EffectivePolicy: &publicv1.EffectivePolicyProjection{Access: publicv1.EffectiveAccess_EFFECTIVE_ACCESS_UNKNOWN,
+			Verification: publicv1.PolicyVerification_POLICY_VERIFICATION_UNVERIFIED},
 		WriterAuthority:     &publicv1.WriterAuthorityProjection{State: publicv1.WriterAuthorityState_WRITER_AUTHORITY_STATE_NONE, ReconciliationAction: publicv1.ReconciliationAction_RECONCILIATION_ACTION_NONE},
 		ServerLane:          &publicv1.ServerLaneProjection{Kind: request.GetExecutionLane(), State: publicv1.ServerLaneState_SERVER_LANE_STATE_READY},
 		BackgroundExecution: &publicv1.BackgroundExecutionProjection{State: publicv1.BackgroundExecutionState_BACKGROUND_EXECUTION_STATE_VERIFIED_ABSENT},
@@ -305,8 +305,37 @@ func (h *Harness) SubmitTurn(_ context.Context, request *publicv1.SubmitTurnRequ
 	if r.projection.GetLifecycle() != publicv1.RunLifecycle_RUN_LIFECYCLE_IDLE || r.projection.GetActiveTurn() != nil || r.closeChoice != nil {
 		return nil, conflict()
 	}
+	if request.GetWriteIntent() == publicv1.WriteIntent_WRITE_INTENT_WRITE {
+		if r.projection.ExecutionLane != publicv1.ExecutionLane_EXECUTION_LANE_DEDICATED || r.projection.Thread != nil && r.projection.EffectivePolicy.Access != publicv1.EffectiveAccess_EFFECTIVE_ACCESS_WRITE {
+			return nil, conflict()
+		}
+		if w.writer.GetOwnerRunId() != "" && w.writer.GetOwnerRunId() != r.projection.RunId {
+			return nil, providerError("WRITER_BUSY")
+		}
+		if w.writer.GetOwnerRunId() == "" {
+			w.writer.OwnerRunId = pointer(r.projection.RunId)
+			w.writer.AuthorityState = publicv1.WriterAuthorityState_WRITER_AUTHORITY_STATE_ACTIVE
+			w.writer.WriterGeneration++
+			w.writer.StateRevision++
+		}
+		r.projection.EffectivePolicy.Access = publicv1.EffectiveAccess_EFFECTIVE_ACCESS_WRITE
+		r.projection.WriterAuthority.State = w.writer.AuthorityState
+		r.projection.WriterAuthority.WriterGeneration = w.writer.WriterGeneration
+	} else if r.projection.EffectivePolicy.Access == publicv1.EffectiveAccess_EFFECTIVE_ACCESS_UNKNOWN {
+		r.projection.EffectivePolicy.Access = publicv1.EffectiveAccess_EFFECTIVE_ACCESS_READ
+	}
+	r.projection.EffectivePolicy.Verification = publicv1.PolicyVerification_POLICY_VERIFICATION_VERIFIED
 	turnID := h.next("turn")
-	turn := &publicv1.TurnProjection{RunId: r.projection.GetRunId(), ThreadId: h.next("thread"), TurnId: turnID,
+	if r.projection.Thread == nil {
+		r.projection.Thread = &publicv1.ThreadProjection{ThreadId: h.next("thread"), ThreadGeneration: 1}
+		if r.projection.ExecutionLane == publicv1.ExecutionLane_EXECUTION_LANE_DEDICATED {
+			r.projection.StateVariant = publicv1.RunStateVariant_RUN_STATE_VARIANT_DEDICATED_READER
+			if request.GetWriteIntent() == publicv1.WriteIntent_WRITE_INTENT_WRITE {
+				r.projection.StateVariant = publicv1.RunStateVariant_RUN_STATE_VARIANT_DEDICATED_WRITER_ACTIVE
+			}
+		}
+	}
+	turn := &publicv1.TurnProjection{RunId: r.projection.GetRunId(), ThreadId: r.projection.Thread.ThreadId, TurnId: turnID,
 		Status: publicv1.TurnStatus_TURN_STATUS_RUNNING}
 	r.projection.ActiveTurn = turn
 	r.projection.Lifecycle = publicv1.RunLifecycle_RUN_LIFECYCLE_RUNNING

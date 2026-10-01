@@ -19,7 +19,7 @@ import (
 
 // defaultFeatures composes the completed local services against one core and
 // store. Runtime ports deliberately have no source until E2 supplies one.
-// Config.Features remains the explicit E14 override.
+// Config.Assemble supplies E14 services before startup and handlers afterward.
 func defaultFeatures(core *app.Core, store *storage.Store) api.FeatureHandlers {
 	local := store.Presentation()
 	workspaces := workspace.NewService(offlineRuntime{}, local, nil, nil)
@@ -48,6 +48,7 @@ func defaultFeatures(core *app.Core, store *storage.Store) api.FeatureHandlers {
 		Writer:      &api.WriterHandler{Core: core, Actions: actions},
 		Files:       &api.FileHandler{Core: core, Files: files.NewService(local)},
 		Events:      &api.ClientEventHandler{Core: core, Events: store.Observation()},
+		Diagnostics: &api.DiagnosticsHandler{Core: core},
 	}
 }
 

@@ -27,6 +27,7 @@ import (
 	"unsafe"
 
 	"github.com/rootkernel/gul/internal/auth"
+	acceptancenative "github.com/rootkernel/gul/test/acceptance/native"
 )
 
 func nativeTestCertificate(t *testing.T) tls.Certificate {
@@ -68,6 +69,15 @@ func TestMain(m *testing.M) {
 	view := WailsHost{URL: os.Getenv("GUL_NATIVE_TEST_URL"), CertificateDER: der,
 		SetupCredential: os.Getenv("GUL_NATIVE_TEST_CREDENTIAL")}
 	installer := installNativeHTTPS
+	if os.Getenv("GUL_NATIVE_ASSEMBLED_PROBE") == "1" {
+		installer = func(window unsafe.Pointer, origin string, pin [sha256.Size]byte, script string, der []byte) bool {
+			if !installNativeHTTPS(window, origin, pin, script, der) {
+				return false
+			}
+			acceptancenative.Probe(window, nativeAcceptanceScript)
+			return true
+		}
+	}
 	timeout := desktopLoadTimeout
 	if os.Getenv("GUL_NATIVE_TEST_FAILURE") == "install" {
 		installer = func(unsafe.Pointer, string, [sha256.Size]byte, string, []byte) bool { return false }

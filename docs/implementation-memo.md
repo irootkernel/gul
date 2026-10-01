@@ -1462,21 +1462,21 @@ not enrolled.
 | Five Gul SOT documents | E0-T4 completed the consumer alignment and Gate A reproduction; E0-T8 completed toolchain/ADR alignment; E0-T7 completed Gate B |
 | Toolchain and developer-command artifacts | E0-T8 accepted one pin manifest and read-only host checks; E0-T7 adds checked contract generation/drift delegates; E1-T1 adds the root Go module; E1-T2 adds root Bun pin validation and checked frontend generation/drift commands; E1-T3 adds checked Gul API/error-catalog generation; no installer |
 | Contract boundary | E12-T1 pins TASK-053 and regenerates checked clients/maps/fake transport for 36 known, 27 required, and 9 unavailable methods; E13-T1 adds an explicit stateful scenario provider over the 27-method port |
-| Production source | E1 shared core, bundle, API declarations, isolated SQLite and Wails shell; E3 adds Workspace attachment and presentation; E4 adds typed observation, Interactions, actions and bounded history/result/artifact reads; E5 adds safe close, reconnect and operation-specific replay; E6 adds verified-root local FileService, bounded previews, refresh, watcher and Git review; E7-T1/T2/T3 add the responsive operator, files, session presentation, composition guard, and keyboard focus through injected clients; E8-T1 adds isolated local auth, bounded Argon2id storage and the injected first-run setup form; E8-T2 adds durable cookie sessions, protected route assembly and the browser auth gate within isolated delivery scope; E8-T3 mounts the authenticated loopback HTTPS host against offline runtime ports; full assembly remains E14-owned |
-| Wails host/frontend | One checked React bundle includes the E7-T1/T2/T3 operator components and fail-closed foundation; E8-T3 implements verified authenticated Wails attachment and native cancellation; E3-T4 launch selection and live provider assembly remain E14-owned |
-| ConnectRPC schema/services | Gul AuthService and completed feature declarations and generated clients exist; E8-T2 adds protected route assembly; E8-T3 mounts all eight feature handlers behind the shared browser boundary |
+| Production source | E1 shared core, bundle, API declarations, isolated SQLite and Wails shell; E3 adds Workspace attachment and presentation; E4 adds typed observation, Interactions, actions and bounded history/result/artifact reads; E5 adds safe close, reconnect and operation-specific replay; E6 adds verified-root local FileService, bounded previews, refresh, watcher and Git review; E7-T1/T2/T3 add the responsive operator, files, session presentation, composition guard, and keyboard focus through injected clients; E8-T1 adds isolated local auth, bounded Argon2id storage and the injected first-run setup form; E8-T2 adds durable cookie sessions, protected route assembly and the browser auth gate within isolated delivery scope; E8-T3 mounts the authenticated loopback HTTPS host against offline runtime ports; E14-T1 adds checked adapter assembly and authenticated browser/native acceptance with explicit stateful fakes; released-provider assembly remains E2/E9-owned |
+| Wails host/frontend | One checked React bundle includes the E7-T1/T2/T3 operator components and fail-closed foundation; E8-T3 implements verified authenticated Wails attachment and native cancellation; E14-T1 exercises E3-T4 launch selection through checked clients; live provider assembly remains E2/E9-owned |
+| ConnectRPC schema/services | Gul AuthService and completed feature declarations and generated clients exist; E8-T2 adds protected route assembly; E8-T3 mounts eight feature handlers behind the shared browser boundary; E14-T1 adds the ninth Diagnostics handler and checked runtime assembly |
 | Gul SQLite schema | Gul-owned version 9 schema with Workspace attachment, favorites, Primary binding, event metadata, session-close attempts, mutation-attempt details, Writer reconciliation baselines and a singleton password record; E8-T3 owns protected host startup and ordered shutdown integration |
 | Dolgorae RPC supervisor/provider | Bounded restart policy implemented against an injected lifecycle; production process ownership and live provider remain pending |
 | Controller credential store | Caller-owned mechanism selected by ADR-0047; not implemented |
-| FileService/auth/PWA/Tailscale integration | E8-T3 mounts the E6 FileService and E7 checked operator entry behind authentication, with network-only PWA delivery and read-only Tailscale admission; live deployment and provider qualification remain E2/E9/E14-owned |
-| Current State promotions | Prior E0/E12/E1/E13/E3/E4/E5 entries plus component-scoped REQ-FILE-001..014 and REQ-FILE-016; E7-T1 fake-client REQ-UI-001/002/004, E7-T2 fake-client REQ-OUT-001/002/004/007, REQ-UI-003/006/009/010 and REQ-PROMPT-001, and E7-T3 browser/component-scoped REQ-OUT-006 and REQ-UI-008; E8-T1 account/service/component-scoped REQ-AUTH-001/002, E8-T2 authenticated-route REQ-AUTH-002/003/004, and E8-T3 isolated host/delivery-scoped REQ-HOST-007/009/010, REQ-NET-001..004 and REQ-UI-007; cross-surface REQ-FILE-015 pending; no assembled-product or released-provider claim |
+| FileService/auth/PWA/Tailscale integration | E8-T3 mounts the E6 FileService and E7 checked operator entry behind authentication, with network-only PWA delivery and read-only Tailscale admission; live deployment and provider qualification remain E2/E9-owned |
+| Current State promotions | Prior E0/E12/E1/E13/E3/E4/E5 entries plus component-scoped REQ-FILE-001..014 and REQ-FILE-016; E7-T1 fake-client REQ-UI-001/002/004, E7-T2 fake-client REQ-OUT-001/002/004/007, REQ-UI-003/006/009/010 and REQ-PROMPT-001, and E7-T3 browser/component-scoped REQ-OUT-006 and REQ-UI-008; E8-T1 account/service/component-scoped REQ-AUTH-001/002, E8-T2 authenticated-route REQ-AUTH-002/003/004, and E8-T3 isolated host/delivery-scoped REQ-HOST-007/009/010, REQ-NET-001..004 and REQ-UI-007; E14-T1 assembled fake-provider REQ-HOST-001/002, REQ-API-001 and REQ-CONSUMER-004; cross-surface REQ-FILE-015 and released-provider qualification remain pending |
 
-The repository contains a mounted authenticated HTTPS host, all eight feature
-handlers, protected Gul-owned SQLite lifecycle, verified native attachment, and
-one checked browser/PWA bundle. E8-T3 completion review accepts that bounded scope. Default runtime
-ports fail closed as unavailable; production provider ownership, Controller
-credentials, full product assembly, and live deployment qualification remain
-E2/E14/E9-owned.
+The repository contains a mounted authenticated HTTPS host, nine feature handlers
+including E14-T1 Diagnostics, protected Gul-owned SQLite lifecycle,
+verified native attachment, and one checked browser/PWA bundle. E8-T3 completion
+review accepts its eight-handler delivery scope; E14-T1 accepts the assembled fake-provider scope; E14 remains In Progress
+for its separate committed Epic audit and closeout. Default runtime ports fail closed as unavailable. Released provider wiring,
+Controller credentials and live deployment qualification remain E2/E9-owned.
 
 ## 3. Historical E0 assumption snapshot
 
@@ -1925,7 +1925,9 @@ The initial documentation assumed Gul would manage one Codex App Server, map Ses
 
 E12, E1, E13, E3, E4, E5, E6, E7 and E8 are complete. E8-T1/T2/T3
 are accepted within their account/password, authenticated route and isolated
-host/delivery scopes. E14-T1 assembled fake-provider acceptance is next. The
+host/delivery scopes. E14-T1 assembled fake-provider acceptance is complete.
+E14 remains In Progress for its separate committed audit and closeout; E2-T0
+follows after that closeout and the Provider released gate. The
 TASK-053 consumer lock and generated contract tooling remain authoritative. E6 provides guarded local FileService
 inspection, bounded preview, refresh and Git review over E3's saved Workspace
 attachment. E2-T3 retains the Submit-image handoff and final REQ-FILE-015
@@ -2097,3 +2099,62 @@ deployment qualification remain E2/E9-owned.
 E8 is Completed, no Task is active, and E14-T1 is next. The shared consumer
 dossier remains for E14, E2 and E9; only E8's roadmap link is replaced by its
 canonical outcomes.
+
+### E14-T1 assembled acceptance (2026-10-01)
+
+The checked adapters now run together through the real shared host, authenticated
+Connect routes and SQLite. The native shell and Chrome use the same checked
+bundle. The requirement mapping below records assembled fake-provider
+acceptance for the four E14-T1-owned requirements.
+
+| Requirement | Implemented E14-T1 scope and evidence |
+| --- | --- |
+| REQ-HOST-001 | The real shared TLS listener, account/session boundary and SQLite operate without Wails or a real provider; `internal/host` tests also cover the unavailable-runtime production configuration. |
+| REQ-HOST-002 | Chrome and isolated Wails/WebKit use the same checked bundle, authenticated Connect routes and host persistence. The native assembled check covers login, session selection, exact original and local file reading. |
+| REQ-API-001 | Generated Auth, Runtime, Workspace, Direct Session, Artifact, Interaction, Writer, File, ClientEvent and Diagnostics services share the protection boundary. Direct Session adds bounded text Submit; Diagnostics returns only provider/persistence availability. |
+| REQ-CONSUMER-004 | Real assembled HTTP and Chrome checks cover sequential read/write admission, distinct duplicate prompts, busy draft/rejection, approval during a waiting Turn, verified originals/results, restart, disconnect/reconnect, root-only aggregate close and safe local files. Unknown Submit survives restart without replay. |
+
+The fake uses a real-time clock for fresh projections while retaining the
+existing deterministic constructor for contract scenarios. It preserves one
+Thread across sequential Turns, exact original bytes and distinct accepted
+identities. First dedicated write publishes typed writer authority and verified
+write policy. Waiting Interaction projections carry current revision/stamp and
+terminal Turn events include their identity.
+
+The assembled host creates checked adapters before core startup. Reconnect
+reads raw provider snapshots to avoid a circular admission dependency; it checks
+workspace/carrier authority, refreshes aggregate floors and joins observation
+before store shutdown. Repeated provider loss publishes one invalidation until
+recovery; failed persistence invalidation remains retryable. Sync reads have a
+20-second cycle deadline. Pending-close UI reads refresh the projection without
+sending another mutation.
+
+Focused Go race checks and real Chrome/native checks pass. Serial `make test` also passes, including API/frontend/contract drift, foundation isolation and SOT checks. Gaori reports command exit 0; its degraded extractor does not change the passing command status. The first six-role static assessment found missing direct assertions for offline
+mutation refusal, the WRITE effect and actual no-replay calls, plus a duplicated
+Submit bound and unqualified phase/API wording. Corrections add provider-call
+counters, typed writer assertions, cancellable subject-scoped binding lookup,
+generated bound use and explicit E2-T3 extension ownership. The updated browser
+campaign checks unknown draft retention, size feedback and automatic event
+reconnection, and holds close pending through a poll interval. The corrected
+focused race suites, complete Chrome campaign and actual native race suite pass.
+The serial `make test` facade also passes, with degraded Gaori extraction recorded
+separately. The second six-role assessment confirmed those corrections and identified a snapshot-required content catch-up gap, pre-attempt persistence misclassification and missing direct fake-authority regression assertions. The candidate now refreshes all content panels on rejoin, distinguishes typed persistence failure from unknown effects and tests startup policy, stable thread identity, WRITE retention, lane refusal and cross-run writer conflict. Focused checks also cover production Submit refusal, ambiguous binding lookup and online Diagnostics. The Chrome campaign holds rejoin across an actual result publication and verifies all three content reads resume. Revised contract comments and host timing descriptions match the assembly. Unchanged historical handler comments remain explicitly owned by E8-FB-012. The corrected focused Go race checks and full real Chrome campaign pass. Chrome verifies neutral pending-eligibility status, all three content reads after rejoin, missed-publication visibility and full result integrity. The actual native race suite also passes. Latest serial `make test` passes with command exit 0 and degraded Gaori extraction recorded separately. The third assessment confirmed the earlier corrections and found a gate closure between durable admission and provider dispatch could retain a never-dispatched Submit as unknown. The correction resolves fresh pending attempts as rejected, preserves prior unknown attempts during blocked recovery, propagates rejection-persistence failure and prevents durable rejection retries from appearing accepted. Focused race checks prove restart releases the rejected attempt's mutation slot, exact retries never dispatch, unknown recovery retains its possible prior effect and storage failure remains fail closed. Assembled checks also cover offline-start cleanup and actual JSON transport limits. The fourth six-role assessment confirmed the runtime corrections. Its documentary command attribution was corrected and checked locally; remaining independent Low observations retain their canonical future-work owners. A lifecycle negative fixture depended on the repository task remaining incomplete. The fixture now explicitly sets E14-T1 to Planned within its isolated copy, preserving the same premature-promotion rejection assertion across actual lifecycle transitions.
+E14-T1 is Completed for the assembled fake-provider scope. Its completion
+projection must pass the required SOT and serial gates and the bounded correction
+confirmation. E14 remains In Progress for separate committed Epic validation
+and closeout; real-provider and live deployment qualification remain E2/E9-owned.
+
+| Remaining qualification | Canonical owner |
+| --- | --- |
+| Exact released executable and runtime capabilities, install identity and immutable version pin | E2-T0 |
+| Public local gRPC/UDS permissions, dial/reconnect, no Machine CLI fallback | E2-T1 |
+| Real Controller/carrier issuance and fixed-home credential validation | E2-T2 |
+| Actual session creation, live sequential read/write, guarded image handoff, provider/Worker/Gul/browser restart and large artifacts | E2-T3 |
+| Supported browser/device layouts and touch, live diagnostics/security, deployed authentication and stream revocation | E9-T1/T2 |
+| Installed launchd login/upgrade/sleep/wake and actual Tailscale Serve exposure/reachability | E2/E9 deployment qualification |
+
+The real provider and live runtime are absent from E14. Fake approval, mutation
+and result evidence does not qualify those remaining boundaries. The shared
+consumer dossier remains referenced by E14, E2 and E9 until their respective
+closeouts. Existing ADRs apply; this task introduces no installation or release
+operation.

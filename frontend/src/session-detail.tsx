@@ -1,20 +1,26 @@
 import {useEffect, useRef, useState} from "react";
+import {Code, ConnectError} from "@connectrpc/connect";
 import {
+  ActionBlocker, ActionFailureSchema, SubmitOutcome, type SubmitResponse, type ListSpecialistResultsResponse, type ClientEvent,
   ActionCloseIntent, ActionWriteIntent, ApprovalPolicy, CloseProgress, CloseStatus,
   Freshness, InteractionCardStatus, LaunchAssurance, ProviderState, SessionLifecycle, WriterAccessMode,
   type ActionState, type CloseRuntimeResponse, type GetActionStateResponse,
   type GetCardResponse, type GetExecutionStateResponse, type InteractionCard,
   type ListPendingResponse, type ResolveResponse,
 } from "../../api/generated/ts/gul/v1/gul_pb";
+import {SpecialistResults} from "./specialist-results";
 import {ConversationPanel, type ConversationClient} from "./conversation-panel";
 import {domainErrorMessage, domainErrorRequiresExternalAction, externalActionRequired, operatorError} from "./domain-errors";
 import {InteractionCardView} from "./interaction-card";
 import {PromptHistoryPanel, type PromptHistoryClient} from "./prompt-history";
 import {ProviderStatus} from "./provider-status";
-import {ActionBlockerMessage, InterruptConsent, WriterPanel} from "./writer-panel";
+import {ActionBlockerMessage, InterruptConsent, WriterPanel, PromptDraft} from "./writer-panel";
 import {WriterStatus} from "./writer-status";
 
 export type SessionDetailClient = ConversationClient & PromptHistoryClient & {
+  submit?(request: {sessionId: string; attemptId: string; text: string; writeIntent: ActionWriteIntent}): Promise<SubmitResponse>;
+  listSpecialistResults?(request: {sessionId: string; pageSize: number; pageToken?: string}): Promise<ListSpecialistResultsResponse>;
+  watch?(request: {sessionId: string; afterDeliverySequence: bigint}, signal: AbortSignal): AsyncIterable<ClientEvent>;
   getExecutionState(request: {sessionId: string}): Promise<GetExecutionStateResponse>;
   getActionState(request: {sessionId: string; writeIntent: ActionWriteIntent; closeIntent: ActionCloseIntent; interruptConfirmed: boolean}): Promise<GetActionStateResponse>;
   listPending(request: {sessionId: string}): Promise<ListPendingResponse>;
@@ -43,6 +49,10 @@ function closeLabel(progress: CloseProgress) {
 }
 
 export function SessionDetail({sessionId, client, onActivity}: {sessionId: string; client: SessionDetailClient; onActivity: (value: SessionActivity | undefined) => void}) {
+  const [write, setWrite] = useState(false);
+  const [contentRevision, setContentRevision] = useState(0);
+  const [eventError, setEventError] = useState("");
+  const [eventReconnect, setEventReconnect] = useState(0);
   const [execution, setExecution] = useState<GetExecutionStateResponse>();
   const [action, setAction] = useState<ActionState>();
   const [eligibilityPending, setEligibilityPending] = useState(true);
@@ -72,13 +82,19 @@ export function SessionDetail({sessionId, client, onActivity}: {sessionId: strin
   const conversationTab = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
+    if (!closeAttemptRecorded || execution?.closeProgress === CloseProgress.CONFIRMED) return;
+    const timer = setInterval(() => setReload(value => value + 1), 5000);
+    return () => clearInterval(timer);
+  }, [closeAttemptRecorded, execution?.closeProgress]);
+
+  useEffect(() => {
     let current = true;
     const actionRequest = ++actionGeneration.current;
     setExecution(undefined); setAction(undefined); setEligibilityPending(true); setCards([]); setPendingCount(undefined); setPendingFailed(false); setPendingNotice(""); setCardError("");
     setExecutionError(""); setActionError(""); setExecutionExternal(false); setActionExternal(false); setPendingExternal(false); setCardExternal(false);
     void Promise.allSettled([
       client.getExecutionState({sessionId}),
-      client.getActionState({sessionId, writeIntent: ActionWriteIntent.READ, closeIntent: ActionCloseIntent.COMPLETE, interruptConfirmed: interrupt}),
+      client.getActionState({sessionId, writeIntent: write ? ActionWriteIntent.WRITE : ActionWriteIntent.READ, closeIntent: ActionCloseIntent.COMPLETE, interruptConfirmed: interrupt}),
       client.listPending({sessionId}),
     ]).then(async ([state, eligibility, pending]) => {
       if (!current) return;
@@ -119,7 +135,7 @@ export function SessionDetail({sessionId, client, onActivity}: {sessionId: strin
       }
     });
     return () => {current = false;};
-  }, [client, sessionId, reload]);
+  }, [client, sessionId, reload, write]);
 
   useEffect(() => {
     if (lastConsent.current === interrupt) return;
@@ -127,12 +143,12 @@ export function SessionDetail({sessionId, client, onActivity}: {sessionId: strin
     let current = true;
     const actionRequest = ++actionGeneration.current;
     setEligibilityPending(true);
-    void client.getActionState({sessionId, writeIntent: ActionWriteIntent.READ, closeIntent: ActionCloseIntent.COMPLETE, interruptConfirmed: interrupt})
+    void client.getActionState({sessionId, writeIntent: write ? ActionWriteIntent.WRITE : ActionWriteIntent.READ, closeIntent: ActionCloseIntent.COMPLETE, interruptConfirmed: interrupt})
       .then(result => {if (current && actionGeneration.current === actionRequest) {setAction(result.state); setActionError(""); setActionExternal(false);}})
       .catch(reason => {if (current && actionGeneration.current === actionRequest) {setAction(undefined); setActionError(operatorError(reason)); setActionExternal(externalActionRequired(reason));}})
       .finally(() => {if (current && actionGeneration.current === actionRequest) setEligibilityPending(false);});
     return () => {current = false;};
-  }, [client, sessionId, interrupt]);
+  }, [client, sessionId, interrupt, write]);
 
   useEffect(() => {
     if (!execution) {onActivity(undefined); return () => onActivity(undefined);}
@@ -143,6 +159,43 @@ export function SessionDetail({sessionId, client, onActivity}: {sessionId: strin
     onActivity({provider: ProviderState[execution.providerState] ?? "Unavailable", activity, writer, policy, assurance, interactions: pendingCount});
     return () => onActivity(undefined);
   }, [execution, action, pendingCount, onActivity]);
+
+  useEffect(() => {
+    if (!client.watch) return;
+    const controller = new AbortController();
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    setEventError("");
+    void (async () => {
+      try {
+        for await (const event of client.watch!({sessionId, afterDeliverySequence: 0n}, controller.signal)) {
+          if (controller.signal.aborted || event.sessionId !== sessionId) continue;
+          setReload(value => value + 1);
+          setContentRevision(value => value + 1);
+        }
+        if (!controller.signal.aborted) throw new Error("Observation disconnected");
+      } catch {
+        if (!controller.signal.aborted) {
+          setAction(undefined); setEventError("Observation disconnected. Checking fresh state before reconnect.");
+          timer = setTimeout(() => setEventReconnect(value => value + 1), 3000);
+        }
+      }
+    })();
+    return () => {controller.abort(); clearTimeout(timer);};
+  }, [client, sessionId, eventReconnect]);
+
+  async function send(text: string) {
+    if (!client.submit) throw new Error("Submit unavailable");
+    const result = await client.submit({sessionId, attemptId: crypto.randomUUID(), text, writeIntent: write ? ActionWriteIntent.WRITE : ActionWriteIntent.READ});
+    setAction(result.state);
+    setReload(value => value + 1);
+    if (result.outcome !== SubmitOutcome.ACCEPTED) {
+      const blocker = result.outcome === SubmitOutcome.REJECTED
+        ? result.state?.blocker ?? ActionBlocker.FRESH_SNAPSHOT_REQUIRED : ActionBlocker.UNRESOLVED_OUTCOME;
+      throw new ConnectError("Submission was not accepted", Code.FailedPrecondition, undefined,
+        [{desc: ActionFailureSchema, value: {blocker}}]);
+    }
+    setContentRevision(value => value + 1);
+  }
 
   async function changeWriter(kind: "acquire" | "release") {
     const result = await (kind === "acquire" ? client.acquireWriter({sessionId}) : client.releaseWriter({sessionId}));
@@ -183,6 +236,7 @@ export function SessionDetail({sessionId, client, onActivity}: {sessionId: strin
   }
 
   return <div className="session-detail">
+    {eventError && <p role="alert">{eventError}</p>}
     <section className="session-detail__interactions" aria-label="Action required">
       <h3>Action required {pendingCount ? `(${pendingCount})` : ""}</h3>
       {cardError && <p role="alert">{cardError}</p>}
@@ -196,7 +250,7 @@ export function SessionDetail({sessionId, client, onActivity}: {sessionId: strin
     </section>
     <div className="session-detail__summary">
       <h3>Current activity</h3>
-      {!externalError && !closeExternalRejected && !action?.flags?.requiresOperatorAction && <button type="button" onClick={() => setReload(value => value + 1)}>Refresh current state</button>}
+      {!externalError && !closeExternalRejected && !action?.flags?.requiresOperatorAction && <button type="button" onClick={() => {setReload(value => value + 1); setContentRevision(value => value + 1);}}>Refresh current state</button>}
       {error && <p role="alert">{error}</p>}
       {!execution && !error && <p role="status">Loading current state…</p>}
       {execution && <>
@@ -216,12 +270,17 @@ export function SessionDetail({sessionId, client, onActivity}: {sessionId: strin
       <button type="button" ref={conversationTab} aria-current={view === "conversation" ? "page" : undefined} onClick={() => setView("conversation")}>Conversation</button>
       <button type="button" aria-current={view === "history" ? "page" : undefined} onClick={() => setView("history")}>Prompt History</button>
     </div>
-    <div hidden={view !== "conversation"}><ConversationPanel sessionId={sessionId} client={client}
+    <div hidden={view !== "conversation"}><ConversationPanel refreshRevision={contentRevision} sessionId={sessionId} client={client}
       focusEntryId={focusEntryId} focusRequest={focusRequest} active={view === "conversation"}
       focusAnchor={conversationTab} /></div>
-    <div hidden={view !== "history"}><PromptHistoryPanel sessionId={sessionId} client={client}
+    <div hidden={view !== "history"}><PromptHistoryPanel refreshRevision={contentRevision} sessionId={sessionId} client={client}
       onOpenTurn={entryId => {setFocusEntryId(entryId); setFocusRequest(value => value + 1);
         setView("conversation"); conversationTab.current?.focus();}} /></div>
+    {client.submit && <section aria-label="Submit prompt">
+      <label>Prompt access <select value={write ? "write" : "read"} onChange={event => setWrite(event.currentTarget.value === "write")}><option value="read">Read</option><option value="write">Write</option></select></label>
+      <PromptDraft state={actionsCurrent && !eventError ? action : undefined} write={write} send={send} />
+    </section>}
+    {client.listSpecialistResults && <SpecialistResults sessionId={sessionId} client={client} refreshRevision={contentRevision} />}
     {action && actionsCurrent && <WriterPanel state={action} acquire={() => changeWriter("acquire")} release={() => changeWriter("release")} onState={setAction} />}
     <section aria-label="Session close">
       <h3>Close session</h3>

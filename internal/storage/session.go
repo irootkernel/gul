@@ -127,3 +127,58 @@ WHERE subject_id = ? AND session_id = ? AND workspace_id = ? AND run_id = ? AND 
 	}
 	return nil
 }
+
+// BoundSessions supplies persisted backend bindings to host startup recovery.
+// It is never exposed as a cross-subject browser listing.
+func (r PresentationRepository) BoundSessions(ctx context.Context) ([]session.Binding, error) {
+	rows, err := r.store.reader.QueryContext(ctx, `SELECT subject_id, session_id, workspace_id, run_id, controller_binding_id, provider_session_id, configuration_json FROM primary_session_bindings ORDER BY subject_id, session_id`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var out []session.Binding
+	for rows.Next() {
+		var b session.Binding
+		var config string
+		if err = rows.Scan(&b.SubjectID, &b.ID, &b.WorkspaceID, &b.RunID, &b.ControllerBindingID, &b.ProviderSessionID, &config); err != nil {
+			return nil, err
+		}
+		if err = json.Unmarshal([]byte(config), &b.Configuration); err != nil {
+			return nil, err
+		}
+		out = append(out, b)
+	}
+	return out, rows.Err()
+}
+
+// BindingByRun resolves one trusted subject's persisted Run without a host-wide scan.
+// Ambiguous identity fails closed rather than choosing another binding.
+func (r PresentationRepository) BindingByRun(ctx context.Context, subject, run string) (session.Binding, error) {
+	rows, err := r.store.reader.QueryContext(ctx, `SELECT session_id, workspace_id, controller_binding_id, provider_session_id, configuration_json FROM primary_session_bindings WHERE subject_id = ? AND run_id = ? LIMIT 2`, subject, run)
+	if err != nil {
+		return session.Binding{}, err
+	}
+	defer rows.Close()
+	var b session.Binding
+	var config string
+	if !rows.Next() {
+		if err := rows.Err(); err != nil {
+			return session.Binding{}, err
+		}
+		return session.Binding{}, session.ErrNotFound
+	}
+	b.SubjectID, b.RunID = subject, run
+	if err := rows.Scan(&b.ID, &b.WorkspaceID, &b.ControllerBindingID, &b.ProviderSessionID, &config); err != nil {
+		return session.Binding{}, err
+	}
+	if rows.Next() {
+		return session.Binding{}, session.ErrBindingConflict
+	}
+	if err := rows.Err(); err != nil {
+		return session.Binding{}, err
+	}
+	if err := json.Unmarshal([]byte(config), &b.Configuration); err != nil {
+		return session.Binding{}, err
+	}
+	return b, nil
+}

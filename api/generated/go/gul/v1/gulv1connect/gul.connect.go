@@ -42,6 +42,8 @@ const (
 	WriterActionServiceName = "gul.v1.WriterActionService"
 	// FileServiceName is the fully-qualified name of the FileService service.
 	FileServiceName = "gul.v1.FileService"
+	// DiagnosticsServiceName is the fully-qualified name of the DiagnosticsService service.
+	DiagnosticsServiceName = "gul.v1.DiagnosticsService"
 )
 
 // These constants are the fully-qualified names of the RPCs defined in this package. They're
@@ -103,6 +105,9 @@ const (
 	// WorkspacePresentationServiceSetNavigationProcedure is the fully-qualified name of the
 	// WorkspacePresentationService's SetNavigation RPC.
 	WorkspacePresentationServiceSetNavigationProcedure = "/gul.v1.WorkspacePresentationService/SetNavigation"
+	// DirectSessionServiceSubmitProcedure is the fully-qualified name of the DirectSessionService's
+	// Submit RPC.
+	DirectSessionServiceSubmitProcedure = "/gul.v1.DirectSessionService/Submit"
 	// DirectSessionServiceListConversationProcedure is the fully-qualified name of the
 	// DirectSessionService's ListConversation RPC.
 	DirectSessionServiceListConversationProcedure = "/gul.v1.DirectSessionService/ListConversation"
@@ -185,6 +190,9 @@ const (
 	// FileServiceWatchFileChangesProcedure is the fully-qualified name of the FileService's
 	// WatchFileChanges RPC.
 	FileServiceWatchFileChangesProcedure = "/gul.v1.FileService/WatchFileChanges"
+	// DiagnosticsServiceGetSummaryProcedure is the fully-qualified name of the DiagnosticsService's
+	// GetSummary RPC.
+	DiagnosticsServiceGetSummaryProcedure = "/gul.v1.DiagnosticsService/GetSummary"
 )
 
 // AuthServiceClient is a client for the gul.v1.AuthService service.
@@ -791,6 +799,7 @@ func (UnimplementedWorkspacePresentationServiceHandler) SetNavigation(context.Co
 
 // DirectSessionServiceClient is a client for the gul.v1.DirectSessionService service.
 type DirectSessionServiceClient interface {
+	Submit(context.Context, *connect.Request[v1.SubmitRequest]) (*connect.Response[v1.SubmitResponse], error)
 	ListConversation(context.Context, *connect.Request[v1.ListConversationRequest]) (*connect.Response[v1.ListConversationResponse], error)
 	GetConversationEntry(context.Context, *connect.Request[v1.GetConversationEntryRequest]) (*connect.Response[v1.GetConversationEntryResponse], error)
 	ListDirectSessions(context.Context, *connect.Request[v1.ListDirectSessionsRequest]) (*connect.Response[v1.ListDirectSessionsResponse], error)
@@ -816,6 +825,12 @@ func NewDirectSessionServiceClient(httpClient connect.HTTPClient, baseURL string
 	baseURL = strings.TrimRight(baseURL, "/")
 	directSessionServiceMethods := v1.File_gul_v1_gul_proto.Services().ByName("DirectSessionService").Methods()
 	return &directSessionServiceClient{
+		submit: connect.NewClient[v1.SubmitRequest, v1.SubmitResponse](
+			httpClient,
+			baseURL+DirectSessionServiceSubmitProcedure,
+			connect.WithSchema(directSessionServiceMethods.ByName("Submit")),
+			connect.WithClientOptions(opts...),
+		),
 		listConversation: connect.NewClient[v1.ListConversationRequest, v1.ListConversationResponse](
 			httpClient,
 			baseURL+DirectSessionServiceListConversationProcedure,
@@ -893,6 +908,7 @@ func NewDirectSessionServiceClient(httpClient connect.HTTPClient, baseURL string
 
 // directSessionServiceClient implements DirectSessionServiceClient.
 type directSessionServiceClient struct {
+	submit                       *connect.Client[v1.SubmitRequest, v1.SubmitResponse]
 	listConversation             *connect.Client[v1.ListConversationRequest, v1.ListConversationResponse]
 	getConversationEntry         *connect.Client[v1.GetConversationEntryRequest, v1.GetConversationEntryResponse]
 	listDirectSessions           *connect.Client[v1.ListDirectSessionsRequest, v1.ListDirectSessionsResponse]
@@ -905,6 +921,11 @@ type directSessionServiceClient struct {
 	getExecutionState            *connect.Client[v1.GetExecutionStateRequest, v1.GetExecutionStateResponse]
 	listSpecialistResults        *connect.Client[v1.ListSpecialistResultsRequest, v1.ListSpecialistResultsResponse]
 	closeRuntime                 *connect.Client[v1.CloseRuntimeRequest, v1.CloseRuntimeResponse]
+}
+
+// Submit calls gul.v1.DirectSessionService.Submit.
+func (c *directSessionServiceClient) Submit(ctx context.Context, req *connect.Request[v1.SubmitRequest]) (*connect.Response[v1.SubmitResponse], error) {
+	return c.submit.CallUnary(ctx, req)
 }
 
 // ListConversation calls gul.v1.DirectSessionService.ListConversation.
@@ -969,6 +990,7 @@ func (c *directSessionServiceClient) CloseRuntime(ctx context.Context, req *conn
 
 // DirectSessionServiceHandler is an implementation of the gul.v1.DirectSessionService service.
 type DirectSessionServiceHandler interface {
+	Submit(context.Context, *connect.Request[v1.SubmitRequest]) (*connect.Response[v1.SubmitResponse], error)
 	ListConversation(context.Context, *connect.Request[v1.ListConversationRequest]) (*connect.Response[v1.ListConversationResponse], error)
 	GetConversationEntry(context.Context, *connect.Request[v1.GetConversationEntryRequest]) (*connect.Response[v1.GetConversationEntryResponse], error)
 	ListDirectSessions(context.Context, *connect.Request[v1.ListDirectSessionsRequest]) (*connect.Response[v1.ListDirectSessionsResponse], error)
@@ -990,6 +1012,12 @@ type DirectSessionServiceHandler interface {
 // and JSON codecs. They also support gzip compression.
 func NewDirectSessionServiceHandler(svc DirectSessionServiceHandler, opts ...connect.HandlerOption) (string, http.Handler) {
 	directSessionServiceMethods := v1.File_gul_v1_gul_proto.Services().ByName("DirectSessionService").Methods()
+	directSessionServiceSubmitHandler := connect.NewUnaryHandler(
+		DirectSessionServiceSubmitProcedure,
+		svc.Submit,
+		connect.WithSchema(directSessionServiceMethods.ByName("Submit")),
+		connect.WithHandlerOptions(opts...),
+	)
 	directSessionServiceListConversationHandler := connect.NewUnaryHandler(
 		DirectSessionServiceListConversationProcedure,
 		svc.ListConversation,
@@ -1064,6 +1092,8 @@ func NewDirectSessionServiceHandler(svc DirectSessionServiceHandler, opts ...con
 	)
 	return "/gul.v1.DirectSessionService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
+		case DirectSessionServiceSubmitProcedure:
+			directSessionServiceSubmitHandler.ServeHTTP(w, r)
 		case DirectSessionServiceListConversationProcedure:
 			directSessionServiceListConversationHandler.ServeHTTP(w, r)
 		case DirectSessionServiceGetConversationEntryProcedure:
@@ -1096,6 +1126,10 @@ func NewDirectSessionServiceHandler(svc DirectSessionServiceHandler, opts ...con
 
 // UnimplementedDirectSessionServiceHandler returns CodeUnimplemented from all methods.
 type UnimplementedDirectSessionServiceHandler struct{}
+
+func (UnimplementedDirectSessionServiceHandler) Submit(context.Context, *connect.Request[v1.SubmitRequest]) (*connect.Response[v1.SubmitResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("gul.v1.DirectSessionService.Submit is not implemented"))
+}
 
 func (UnimplementedDirectSessionServiceHandler) ListConversation(context.Context, *connect.Request[v1.ListConversationRequest]) (*connect.Response[v1.ListConversationResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("gul.v1.DirectSessionService.ListConversation is not implemented"))
@@ -1782,4 +1816,74 @@ func (UnimplementedFileServiceHandler) CompareFixedRevisions(context.Context, *c
 
 func (UnimplementedFileServiceHandler) WatchFileChanges(context.Context, *connect.Request[v1.WatchFileChangesRequest], *connect.ServerStream[v1.FileChange]) error {
 	return connect.NewError(connect.CodeUnimplemented, errors.New("gul.v1.FileService.WatchFileChanges is not implemented"))
+}
+
+// DiagnosticsServiceClient is a client for the gul.v1.DiagnosticsService service.
+type DiagnosticsServiceClient interface {
+	GetSummary(context.Context, *connect.Request[v1.GetSummaryRequest]) (*connect.Response[v1.GetSummaryResponse], error)
+}
+
+// NewDiagnosticsServiceClient constructs a client for the gul.v1.DiagnosticsService service. By
+// default, it uses the Connect protocol with the binary Protobuf Codec, asks for gzipped responses,
+// and sends uncompressed requests. To use the gRPC or gRPC-Web protocols, supply the
+// connect.WithGRPC() or connect.WithGRPCWeb() options.
+//
+// The URL supplied here should be the base URL for the Connect or gRPC server (for example,
+// http://api.acme.com or https://acme.com/grpc).
+func NewDiagnosticsServiceClient(httpClient connect.HTTPClient, baseURL string, opts ...connect.ClientOption) DiagnosticsServiceClient {
+	baseURL = strings.TrimRight(baseURL, "/")
+	diagnosticsServiceMethods := v1.File_gul_v1_gul_proto.Services().ByName("DiagnosticsService").Methods()
+	return &diagnosticsServiceClient{
+		getSummary: connect.NewClient[v1.GetSummaryRequest, v1.GetSummaryResponse](
+			httpClient,
+			baseURL+DiagnosticsServiceGetSummaryProcedure,
+			connect.WithSchema(diagnosticsServiceMethods.ByName("GetSummary")),
+			connect.WithClientOptions(opts...),
+		),
+	}
+}
+
+// diagnosticsServiceClient implements DiagnosticsServiceClient.
+type diagnosticsServiceClient struct {
+	getSummary *connect.Client[v1.GetSummaryRequest, v1.GetSummaryResponse]
+}
+
+// GetSummary calls gul.v1.DiagnosticsService.GetSummary.
+func (c *diagnosticsServiceClient) GetSummary(ctx context.Context, req *connect.Request[v1.GetSummaryRequest]) (*connect.Response[v1.GetSummaryResponse], error) {
+	return c.getSummary.CallUnary(ctx, req)
+}
+
+// DiagnosticsServiceHandler is an implementation of the gul.v1.DiagnosticsService service.
+type DiagnosticsServiceHandler interface {
+	GetSummary(context.Context, *connect.Request[v1.GetSummaryRequest]) (*connect.Response[v1.GetSummaryResponse], error)
+}
+
+// NewDiagnosticsServiceHandler builds an HTTP handler from the service implementation. It returns
+// the path on which to mount the handler and the handler itself.
+//
+// By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf
+// and JSON codecs. They also support gzip compression.
+func NewDiagnosticsServiceHandler(svc DiagnosticsServiceHandler, opts ...connect.HandlerOption) (string, http.Handler) {
+	diagnosticsServiceMethods := v1.File_gul_v1_gul_proto.Services().ByName("DiagnosticsService").Methods()
+	diagnosticsServiceGetSummaryHandler := connect.NewUnaryHandler(
+		DiagnosticsServiceGetSummaryProcedure,
+		svc.GetSummary,
+		connect.WithSchema(diagnosticsServiceMethods.ByName("GetSummary")),
+		connect.WithHandlerOptions(opts...),
+	)
+	return "/gul.v1.DiagnosticsService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case DiagnosticsServiceGetSummaryProcedure:
+			diagnosticsServiceGetSummaryHandler.ServeHTTP(w, r)
+		default:
+			http.NotFound(w, r)
+		}
+	})
+}
+
+// UnimplementedDiagnosticsServiceHandler returns CodeUnimplemented from all methods.
+type UnimplementedDiagnosticsServiceHandler struct{}
+
+func (UnimplementedDiagnosticsServiceHandler) GetSummary(context.Context, *connect.Request[v1.GetSummaryRequest]) (*connect.Response[v1.GetSummaryResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("gul.v1.DiagnosticsService.GetSummary is not implemented"))
 }

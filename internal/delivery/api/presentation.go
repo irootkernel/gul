@@ -12,6 +12,7 @@ import (
 	"github.com/rootkernel/gul/internal/presentation"
 	"github.com/rootkernel/gul/internal/session"
 	"github.com/rootkernel/gul/internal/sessionclose"
+	"github.com/rootkernel/gul/internal/submit"
 )
 
 func localAccess(ctx context.Context, core *app.Core, resolve PrincipalResolver) (string, error) {
@@ -113,7 +114,7 @@ func (h *WorkspaceHandler) SetNavigation(ctx context.Context, request *connect.R
 	return connect.NewResponse(&gulv1.NavigationResponse{WorkspaceId: value.WorkspaceID, SessionId: value.SessionID}), nil
 }
 
-// DirectPresentationHandler remains unmounted until authenticated route assembly.
+// DirectPresentationHandler supplies shared authenticated session routes.
 type DirectPresentationHandler struct {
 	gulv1connect.UnimplementedDirectSessionServiceHandler
 	Core         *app.Core
@@ -121,6 +122,7 @@ type DirectPresentationHandler struct {
 	Sessions     *session.Service
 	Close        *sessionclose.Service
 	History      *history.Service
+	Submissions  *submit.Service
 	Principal    PrincipalResolver
 }
 

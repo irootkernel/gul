@@ -113,6 +113,11 @@ func TestOfflineCompositionThroughAuthenticatedTLSHost(t *testing.T) {
 	if result, err := directClient.ListDirectSessions(t.Context(), direct); err != nil || len(result.Msg.Sessions) != 0 {
 		t.Fatalf("offline direct sessions: %v, %v", result, err)
 	}
+	submit := connect.NewRequest(&gulv1.SubmitRequest{SessionId: "missing", AttemptId: "offline", Text: "must not dispatch", WriteIntent: gulv1.ActionWriteIntent_ACTION_WRITE_INTENT_READ})
+	withSession(submit)
+	if _, err := directClient.Submit(t.Context(), submit); connect.CodeOf(err) != connect.CodeUnavailable {
+		t.Fatalf("production Submit did not fail closed: %v", err)
+	}
 	actionClient := gulv1connect.NewWriterActionServiceClient(httpClient, h.Origin())
 	state := connect.NewRequest(&gulv1.GetActionStateRequest{SessionId: "missing", WriteIntent: gulv1.ActionWriteIntent_ACTION_WRITE_INTENT_READ, CloseIntent: gulv1.ActionCloseIntent_ACTION_CLOSE_INTENT_NONE})
 	withSession(state)
@@ -152,7 +157,7 @@ func TestOfflineCompositionThroughAuthenticatedTLSHost(t *testing.T) {
 	}
 	list := connect.NewRequest(&gulv1.ListWorkspacesRequest{})
 	withSession(list)
-	if _, err := workspaceClient.ListWorkspaces(t.Context(), list); connect.CodeOf(err) != connect.CodeUnavailable {
-		t.Fatalf("provider workspace listing: %v", err)
+	if result, err := workspaceClient.ListWorkspaces(t.Context(), list); err != nil || len(result.Msg.Workspaces) != 1 {
+		t.Fatalf("offline local workspace listing: %v, %v", result, err)
 	}
 }

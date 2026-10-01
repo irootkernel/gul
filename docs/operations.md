@@ -112,3 +112,13 @@ the sole owner creates a new private key and loopback leaf under its lock. Keep
 so it pins the new leaf; refresh browser connections and requalify any deployment
 certificate configuration separately. This procedure does not install system
 trust or alter Tailscale configuration.
+
+## Isolated assembled verification
+
+The E14 acceptance driver is a development fixture. Run the commands in
+[TESTING.md](../TESTING.md#assembled-application-acceptance) to exercise the real
+host and checked bundle with explicit stateful fakes. They allocate temporary
+Gul data, Workspace and client state and remove only their own fixture state.
+Production `gul` and `gul serve` keep runtime ports unavailable until the released
+provider integration is qualified. E14 does not install a provider, create a
+live Controller, load launchd, expose Tailscale or qualify a supported device.

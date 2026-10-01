@@ -1,9 +1,9 @@
 import {expect, test} from "bun:test";
 import {create} from "@bufbuild/protobuf";
 import {ConversationEntrySchema, ListConversationResponseSchema, ListPromptHistoryResponseSchema,
-  PromptHistoryItemSchema} from "../../api/generated/ts/gul/v1/gul_pb";
+  PromptHistoryItemSchema, ListSpecialistResultsResponseSchema, SpecialistResultFormat} from "../../api/generated/ts/gul/v1/gul_pb";
 import {maximumPageMetadataBytes, maximumPageSize, maximumPreviewBytes, maximumTokenBytes} from "../../api/generated/ts/gul/v1/bounds";
-import {assertConversationPage, assertHistoryPage} from "./paged-provider-list";
+import {assertConversationPage, assertHistoryPage, assertSpecialistPage} from "./paged-provider-list";
 
 test("conversation page rejects each browser response bound", () => {
   const entry = create(ConversationEntrySchema, {entryId: "entry-1", preview: "ok"});
@@ -51,4 +51,12 @@ test("oversized conversation and history pages reject before visiting entries", 
   }
   expect(() => assertConversationPage(conversation)).toThrow("Provider page is invalid");
   expect(() => assertHistoryPage(history)).toThrow("Provider page is invalid");
+});
+
+test("result discovery refuses oversized pages and unsupported or unverified artifacts", () => {
+  const page = create(ListSpecialistResultsResponseSchema, {snapshotId: "snapshot", items: [{resultId: "result", artifactRef: "artifact", format: SpecialistResultFormat.UTF8_TEXT, sha256: "a".repeat(64)}]});
+  expect(() => assertSpecialistPage(page)).not.toThrow();
+  expect(() => assertSpecialistPage({...page, items: Array(maximumPageSize + 1).fill(page.items[0])})).toThrow("Provider page is invalid");
+  expect(() => assertSpecialistPage({...page, items: [{...page.items[0]!, format: SpecialistResultFormat.UNSPECIFIED}]})).toThrow("Provider result is invalid");
+  expect(() => assertSpecialistPage({...page, items: [{...page.items[0]!, sha256: "unverified"}]})).toThrow("Provider result is invalid");
 });

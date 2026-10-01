@@ -79,6 +79,8 @@ const auth = goSourceFiles(path.join(sourceRoot, "internal/auth"))
   .map(name => fs.readFileSync(name, "utf8")).join("\n");
 const browserHelper = goSourceFiles(path.join(sourceRoot, "frontend/browser"))
   .map(name => fs.readFileSync(name, "utf8")).join("\n");
+const composition = goSourceFiles(path.join(sourceRoot, "internal/composition")).map(name => fs.readFileSync(name, "utf8")).join("\n");
+const submit = goSourceFiles(path.join(sourceRoot, "internal/submit")).map(name => fs.readFileSync(name, "utf8")).join("\n");
 const scenarioImport = /"github\.com\/rootkernel\/gul\/contract\/scenario(?:\/[^\"]+)?"/;
 
 function sourceFiles(directory) {
@@ -142,6 +144,14 @@ const boundaries = [
 for (const [label, source, forbidden] of boundaries) {
   for (const pattern of forbidden) assert.doesNotMatch(source, pattern, `${label} foundation gained ${pattern}`);
 }
+
+// The assembly layer can connect ports, but cannot introduce a production fixture.
+for (const [label, source] of [["composition", composition], ["submit", submit], ...boundaries.slice(2).map(([label, source]) => [label, source])]) {
+  assert.doesNotMatch(source, /"github\.com\/rootkernel\/gul\/test\/acceptance(?:\/[^"]*)?"/, `${label} imports an acceptance fixture`);
+}
+for (const pattern of [scenarioImport, /"github\.com\/wailsapp/, /"database\/sql"/, /\bListenAndServe\b/]) assert.doesNotMatch(composition, pattern);
+// Submit consumes generated text bounds like auth consumes password bounds.
+for (const pattern of boundaries.find(([label]) => label === "auth")[2]) assert.doesNotMatch(submit, pattern);
 
 const fixture = fs.mkdtempSync(path.join(os.tmpdir(), "gul-boundary-"));
 try {

@@ -1,10 +1,11 @@
 import {useRef, useState, type FormEvent} from "react";
-import {ConnectError} from "@connectrpc/connect";
+import {Code, ConnectError} from "@connectrpc/connect";
 import {
   ActionBlocker, ActionFailureSchema, WriterAuthority, WriterEffectiveAccess,
   WriterPolicyVerification, WriterOwner, LaunchExecutionLane, LaunchAssurance,
   WriterAccessMode, type ActionState,
 } from "../../api/generated/ts/gul/v1/gul_pb";
+import {maximumSubmitTextBytes} from "../../api/generated/ts/gul/v1/bounds";
 import {useImeSubmitGuard} from "./ime-submit";
 
 const blockers: Partial<Record<ActionBlocker, string>> = {
@@ -66,33 +67,37 @@ export function WriterPanel({state, acquire, release, onState}: WriterPanelProps
     </dl>
     {w?.backgroundBlocked && <p>Background execution blocks writer changes.</p>}
     {w?.recoveryBlocked && <p>Provider recovery blocks writer changes.</p>}
-    <ActionBlockerMessage blocker={failure?.basis === state ? failure.blocker : state.blocker} />
+    <ActionBlockerMessage blocker={failure && failure.basis === state ? failure.blocker : state?.blocker ?? ActionBlocker.FRESH_SNAPSHOT_REQUIRED} />
     <button disabled={busy || failure?.basis === state || !state.flags?.canAcquireWriter} onClick={() => void mutate("acquire")}>Acquire writer</button>
     <button disabled={busy || failure?.basis === state || !state.flags?.canReleaseWriter} onClick={() => void mutate("release")}>Release writer</button>
     <p>Release and acquire are separate operations. No writer is reserved between them.</p>
   </section>;
 }
 
-export function PromptDraft({state, write, send}: {state: ActionState; write: boolean; send: (text: string) => Promise<void>}) {
+export function PromptDraft({state, write, send}: {state: ActionState | undefined; write: boolean; send: (text: string) => Promise<void>}) {
   const [draft, setDraft] = useState("");
-  const [failure, setFailure] = useState<{basis: ActionState; blocker: ActionBlocker}>();
+  const [failure, setFailure] = useState<{basis: ActionState | undefined; blocker: ActionBlocker; message: string | undefined}>();
   const [busy, setBusy] = useState(false);
   const inFlight = useRef(false);
   const ime = useImeSubmitGuard();
-  const allowed = failure?.basis !== state && (write ? state.flags?.canSubmitWrite : state.flags?.canSubmitRead);
+  const tooLarge = new TextEncoder().encode(draft).byteLength > maximumSubmitTextBytes;
+  const allowed = failure?.basis !== state && (write ? state?.flags?.canSubmitWrite : state?.flags?.canSubmitRead);
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!allowed || !draft || inFlight.current || ime.blocksSubmit()) return;
+    if (!allowed || tooLarge || !draft || inFlight.current || ime.blocksSubmit()) return;
     inFlight.current = true; setBusy(true);
-    try {await send(draft); setDraft("");} catch (error) {setFailure({basis: state, blocker: failureBlocker(error)});}
+    try {await send(draft); setDraft("");} catch (error) {setFailure({basis: state, blocker: failureBlocker(error), message: error instanceof ConnectError && error.code === Code.InvalidArgument ? "Check the prompt and submission options, then try again." : undefined});}
     finally {inFlight.current = false; setBusy(false);}
   }
   return <form onSubmit={submit} aria-label="Prompt draft" onCompositionStart={ime.onCompositionStart}
     onCompositionEnd={ime.onCompositionEnd} onKeyDown={ime.onKeyDown} onKeyUp={ime.onKeyUp}>
-    <label>Prompt<textarea value={draft} disabled={busy} onBlur={ime.onInputBlur}
+    <label>Prompt<textarea aria-label="Prompt" value={draft} disabled={busy} onBlur={ime.onInputBlur}
       onChange={event => setDraft(event.currentTarget.value)} /></label>
-    <ActionBlockerMessage blocker={failure?.basis === state ? failure.blocker : state.blocker} />
-    <button disabled={!allowed || busy || !draft} type="submit" onPointerDown={ime.explicitSubmit}
+    {tooLarge && <p role="alert">Prompt exceeds the {maximumSubmitTextBytes.toLocaleString("en-US")} byte limit. Shorten it before sending.</p>}
+    {failure && failure.basis === state && failure.message ? <p role="alert">{failure.message}</p> :
+      failure && failure.basis === state ? <ActionBlockerMessage blocker={failure.blocker} /> :
+      state ? <ActionBlockerMessage blocker={state.blocker} /> : <p role="status">Checking current state…</p>}
+    <button disabled={!allowed || tooLarge || busy || !draft} type="submit" onPointerDown={ime.explicitSubmit}
       onKeyDown={ime.onSubmitButtonKeyDown}>Send prompt</button>
   </form>;
 }

@@ -2,6 +2,7 @@
 package gulv1
 
 const (
+	MaximumSubmitTextBytes = 1048576
 	DefaultPageSize = 50
 	MaximumPageSize = 100
 	MaximumTokenBytes = 4096

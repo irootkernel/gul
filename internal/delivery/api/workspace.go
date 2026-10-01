@@ -122,7 +122,10 @@ func (h *WorkspaceHandler) RevalidateWorkspace(ctx context.Context, request *con
 }
 
 func (h *WorkspaceHandler) ListWorkspaces(ctx context.Context, _ *connect.Request[gulv1.ListWorkspacesRequest]) (*connect.Response[gulv1.ListWorkspacesResponse], error) {
-	subject, err := h.access(ctx)
+	if h == nil || h.Workspaces == nil {
+		return nil, accessError(connect.CodeUnauthenticated, "product access unavailable")
+	}
+	subject, err := localAccess(ctx, h.Core, h.Principal)
 	if err != nil {
 		return nil, err
 	}

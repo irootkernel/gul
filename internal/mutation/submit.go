@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"sync"
 	"time"
 
@@ -14,6 +15,8 @@ import (
 const MaximumSubmitBytes = 8 << 20
 const MaximumLiveSubmits = 4
 const SubmitMemoryAge = 10 * time.Minute
+
+var ErrSubmitPersistence = errors.New("submit rejection could not be persisted")
 
 type SubmitRequest struct {
 	OperationID, SubjectID, RunID, BindingID, ControllerID, IdempotencyKey string
@@ -47,7 +50,7 @@ type SubmitAttempts interface {
 type SubmitService struct {
 	Attempts SubmitAttempts
 	Provider SubmitProvider
-	Gate     func(string, string) bool // subject, Run; compatibility and convergence
+	Gate     func(context.Context, string, string) bool // subject, Run; compatibility and convergence
 	mu       sync.Mutex
 	live     map[string]*liveSubmit
 }
@@ -81,7 +84,7 @@ func (s *SubmitService) Submit(ctx context.Context, request SubmitRequest) (oper
 	if err != nil {
 		return operation.MutationAttempt{}, err
 	}
-	if !s.Gate(request.SubjectID, request.RunID) {
+	if !s.Gate(ctx, request.SubjectID, request.RunID) {
 		return operation.MutationAttempt{}, ErrBlocked
 	}
 	a := operation.MutationAttempt{OperationAttempt: operation.OperationAttempt{OperationID: request.OperationID, SubjectID: request.SubjectID,
@@ -126,8 +129,16 @@ func (s *SubmitService) retain(request SubmitRequest, age time.Duration) {
 }
 
 func (s *SubmitService) dispatchSubmit(ctx context.Context, a operation.MutationAttempt, request SubmitRequest) (operation.MutationAttempt, error) {
-	if !s.Gate(request.SubjectID, request.RunID) {
-		_ = s.markSubmitUnknown(ctx, a.OperationID)
+	if !s.Gate(ctx, request.SubjectID, request.RunID) {
+		// Only a fresh pending attempt has never reached the provider. A replay
+		// of an unknown attempt must retain its earlier possible effect.
+		if a.State == "pending" {
+			s.forget(a.OperationID)
+			if err := s.Attempts.ResolveMutation(context.WithoutCancel(ctx), a.OperationID, "rejected"); err != nil {
+				return a, errors.Join(ErrSubmitPersistence, err)
+			}
+			a.State, a.OutcomeRef = "resolved", "rejected"
+		}
 		return a, ErrBlocked
 	}
 	callCtx, cancel := context.WithTimeout(ctx, 20*time.Second)
@@ -195,7 +206,7 @@ func (s *SubmitService) RecoverTurn(ctx context.Context, id string) (operation.M
 	if a.State == "pending" {
 		return a, ErrBlocked
 	}
-	if !s.Gate(a.SubjectID, a.TargetRef) {
+	if !s.Gate(ctx, a.SubjectID, a.TargetRef) {
 		return a, ErrBlocked
 	}
 	ref := SubmitReference{OperationID: a.OperationID, SubjectID: a.SubjectID, RunID: a.TargetRef,

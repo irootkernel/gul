@@ -264,6 +264,9 @@ expectFailure('implementation memo drops frontend drift from test-int', root => 
 }, /Implementation memo test-int contract is missing frontend bundle drift/);
 
 expectFailure('current state promotes a requirement before its owner completes', root => {
+  write(root, 'docs/roadmap.md', text => clearActiveTask(text).replace(
+    /^(\| E14-T1 \| Pre-release \|) [^|]+ \|/m, '$1 Planned |',
+  ));
   write(root, 'docs/required-specs.md', text => text.replace(
     '| REQ-HOST-005 | Exact Go toolchain',
     '| REQ-HOST-001 | Premature foundation promotion | E1-T1 |\n| REQ-HOST-005 | Exact Go toolchain',

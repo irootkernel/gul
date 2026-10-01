@@ -146,7 +146,7 @@ func TestWorkspaceHandlerRequiresTrustedPrincipalAndKeepsProviderIdentityPrivate
 		core *app.Core
 		code gulv1.ErrorCode
 	}{
-		{"provider", app.NewCore(app.Dependencies{Provider: unavailable{}, Persistence: ready{}, Authorization: allow{}}), gulv1.ErrorCode_ERROR_CODE_PROVIDER_BLOCKED},
+
 		{"persistence", app.NewCore(app.Dependencies{Provider: ready{}, Persistence: unavailable{}, Authorization: allow{}}), gulv1.ErrorCode_ERROR_CODE_PERSISTENCE_UNAVAILABLE},
 	} {
 		t.Run(test.name+" access outage", func(t *testing.T) {

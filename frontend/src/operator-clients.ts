@@ -1,6 +1,6 @@
 import {createClient, type Transport} from "@connectrpc/connect";
 import {
-  ArtifactPresentationService, DirectSessionService, FileService,
+  ArtifactPresentationService, DirectSessionService, FileService, RuntimeService, DiagnosticsService, ClientEventService,
   InteractionPresentationService, WorkspacePresentationService, WriterActionService,
 } from "../../api/generated/ts/gul/v1/gul_pb";
 import type {OperatorClients} from "./operator-app";
@@ -14,11 +14,24 @@ export function createOperatorClients(transport: Transport): OperatorClients {
   const artifacts = createClient(ArtifactPresentationService, transport);
   const interactions = createClient(InteractionPresentationService, transport);
   const writer = createClient(WriterActionService, transport);
+  const runtime = createClient(RuntimeService, transport);
+  const diagnostics = createClient(DiagnosticsService, transport);
+  const events = createClient(ClientEventService, transport);
   return {
+    runtime, diagnostics,
     workspace,
     sessions,
-    files,
+    files: {
+      listDirectory: request => files.listDirectory({...request, relativePath: request.relativePath || "."}),
+      readPreview: request => files.readPreview(request),
+      getGitStatus: request => files.getGitStatus({...request, relativePath: request.relativePath || "."}),
+      compareFixedRevisions: request => files.compareFixedRevisions({...request, relativePath: request.relativePath || "."}),
+      refreshFiles: request => files.refreshFiles(request),
+    },
     details: {
+      submit: request => sessions.submit(request),
+      listSpecialistResults: request => sessions.listSpecialistResults(request),
+      watch: (request, signal) => events.watchClientEvents(request, {signal}),
       listConversation: request => sessions.listConversation(request),
       getConversationEntry: request => sessions.getConversationEntry(request),
       listPromptHistory: request => sessions.listPromptHistory(request),

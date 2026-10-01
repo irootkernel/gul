@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"connectrpc.com/connect"
+	gulv1 "github.com/rootkernel/gul/api/generated/go/gul/v1"
 	"github.com/rootkernel/gul/api/generated/go/gul/v1/gulv1connect"
 )
 
@@ -20,6 +21,7 @@ type FeatureHandlers struct {
 	Writer      *WriterHandler
 	Files       *FileHandler
 	Events      *ClientEventHandler
+	Diagnostics *DiagnosticsHandler
 }
 
 func NewAuthenticatedRoutes(boundary *BrowserBoundary, features FeatureHandlers) (http.Handler, error) {
@@ -45,7 +47,8 @@ func NewAuthenticatedRoutes(boundary *BrowserBoundary, features FeatureHandlers)
 	if features.Direct != nil {
 		h := *features.Direct
 		h.Principal = boundary.Principal
-		path, handler = gulv1connect.NewDirectSessionServiceHandler(&h, opts...)
+		// Each UTF-8 text byte can require six JSON bytes (\u00XX); allow a 4 KiB envelope.
+		path, handler = gulv1connect.NewDirectSessionServiceHandler(&h, connect.WithReadMaxBytes(6*gulv1.MaximumSubmitTextBytes+4096))
 		mux.Handle(path, handler)
 	}
 	if features.Artifact != nil {
@@ -76,6 +79,12 @@ func NewAuthenticatedRoutes(boundary *BrowserBoundary, features FeatureHandlers)
 		h := *features.Events
 		h.Principal = boundary.Principal
 		path, handler = gulv1connect.NewClientEventServiceHandler(&h, opts...)
+		mux.Handle(path, handler)
+	}
+	if features.Diagnostics != nil {
+		h := *features.Diagnostics
+		h.Principal = boundary.Principal
+		path, handler = gulv1connect.NewDiagnosticsServiceHandler(&h, opts...)
 		mux.Handle(path, handler)
 	}
 	return boundary.Protect(mux), nil

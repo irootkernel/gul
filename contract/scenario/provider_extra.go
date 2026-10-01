@@ -55,7 +55,9 @@ func (h *Harness) GetControllerInteraction(_ context.Context, request *publicv1.
 	if interaction == nil {
 		return nil, invalid()
 	}
-	return &publicv1.GetControllerInteractionResponse{Context: h.response(), Interaction: copyOf(interaction)}, nil
+	detail := copyOf(interaction)
+	detail.Stamp = r.stamp()
+	return &publicv1.GetControllerInteractionResponse{Context: h.response(), Interaction: detail}, nil
 }
 
 func (h *Harness) ResolveInteraction(_ context.Context, request *publicv1.ResolveInteractionRequest) (*publicv1.ResolveInteractionResponse, error) {
@@ -91,6 +93,7 @@ func (h *Harness) ResolveInteraction(_ context.Context, request *publicv1.Resolv
 	}
 	interaction.Summary.Status = publicv1.InteractionStatus_INTERACTION_STATUS_RESOLVED
 	interaction.Summary.ResolvedAt = h.timestamp()
+	interaction.Summary.RequiresUserEscalation = false
 	r.projection.PendingInteractionCount--
 	if r.session != nil {
 		r.session.PendingApprovalCount--
@@ -155,6 +158,7 @@ func (h *Harness) AcquireWriter(_ context.Context, request *publicv1.AcquireWrit
 	w.writer.WriterGeneration++
 	w.writer.StateRevision++
 	r.projection.EffectivePolicy.Access = publicv1.EffectiveAccess_EFFECTIVE_ACCESS_WRITE
+	r.projection.EffectivePolicy.Verification = publicv1.PolicyVerification_POLICY_VERIFICATION_VERIFIED
 	r.projection.WriterAuthority.State = w.writer.AuthorityState
 	r.projection.WriterAuthority.WriterGeneration = w.writer.WriterGeneration
 	h.changed(r)
@@ -305,7 +309,9 @@ func (h *Harness) GetOrchestratedSession(_ context.Context, request *publicv1.Ge
 	if err != nil {
 		return nil, err
 	}
-	return &publicv1.GetOrchestratedSessionResponse{Context: h.response(), Session: copyOf(r.session)}, nil
+	snapshot := copyOf(r.session)
+	snapshot.CapturedAt = h.timestamp()
+	return &publicv1.GetOrchestratedSessionResponse{Context: h.response(), Session: snapshot}, nil
 }
 
 func (h *Harness) ListOrchestratedSessionResults(_ context.Context, request *publicv1.ListOrchestratedSessionResultsRequest) (*publicv1.ListOrchestratedSessionResultsResponse, error) {

@@ -2,6 +2,7 @@ import {useCallback, useEffect, useRef, useState} from "react";
 import type {DirectSessionPresentation, NavigationResponse, WorkspaceEntry} from "../../api/generated/ts/gul/v1/gul_pb";
 import {FilePane, rootFileLocation, type FileClient, type FileLocation} from "./file-pane";
 import {externalActionRequired, operatorError} from "./domain-errors";
+import {RuntimeChoices, type RuntimeClient} from "./runtime-choices";
 import {SessionDetail, type SessionActivity, type SessionDetailClient} from "./session-detail";
 
 type WorkspaceClient = {
@@ -14,7 +15,7 @@ type SessionClient = {
   listDirectSessions(request: {workspaceId: string}): Promise<{sessions: DirectSessionPresentation[]}>;
 };
 
-export type OperatorClients = {workspace: WorkspaceClient; sessions: SessionClient; files: FileClient; details?: SessionDetailClient};
+export type OperatorClients = {workspace: WorkspaceClient; sessions: SessionClient; files: FileClient; details?: SessionDetailClient; runtime?: RuntimeClient; diagnostics?: {getSummary(request: object): Promise<{providerReady: boolean; persistenceReady: boolean}>}};
 
 type OperatorTab = "sessions" | "chat" | "files";
 const tabStorageKey = "gul.presentation.tab";
@@ -133,6 +134,7 @@ export function OperatorApp({clients, writerActive = false}: {clients: OperatorC
     {loading ? <p role="status">Loading workspaces…</p> : <div className={`operator__panes operator__panes--${tab}`}>
       <aside className="operator__pane operator__sessions" aria-label="Workspaces and sessions">
         <h2>Sessions</h2>
+        {clients.runtime && <RuntimeChoices client={clients.runtime} />}
         <label>Workspace <select aria-label="Workspace" value={workspaceId} disabled={navigationBusy} onChange={event => void chooseWorkspace(event.currentTarget.value)}>
           {!workspaceId && <option value="">Choose a workspace</option>}
           {workspaces.map(entry => <option key={entry.workspaceId} value={entry.workspaceId}>{entry.displayName}</option>)}

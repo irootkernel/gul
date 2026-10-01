@@ -16,8 +16,8 @@ function acceptedAt(item: PromptHistoryItem) {
   return Number.isFinite(date.getTime()) ? date.toISOString() : "Time unavailable";
 }
 
-export function PromptHistoryPanel({sessionId, client, onOpenTurn}: {
-  sessionId: string; client: PromptHistoryClient; onOpenTurn: (entryId: string) => void;
+export function PromptHistoryPanel({sessionId, client, refreshRevision, onOpenTurn}: {
+  refreshRevision?: number; sessionId: string; client: PromptHistoryClient; onOpenTurn: (entryId: string) => void;
 }) {
   const [items, setItems] = useState<PromptHistoryItem[]>([]);
   const [snapshotId, setSnapshotId] = useState("");
@@ -45,7 +45,7 @@ export function PromptHistoryPanel({sessionId, client, onOpenTurn}: {
     }).catch(() => {if (current) setError("Prompt History is unavailable. Refresh to try again.");})
       .finally(() => {if (current) setLoading(false);});
     return () => {current = false;};
-  }, [client, sessionId, reload]);
+  }, [client, sessionId, reload, refreshRevision]);
 
   useEffect(() => {
     let current = true;

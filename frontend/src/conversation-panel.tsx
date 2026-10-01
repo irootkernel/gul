@@ -21,8 +21,8 @@ function label(entry: ConversationEntry) {
   }
 }
 
-export function ConversationPanel({sessionId, client, focusEntryId, focusRequest, active, focusAnchor}: {
-  sessionId: string; client: ConversationClient; focusEntryId: string; focusRequest: number; active: boolean;
+export function ConversationPanel({sessionId, client, refreshRevision, focusEntryId, focusRequest, active, focusAnchor}: {
+  refreshRevision?: number; sessionId: string; client: ConversationClient; focusEntryId: string; focusRequest: number; active: boolean;
   focusAnchor: RefObject<HTMLButtonElement | null>;
 }) {
   const [entries, setEntries] = useState<ConversationEntry[]>([]);
@@ -64,7 +64,7 @@ export function ConversationPanel({sessionId, client, focusEntryId, focusRequest
     }).catch(() => {if (current) setError("Conversation is unavailable. Refresh to try again.");})
       .finally(() => {if (current) setLoading(false);});
     return () => {current = false; generation.current++;};
-  }, [client, sessionId, reload]);
+  }, [client, sessionId, reload, refreshRevision]);
 
   useEffect(() => {
     if (!focusEntryId) {setFocused(undefined); setFocusError(undefined); requestedFocus.current = undefined; return;}

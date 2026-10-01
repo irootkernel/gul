@@ -35,6 +35,13 @@ var ErrUnverifiedOwner = errors.New("existing Gul core could not be verified; do
 const NativeHeader = "X-Gul-Native-Host"
 const DefaultPort = 17423
 
+// Assembly binds explicit application services to the host-owned store and lifetime.
+type Assembly struct {
+	Provider  app.ProviderPort
+	Lifecycle app.LifecyclePort
+	Features  func(*app.Core) api.FeatureHandlers
+}
+
 type Config struct {
 	DataDirectory string
 	Port          int
@@ -43,8 +50,10 @@ type Config struct {
 	ServeInspector ServeInspector
 	Provider       app.ProviderPort
 	Lifecycle      app.LifecyclePort
-	// Explicit composition is used by E14; no scenario provider is selected here.
+	// Features supplies handlers after startup. Assemble.Features takes precedence.
+	// Assemble overrides Provider/Lifecycle before startup; neither selects a fake.
 	Features func(*app.Core, *storage.Store) api.FeatureHandlers
+	Assemble func(*storage.Store) (Assembly, error)
 }
 
 type ownerRecord struct {
@@ -174,13 +183,25 @@ func (h *Host) Start(ctx context.Context) (err error) {
 	if e != nil {
 		return e
 	}
-	h.Core = app.NewCore(app.Dependencies{Authorization: h.Boundary, Persistence: h.store, Provider: h.config.Provider, Lifecycle: h.config.Lifecycle})
+	provider, lifecycle := h.config.Provider, h.config.Lifecycle
+	var assembled Assembly
+	if h.config.Assemble != nil {
+		assembled, e = h.config.Assemble(h.store)
+		if e != nil {
+			return e
+		}
+		provider, lifecycle = assembled.Provider, assembled.Lifecycle
+	}
+	h.Core = app.NewCore(app.Dependencies{Authorization: h.Boundary, Persistence: h.store, Provider: provider, Lifecycle: lifecycle})
 	if e = h.Core.Start(ctx); e != nil {
 		return e
 	}
 	features := defaultFeatures(h.Core, h.store)
 	if h.config.Features != nil {
 		features = h.config.Features(h.Core, h.store)
+	}
+	if assembled.Features != nil {
+		features = assembled.Features(h.Core)
 	}
 	routes, e := api.NewAuthenticatedRoutes(h.Boundary, features)
 	if e != nil {

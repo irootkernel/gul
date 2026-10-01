@@ -1,4 +1,5 @@
 // Code generated from api/proto/bounds.json; DO NOT EDIT.
+export const maximumSubmitTextBytes = 1048576;
 export const defaultPageSize = 50;
 export const maximumPageSize = 100;
 export const maximumTokenBytes = 4096;

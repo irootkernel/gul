@@ -123,7 +123,7 @@ and render a user launchd agent without loading it. The opt-in native check
 `GUL_RUN_NATIVE_WAILS_TEST=1 GOTOOLCHAIN=local go test -race ./internal/desktop -count=1`
 opens a real Wails/WebKit window against an isolated HTTPS probe to test the
 pin and document-start bootstrap across same-origin navigation. It does not
-exercise the complete operator bundle.
+qualify live-provider behavior. The assembled native check also opens the checked operator bundle against the real isolated host with an explicitly injected fake and verifies login, session selection, exact prompt original and safe local files.
 `python3 frontend/browser/verify-delivery.py` builds the real isolated host and
 opens the checked entry in Chrome, with a temporary profile and a fixture-scoped
 certificate pin. The default run checks login, refresh, offline refusal and
@@ -143,3 +143,31 @@ also receives an already-canceled context. The Chrome file fixture returns an
 overlapping continuation after a retry and verifies unique rows while retaining
 stale-page and Workspace-context tests. These isolated checks settle the mounted
 FileService re-entry obligations without claiming live provider qualification.
+
+## Assembled application acceptance
+
+`go test -race ./test/acceptance/fixture` runs the real TLS/core/SQLite and
+checked-adapter flows without a native window or real provider. It covers
+sequential read and first-write admission, busy rejection, long/duplicate prompt
+history and originals, waiting approval, Specialist results, root-only close,
+restart, all declared feature-service guards, offline local presentation and blocked Submit/
+writer/close requests. Provider-call counters prove WRITE intent and no Submit
+replay after restart; a blocked offline Submit creates no durable attempt. Direct fake-port checks pin unknown/unverified startup, stable thread identity across WRITE then READ, retained WRITE policy, unsupported-lane refusal and cross-run writer conflict. Other fixture assertions cover ambiguous binding lookup, typed pre-dispatch persistence failure and both Diagnostics availability branches. The production-composition Submit refusal is asserted by `go test -race ./internal/host`. Additional assembled checks verify offline startup releases its listener and singleton lock, the maximum escaped-text JSON request is accepted, and an oversized wire request is refused before provider dispatch. The Submit race suites, `go test -race ./internal/mutation ./internal/mutation/contractprovider`, cover no-effect gate closure, durable rejection across restart, retained unknown replay and typed rejection-persistence failure. Fixture setup uses the protected native permission flow.
+
+`python3 frontend/browser/verify-acceptance.py` builds the explicit acceptance
+driver and uses Chrome with a temporary profile and that fixture's certificate
+pin. It exercises runtime-profile/model/effort/lane/policy compatibility selection through the checked bundle, busy draft preservation, original/result
+integrity, restart, provider/stream loss, offline files and aggregate close. It
+also faults one browser event connection, holds rejoin while a real result is published, and asserts automatic reconnection plus content-panel catch-up,
+keeps close pending across a polling interval, and checks an isolated unknown-
+outcome session for draft retention, size guidance and no replay. The
+driver refuses to run without `GUL_RUN_ASSEMBLED_ACCEPTANCE=1`; controls use stdin,
+never a product HTTP endpoint. The script sets the opt-in for its own child only.
+
+These checks supplement `make test`. The native opt-in above includes
+`TestNativeAssembledCheckedApplication`; it drives the real WebKit DOM through a
+test-only native probe and reports over child stdout. It adds no Wails API bridge.
+The fixtures close their temporary hosts, windows and browser profiles.
+Released executable/UDS integration, real Controller/carrier creation, image
+handoff, live runtimes, launchd/Serve deployment and supported devices need E2/E9
+qualification.

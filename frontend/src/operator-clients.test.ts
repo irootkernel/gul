@@ -1,8 +1,8 @@
 import {afterEach, expect, test} from "bun:test";
-import {create, toBinary} from "@bufbuild/protobuf";
+import {create, fromBinary, toBinary} from "@bufbuild/protobuf";
 import {
   WriterAccessMode, AcquireWriterResponseSchema, ReleaseWriterResponseSchema, GetActionStateResponseSchema, GetMetadataResponseSchema, NavigationResponseSchema,
-  ListDirectSessionsResponseSchema, ListDirectoryResponseSchema, LoginResponseSchema,
+  ListDirectSessionsResponseSchema, ListDirectoryRequestSchema, ListDirectoryResponseSchema, LoginResponseSchema,
 } from "../../api/generated/ts/gul/v1/gul_pb";
 import {createBrowserAuth} from "./auth-client";
 import {createOperatorClients} from "./operator-clients";
@@ -30,6 +30,7 @@ test("typed feature clients use actual Connect methods and the auth transport", 
     const headers = new Headers(options?.headers);
     expect(headers.get("X-Gul-Request")).toBe("1");
     if (!path.endsWith("/Login")) expect(headers.get("X-Gul-CSRF")).toBe(csrfToken);
+    if (path === paths[3]) expect(fromBinary(ListDirectoryRequestSchema, new Uint8Array(options?.body as ArrayBuffer)).relativePath).toBe(".");
     const bytes = path === paths[0] ? toBinary(LoginResponseSchema, create(LoginResponseSchema,
       {session: {accountConfigured: true, authenticated: true, csrfToken,
         expiresAt: {seconds: BigInt(Math.floor(Date.now() / 1000) + 3600)}}}))

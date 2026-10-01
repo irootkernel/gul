@@ -223,7 +223,7 @@ state changes. Missing Podway observation cannot block existing functionality.
 - [x] Global Profile reads contain no Workspace reference.
 - [x] The fixed carrier-root contract and no-Operator boundary pass fixtures.
 - [x] E13-T1 stateful fake scenarios pass independently of future Gul features.
-- [ ] E14-T1 assembled authenticated pre-release browser proof passes.
+- [x] E14-T1 assembled authenticated pre-release browser proof passes.
 - [ ] Earlier required Epics close before the next Epic starts; no cross-Epic
       Task interleaving is needed.
 - [x] E8 authentication and packaging run as one complete Epic; earlier product

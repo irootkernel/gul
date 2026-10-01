@@ -92,6 +92,7 @@ type Harness struct {
 	mu           sync.Mutex
 	initial      time.Time
 	now          time.Time
+	clock        func() time.Time
 	sequence     uint64
 	workspaces   map[string]*workspace
 	profiles     map[string]*publicv1.ProfileProjection
@@ -116,6 +117,9 @@ func New(start time.Time) *Harness {
 	h.Reset()
 	return h
 }
+
+// NewRealtime keeps long-running assembled acceptance snapshots current.
+func NewRealtime() *Harness { h := New(time.Now()); h.clock = time.Now; return h }
 
 func (h *Harness) Reset() {
 	h.mu.Lock()
@@ -260,7 +264,12 @@ func (h *Harness) response() *publicv1.ResponseContext {
 	return &publicv1.ResponseContext{ProtocolVersion: 1, ServerInstanceId: "scenario-server"}
 }
 
-func (h *Harness) timestamp() *timestamppb.Timestamp { return timestamppb.New(h.now) }
+func (h *Harness) timestamp() *timestamppb.Timestamp {
+	if h.clock != nil {
+		return timestamppb.New(h.clock().UTC())
+	}
+	return timestamppb.New(h.now)
+}
 
 func copyOf[T proto.Message](value T) T {
 	if any(value) == nil {
@@ -570,7 +579,7 @@ func (h *Harness) completeTurn(r *run, status publicv1.TurnStatus) {
 	if r.projection.GetLifecycle() != publicv1.RunLifecycle_RUN_LIFECYCLE_PAUSED {
 		r.projection.Lifecycle = lifecycleFromWork(r)
 	}
-	h.emit(r, &publicv1.DurableRunEvent{Event: &publicv1.DurableRunEvent_TurnStateChanged{TurnStateChanged: &publicv1.TurnStateChanged{Current: status}}})
+	h.emit(r, &publicv1.DurableRunEvent{TurnId: pointer(turn.GetTurnId()), Event: &publicv1.DurableRunEvent_TurnStateChanged{TurnStateChanged: &publicv1.TurnStateChanged{Current: status}}})
 	item.Cursor = r.head()
 	r.timeline = append(r.timeline, item)
 }
@@ -612,6 +621,8 @@ func (h *Harness) OpenInteraction(runID string, interaction *publicv1.Controller
 	item.Summary.RunId = runID
 	item.Summary.Status = publicv1.InteractionStatus_INTERACTION_STATUS_PENDING
 	item.Summary.CreatedAt = h.timestamp()
+	item.Summary.ControllerKind = r.projection.Controller.Kind
+	item.Summary.RequiresUserEscalation = item.Summary.Kind != publicv1.InteractionKind_INTERACTION_KIND_UNSUPPORTED_REQUEST
 	r.interactions[item.Summary.GetInteractionId()] = item
 	r.projection.PendingInteractionCount++
 	if r.session != nil {
@@ -621,6 +632,7 @@ func (h *Harness) OpenInteraction(runID string, interaction *publicv1.Controller
 		r.projection.Lifecycle = publicv1.RunLifecycle_RUN_LIFECYCLE_WAITING_INTERACTION
 	}
 	h.emit(r, &publicv1.DurableRunEvent{Event: &publicv1.DurableRunEvent_InteractionOpened{InteractionOpened: &publicv1.InteractionOpenedEvent{InteractionId: item.Summary.GetInteractionId(), Kind: item.Summary.GetKind()}}})
+	item.Summary.StateRevision = r.interactionRevision
 	return nil
 }
 

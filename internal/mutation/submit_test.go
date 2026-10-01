@@ -56,7 +56,7 @@ func submitFixture() SubmitRequest {
 func TestSubmitLostResponseUsesOnlySameProcessExactRequest(t *testing.T) {
 	db, path, _ := startStore(t)
 	provider := &submitProvider{lostResponse: true, proof: SubmitEvidence{Status: "unknown"}}
-	s := SubmitService{Attempts: db.Attempts(), Provider: provider, Gate: func(string, string) bool { return true }}
+	s := SubmitService{Attempts: db.Attempts(), Provider: provider, Gate: func(context.Context, string, string) bool { return true }}
 	request := submitFixture()
 	a, err := s.Submit(t.Context(), request)
 	if !errors.Is(err, ErrUnknown) || a.State != "outcome_unknown" || provider.calls != 1 || provider.effects != 1 {
@@ -84,7 +84,7 @@ func TestAcceptedSubmitResolveFailureBecomesRecoverableUnknown(t *testing.T) {
 	db, _, _ := startStore(t)
 	provider := &submitProvider{proof: SubmitEvidence{Status: "unknown"}}
 	attempts := &failSubmitResolveOnce{SubmitAttempts: db.Attempts()}
-	s := SubmitService{Attempts: attempts, Provider: provider, Gate: func(string, string) bool { return true }}
+	s := SubmitService{Attempts: attempts, Provider: provider, Gate: func(context.Context, string, string) bool { return true }}
 	request := submitFixture()
 	a, err := s.Submit(t.Context(), request)
 	if !errors.Is(err, ErrUnknown) || a.State != "outcome_unknown" || provider.calls != 1 || provider.effects != 1 {
@@ -103,7 +103,7 @@ func TestAcceptedSubmitResolveFailureBecomesRecoverableUnknown(t *testing.T) {
 func TestRestartWithoutSubmitMaterialStaysUnknownUntilExactProof(t *testing.T) {
 	db, path, _ := startStore(t)
 	provider := &submitProvider{lostResponse: true, proof: SubmitEvidence{Status: "unknown"}}
-	s := SubmitService{Attempts: db.Attempts(), Provider: provider, Gate: func(string, string) bool { return true }}
+	s := SubmitService{Attempts: db.Attempts(), Provider: provider, Gate: func(context.Context, string, string) bool { return true }}
 	request := submitFixture()
 	if _, err := s.Submit(t.Context(), request); !errors.Is(err, ErrUnknown) {
 		t.Fatal(err)
@@ -117,7 +117,7 @@ func TestRestartWithoutSubmitMaterialStaysUnknownUntilExactProof(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer db.Close()
-	s = SubmitService{Attempts: db.Attempts(), Provider: provider, Gate: func(string, string) bool { return true }}
+	s = SubmitService{Attempts: db.Attempts(), Provider: provider, Gate: func(context.Context, string, string) bool { return true }}
 	if _, err := s.RecoverTurn(t.Context(), request.OperationID); !errors.Is(err, ErrUnknown) || provider.calls != 1 {
 		t.Fatalf("restart inferred nonacceptance: %v; calls=%d", err, provider.calls)
 	}
@@ -132,7 +132,7 @@ func TestObservationGapAndVersionDriftCannotAuthorizeSubmitResend(t *testing.T) 
 	db, _, _ := startStore(t)
 	provider := &submitProvider{lostResponse: true, proof: SubmitEvidence{Status: "unknown"}}
 	compatible := true
-	s := SubmitService{Attempts: db.Attempts(), Provider: provider, Gate: func(string, string) bool { return compatible }}
+	s := SubmitService{Attempts: db.Attempts(), Provider: provider, Gate: func(context.Context, string, string) bool { return compatible }}
 	request := submitFixture()
 	if _, err := s.Submit(t.Context(), request); !errors.Is(err, ErrUnknown) {
 		t.Fatal(err)
@@ -188,4 +188,81 @@ func TestSubmitMemoryExpiresAndEvictsWithoutRetainingSecrets(t *testing.T) {
 		t.Fatal("expired submit material was not cleared")
 	}
 	s.DropProcessMemory()
+}
+
+func TestGateClosingBeforeFirstSubmitPersistsRejectionAcrossRestart(t *testing.T) {
+	db, path, _ := startStore(t)
+	provider := &submitProvider{}
+	gates := 0
+	s := SubmitService{Attempts: db.Attempts(), Provider: provider, Gate: func(context.Context, string, string) bool { gates++; return gates != 2 }}
+	request := submitFixture()
+	a, err := s.Submit(t.Context(), request)
+	if !errors.Is(err, ErrBlocked) || a.State != "resolved" || a.OutcomeRef != "rejected" || provider.calls != 0 || len(s.live) != 0 {
+		t.Fatalf("no-effect rejection = %+v, %v; calls=%d retained=%d", a, err, provider.calls, len(s.live))
+	}
+	if err = db.Close(); err != nil {
+		t.Fatal(err)
+	}
+	db, err = storage.Open(t.Context(), path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer db.Close()
+	s = SubmitService{Attempts: db.Attempts(), Provider: provider, Gate: func(context.Context, string, string) bool { return true }}
+	a, err = s.Submit(t.Context(), request)
+	if err != nil || a.State != "resolved" || a.OutcomeRef != "rejected" || provider.calls != 0 {
+		t.Fatalf("restart retry = %+v, %v; calls=%d", a, err, provider.calls)
+	}
+	request.OperationID = "submit_2"
+	a, err = s.Submit(t.Context(), request)
+	if err != nil || a.OutcomeRef != "turn-1" || provider.calls != 1 {
+		t.Fatalf("next deliberate submit = %+v, %v; calls=%d", a, err, provider.calls)
+	}
+}
+
+func TestGateClosingBeforeUnknownReplayRetainsPossibleEffect(t *testing.T) {
+	db, _, _ := startStore(t)
+	provider := &submitProvider{lostResponse: true, proof: SubmitEvidence{Status: "unknown"}}
+	s := SubmitService{Attempts: db.Attempts(), Provider: provider, Gate: func(context.Context, string, string) bool { return true }}
+	defer s.DropProcessMemory()
+	request := submitFixture()
+	if _, err := s.Submit(t.Context(), request); !errors.Is(err, ErrUnknown) {
+		t.Fatal(err)
+	}
+	gates := 0
+	s.Gate = func(context.Context, string, string) bool { gates++; return gates != 2 }
+	a, err := s.RecoverTurn(t.Context(), request.OperationID)
+	if !errors.Is(err, ErrBlocked) || a.State != "outcome_unknown" || provider.calls != 1 || len(s.live) != 1 {
+		t.Fatalf("blocked replay = %+v, %v; calls=%d retained=%d", a, err, provider.calls, len(s.live))
+	}
+	stored, err := db.Attempts().Mutation(t.Context(), request.OperationID)
+	if err != nil || stored.State != "outcome_unknown" || stored.OutcomeRef != "" {
+		t.Fatalf("prior possible effect lost: %+v, %v", stored, err)
+	}
+	s.Gate = func(context.Context, string, string) bool { return true }
+	a, err = s.RecoverTurn(t.Context(), request.OperationID)
+	if err != nil || a.OutcomeRef != "turn-1" || provider.calls != 2 || provider.effects != 1 {
+		t.Fatalf("exact recovery = %+v, %v; calls=%d effects=%d", a, err, provider.calls, provider.effects)
+	}
+}
+
+func TestNoEffectRejectionPersistenceFailureRemainsFailClosed(t *testing.T) {
+	db, _, _ := startStore(t)
+	provider := &submitProvider{}
+	attempts := &failSubmitResolveOnce{SubmitAttempts: db.Attempts()}
+	gates := 0
+	s := SubmitService{Attempts: attempts, Provider: provider, Gate: func(context.Context, string, string) bool { gates++; return gates != 2 }}
+	request := submitFixture()
+	a, err := s.Submit(t.Context(), request)
+	if !errors.Is(err, ErrSubmitPersistence) || a.State != "pending" || provider.calls != 0 || len(s.live) != 0 {
+		t.Fatalf("failed rejection = %+v, %v; calls=%d", a, err, provider.calls)
+	}
+	stored, err := db.Attempts().Mutation(t.Context(), request.OperationID)
+	if err != nil || stored.State != "pending" {
+		t.Fatalf("unsafe persistence state = %+v, %v", stored, err)
+	}
+	request.OperationID = "submit_2"
+	if _, err = s.Submit(t.Context(), request); !errors.Is(err, storage.ErrMutationConflict) || provider.calls != 0 {
+		t.Fatalf("failed persistence admitted next effect: %v, calls=%d", err, provider.calls)
+	}
 }

@@ -561,7 +561,7 @@ Remote clients cannot supply an absolute path. Registration browsing never resol
 
 ### 8.2 Submit
 
-The browser sends Gul Session ID, prompt, an explicit closed `write_intent` of `READ` or `WRITE`, optional image references, and optional effort override. The backend authenticates and applies CSRF/Origin checks, resolves DirectSession, refreshes the closed action evaluation, persists/reuses the server-owned operation identity, revalidates the Controller carrier, validates local images through the same resolved-path private-root guard, and invokes typed `SubmitTurn`. A write intent never substitutes for provider writer authority, except that the provider-defined first write Turn is the activation mechanism for an eligible threadless Run.
+The browser sends Gul Session ID, prompt, an explicit closed `write_intent` of `READ` or `WRITE`, optional image references, and optional effort override. The backend authenticates and applies CSRF/Origin checks, resolves DirectSession, refreshes the closed action evaluation, derives a subject-bound operation identity from the client attempt label and persists/reuses that backend-owned identity, revalidates the Controller carrier, validates local images through the same resolved-path private-root guard, and invokes typed `SubmitTurn`. A write intent never substitutes for provider writer authority, except that the provider-defined first write Turn is the activation mechanism for an eligible threadless Run.
 
 The normalized Turn request remains in memory only for the lifetime of the active operation. If the response is lost while the same Gul process still holds the exact bytes, application replay may use the original idempotency key under the accepted provider policy. Gul does not persist the prompt or image bytes for crash-safe replay. After process restart it reconciles through `GetRun` and timeline, preserves `OutcomeUnknown` when acceptance cannot be proved, and never automatically submits a reconstructed or new Turn.
 
@@ -676,6 +676,11 @@ the authorized Run snapshot is unavailable rather than fresh.
 Artifact references remain opaque. Dolgorae's inline-final-response and maximum-artifact values are provider wire capabilities; Gul's 256 KiB inline-browser threshold, preferred 256 KiB chunk size, and 64 MiB artifact cap are local presentation/safety limits. A 300 KiB inline provider response is therefore not a protocol violation: Gul may turn it into a bounded browser presentation object. Effective artifact size is `min(provider maximum, 64 MiB)` and each unary chunk request is no larger than both the advertised maximum and Gul's preferred size. Gul verifies exact total length plus SHA-256 before presentation. Safe Markdown is rendered under the Gul allowlist; content is never executed, automatically opened, or interpreted as a local filesystem path.
 
 ## 9. Application API
+
+The inventory below is the Required State design target; planned operations are
+not necessarily declared today. `api/proto/gul/v1/gul.proto` owns the implemented
+wire surface, including conversation reads and `WatchClientEvents`. Section 19
+records the current mounted assembly.
 
 All browser APIs are Protobuf-defined ConnectRPC. Mutations are unary, authenticated, CSRF/Origin protected, typed, and governed by each operation's accepted concurrency contract. Client events are server streamed.
 
@@ -1060,11 +1065,11 @@ The serial command facade is `toolchain-check`, `generate-contract`, `contract-c
 
 ## 19. Current snapshot
 
-**Snapshot date:** 2026-10-01 (E8-T3 scoped completion)
+**Snapshot date:** 2026-10-01 (E14-T1 assembled acceptance)
 
-**Roadmap point:** E0 is `Completed`, E12 is `Completed`, E1 is `Completed`, and E13 is `Completed`; E1-T1 is `Completed` and E1-T2/T3/T4/T5 are `Completed`. E3 and E3-T1/T2/T3/T4 are `Completed`. E4 and E4-T1/T2/T3/T5 are `Completed`. E4-T4 remains Deferred outside its epic. E5 and E5-T1/T2/T3 are `Completed`. E6 and E6-T1/T2/T3 are `Completed`. E7 and E7-T1/T2/T3 are `Completed`. E8 is `Completed`; E8-T1/T2/T3 are `Completed`. Former E12-T2/T3 remain Retired. E14 owns pre-release application acceptance. No live-provider or assembled-application acceptance is implied.
+**Roadmap point:** E0 is `Completed`, E12 is `Completed`, E1 is `Completed`, and E13 is `Completed`; E1-T1 is `Completed` and E1-T2/T3/T4/T5 are `Completed`. E3 and E3-T1/T2/T3/T4 are `Completed`. E4 and E4-T1/T2/T3/T5 are `Completed`. E4-T4 remains Deferred outside its epic. E5 and E5-T1/T2/T3 are `Completed`. E6 and E6-T1/T2/T3 are `Completed`. E7 and E7-T1/T2/T3 are `Completed`. E8 is `Completed`; E8-T1/T2/T3 are `Completed`. Former E12-T2/T3 remain Retired. E14-T1 is Completed; E14 remains In Progress for its separate committed Epic audit and closeout. The assembled application has explicit fake-provider verification; live-provider qualification remains E2/E9-owned.
 
-**Maturity:** delivery-independent Go core, shared React bundle, authenticated Gul API mounted by the E8-T3 host, typed provider ports and explicit scenario harness, host-opened Gul SQLite repositories with fake-scoped runtime attachment, local presentation and passive session reads, and a Wails shell foundation. E4 adds typed observation, Interaction cards, action eligibility and bounded history/result/artifact reads. E5 adds whole-session close, reconnect convergence and operation-specific recovery against fakes. E6 adds verified-root local FileService inspection, bounded previews, refresh, watcher and Git review through component-tested typed APIs mounted by E8-T3. E7-T1 adds three responsive panes, workspace/session navigation and read-only FileService presentation through injected typed clients. E7-T2 adds provider-projected activity, prioritized Interaction cards, conversation and accepted-user Prompt History, and guarded whole-session close to that injected-client view. E7-T3 adds composition-safe input and keyboard focus behavior to the same component scope. E8-T1 adds isolated local account setup, bounded password hashing and the injected first-run form. E8-T2 adds protected session routes and the checked auth entry within isolated delivery scope. E8-T3 accepts the shared authenticated host, verified native attachment, isolated deployment fixtures and installed PWA delivery. Full application and live-provider qualification remain pending.
+**Maturity:** delivery-independent Go core, shared React bundle, authenticated Gul API mounted by the E8-T3 host, typed provider ports and explicit scenario harness, host-opened Gul SQLite repositories with fake-scoped runtime attachment, local presentation and passive session reads, and a Wails shell foundation. E4 adds typed observation, Interaction cards, action eligibility and bounded history/result/artifact reads. E5 adds whole-session close, reconnect convergence and operation-specific recovery against fakes. E6 adds verified-root local FileService inspection, bounded previews, refresh, watcher and Git review through component-tested typed APIs mounted by E8-T3. E7-T1 adds three responsive panes, workspace/session navigation and read-only FileService presentation through injected typed clients. E7-T2 adds provider-projected activity, prioritized Interaction cards, conversation and accepted-user Prompt History, and guarded whole-session close to that injected-client view. E7-T3 adds composition-safe input and keyboard focus behavior to the same component scope. E8-T1 adds isolated local account setup, bounded password hashing and the injected first-run form. E8-T2 adds protected session routes and the checked auth entry within isolated delivery scope. E8-T3 accepts the shared authenticated host, verified native attachment, isolated deployment fixtures and installed PWA delivery. E14-T1 adds checked adapter assembly and real authenticated browser/native acceptance with explicit fakes. Live-provider qualification remains pending.
 
 ### 19.1 Implemented components
 
@@ -1111,11 +1116,12 @@ foundation hosts it, while the E8-T3 host owns shared HTTPS and SQLite lifecycle
 provider wiring and complete application acceptance remain E2 and E14 work.
 
 `api/proto` declares Gul-owned Auth, Runtime, WorkspacePresentation, DirectSession,
-ClientEventService, Interaction, Writer, ArtifactPresentation and FileService browser
-contracts. Its `bounds.json` is the shared authority for generated Go and
+ClientEventService, Interaction, Writer, ArtifactPresentation, FileService and
+Diagnostics browser contracts, including bounded text submission through DirectSession. Its `bounds.json` is the shared authority for generated Go and
 TypeScript page/content limits. Generated clients are checked for drift. The
 declarations are registered by the isolated E8-T2 protected route assembly;
-the shared E8-T3 host mounts them behind the same session boundary. `contract/port` defines the exact
+the shared E8-T3 host mounts its eight feature handlers behind the same session boundary.
+E14-T1 adds Diagnostics as the ninth feature handler. `contract/port` defines the exact
 27-method typed consumer interface and a closed provider-error translation
 catalog; the root Go module consumes this checked local module through one
 explicit local replacement. `contract/scenario` supplies a stateful test
@@ -1483,9 +1489,42 @@ remain online-only. Refresh restores only the presentation tab, then reads
 current authentication and navigation from the server.
 
 Missing runtime dependencies stay unavailable; no fake or diagnostic CLI is
-selected by production composition. Full feature assembly remains assigned to E14;
-released provider and actual deployment qualification remain E2/E9.
+selected by production composition. E14-T1 supplies explicit checked-port assembly; released provider and actual deployment qualification remain E2/E9.
 
 The [host operations guide](operations.md) describes commands, protected logs,
 certificate recovery and the read-only Tailscale gate. It is subordinate to the
 five source-of-truth documents.
+
+### 19.9 E14-T1 assembled application
+
+`internal/composition` connects the checked PublicContractPort adapters to the
+host-opened SQLite store. `Host.Config.Assemble` constructs the provider,
+lifecycle and feature services before core startup and supplies handlers afterward; the host owns stream/poller
+shutdown before persistence closes. Composition reconstructs backend bindings and carriers. Compatibility and workspace checks precede aggregate refresh and per-session mutation admission. Provider
+loss revokes admission while authenticated local presentation and files remain
+available. Recovery reads current authority and never resubmits an unknown Turn.
+
+The E14-T1 DirectSessionService.Submit subset accepts a Gul session ID, client
+attempt label, read/write intent and at most 1 MiB of UTF-8 text. Image references
+and effort override in REQ-DIRECT-004 remain E2-T3-owned additive extensions.
+The backend derives the durable operation identity from the subject and attempt
+label, so the browser cannot supply provider idempotency authority. The backend reconstructs Run, carrier,
+generation and revision from trusted state. It dispatches once through the
+existing durable mutation-attempt service. The response distinguishes accepted,
+rejected and unknown effects; a busy rejection creates no queue. Drafts remain
+in browser memory on rejection or uncertainty and clear only after acceptance.
+The checked bundle refreshes state and content panels from ClientEvent invalidations, including the snapshot-required marker on rejoin. It reads pending close projections periodically without repeating CloseRun. A pre-attempt persistence failure returns the typed persistence-unavailable error; it does not claim an unknown provider effect.
+
+Runtime choices check Profile/model/effort/lane/assurance and preprovisioned
+policy compatibility. Session creation stays E2-owned. Specialist discovery
+keeps bounded pages and snapshot identity, then verifies complete artifact bytes
+before inert text rendering. Diagnostics exposes availability booleans only.
+All clients use the authentication transport and its CSRF/session guards.
+
+`test/acceptance/fixture` explicitly injects the stateful scenario provider into
+the real host. Its executable requires `GUL_RUN_ASSEMBLED_ACCEPTANCE=1` and accepts
+control over stdin only. Browser and native checks use isolated data directories,
+TLS certificates and client state. Production commands neither import these
+fixtures nor select them when dependencies fail. These checks qualify the fake
+assembly; real UDS, carrier issuance, live execution, deployment and supported
+devices remain E2/E9 boundaries.

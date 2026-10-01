@@ -479,9 +479,18 @@ Earlier component entries retain the verification scope accepted at their task
 completion. Their "unmounted" and "disabled" route labels describe that earlier
 scope, not the current host route inventory. The E8-T3 host now mounts AuthService
 and all eight completed feature handlers behind shared authentication, with
-runtime ports unavailable by default. Full application acceptance remains E14-owned; released-provider and
-live deployment qualification remain E2/E9-owned. Architecture Section 19 and
+runtime ports unavailable by default. E14-T1 adds Diagnostics as
+the ninth feature route, checked-port assembly, and authenticated core/browser/
+native acceptance with stateful fakes. Released-provider and live deployment
+qualification remain E2/E9-owned. Architecture Section 19 and
 `internal/host/composition.go` describe the current host composition.
+
+The injected provider remains a contract-derived stateful fake. Production
+commands do not import acceptance fixtures and keep runtime ports unavailable
+until E2 supplies the released provider. E2/E9 still own real transport,
+credentials, session creation, image handoff, deployment and device qualification.
+E14-T1 is Completed for this assembled fake-provider scope. E14 remains
+In Progress until its separate committed Epic audit and closeout complete.
 
 E1-T1 through E1-T5 establish the delivery-independent Go core, one checked
 React bundle, declared but disabled browser API, isolated SQLite repositories,
@@ -567,6 +576,10 @@ assembled-product and live-provider acceptance.
 
 | Requirement | Accepted Current State | Evidence |
 |---|---|---|
+| REQ-HOST-001 | Authenticated delivery-independent core, shared TLS listener and SQLite run without Wails or a real provider | E14-T1; isolated assembled host, Chrome and serial checks; explicit stateful fake provenance |
+| REQ-HOST-002 | One checked bundle serves authenticated Chrome and the native Wails/WebKit shell | E14-T1; real Chrome campaign and isolated native assembled check |
+| REQ-API-001 | Generated application services share authentication, bounded Direct Session Submit and availability-only Diagnostics | E14-T1; assembled route, authentication, failure-path and serial drift checks; released-provider diagnostics remain E9-T2 |
+| REQ-CONSUMER-004 | Real Gul core/browser pass assembled authentication, history/originals, approvals, results, close, files and restart/reconnect scenarios | E14-T1; checked stateful fakes and prebound Run; remaining live transport, credentials, session creation and deployment remain E2/E9 |
 | REQ-HOST-005 | Exact Go toolchain with minimum-compatible non-Go host tools, exact project dependency and generator pins, and read-only host reporting | E0-T8; ADR-0054; `toolchain/versions.env`; checker fixtures; serial `make test` |
 | REQ-AUTH-001 | Host-authorized one-use setup atomically retains or creates one stable subject, denies invalid grants and ambiguous data, and provides a username-free injected local setup form; account/service/component scope only | E8-T1; `internal/auth` and `internal/storage` race, grant, rollback and retained-identity tests; `frontend/browser/verify-setup.py`; completion source review |
 | REQ-AUTH-002 | ADR-0013 bounded salted Argon2id, exact UTF-8 bounds, strict record decoding, constant-time verification, hashes-only persistence, input clearing and sanitized component errors; E8-T2 adds bounded UTF-8 transport buffers cleared on every exit and fixed typed delivery errors in isolated protected routes | E8-T1/T2; independent hash-cost vectors and malformed-record tests; reopen/backup plaintext scans; real Chrome component checks; serial `make test` and completion source review |

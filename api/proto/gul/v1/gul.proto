@@ -6,8 +6,8 @@ option go_package = "github.com/rootkernel/gul/api/generated/go/gul/v1;gulv1";
 
 import "google/protobuf/timestamp.proto";
 
-// These declarations are a browser contract, not an enabled product route.
-// Handlers remain unmounted until authenticated host assembly (E8-T3).
+// This browser contract is mounted behind the shared authenticated host.
+// Runtime operations require explicitly assembled provider dependencies.
 service AuthService {
   rpc FirstRunSetup(FirstRunSetupRequest) returns (FirstRunSetupResponse);
   rpc Login(LoginRequest) returns (LoginResponse);
@@ -227,6 +227,7 @@ message ListWorkspacesResponse {
 }
 
 service DirectSessionService {
+  rpc Submit(SubmitRequest) returns (SubmitResponse);
   rpc ListConversation(ListConversationRequest) returns (ListConversationResponse);
   rpc GetConversationEntry(GetConversationEntryRequest) returns (GetConversationEntryResponse);
   rpc ListDirectSessions(ListDirectSessionsRequest) returns (ListDirectSessionsResponse);
@@ -897,8 +898,8 @@ message ReleaseWriterRequest { string session_id = 1; }
 message ReleaseWriterResponse { ActionState state = 1; }
 message ActionFailure { ActionBlocker blocker = 1; }
 
-// FileService reads only from a previously verified Workspace Entry. Its
-// handlers remain unmounted until authenticated product route assembly.
+// FileService reads only from a previously verified Workspace Entry through
+// the shared authenticated product boundary.
 service FileService {
   rpc InspectPath(InspectPathRequest) returns (InspectPathResponse);
   rpc ListDirectory(ListDirectoryRequest) returns (ListDirectoryResponse);
@@ -1028,4 +1029,34 @@ message WatchFileChangesRequest { string workspace_id = 1; }
 message FileChange {
   uint64 revision = 1;
   string relative_path = 2;
+}
+
+// E14 Submit carries Gul identity, intent and text; provider authority is backend-owned.
+// REQ-DIRECT-004 image references and effort override remain E2-T3-owned additions.
+// attempt_id is a client retry label; the backend derives and persists operation identity.
+message SubmitRequest {
+  string session_id = 1;
+  string attempt_id = 2;
+  string text = 3;
+  ActionWriteIntent write_intent = 4;
+}
+enum SubmitOutcome {
+  SUBMIT_OUTCOME_UNSPECIFIED = 0;
+  SUBMIT_OUTCOME_ACCEPTED = 1;
+  SUBMIT_OUTCOME_REJECTED = 2;
+  SUBMIT_OUTCOME_UNKNOWN = 3;
+}
+message SubmitResponse {
+  SubmitOutcome outcome = 1;
+  ActionState state = 2;
+}
+service DiagnosticsService {
+  rpc GetSummary(GetSummaryRequest) returns (GetSummaryResponse);
+}
+message GetSummaryRequest {}
+message GetSummaryResponse {
+  bool provider_ready = 1;
+  // Successful responses are persistence-gated. Outages return a typed
+  // ERROR_CODE_PERSISTENCE_UNAVAILABLE error instead of false here.
+  bool persistence_ready = 2;
 }

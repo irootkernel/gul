@@ -8,6 +8,7 @@ const repositoryRoot = path.resolve(apiRoot, "..");
 const contractRoot = path.join(repositoryRoot, "contract");
 const checkedRoot = path.join(apiRoot, "generated");
 const boundNames = {
+  maximum_submit_text_bytes: "MaximumSubmitTextBytes",
   default_page_size: "DefaultPageSize",
   maximum_page_size: "MaximumPageSize",
   maximum_token_bytes: "MaximumTokenBytes",
