@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Exercise the checked entry against the explicitly injected assembled fake host."""
+import base64
 import importlib.util
 import json
 import os
@@ -35,6 +36,78 @@ def command(process, value):
     return result
 
 
+def browser_reply(result):
+    return json.loads(result.split("### Result\n", 1)[1].split("\n###", 1)[0])
+
+
+def decode_message(encoded, message):
+    return subprocess.run(
+        ["protoc", f"--decode=gul.v1.{message}", "--proto_path=api/proto", "api/proto/gul/v1/gul.proto"],
+        cwd=ROOT, input=base64.b64decode(encoded + "=" * (-len(encoded) % 4)), capture_output=True, check=True,
+    ).stdout.decode()
+
+
+def submit_prompt(run, expected):
+    for attempt in range(8):
+        result = run("""
+        await page.waitForFunction(() => {const b = [...document.querySelectorAll('button')].find(b => b.textContent === 'Send prompt'); return b && !b.disabled;});
+        const draft = await page.getByLabel('Prompt', {exact:true}).inputValue();
+        const reply = page.waitForResponse(r => r.url().endsWith('.DirectSessionService/Submit'));
+        await page.getByRole('button', {name:'Send prompt'}).click();
+        const response = await reply;
+        return {status: response.status(), body: (await response.body()).toString('base64'), draftRetained:await page.getByLabel('Prompt', {exact:true}).inputValue() === draft};
+        """)
+        reply = browser_reply(result)
+        if reply["status"] != 200:
+            raise AssertionError(f"Submit failed: {reply}")
+        body = decode_message(reply["body"], "SubmitResponse")
+        if "outcome: SUBMIT_OUTCOME_REJECTED" in body and "blocker: ACTION_BLOCKER_FRESH_SNAPSHOT_REQUIRED" in body:
+            if "requires_fresh_snapshot: true" not in body or not reply["draftRetained"]:
+                raise AssertionError(f"Freshness rejection lost its reason or draft: {body}")
+            run("""
+              await page.waitForTimeout(200);
+              await page.getByRole('button', {name:'Refresh current state', exact:true}).click();
+            """)
+            continue
+        if f"outcome: {expected}" not in body:
+            raise AssertionError(f"Unexpected Submit outcome: {body}")
+        return
+    raise AssertionError("Submit did not converge after freshness rejection")
+
+
+def approve_once(run):
+    for attempt in range(8):
+        result = run("""
+          await page.getByRole('button', {name:'Refresh current state', exact:true}).click();
+          try {
+            await page.waitForFunction(() => {const b = [...document.querySelectorAll('button')].find(b => b.textContent === 'Approve once'); return b && !b.disabled;}, null, {timeout:3000});
+          } catch (error) {
+            if (await page.getByText('A fresh eligible state is required before responding.', {exact:true}).isVisible()) return {stale:true};
+            throw error;
+          }
+          const reply = page.waitForResponse(r => r.url().endsWith('.InteractionPresentationService/Resolve'));
+          await page.getByRole('button', {name:'Approve once', exact:true}).click();
+          const response = await reply;
+          return {status:response.status(), body:(await response.body()).toString('base64')};
+        """)
+        reply = browser_reply(result)
+        if reply.get("stale"):
+            continue
+        if reply["status"] == 200:
+            body = decode_message(reply["body"], "ResolveResponse")
+            if "outcome: INTERACTION_RESOLUTION_OUTCOME_RESOLVED" not in body:
+                raise AssertionError(f"Unexpected approval outcome: {body}")
+            return
+        error = json.loads(base64.b64decode(reply["body"]))
+        details = [detail for detail in error.get("details", []) if detail.get("type") == "gul.v1.DomainError"]
+        if error.get("code") != "failed_precondition" or len(details) != 1:
+            raise AssertionError(f"Approval failed: {error}")
+        detail = decode_message(details[0]["value"], "DomainError")
+        if "code: ERROR_CODE_PROVIDER_BLOCKED" not in detail or "action: ACTION_CLASS_REFETCH_INTERACTION" not in detail:
+            raise AssertionError(f"Approval refusal was not safe to retry: {detail}")
+    raise AssertionError("Approval did not converge after fresh-state refusals")
+
+
 
 def verify_unknown_draft(binary, work):
     port = delivery.free_port()
@@ -67,10 +140,8 @@ def verify_unknown_draft(binary, work):
         """)
         if command(process, "unknown-submit")["submitCalls"] != 0:
             raise AssertionError("Oversized draft was dispatched")
+        submit_prompt(run, "SUBMIT_OUTCOME_UNKNOWN")
         run("""
-          const reply = page.waitForResponse(r => r.url().endsWith('.DirectSessionService/Submit'));
-          await page.getByRole('button', {name:'Send prompt'}).click();
-          const response = await reply; if (response.status() !== 200) throw Error('Unknown request failed before effect');
           await page.getByText('The previous outcome is unresolved.', {exact:true}).first().waitFor();
           if (await page.getByLabel('Prompt', {exact:true}).inputValue() !== 'unknown draft remains') throw Error('Unknown outcome discarded draft');
           if (!await page.getByRole('button', {name:'Send prompt'}).isDisabled()) throw Error('Unknown outcome admitted another send');
@@ -155,7 +226,9 @@ def main():
               await page.getByRole('button', {name:'Send prompt'}).waitFor();
               await page.getByLabel('Prompt', {exact:true}).fill('same\\r\\n한글');
               await page.waitForFunction(() => {const button = [...document.querySelectorAll('button')].find(b => b.textContent === 'Send prompt'); return button && !button.disabled;});
-              await page.getByRole('button', {name:'Send prompt'}).click();
+            """)
+            submit_prompt(run, "SUBMIT_OUTCOME_ACCEPTED")
+            run("""
               await page.waitForFunction(() => document.querySelector('textarea')?.value === '');
               await page.getByLabel('Prompt', {exact:true}).fill('busy draft stays');
               if (!await page.getByRole('button', {name:'Send prompt'}).isDisabled()) throw Error('Busy prompt could send');
@@ -163,7 +236,9 @@ def main():
             command(process, "approval")
             run("""
               await page.getByRole('heading', {name:'Fixture approval'}).waitFor();
-              await page.getByRole('button', {name:'Approve once'}).click();
+            """)
+            approve_once(run)
+            run("""
               await page.getByText('No pending interaction requests.').waitFor();
               if (await page.getByLabel('Prompt', {exact:true}).inputValue() !== 'busy draft stays') throw Error('Refresh discarded busy draft');
             """)
@@ -171,16 +246,17 @@ def main():
             run("""
               await page.waitForFunction(() => {const button = [...document.querySelectorAll('button')].find(b => b.textContent === 'Send prompt'); return button && !button.disabled;});
               await page.getByLabel('Prompt', {exact:true}).fill('same\\r\\n한글');
-              await page.getByRole('button', {name:'Send prompt'}).click();
+            """)
+            submit_prompt(run, "SUBMIT_OUTCOME_ACCEPTED")
+            run("""
               await page.waitForFunction(() => document.querySelector('textarea')?.value === '');
             """)
             command(process, "complete")
             run("""
               await page.getByLabel('Prompt', {exact:true}).evaluate(element => {Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value').set.call(element, '긴 입력\\n'.repeat(40000)); element.dispatchEvent(new Event('input', {bubbles:true}));});
-              await page.waitForFunction(() => {const button = [...document.querySelectorAll('button')].find(b => b.textContent === 'Send prompt'); return button && !button.disabled;});
-              const reply = page.waitForResponse(r => r.url().endsWith('.DirectSessionService/Submit'));
-              await page.getByRole('button', {name:'Send prompt'}).click();
-              const response = await reply; const body = await response.text(); if (response.status() !== 200) throw Error('Long submit '+response.status()+' '+body); try {await page.waitForFunction(() => document.querySelector('textarea')?.value === '');} catch {throw Error('Long submit response: '+body+'; draft length '+await page.getByLabel('Prompt', {exact:true}).inputValue().then(v=>v.length));}
+            """)
+            submit_prompt(run, "SUBMIT_OUTCOME_ACCEPTED")
+            run("""
               await page.waitForFunction(() => document.querySelector('textarea')?.value === '');
             """)
             command(process, "complete")
@@ -260,6 +336,8 @@ def main():
             result = command(process, "settle-close")
             if result["closeCalls"] != 1:
                 raise AssertionError("Close invoked more than the root once")
+            if result["submitCalls"] != 3:
+                raise AssertionError("Rejected draft dispatched or accepted prompt repeated")
             run("""
               await page.getByText('Whole-session close confirmed by current provider projection.').waitFor();
               await page.getByRole('button', {name:'Prompt History', exact:true}).click();

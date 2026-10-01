@@ -6,6 +6,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
+	"fmt"
 	"io"
 	"net"
 	"net/http"
@@ -106,8 +107,9 @@ func TestAssembledAuthenticatedHistoryApprovalResultsCloseAndRestart(t *testing.
 	for i, text := range texts {
 		synchronize(t, f)
 		waitSubmitReady(t, f, c, gulv1.ActionWriteIntent_ACTION_WRITE_INTENT_READ)
-		if result := send(string(rune('a'+i)), text); result.Outcome != gulv1.SubmitOutcome_SUBMIT_OUTCOME_ACCEPTED {
-			t.Fatalf("submit %d: %v", i, result)
+		result, err := submitAfterRefresh(t, f, c, direct(), &gulv1.SubmitRequest{SessionId: f.Binding.ID, AttemptId: string(rune('a' + i)), Text: text, WriteIntent: gulv1.ActionWriteIntent_ACTION_WRITE_INTENT_READ})
+		if err != nil || result.Msg.Outcome != gulv1.SubmitOutcome_SUBMIT_OUTCOME_ACCEPTED {
+			t.Fatalf("submit %d: %v, %v", i, result, err)
 		}
 		if result := send("busy", "never queued"); result.Outcome != gulv1.SubmitOutcome_SUBMIT_OUTCOME_REJECTED {
 			t.Fatalf("busy: %v", result)
@@ -122,9 +124,30 @@ func TestAssembledAuthenticatedHistoryApprovalResultsCloseAndRestart(t *testing.
 			if e != nil || card.Msg.Card == nil {
 				t.Fatalf("approval card: %v, %v", card, e)
 			}
-			_, e = interactions.Resolve(t.Context(), authorize(f, c, connect.NewRequest(&gulv1.ResolveRequest{SessionId: f.Binding.ID, InteractionId: "approval", ResponseJson: []byte(`{"decision":"accept_once"}`)})))
-			if e != nil {
-				t.Fatal(e)
+			deadline := time.Now().Add(5 * time.Second)
+			for {
+				resolved, err := interactions.Resolve(t.Context(), authorize(f, c, connect.NewRequest(&gulv1.ResolveRequest{SessionId: f.Binding.ID, InteractionId: "approval", ResponseJson: []byte(`{"decision":"accept_once"}`)})))
+				if err == nil {
+					if resolved.Msg.Outcome != gulv1.InteractionResolutionOutcome_INTERACTION_RESOLUTION_OUTCOME_RESOLVED {
+						t.Fatalf("approval outcome: %v", resolved.Msg)
+					}
+					break
+				}
+				var wire *connect.Error
+				var domain *gulv1.DomainError
+				if errors.As(err, &wire) {
+					for _, detail := range wire.Details() {
+						value, _ := detail.Value()
+						if d, ok := value.(*gulv1.DomainError); ok {
+							domain = d
+						}
+					}
+				}
+				// This typed refusal occurs before an Interaction attempt begins.
+				if connect.CodeOf(err) != connect.CodeFailedPrecondition || domain == nil || domain.Code != gulv1.ErrorCode_ERROR_CODE_PROVIDER_BLOCKED || domain.Action != gulv1.ActionClass_ACTION_CLASS_REFETCH_INTERACTION || time.Now().After(deadline) {
+					t.Fatal(err)
+				}
+				time.Sleep(200 * time.Millisecond)
 			}
 		}
 		if e := f.Complete(); e != nil {
@@ -309,8 +332,8 @@ func TestAssembledGuardsOfflinePresentationAndUnknownRestart(t *testing.T) {
 	if e = f.Provider.FaultNext("SubmitTurn", scenario.AfterCommit, io.ErrUnexpectedEOF); e != nil {
 		t.Fatal(e)
 	}
-	q := authorize(f, c, connect.NewRequest(&gulv1.SubmitRequest{SessionId: f.Binding.ID, AttemptId: "unknown", Text: "unknown original", WriteIntent: gulv1.ActionWriteIntent_ACTION_WRITE_INTENT_READ}))
-	result, e := client.Submit(t.Context(), q)
+	q := &gulv1.SubmitRequest{SessionId: f.Binding.ID, AttemptId: "unknown", Text: "unknown original", WriteIntent: gulv1.ActionWriteIntent_ACTION_WRITE_INTENT_READ}
+	result, e := submitAfterRefresh(t, f, c, client, q)
 	if e != nil || result.Msg.Outcome != gulv1.SubmitOutcome_SUBMIT_OUTCOME_UNKNOWN {
 		t.Fatalf("unknown: %v,%v", result, e)
 	}
@@ -351,6 +374,29 @@ func waitSubmitReady(t *testing.T, f *Fixture, c credentials, intent gulv1.Actio
 	t.Fatalf("submit readiness never converged: %v", last)
 }
 
+// Readiness can change while the observer refreshes dependent projections.
+// Only a typed freshness rejection permits a new explicit attempt; an unknown
+// effect or any other response is returned without retrying it.
+func submitAfterRefresh(t *testing.T, f *Fixture, c credentials, client gulv1connect.DirectSessionServiceClient, q *gulv1.SubmitRequest) (*connect.Response[gulv1.SubmitResponse], error) {
+	t.Helper()
+	calls := len(f.Provider.SubmitCalls())
+	deadline := time.Now().Add(5 * time.Second)
+	for attempt := 0; ; attempt++ {
+		request := &gulv1.SubmitRequest{SessionId: q.SessionId, AttemptId: fmt.Sprintf("%s-%d", q.AttemptId, attempt), Text: q.Text, WriteIntent: q.WriteIntent}
+		result, err := client.Submit(t.Context(), authorize(f, c, connect.NewRequest(request)))
+		if err != nil || result.Msg.Outcome != gulv1.SubmitOutcome_SUBMIT_OUTCOME_REJECTED || result.Msg.State.GetBlocker() != gulv1.ActionBlocker_ACTION_BLOCKER_FRESH_SNAPSHOT_REQUIRED {
+			return result, err
+		}
+		if len(f.Provider.SubmitCalls()) != calls || !result.Msg.State.GetFlags().GetRequiresFreshSnapshot() {
+			t.Fatalf("freshness rejection dispatched or lost its reason: %v", result.Msg)
+		}
+		if time.Now().After(deadline) {
+			t.Fatalf("submit did not converge after freshness rejection: %v", result.Msg)
+		}
+		time.Sleep(200 * time.Millisecond)
+	}
+}
+
 func TestAssembledFirstWriteAndAdmissionLimits(t *testing.T) {
 	f := prepared(t)
 	c := login(t, f)
@@ -364,7 +410,7 @@ func TestAssembledFirstWriteAndAdmissionLimits(t *testing.T) {
 	for i := 0; i < 2; i++ {
 		synchronize(t, f)
 		waitSubmitReady(t, f, c, gulv1.ActionWriteIntent_ACTION_WRITE_INTENT_WRITE)
-		r, e := client.Submit(t.Context(), authorize(f, c, connect.NewRequest(&gulv1.SubmitRequest{SessionId: f.Binding.ID, AttemptId: string(rune('x' + i)), Text: "write prompt", WriteIntent: gulv1.ActionWriteIntent_ACTION_WRITE_INTENT_WRITE})))
+		r, e := submitAfterRefresh(t, f, c, client, &gulv1.SubmitRequest{SessionId: f.Binding.ID, AttemptId: string(rune('x' + i)), Text: "write prompt", WriteIntent: gulv1.ActionWriteIntent_ACTION_WRITE_INTENT_WRITE})
 		if e != nil || r.Msg.Outcome != gulv1.SubmitOutcome_SUBMIT_OUTCOME_ACCEPTED {
 			t.Fatalf("write %d: %v,%v", i, r, e)
 		}
@@ -433,7 +479,7 @@ func TestAssembledPredispatchPersistenceFailureIsTypedAndDoesNotDispatch(t *test
 	service.Dispatcher = persistenceFailureDispatcher{}
 	defer func() { service.Dispatcher = dispatcher }()
 	client := gulv1connect.NewDirectSessionServiceClient(f.HTTP, f.Host.Origin())
-	_, err := client.Submit(t.Context(), authorize(f, c, connect.NewRequest(&gulv1.SubmitRequest{SessionId: f.Binding.ID, AttemptId: "persistence", Text: "retained draft", WriteIntent: gulv1.ActionWriteIntent_ACTION_WRITE_INTENT_READ})))
+	_, err := submitAfterRefresh(t, f, c, client, &gulv1.SubmitRequest{SessionId: f.Binding.ID, AttemptId: "persistence", Text: "retained draft", WriteIntent: gulv1.ActionWriteIntent_ACTION_WRITE_INTENT_READ})
 	if connect.CodeOf(err) != connect.CodeUnavailable || len(f.Provider.SubmitCalls()) != 0 {
 		t.Fatalf("persistence failure changed effect taxonomy: %v", err)
 	}
@@ -560,7 +606,7 @@ func TestDirectJSONEnvelopeAcceptsMaximumEscapedTextAndRejectsOversizeWire(t *te
 	c := login(t, f)
 	text := strings.Repeat("\x01", gulv1.MaximumSubmitTextBytes)
 	client := gulv1connect.NewDirectSessionServiceClient(f.HTTP, f.Host.Origin(), connect.WithProtoJSON())
-	result, err := client.Submit(t.Context(), authorize(f, c, connect.NewRequest(&gulv1.SubmitRequest{SessionId: f.Binding.ID, AttemptId: "maximum-escaped", Text: text, WriteIntent: gulv1.ActionWriteIntent_ACTION_WRITE_INTENT_READ})))
+	result, err := submitAfterRefresh(t, f, c, client, &gulv1.SubmitRequest{SessionId: f.Binding.ID, AttemptId: "maximum-escaped", Text: text, WriteIntent: gulv1.ActionWriteIntent_ACTION_WRITE_INTENT_READ})
 	if err != nil || result.Msg.Outcome != gulv1.SubmitOutcome_SUBMIT_OUTCOME_ACCEPTED {
 		t.Fatalf("maximum escaped JSON rejected: %v, %v", result, err)
 	}
