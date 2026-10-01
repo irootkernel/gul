@@ -146,6 +146,14 @@ func proxyUsesPort(raw string, port uint16) bool {
 	var value string
 	if err == nil && parsed.Host != "" {
 		value = parsed.Port()
+		if value == "" {
+			switch parsed.Scheme {
+			case "http":
+				return port == 80
+			case "https", "https+insecure":
+				return port == 443
+			}
+		}
 	} else {
 		_, value, err = net.SplitHostPort(raw)
 		if err != nil {

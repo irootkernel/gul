@@ -3,6 +3,7 @@ package deployment
 import (
 	"encoding/json"
 	"os"
+	"strconv"
 	"strings"
 	"testing"
 )
@@ -74,5 +75,37 @@ func TestValidateServeStatus(t *testing.T) {
 	withoutProof.NoServiceRoutesVerified = false
 	if err := ValidateServeStatus(valid, withoutProof); err == nil {
 		t.Fatal("unverified service routes accepted")
+	}
+}
+
+func TestValidateServeStatusImplicitProxyPort(t *testing.T) {
+	valid, err := os.ReadFile("testdata/serve-valid.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, test := range []struct {
+		name    string
+		port    uint16
+		proxy   string
+		wantErr bool
+	}{
+		{"HTTP default targets Gul", 80, "http://127.0.0.1", true},
+		{"HTTPS default targets Gul", 443, "https://127.0.0.1/", true},
+		{"insecure HTTPS default targets Gul", 443, "https+insecure://127.0.0.1", true},
+		{"HTTP default targets another port", 443, "http://127.0.0.1/", false},
+		{"HTTPS default targets another port", 80, "https://127.0.0.1", false},
+		{"insecure HTTPS default targets another port", 80, "https+insecure://127.0.0.1/", false},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			want := ServeExpectation{
+				HostPort: "gul.tail123.ts.net:443", LoopbackPort: test.port,
+				Authenticated: true, LocalCertificateVerified: true, NoServiceRoutesVerified: true,
+			}
+			status := strings.Replace(string(valid), ":18443", ":"+strconv.FormatUint(uint64(test.port), 10), 1)
+			status = strings.Replace(status, "http://127.0.0.1:8080", test.proxy, 1)
+			if err := ValidateServeStatus([]byte(status), want); (err != nil) != test.wantErr {
+				t.Fatalf("ValidateServeStatus() = %v, want error %t", err, test.wantErr)
+			}
+		})
 	}
 }
