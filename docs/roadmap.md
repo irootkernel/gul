@@ -3,21 +3,20 @@
 | Field | Value |
 | --- | --- |
 | Role | Sole authority for task identity, order, status, dependencies, and phase |
-| Revision | 2026-10-01 E14-T1 assembled acceptance |
+| Revision | 2026-10-01 E14 assembled acceptance closeout |
 | Active Task | None |
-| Next | E2-T0 (after E14 closeout and Provider released) |
+| Next | E2-T0 (after Provider released) |
 | Required provider | Released Dolgorae v0.1.3 implementing `dolgorae.gul-consumer/v1` |
 
-`Next` names the next canonical Task, E2-T0. It cannot start until E14
-closeout and the Provider released gate are both satisfied.
+E14 is Completed. `Next` names E2-T0, which cannot start until the Provider
+released gate is satisfied.
 
 ## 1. Status and execution rules
 
 Allowed executable states are `Planned`, `In Progress`, `In Review`, `Completed`,
 `Blocked`, and `Deferred`. `Retired` preserves a historical non-executable ID.
 At most one Task is In Progress or In Review globally. No Task is active;
-E14-T1 is Completed and E14 remains In Progress for its separate Epic audit
-and closeout.
+E14-T1 and E14 are Completed for the assembled fake-provider scope.
 A Task completes only after its scoped outputs, verification, documentation,
 review, and ordinary completion commit requirements pass. No status implies live
 credentials, staging, commit, publication, or installation authorization.
@@ -139,7 +138,7 @@ second owner of membership, order or status.
 | E6 | Completed | Read-only FileService and bounded preview/review | [Roadmap](#e6-complete-read-only-files-and-review); [Memo](implementation-memo.md#e6-epic-closeout-2026-09-29) |
 | E7 | Completed | Responsive UI, mandatory Prompt History, accessibility and IME | [Roadmap](#e7-complete-the-usable-responsive-interface); [Memo](implementation-memo.md#e7-epic-closeout-2026-09-30) |
 | E8 | Completed | Authentication, browser protection and headless/PWA/tailnet packaging together | [Roadmap](#e8-complete-authentication-and-deployment-packaging); [Memo](implementation-memo.md#e8-epic-closeout-2026-10-01) |
-| E14 | In Progress | Assembled pre-release application acceptance and live handoff; E14-T1 | [Shared](todo/GUL-CONSUMER-REBASELINE.md) |
+| E14 | Completed | Assembled pre-release application acceptance and live handoff; E14-T1 | [Roadmap](#e14-accept-the-assembled-pre-release-application); [Memo](implementation-memo.md#e14-epic-closeout-2026-10-01) |
 | E2 | Planned | Released provider qualification and real integration | [Shared](todo/GUL-CONSUMER-REBASELINE.md) |
 | E9 | Planned | Actual-provider fault/security/E2E and Gul release qualification | [Shared](todo/GUL-CONSUMER-REBASELINE.md) |
 | Deferred-Gorae | Deferred | Separate future managed provider, not Dolgorae orchestration | None |

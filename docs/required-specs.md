@@ -489,8 +489,7 @@ The injected provider remains a contract-derived stateful fake. Production
 commands do not import acceptance fixtures and keep runtime ports unavailable
 until E2 supplies the released provider. E2/E9 still own real transport,
 credentials, session creation, image handoff, deployment and device qualification.
-E14-T1 is Completed for this assembled fake-provider scope. E14 remains
-In Progress until its separate committed Epic audit and closeout complete.
+E14-T1 and E14 are Completed for this assembled fake-provider scope.
 
 E1-T1 through E1-T5 establish the delivery-independent Go core, one checked
 React bundle, declared but disabled browser API, isolated SQLite repositories,

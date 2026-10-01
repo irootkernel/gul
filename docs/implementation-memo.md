@@ -1474,9 +1474,10 @@ not enrolled.
 The repository contains a mounted authenticated HTTPS host, nine feature handlers
 including E14-T1 Diagnostics, protected Gul-owned SQLite lifecycle,
 verified native attachment, and one checked browser/PWA bundle. E8-T3 completion
-review accepts its eight-handler delivery scope; E14-T1 accepts the assembled fake-provider scope; E14 remains In Progress
-for its separate committed Epic audit and closeout. Default runtime ports fail closed as unavailable. Released provider wiring,
-Controller credentials and live deployment qualification remain E2/E9-owned.
+review accepts its eight-handler delivery scope; E14-T1 and E14 accept the
+assembled fake-provider scope. Default runtime ports fail closed as unavailable.
+Released provider wiring, Controller credentials and live deployment
+qualification remain E2/E9-owned.
 
 ## 3. Historical E0 assumption snapshot
 
@@ -1926,8 +1927,7 @@ The initial documentation assumed Gul would manage one Codex App Server, map Ses
 E12, E1, E13, E3, E4, E5, E6, E7 and E8 are complete. E8-T1/T2/T3
 are accepted within their account/password, authenticated route and isolated
 host/delivery scopes. E14-T1 assembled fake-provider acceptance is complete.
-E14 remains In Progress for its separate committed audit and closeout; E2-T0
-follows after that closeout and the Provider released gate. The
+E14 is Completed; E2-T0 follows after the Provider released gate. The
 TASK-053 consumer lock and generated contract tooling remain authoritative. E6 provides guarded local FileService
 inspection, bounded preview, refresh and Git review over E3's saved Workspace
 attachment. E2-T3 retains the Submit-image handoff and final REQ-FILE-015
@@ -2140,9 +2140,9 @@ focused race suites, complete Chrome campaign and actual native race suite pass.
 The serial `make test` facade also passes, with degraded Gaori extraction recorded
 separately. The second six-role assessment confirmed those corrections and identified a snapshot-required content catch-up gap, pre-attempt persistence misclassification and missing direct fake-authority regression assertions. The candidate now refreshes all content panels on rejoin, distinguishes typed persistence failure from unknown effects and tests startup policy, stable thread identity, WRITE retention, lane refusal and cross-run writer conflict. Focused checks also cover production Submit refusal, ambiguous binding lookup and online Diagnostics. The Chrome campaign holds rejoin across an actual result publication and verifies all three content reads resume. Revised contract comments and host timing descriptions match the assembly. Unchanged historical handler comments remain explicitly owned by E8-FB-012. The corrected focused Go race checks and full real Chrome campaign pass. Chrome verifies neutral pending-eligibility status, all three content reads after rejoin, missed-publication visibility and full result integrity. The actual native race suite also passes. Latest serial `make test` passes with command exit 0 and degraded Gaori extraction recorded separately. The third assessment confirmed the earlier corrections and found a gate closure between durable admission and provider dispatch could retain a never-dispatched Submit as unknown. The correction resolves fresh pending attempts as rejected, preserves prior unknown attempts during blocked recovery, propagates rejection-persistence failure and prevents durable rejection retries from appearing accepted. Focused race checks prove restart releases the rejected attempt's mutation slot, exact retries never dispatch, unknown recovery retains its possible prior effect and storage failure remains fail closed. Assembled checks also cover offline-start cleanup and actual JSON transport limits. The fourth six-role assessment confirmed the runtime corrections. Its documentary command attribution was corrected and checked locally; remaining independent Low observations retain their canonical future-work owners. A lifecycle negative fixture depended on the repository task remaining incomplete. The fixture now explicitly sets E14-T1 to Planned within its isolated copy, preserving the same premature-promotion rejection assertion across actual lifecycle transitions.
 E14-T1 is Completed for the assembled fake-provider scope. Its completion
-projection must pass the required SOT and serial gates and the bounded correction
-confirmation. E14 remains In Progress for separate committed Epic validation
-and closeout; real-provider and live deployment qualification remain E2/E9-owned.
+projection passed the required SOT and serial gates and the bounded correction
+confirmation. E14 is Completed after whole-Epic validation and closeout;
+real-provider and live deployment qualification remain E2/E9-owned.
 
 | Remaining qualification | Canonical owner |
 | --- | --- |
@@ -2155,6 +2155,22 @@ and closeout; real-provider and live deployment qualification remain E2/E9-owned
 
 The real provider and live runtime are absent from E14. Fake approval, mutation
 and result evidence does not qualify those remaining boundaries. The shared
-consumer dossier remains referenced by E14, E2 and E9 until their respective
-closeouts. Existing ADRs apply; this task introduces no installation or release
+consumer dossier remains for E2 and E9 until their respective closeouts. Existing ADRs apply; this task introduces no installation or release
 operation.
+
+### E14 Epic closeout (2026-10-01)
+
+E14 is Completed for the assembled authenticated application against explicit
+stateful fakes. REQ-HOST-001/002, REQ-API-001 and REQ-CONSUMER-004 cover the shared
+core, protected generated APIs, one browser/native bundle and integrated
+history, approval, results, close, files and recovery behavior. The committed
+implementation and its actual scoped checks support the whole-Epic acceptance;
+released-provider qualification remains E2/E9-owned. Independent regression
+coverage and diagnostic wording follow-ups are owned by E14-FB-001 through
+E14-FB-006 in `deferred-feedback.md`, with explicit re-entry conditions.
+
+No Task is active. E2-T0 is next after the Provider released gate. The shared
+consumer dossier remains for E2/E9; E14's roadmap link now points to its
+canonical outcomes. Live transport, credentials, session creation, image/effort
+handoff, supported devices and deployment remain unqualified by this fake
+acceptance. No installation or upstream publication is implied.
