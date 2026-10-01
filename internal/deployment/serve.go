@@ -143,9 +143,15 @@ func proxyUsesPort(raw string, port uint16) bool {
 		return false
 	}
 	parsed, err := url.Parse(raw)
+	var value string
 	if err == nil && parsed.Host != "" {
-		return parsed.Port() == strconv.FormatUint(uint64(port), 10)
+		value = parsed.Port()
+	} else {
+		_, value, err = net.SplitHostPort(raw)
+		if err != nil {
+			return false
+		}
 	}
-	_, value, err := net.SplitHostPort(raw)
-	return err == nil && value == strconv.FormatUint(uint64(port), 10)
+	number, err := strconv.ParseUint(value, 10, 16)
+	return err == nil && number == uint64(port)
 }
