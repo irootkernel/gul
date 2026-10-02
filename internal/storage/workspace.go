@@ -99,3 +99,22 @@ WHERE a.subject_id = ? ORDER BY a.workspace_id`, subjectID)
 	}
 	return entries, nil
 }
+
+// WorkspaceRoots includes unattached-to-session roots when selecting a private
+// gateway socket. It is host-only and exposes no provider endpoint to clients.
+func (r PresentationRepository) WorkspaceRoots(ctx context.Context) ([]string, error) {
+	rows, err := r.store.reader.QueryContext(ctx, "SELECT DISTINCT canonical_root FROM workspace_attachments")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var roots []string
+	for rows.Next() {
+		var root string
+		if err = rows.Scan(&root); err != nil {
+			return nil, err
+		}
+		roots = append(roots, root)
+	}
+	return roots, rows.Err()
+}

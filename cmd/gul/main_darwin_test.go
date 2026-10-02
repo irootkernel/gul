@@ -28,7 +28,8 @@ func commandConfig(t *testing.T) host.Config {
 	if err := listener.Close(); err != nil {
 		t.Fatal(err)
 	}
-	return host.Config{DataDirectory: filepath.Join(base, "Gul"), Port: port}
+	t.Setenv("HOME", base)
+	return host.Config{DataDirectory: filepath.Join(base, "Gul"), Port: port, DolgoraeExecutable: filepath.Join(base, "missing-provider")}
 }
 
 func noDesktop(host.Attachment, func()) error { return errors.New("unexpected desktop launch") }
@@ -44,7 +45,7 @@ func TestCommandDispatchRejectsBadInputWithoutCreatingOwner(t *testing.T) {
 		{[]string{"diagnose"}, "no Gul owner state"},
 	} {
 		c := commandConfig(t)
-		args := append(test.args, "--data-directory", c.DataDirectory)
+		args := append(test.args, "--data-directory", c.DataDirectory, "--dolgorae-executable", c.DolgoraeExecutable)
 		err := runCommand(t.Context(), args, noDesktop)
 		if err == nil || !strings.Contains(err.Error(), test.message) {
 			t.Fatalf("%v: %v", args, err)

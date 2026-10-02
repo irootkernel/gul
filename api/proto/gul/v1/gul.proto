@@ -1059,4 +1059,22 @@ message GetSummaryResponse {
   // Successful responses are persistence-gated. Outages fail closed with an
   // error instead of returning false here.
   bool persistence_ready = 2;
+  // Safe host facts; no socket, carrier, executable or payload identities.
+  string provider_health = 3;
+  uint32 provider_restarts_remaining = 4;
+  string provider_version = 5;
+  uint32 provider_protocol = 6;
+  bool provider_channel_ready = 7;
+  ProviderCapabilities provider_capabilities = 8;
+  bool provider_socket_cleanup_unsafe = 9;
+}
+message ProviderCapabilities {
+  bool persistent_runs = 1;
+  bool event_replay = 2;
+  bool controller_binding = 3;
+  bool artifact_retrieval = 4;
+  bool reader_writer_access = 5;
+  bool dedicated_writer_support = 6;
+  bool durable_writer_authority = 7;
+  bool first_write_via_submit_turn = 8;
 }

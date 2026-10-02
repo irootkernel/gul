@@ -479,8 +479,20 @@ E2-T0 pins the qualified published v0.1.3 artifact and matching immutable
 consumer inputs in `contract/dependency-lock.json`. Its isolated gateway check,
 regenerated release drift and admission policy establish Current State for
 REQ-CONSUMER-003 and REQ-RUNTIME-008 within the release identity and contract
-boundary. Production transport, credentials and actual session actions retain
-their E2-T1/T2/T3 owners below.
+boundary. E2-T1 adds the generated production transport and ordinary host
+assembly described below. Credentials and actual session actions remain
+E2-T2/T3-owned.
+
+E2-T1 supplies a verified executable copy, a private supervised
+Unix gateway, protocol-zero negotiation, fresh request UUIDs and one shared
+gRPC channel for the 27-method consumer port. Published-artifact checks cover
+restart, collision refusal, changed selection rejection and ordinary authenticated
+host profile/diagnostic reads. Missing or incompatible providers and transport
+loss preserve local presentation/files while Submit remains rejected. Transport
+fixtures check read single-flight, cancellation, typed close errors and enum/
+optional-data handling. The gateway and host are implemented; real carriers,
+Run creation and end-to-end session action acceptance remain E2-T2/T3-owned.
+E9 retains supported-device, fault/security and deployment qualification.
 
 Earlier component entries retain the verification scope accepted at their task
 completion. Their "unmounted" and "disabled" route labels describe that earlier

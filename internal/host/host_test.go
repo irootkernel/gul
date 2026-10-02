@@ -40,7 +40,7 @@ func config(t *testing.T) Config {
 	}
 	port := l.Addr().(*net.TCPAddr).Port
 	l.Close()
-	return Config{DataDirectory: root, Port: port}
+	return Config{DataDirectory: root, Port: port, ProviderHome: filepath.Join(base, "home"), DolgoraeExecutable: filepath.Join(base, "missing-provider")}
 }
 func started(t *testing.T, c Config) *Host {
 	t.Helper()

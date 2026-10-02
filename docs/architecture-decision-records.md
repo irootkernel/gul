@@ -768,4 +768,6 @@ E2-T0 release qualification (2026-10-02): the published v0.1.3 source is
 `07dc31331d03aae9ed7c0c862a0cbe8a5184024e`. The current dependency-lock SHA-256
 is `223d2a72d7bd281dba0abdc8b1e966d792492546c3be63a67e593c94eed0c05a` and generated-lock SHA-256 is
 `8d02e824c36795221ee6d1b3fc7e2b43943d13701aa76d019c3b6aea30b26a6d`. The earlier E12 pin remains historical evidence.
-Actual production assembly, credentials and session actions remain E2-T1/T2/T3.
+E2-T1 applies the accepted public-gRPC boundary to ordinary host
+startup and implements supervised gateway, read budgets and safe diagnostics.
+Credentials and actual session actions remain E2-T2/T3-owned.

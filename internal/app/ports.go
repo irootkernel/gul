@@ -21,6 +21,21 @@ type ProviderPort interface {
 	Ready(context.Context) error
 }
 
+// ProviderStatus contains safe availability facts, never provider paths,
+// credentials, raw diagnostics or request bodies.
+type ProviderStatus struct {
+	Health                                                            string
+	RestartsRemaining                                                 uint32
+	Version                                                           string
+	Protocol                                                          uint32
+	ChannelReady                                                      bool
+	SocketCleanupUnsafe                                               bool
+	PersistentRuns, EventReplay, ControllerBinding, Artifacts         bool
+	ReaderWriter, DedicatedWriter, DurableWriter, FirstWriteViaSubmit bool
+}
+
+type ProviderDiagnostics interface{ Status() ProviderStatus }
+
 // PersistencePort reports whether Gul-owned persistence can currently serve
 // product behavior. Repository APIs are added with their owning tasks.
 type PersistencePort interface {

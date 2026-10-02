@@ -21,5 +21,7 @@ func (h *DiagnosticsHandler) GetSummary(ctx context.Context, _ *connect.Request[
 	}
 	ready := h.Core.RequireProductAccess(ctx, app.Principal{Subject: subject}) == nil
 	// localAccess has already verified persistence; an outage returns an error.
-	return connect.NewResponse(&gulv1.GetSummaryResponse{ProviderReady: ready, PersistenceReady: true}), nil
+	status := h.Core.ProviderStatus()
+	return connect.NewResponse(&gulv1.GetSummaryResponse{ProviderReady: ready, PersistenceReady: true, ProviderHealth: status.Health, ProviderRestartsRemaining: status.RestartsRemaining, ProviderVersion: status.Version, ProviderProtocol: status.Protocol, ProviderChannelReady: status.ChannelReady, ProviderSocketCleanupUnsafe: status.SocketCleanupUnsafe,
+		ProviderCapabilities: &gulv1.ProviderCapabilities{PersistentRuns: status.PersistentRuns, EventReplay: status.EventReplay, ControllerBinding: status.ControllerBinding, ArtifactRetrieval: status.Artifacts, ReaderWriterAccess: status.ReaderWriter, DedicatedWriterSupport: status.DedicatedWriter, DurableWriterAuthority: status.DurableWriter, FirstWriteViaSubmitTurn: status.FirstWriteViaSubmit}}), nil
 }

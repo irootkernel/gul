@@ -9,7 +9,7 @@ import (
 
 func readerInput() Input {
 	stamp := observation.Stamp{Head: "4", Run: 4, Writer: 2, Interaction: 3}
-	return Input{ControllerMatches: true, Checked: true, Freshness: Fresh, Run: RunFacts{Lifecycle: Idle, Variant: DedicatedReader, Control: Direct, Lane: Dedicated, Thread: Present, ActiveTurn: Missing, Access: Read, Verification: Verified, Authority: Unowned, Reconciliation: NoReconciliation, Requested: BestEffort, Achieved: BestEffort, Background: Absent, Server: ServerReady, Recovery: NoRecovery, RecoveryAction: NoRecoveryAction, Lineage: NoLineage, Stamp: stamp}, Writer: WriterProjection{Authority: Unowned, Access: UnknownAccess, Verification: Unverified, Owner: NoOwner, Reconciliation: NoReconciliation, Revision: 2, Stamp: observation.Stamp{Writer: 2}}, Profile: ProfileFacts{Compatibility: Compatible, Transition: Supported, BackgroundControl: Supported, MaximumAssurance: ProcessContained, SupportsLane: true}, Capabilities: Capabilities{Checked: true, Submit: true, Acquire: true, Release: true, Interrupt: true, Resolve: true, Recover: true, Reconcile: true, VerifyController: true, Pause: true, Resume: true, Close: true, ReaderWriter: true, DurableWriter: true, FirstWriteViaSubmit: true, Transition: Supported}, InteractionStamp: stamp, TimelineHead: "4", Aggregate: Aggregate{Directive: NoAggregateAction, Freshness: Fresh, Revision: 91, Lifecycle: SessionActive, CloseProgress: NoClose, Recovery: AggregateReady, CloseIntent: NoCloseIntent, NonretiredMembers: 1}, Local: LocalState{Ownership: OwnedSession, Credential: Healthy, Operation: NoOperation}, Request: Request{Intent: IntentRead, CloseIntent: CompleteSession}}
+	return Input{ControllerMatches: true, Checked: true, Freshness: Fresh, Run: RunFacts{Lifecycle: Idle, Variant: DedicatedReader, Control: Direct, Lane: Dedicated, Thread: Present, ActiveTurn: Missing, Access: Read, Verification: Verified, Authority: Unowned, Reconciliation: NoReconciliation, Requested: BestEffort, Achieved: BestEffort, Background: Absent, Server: ServerReady, Recovery: NoRecovery, RecoveryAction: NoRecoveryAction, Lineage: NoLineage, Stamp: stamp}, Writer: WriterProjection{Authority: Unowned, Access: UnknownAccess, Verification: Unverified, Owner: NoOwner, Reconciliation: NoReconciliation, Revision: 2, Stamp: observation.Stamp{Writer: 2}}, Profile: ProfileFacts{Compatibility: Compatible, Transition: Supported, BackgroundControl: Supported, MaximumAssurance: ProcessContained, SupportsLane: true}, Capabilities: Capabilities{Checked: true, Submit: true, Acquire: true, Release: true, Interrupt: true, Resolve: true, Recover: true, Reconcile: true, VerifyController: true, Pause: true, Resume: true, Close: true, ReaderWriter: true, DedicatedWriter: true, DurableWriter: true, FirstWriteViaSubmit: true, Transition: Supported}, InteractionStamp: stamp, TimelineHead: "4", Aggregate: Aggregate{Directive: NoAggregateAction, Freshness: Fresh, Revision: 91, Lifecycle: SessionActive, CloseProgress: NoClose, Recovery: AggregateReady, CloseIntent: NoCloseIntent, NonretiredMembers: 1}, Local: LocalState{Ownership: OwnedSession, Credential: Healthy, Operation: NoOperation}, Request: Request{Intent: IntentRead, CloseIntent: CompleteSession}}
 }
 func writerInput() Input {
 	in := readerInput()
@@ -82,10 +82,10 @@ func TestUnsupportedTransitionPreservesSourceAndExternalWriterHasNoTakeover(t *t
 			t.Fatal("fixed read lost")
 		}
 		in = writerInput()
-		in.Capabilities.Transition = support
+		in.Profile.Transition = support
 		in.Request.Intent = IntentRead
 		got = Evaluate(in)
-		if got.Blocker != UnsupportedTransition || got.Flags.CanReleaseWriter || got.Flags.CanSubmitRead {
+		if got.Blocker == UnsupportedTransition || !got.Flags.CanReleaseWriter || !got.Flags.CanSubmitRead || !got.Flags.CanSubmitWrite {
 			t.Fatal(got)
 		}
 	}
@@ -361,5 +361,27 @@ func TestStaleAggregateCannotEnableControllerAdoption(t *testing.T) {
 	in.Aggregate.Freshness = Stale
 	if got := Evaluate(in); got.Flags.CanAdoptController || !got.Flags.RequiresFreshSnapshot {
 		t.Fatal(got)
+	}
+}
+
+func TestReleaseLaneSupportIsIndependentOfBroadWriterFlag(t *testing.T) {
+	in := readerInput()
+	in.Capabilities.ReaderWriter = false
+	in.Capabilities.Transition = SupportUnverified
+	if !Evaluate(in).Flags.CanAcquireWriter {
+		t.Fatal("verified Profile transition was vetoed by global summary")
+	}
+	in.Profile.Transition = SupportUnverified
+	if Evaluate(in).Flags.CanAcquireWriter {
+		t.Fatal("unverified Profile admitted Acquire")
+	}
+	in = writerInput()
+	in.Capabilities.ReaderWriter = false
+	if !Evaluate(in).Flags.CanSubmitWrite {
+		t.Fatal("dedicated write requires broad reader/writer flag")
+	}
+	in.Capabilities.DedicatedWriter = false
+	if Evaluate(in).Flags.CanSubmitWrite {
+		t.Fatal("missing lane writer support")
 	}
 }

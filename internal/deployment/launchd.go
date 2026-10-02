@@ -19,11 +19,14 @@ const LaunchdLabel = "xyz.rootkernel.gul.serve"
 // directory of the same user that will load the agent. Logs and their parent
 // must already exist with protected ownership and modes before rendering.
 type LaunchdConfig struct {
-	Home        string
-	BinaryPath  string
-	DataRoot    string
-	Port        int
-	TailnetHost string
+	Home               string
+	BinaryPath         string
+	DataRoot           string
+	Port               int
+	TailnetHost        string
+	DolgoraeExecutable string
+	WorkspaceRoots     []string
+	Policies           []string
 }
 
 // RenderLaunchdPlist renders a launchd user agent without installing it.
@@ -70,6 +73,21 @@ func RenderLaunchdPlist(config LaunchdConfig) ([]byte, error) {
 			return nil, err
 		}
 		arguments = append(arguments, "--tailnet-host", config.TailnetHost)
+	}
+	if config.DolgoraeExecutable != "" {
+		if err := absoluteClean(config.DolgoraeExecutable); err != nil {
+			return nil, err
+		}
+		arguments = append(arguments, "--dolgorae-executable", config.DolgoraeExecutable)
+	}
+	for _, root := range config.WorkspaceRoots {
+		if err := absoluteClean(root); err != nil {
+			return nil, err
+		}
+		arguments = append(arguments, "--workspace-root", root)
+	}
+	for _, policy := range config.Policies {
+		arguments = append(arguments, "--policy", policy)
 	}
 	values := append(arguments, stdout, stderr)
 	for i, value := range values {

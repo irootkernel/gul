@@ -24,6 +24,7 @@ import (
 	"github.com/rootkernel/gul/internal/auth"
 	"github.com/rootkernel/gul/internal/delivery/api"
 	"github.com/rootkernel/gul/internal/delivery/web"
+	"github.com/rootkernel/gul/internal/gateway"
 	"github.com/rootkernel/gul/internal/storage"
 	"golang.org/x/sys/unix"
 )
@@ -37,6 +38,7 @@ const DefaultPort = 17423
 
 // Assembly binds explicit application services to the host-owned store and lifetime.
 type Assembly struct {
+	gateway   *gateway.Gateway
 	Provider  app.ProviderPort
 	Lifecycle app.LifecyclePort
 	Features  func(*app.Core) api.FeatureHandlers
@@ -48,8 +50,13 @@ type Config struct {
 	// Remote origins are admitted only after the caller's current Serve inspection.
 	TailnetHost    string
 	ServeInspector ServeInspector
-	Provider       app.ProviderPort
-	Lifecycle      app.LifecyclePort
+	// Provider configuration is trusted host input, never a browser selection.
+	DolgoraeExecutable string
+	ProviderHome       string
+	WorkspaceRoots     []string
+	Policies           []string
+	Provider           app.ProviderPort
+	Lifecycle          app.LifecyclePort
 	// Features supplies handlers after startup. Assemble.Features takes precedence.
 	// Assemble overrides Provider/Lifecycle before startup; neither selects a fake.
 	Features func(*app.Core, *storage.Store) api.FeatureHandlers
@@ -70,6 +77,7 @@ type Host struct {
 	lock      *os.File
 	store     *storage.Store
 	Core      *app.Core
+	gateway   *gateway.Gateway
 	Boundary  *api.BrowserBoundary
 	listener  net.Listener
 	server    *http.Server
@@ -128,7 +136,7 @@ func (h *Host) Start(ctx context.Context) (err error) {
 				h.listener = nil
 			}
 			if h.Core != nil {
-				stop, c := context.WithTimeout(context.Background(), 5*time.Second)
+				stop, c := context.WithTimeout(context.Background(), 10*time.Second)
 				defer c()
 				if stopErr := h.Core.Stop(stop); stopErr != nil {
 					err = errors.Join(err, stopErr)
@@ -191,7 +199,14 @@ func (h *Host) Start(ctx context.Context) (err error) {
 			return e
 		}
 		provider, lifecycle = assembled.Provider, assembled.Lifecycle
+	} else if provider == nil && lifecycle == nil {
+		assembled, e = productionAssembly(ctx, h.store, h.config)
+		if e != nil {
+			return e
+		}
+		provider, lifecycle = assembled.Provider, assembled.Lifecycle
 	}
+	h.gateway = assembled.gateway
 	h.Core = app.NewCore(app.Dependencies{Authorization: h.Boundary, Persistence: h.store, Provider: provider, Lifecycle: lifecycle})
 	if e = h.Core.Start(ctx); e != nil {
 		return e

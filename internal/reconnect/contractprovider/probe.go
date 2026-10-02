@@ -3,7 +3,9 @@ package contractprovider
 import (
 	"context"
 	"fmt"
+	contract "github.com/rootkernel/gul/contract"
 	"slices"
+	"strings"
 
 	publicv1 "github.com/rootkernel/gul/contract/generated/go/dolgorae/public/v1"
 	"github.com/rootkernel/gul/contract/port"
@@ -25,16 +27,22 @@ func (p ContractProbe) Check(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
+	return ValidateCapabilities(caps)
+}
+
+// ValidateCapabilities applies the qualified consumer admission matrix.
+func ValidateCapabilities(caps *publicv1.GetCapabilitiesResponse) error {
 	if caps == nil || proto.Size(caps) > 1024*1024 || !known(caps.ProtoReflect()) || caps.Context == nil || caps.Context.ProtocolVersion != 1 ||
-		caps.Context.ServerInstanceId == "" || caps.Protocol == nil || caps.Protocol.RpcProtocolVersion != 1 ||
+		caps.Context.ServerInstanceId == "" || strings.TrimPrefix(caps.DolgoraeVersion, "v") != contract.QualifiedRelease().Version || caps.Protocol == nil || caps.Protocol.RpcProtocolVersion != 1 ||
 		caps.Protocol.MinimumClientProtocolVersion > 1 || caps.Protocol.MaximumClientProtocolVersion < 1 ||
 		caps.Protocol.EventProtocolVersion != 1 || caps.Protocol.TimelineProtocolVersion != 1 ||
 		caps.Protocol.EventProjectionVersion != 1 || caps.Protocol.GrpcErrorDetailVersion != 1 ||
+		!slices.Contains(caps.Protocol.ProjectionProfiles, publicv1.ProjectionProfile_PROJECTION_PROFILE_MINIMAL) ||
 		caps.DescriptorSha256 != port.DescriptorSHA256 || caps.Features == nil || !caps.Features.PersistentRuns ||
 		!caps.Features.EventReplay || !caps.Features.ControllerTimeline || !caps.Features.SafeClientProjection ||
-		!caps.Features.ControllerBinding || !caps.Features.PublicLocalSocket || !caps.Features.ReaderWriterAccess ||
+		!caps.Features.ControllerBinding || !caps.Features.PublicLocalSocket ||
 		!caps.Features.DurableWriterAuthority || !caps.Features.ArtifactRetrieval || !caps.Features.ControlModes ||
-		caps.ControllerCarrier == nil || caps.ControllerCarrier.SchemaId != "dolgorae.controller-credential/v1" ||
+		caps.ControllerCarrier == nil || caps.ControllerCarrier.SchemaId != contract.Admission().CredentialSchemaID ||
 		caps.ControllerCarrier.SchemaVersion != 1 || caps.ControllerCarrier.SchemaSha256 != port.ControllerCredentialSchemaSHA256 ||
 		!caps.ControllerCarrier.SameUidRequired || !caps.ControllerCarrier.RegularFileRequired ||
 		!caps.ControllerCarrier.SymlinksForbidden ||
@@ -64,16 +72,25 @@ func (p ContractProbe) Check(ctx context.Context) error {
 		}
 		methods[method] = true
 	}
-	for _, method := range port.RequiredMethods() {
-		if !methods[method] {
-			return fmt.Errorf("%w: missing %s", recovery.ErrIncompatible, method)
+	for _, operation := range contract.Admission().Operations {
+		if !operation.ReleaseAdmitted || !methods[operation.Method] {
+			return fmt.Errorf("%w: missing %s", recovery.ErrIncompatible, operation.Method)
 		}
+		for _, feature := range operation.RequiredFeatures {
+			field := caps.Features.ProtoReflect().Descriptor().Fields().ByName(protoreflect.Name(feature))
+			if field == nil || !caps.Features.ProtoReflect().Get(field).Bool() {
+				return fmt.Errorf("%w: required feature", recovery.ErrIncompatible)
+			}
+		}
+	}
+	if !validLanes(caps.Lanes) {
+		return fmt.Errorf("%w: lanes", recovery.ErrIncompatible)
 	}
 	return nil
 }
 
 func validInteractions(c *publicv1.InteractionCapabilities) bool {
-	if c == nil || c.MaximumResponseBytes == 0 || c.MaximumSafePayloadBytes == 0 || len(c.KnownKinds) == 0 || len(c.Items) != len(c.KnownKinds) {
+	if c == nil || c.MaximumResponseBytes == 0 || c.MaximumSafePayloadBytes == 0 || len(c.KnownKinds) < 6 || len(c.Items) != len(c.KnownKinds) {
 		return false
 	}
 	kinds := make(map[publicv1.InteractionKind]bool, len(c.KnownKinds))
@@ -82,6 +99,11 @@ func validInteractions(c *publicv1.InteractionCapabilities) bool {
 			return false
 		}
 		kinds[kind] = true
+	}
+	for kind := publicv1.InteractionKind_INTERACTION_KIND_COMMAND_EXECUTION_APPROVAL; kind <= publicv1.InteractionKind_INTERACTION_KIND_CONNECTOR_APPROVAL; kind++ {
+		if !kinds[kind] {
+			return false
+		}
 	}
 	seen := make(map[publicv1.InteractionKind]bool, len(c.Items))
 	for _, item := range c.Items {
@@ -124,4 +146,25 @@ func known(m protoreflect.Message) bool {
 		return valid
 	})
 	return valid
+}
+
+func validLanes(c *publicv1.LaneCapabilities) bool {
+	if c == nil || len(c.SupportedLanes) == 0 || len(c.Items) != len(c.SupportedLanes) {
+		return false
+	}
+	lanes := map[publicv1.ExecutionLane]bool{}
+	for _, lane := range c.SupportedLanes {
+		if lane == publicv1.ExecutionLane_EXECUTION_LANE_UNSPECIFIED || lanes[lane] {
+			return false
+		}
+		lanes[lane] = true
+	}
+	seen := map[publicv1.ExecutionLane]bool{}
+	for _, item := range c.Items {
+		if item == nil || !lanes[item.Lane] || seen[item.Lane] {
+			return false
+		}
+		seen[item.Lane] = true
+	}
+	return true
 }

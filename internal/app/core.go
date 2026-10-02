@@ -38,6 +38,13 @@ type Core struct {
 	authorization AuthorizationPort
 }
 
+func (c *Core) ProviderStatus() ProviderStatus {
+	if p, ok := c.provider.(ProviderDiagnostics); ok {
+		return p.Status()
+	}
+	return ProviderStatus{Health: "unavailable"}
+}
+
 func NewCore(dependencies Dependencies) *Core {
 	lifecycle := dependencies.Lifecycle
 	if lifecycle == nil {

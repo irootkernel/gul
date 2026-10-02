@@ -2249,3 +2249,70 @@ deployment qualification. Release notes are not enrolled. The shared dossier
 remains for E2/E9. `make contract-check`, admission-policy negatives and the
 serial `make test` facade passed. Corrected-target completion source review
 confirms the release-qualification scope. E2-T0 is Completed; E2-T1 is next.
+
+### E2-T1 production gateway and host integration (2026-10-02)
+
+`internal/gateway` implements the frozen 27-method port with the generated
+public local-gRPC clients. All clients share one Unix HTTP/2 transport. The
+handshake uses protocol zero and the supported range; subsequent requests use
+the negotiated protocol and a fresh UUID without modifying caller messages.
+The probe compares the exact schema `$id` and digests and consumes the generated
+operation admission matrix. The accepted event projection inventory must include
+`MINIMAL`, which the observation adapter requests. Dedicated writer support stays
+independent from
+`reader_writer_access=false`; the selected Profile supplies transition support.
+Threadless Acquire remains unavailable. Existing-reader Acquire requires
+supported Profile transition, while a verified held writer can submit READ and
+Release without it. Typed Submit close errors pass through
+the wire adapter to the existing safe domain mapper. Unknown optional bytes are
+discarded before projection use, while unknown typed enums and stale response
+contexts block the call.
+
+The host singleton precedes provider work. Gul verifies a private executable
+copy against the embedded published digest, creates protected runtime parents
+below the selected user's cache and chooses an unused socket outside configured
+and saved Workspace roots. It launches only `serve`, without a shell. The
+provider owns socket bind, chmod, stale proof and unlink. A bounded serve
+readiness envelope supplies safe failure codes; socket ownership and the gRPC
+handshake decide admission. Source selection is rechecked at every later start.
+Startup, shutdown and restart limits follow §6.1. Transient restart readiness or
+transport failure retries within the same backoff and rolling budget. Semantic,
+identity, socket and collision rejection remains terminal. An earlier failed
+startup must settle its owned child before the next attempt.
+Coalesced reads have four
+workers, 16 starts per second and a 250ms per-key floor; mutations and streams
+have independent eight-slot bounds. The transport retains no read-result cache.
+
+Ordinary headless/native host startup assembles the completed services without
+`Config.Assemble`. Missing or incompatible providers keep local authentication,
+Workspace presentation and FileService available. A provider loss disables
+runtime actions and does not mark durable Runs failed. Construction uses the
+accepted handshake contract without another network probe; provider loss at
+that boundary preserves local host services while live runtime gates stay closed.
+The diagnostic API and
+operator view expose health, release identity, unsafe socket cleanup and
+independent capability flags.
+Trusted executable, root and policy flags also survive launchd rendering.
+Production never invokes a Machine CLI operation to bootstrap or replace RPCs.
+The opt-in tests initialize only their private provider HOME/workspace.
+
+Published-artifact qualification checks live startup, protocol/schema/feature
+refusal, active-gateway collision, owned-child shutdown, crash re-handshake and
+replacement rejection. Ordinary authenticated host tests cover actual profile
+and diagnostic reads followed by transport loss, preserved local navigation/
+files and rejected Submit. Offline transport fixtures cover request context
+isolation, single-flight, cancellation, typed errors and optional-data handling.
+Regression checks cover held-writer READ/Release without transition support,
+transient restart recovery and budget/cancellation boundaries, transport versus
+semantic handshake rejection, and authenticated local routes after actual
+published-provider loss between handshake and service construction. Missing or
+OPERATIONAL-only projection inventories are rejected in both isolated and actual
+released-capability tests.
+Serial `make test` and the published provider/gateway/host race checks passed.
+The exact Rust-tag build remains supplemental T0 evidence. Real carrier creation
+and session actions remain E2-T2/T3-owned; E9 keeps device/fault/security and
+deployment acceptance. No installation or upstream publication is implied.
+
+E2-T1 is Completed for the production gateway and host integration scope.
+Real protected carriers and actual session-action qualification remain
+E2-T2/T3-owned. E2 remains In Progress, with E2-T2 next.

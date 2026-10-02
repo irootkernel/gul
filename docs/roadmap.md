@@ -3,9 +3,9 @@
 | Field | Value |
 | --- | --- |
 | Role | Sole authority for task identity, order, status, dependencies, and phase |
-| Revision | 2026-10-02 E2-T0 released-provider qualification |
+| Revision | 2026-10-02 E2-T1 production gateway integration |
 | Active Task | None |
-| Next | E2-T1 |
+| Next | E2-T2 |
 | Required provider | Released Dolgorae v0.1.3 implementing `dolgorae.gul-consumer/v1` |
 
 E14 is Completed. The published v0.1.3 artifact and immutable release source
@@ -16,6 +16,7 @@ have been qualified by E2-T0, including the release contract and admission matri
 Allowed executable states are `Planned`, `In Progress`, `In Review`, `Completed`,
 `Blocked`, and `Deferred`. `Retired` preserves a historical non-executable ID.
 At most one Task is In Progress or In Review globally. No Task is active;
+E2-T1 is Completed.
 E14-T1 and E14 are Completed for the assembled fake-provider scope.
 A Task completes only after its scoped outputs, verification, documentation,
 review, and ordinary completion commit requirements pass. No status implies live
@@ -311,12 +312,12 @@ The accepted plan covers release contract drift and capability admission,
 production wiring, and actual read/write behavior. A source-tag test build may
 help diagnose these boundaries, but cannot satisfy the published-artifact gate
 or complete a Task. The published artifact and matching source identity have
-been qualified; E2-T0 is Completed. Later Tasks remain gated on their predecessors.
+been qualified; E2-T0 and E2-T1 are Completed. Later Tasks remain gated on their predecessors.
 
 | Task | Phase | Status | Predecessors | Owned result and verification |
 | --- | --- | --- | --- | --- |
 | E2-T0 | Post-release | Completed | E14-T1; Provider released | Pin the published v0.1.3 artifact and matching immutable consumer inputs; regenerate release drift and document schema/capability admission; no silent installation or replaced production binary |
-| E2-T1 | Post-release | Planned | E2-T0, E1-T3 | Real gateway supervision, private UDS, shared generated gRPC transport, negotiated request contexts and contract checks; wire the accepted runtime into production host startup and diagnostics |
+| E2-T1 | Post-release | Completed | E2-T0, E1-T3 | Real gateway supervision, private UDS, shared generated gRPC transport, negotiated request contexts and contract checks; wire the accepted runtime into production host startup and diagnostics |
 | E2-T2 | Post-release | Planned | E2-T1, E1-T4 | Actual exclusive carriers under the advertised fixed-home root, exact credential schema, verification, adoption and authorization; no Operator or child credential |
 | E2-T3 | Post-release | Planned | E2-T2, E3-T4, E4-T5, E8-T3, E14-T1 | Authenticated production-host session creation and sequential read/write, guarded image handoff, approval, complete history/results/artifacts and aggregate close; unsupported and ambiguous operations remain blocked |
 

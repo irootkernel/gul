@@ -47,6 +47,10 @@ func runCommand(ctx context.Context, args []string, openDesktop func(host.Attach
 	data := flags.String("data-directory", root, "absolute protected Gul data directory")
 	port := flags.Int("port", host.DefaultPort, "fixed loopback HTTPS port")
 	tailnet := flags.String("tailnet-host", "", "expected tailnet DNS name and HTTPS port")
+	executable := flags.String("dolgorae-executable", "", "qualified Dolgorae executable (defaults to PATH)")
+	var roots, policies repeatedStrings
+	flags.Var(&roots, "workspace-root", "approved absolute Workspace root; may repeat")
+	flags.Var(&policies, "policy", "approved launch policy; may repeat")
 	if e := flags.Parse(args); e != nil {
 		return e
 	}
@@ -62,7 +66,7 @@ func runCommand(ctx context.Context, args []string, openDesktop func(host.Attach
 		if e != nil {
 			return e
 		}
-		plist, e := deployment.RenderLaunchdPlist(deployment.LaunchdConfig{Home: home, BinaryPath: binary, DataRoot: *data, Port: *port, TailnetHost: *tailnet})
+		plist, e := deployment.RenderLaunchdPlist(deployment.LaunchdConfig{Home: home, BinaryPath: binary, DataRoot: *data, Port: *port, TailnetHost: *tailnet, DolgoraeExecutable: *executable, WorkspaceRoots: roots, Policies: policies})
 		if e != nil {
 			return e
 		}
@@ -85,7 +89,7 @@ func runCommand(ctx context.Context, args []string, openDesktop func(host.Attach
 		fmt.Fprintln(os.Stdout, "Gul local HTTPS owner verified; remote access not selected")
 		return nil
 	}
-	h := host.New(host.Config{DataDirectory: *data, Port: *port, TailnetHost: *tailnet, ServeInspector: host.TailscaleInspector{HostPort: *tailnet}})
+	h := host.New(host.Config{DataDirectory: *data, Port: *port, TailnetHost: *tailnet, DolgoraeExecutable: *executable, WorkspaceRoots: roots, Policies: policies, ServeInspector: host.TailscaleInspector{HostPort: *tailnet}})
 	e = h.Start(ctx)
 	owned := e == nil
 	if e != nil && (mode == "serve" || !errors.Is(e, host.ErrAlreadyRunning)) {
@@ -93,7 +97,7 @@ func runCommand(ctx context.Context, args []string, openDesktop func(host.Attach
 	}
 	if owned {
 		defer func() {
-			stop, c := context.WithTimeout(context.Background(), 5*time.Second)
+			stop, c := context.WithTimeout(context.Background(), 10*time.Second)
 			defer c()
 			result = errors.Join(result, h.Stop(stop))
 		}()
@@ -113,3 +117,8 @@ func runCommand(ctx context.Context, args []string, openDesktop func(host.Attach
 	// never receives lifecycle authority over the existing headless owner.
 	return openDesktop(view, cancel)
 }
+
+type repeatedStrings []string
+
+func (s *repeatedStrings) String() string         { return fmt.Sprint([]string(*s)) }
+func (s *repeatedStrings) Set(value string) error { *s = append(*s, value); return nil }

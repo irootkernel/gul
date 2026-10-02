@@ -16,6 +16,15 @@ path, without launching a provider.
 `node contract/scripts/test-release-policy.mjs`, also part of `make test-unit`,
 covers admission and release drift independently of a running provider.
 
+The E2-T1 published gateway and ordinary host checks use the same two artifact
+environment variables with
+`GOTOOLCHAIN=local go test -race -count=1 ./internal/gateway ./internal/host ./test/provider`.
+They cover collision refusal, private socket admission, crash re-handshake,
+changed-binary refusal, actual host profiles/diagnostics and transport-loss
+isolation. Their fixture bootstrap initializes only a temporary provider
+HOME/workspace. Production starts `serve` and uses generated public gRPC;
+it does not bootstrap a user's provider configuration.
+
 Supplemental source testing exports the exact v0.1.3 tag into a separate
 temporary tree and runs `rustup run 1.97.1 cargo build --locked --bin dolgorae`
 with an isolated HOME, Cargo home and target directory. The installed Rust

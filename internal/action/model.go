@@ -249,7 +249,7 @@ const (
 type Capabilities struct {
 	Checked                                                                                                  bool
 	Submit, Acquire, Release, Interrupt, Resolve, Recover, Reconcile, VerifyController, Pause, Resume, Close bool
-	ReaderWriter, DurableWriter, ThreadlessAcquire, FirstWriteViaSubmit                                      bool
+	ReaderWriter, DedicatedWriter, DurableWriter, ThreadlessAcquire, FirstWriteViaSubmit                     bool
 	Transition                                                                                               Support
 }
 type RunFacts struct {

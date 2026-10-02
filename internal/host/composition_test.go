@@ -1,22 +1,133 @@
 package host
 
 import (
+	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
+	contract "github.com/rootkernel/gul/contract"
+	"io"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"syscall"
 	"testing"
+	"time"
 
 	"connectrpc.com/connect"
 	"github.com/rootkernel/gul/api/generated/go/gul/v1"
 	"github.com/rootkernel/gul/api/generated/go/gul/v1/gulv1connect"
 	"github.com/rootkernel/gul/internal/delivery/api"
+	"github.com/rootkernel/gul/internal/gateway"
+	"github.com/rootkernel/gul/internal/storage"
 	"github.com/rootkernel/gul/internal/workspace"
+	"google.golang.org/protobuf/proto"
 )
 
 func TestOfflineCompositionThroughAuthenticatedTLSHost(t *testing.T) {
+	t.Run("missing", func(t *testing.T) { offlineHost(t, config(t), false) })
+	t.Run("incompatible", func(t *testing.T) {
+		c := config(t)
+		if err := os.WriteFile(c.DolgoraeExecutable, []byte("unqualified executable"), 0700); err != nil {
+			t.Fatal(err)
+		}
+		offlineHost(t, c, false)
+	})
+}
+
+func TestPublishedProductionHostChoicesAndTransportLoss(t *testing.T) {
+	binary := os.Getenv("GUL_E2_DOLGORAE_EXECUTABLE")
+	if binary == "" {
+		t.Skip("published artifact qualification is opt-in")
+	}
+	archive, err := os.ReadFile(os.Getenv("GUL_E2_DOLGORAE_ARCHIVE"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	digest := sha256.Sum256(archive)
+	if hex.EncodeToString(digest[:]) != contract.QualifiedRelease().Archive.SHA256 {
+		t.Fatal("published archive identity")
+	}
+	c := publishedHostConfig(t, binary)
+	offlineHost(t, c, true)
+}
+
+func publishedHostConfig(t *testing.T, binary string) Config {
+	t.Helper()
 	c := config(t)
+	c.DolgoraeExecutable = binary
+	fixtureRoot, err := os.MkdirTemp("/private/tmp", "gul-host-")
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { os.RemoveAll(fixtureRoot) })
+	c.ProviderHome = filepath.Join(fixtureRoot, "home")
+	work := filepath.Join(filepath.Dir(c.ProviderHome), "workspace")
+	for _, path := range []string{c.ProviderHome, work} {
+		if err = os.Mkdir(path, 0700); err != nil {
+			t.Fatal(err)
+		}
+	}
+	init := exec.CommandContext(t.Context(), binary, "init", work, "--non-git")
+	init.Env, init.Dir, init.Stdout, init.Stderr = []string{"HOME=" + c.ProviderHome, "PATH=/usr/bin:/bin", "TMPDIR=" + filepath.Dir(work)}, work, io.Discard, io.Discard
+	if err = init.Run(); err != nil {
+		t.Fatal("isolated fixture bootstrap", err)
+	}
+	c.WorkspaceRoots = []string{work}
+	return c
+}
+
+func TestPublishedProductionAssemblyPreservesLocalHostAfterHandshakeLoss(t *testing.T) {
+	binary := os.Getenv("GUL_E2_DOLGORAE_EXECUTABLE")
+	if binary == "" {
+		t.Skip("published artifact qualification is opt-in")
+	}
+	archive, err := os.ReadFile(os.Getenv("GUL_E2_DOLGORAE_ARCHIVE"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	digest := sha256.Sum256(archive)
+	if hex.EncodeToString(digest[:]) != contract.QualifiedRelease().Archive.SHA256 {
+		t.Fatal("published archive identity")
+	}
+	c := publishedHostConfig(t, binary)
+	// Exercise the production assembly boundary deterministically, after its
+	// accepted handshake but before construction, using the actual released child.
+	c.Assemble = func(store *storage.Store) (Assembly, error) {
+		g := gateway.New(gateway.Config{Executable: binary, Home: c.ProviderHome, WorkspaceRoots: c.WorkspaceRoots})
+		if err := g.Start(t.Context()); err != nil {
+			return Assembly{}, err
+		}
+		t.Cleanup(func() {
+			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			defer cancel()
+			if err := g.Stop(ctx); err != nil {
+				t.Error(err)
+			}
+		})
+		caps := g.NegotiatedCapabilities()
+		if caps == nil {
+			t.Fatal("missing accepted handshake", g.Status())
+		}
+		altered := g.NegotiatedCapabilities()
+		altered.DescriptorSha256 = "caller mutation"
+		if !proto.Equal(caps, g.NegotiatedCapabilities()) {
+			t.Fatal("shared mutable handshake")
+		}
+		if err := g.Stop(t.Context()); err != nil {
+			return Assembly{}, err
+		}
+		assembled, err := assembleGateway(store, c, g)
+		if err == nil && (assembled.Features == nil || g.Status().ChannelReady) {
+			t.Fatal("lost provider discarded production handlers or opened gate")
+		}
+		return assembled, err
+	}
+	offlineHost(t, c, false)
+}
+
+func offlineHost(t *testing.T, c Config, published bool) {
 	h := started(t, c)
 	httpClient := client(t, h)
 	authClient := gulv1connect.NewAuthServiceClient(httpClient, h.Origin())
@@ -52,6 +163,27 @@ func TestOfflineCompositionThroughAuthenticatedTLSHost(t *testing.T) {
 		headers.Header().Set("Cookie", cookie)
 	}
 
+	if published {
+		runtimeClient := gulv1connect.NewRuntimeServiceClient(httpClient, h.Origin())
+		profiles := connect.NewRequest(&gulv1.ListRuntimeProfilesRequest{})
+		withSession(profiles)
+		result, err := runtimeClient.ListRuntimeProfiles(t.Context(), profiles)
+		if err != nil || result == nil {
+			t.Fatal("ordinary production profiles", err, h.Core.ProviderStatus())
+		}
+		diagnostic := connect.NewRequest(&gulv1.GetSummaryRequest{})
+		withSession(diagnostic)
+		summary, err := gulv1connect.NewDiagnosticsServiceClient(httpClient, h.Origin()).GetSummary(t.Context(), diagnostic)
+		if err != nil || !summary.Msg.ProviderReady || summary.Msg.ProviderVersion != "0.1.3" || summary.Msg.ProviderProtocol != 1 || summary.Msg.ProviderCapabilities.ReaderWriterAccess || !summary.Msg.ProviderCapabilities.DedicatedWriterSupport {
+			t.Fatal("production diagnostics", summary, err)
+		}
+		// Stop only the host's owned provider; its authenticated local core remains.
+		stop, cancel := context.WithTimeout(t.Context(), 10*time.Second)
+		defer cancel()
+		if err = h.gateway.Stop(stop); err != nil {
+			t.Fatal(err)
+		}
+	}
 	workspaceClient := gulv1connect.NewWorkspacePresentationServiceClient(httpClient, h.Origin())
 	unauthenticated := connect.NewRequest(&gulv1.GetNavigationRequest{})
 	unauthenticated.Header().Set("Origin", h.Origin())
@@ -115,8 +247,8 @@ func TestOfflineCompositionThroughAuthenticatedTLSHost(t *testing.T) {
 	}
 	submit := connect.NewRequest(&gulv1.SubmitRequest{SessionId: "missing", AttemptId: "offline", Text: "must not dispatch", WriteIntent: gulv1.ActionWriteIntent_ACTION_WRITE_INTENT_READ})
 	withSession(submit)
-	if _, err := directClient.Submit(t.Context(), submit); connect.CodeOf(err) != connect.CodeUnavailable {
-		t.Fatalf("production Submit did not fail closed: %v", err)
+	if result, err := directClient.Submit(t.Context(), submit); connect.CodeOf(err) != connect.CodeUnavailable && (err != nil || result == nil || result.Msg.Outcome != gulv1.SubmitOutcome_SUBMIT_OUTCOME_REJECTED) {
+		t.Fatalf("production Submit did not fail closed: %v, %v", result, err)
 	}
 	actionClient := gulv1connect.NewWriterActionServiceClient(httpClient, h.Origin())
 	state := connect.NewRequest(&gulv1.GetActionStateRequest{SessionId: "missing", WriteIntent: gulv1.ActionWriteIntent_ACTION_WRITE_INTENT_READ, CloseIntent: gulv1.ActionCloseIntent_ACTION_CLOSE_INTENT_NONE})

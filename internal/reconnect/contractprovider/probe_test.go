@@ -35,14 +35,31 @@ func TestContractProbeRejectsProtocolAndMethodDrift(t *testing.T) {
 	if err := (ContractProbe{Port: provider}).Check(t.Context()); err != nil {
 		t.Fatal(err)
 	}
+	if err := (ContractProbe{Port: alteredRuntime{provider, func(c *publicv1.GetCapabilitiesResponse) {
+		c.Features.ReaderWriterAccess = false
+		c.Features.BrokeredIndependentSubagentRuns = false
+	}}}).Check(t.Context()); err != nil {
+		t.Fatal("broad optional flags became handshake gates", err)
+	}
 	for _, change := range []func(*publicv1.GetCapabilitiesResponse){
 		func(c *publicv1.GetCapabilitiesResponse) { c.Protocol.EventProtocolVersion++ },
+		func(c *publicv1.GetCapabilitiesResponse) { c.Protocol.ProjectionProfiles = nil },
+		func(c *publicv1.GetCapabilitiesResponse) {
+			c.Protocol.ProjectionProfiles = []publicv1.ProjectionProfile{publicv1.ProjectionProfile_PROJECTION_PROFILE_OPERATIONAL}
+		},
 		func(c *publicv1.GetCapabilitiesResponse) { c.DescriptorSha256 = "changed" },
 		func(c *publicv1.GetCapabilitiesResponse) { c.SupportedMethods = nil },
 		func(c *publicv1.GetCapabilitiesResponse) { c.Protocol.MaximumClientProtocolVersion = 0 },
 		func(c *publicv1.GetCapabilitiesResponse) { c.Features.PersistentRuns = false },
 		func(c *publicv1.GetCapabilitiesResponse) { c.Features.ArtifactRetrieval = false },
 		func(c *publicv1.GetCapabilitiesResponse) { c.ControllerCarrier = nil },
+		func(c *publicv1.GetCapabilitiesResponse) { c.ControllerCarrier.SchemaId = "wrong" },
+		func(c *publicv1.GetCapabilitiesResponse) { c.Lanes = nil },
+		func(c *publicv1.GetCapabilitiesResponse) {
+			c.Interactions.KnownKinds = c.Interactions.KnownKinds[:3]
+			c.Interactions.Items = c.Interactions.Items[:3]
+		},
+		func(c *publicv1.GetCapabilitiesResponse) { c.DolgoraeVersion = "0.1.4" },
 		func(c *publicv1.GetCapabilitiesResponse) { c.ControllerCarrier.SchemaSha256 = "changed" },
 		func(c *publicv1.GetCapabilitiesResponse) { c.Artifacts.DigestVerificationRequired = false },
 		func(c *publicv1.GetCapabilitiesResponse) { c.Artifacts.MaximumInlineResponseBytes = 0 },

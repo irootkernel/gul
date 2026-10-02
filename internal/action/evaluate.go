@@ -121,25 +121,25 @@ func Evaluate(in Input) Evaluation {
 	quiescent := !transitionBusy && (r.Server == ServerReady || r.Server == ServerAbsent) && !active && r.Pending == 0 && backgroundSafe && !w.BackgroundBlocked && !w.RecoveryBlocked
 	f.CanPausePrimary = c.Pause && quiescent && r.Lifecycle == Idle
 	f.CanResumePrimary = c.Resume && quiescent && r.Lifecycle == Paused
-	transition := c.Transition == Supported && p.Transition == Supported
+	transition := p.Transition == Supported
 	fixed := r.Thread == Present && !transition
-	writeFeatures := c.ReaderWriter && c.DurableWriter && r.Lane == Dedicated
+	writeFeatures := c.DedicatedWriter && c.DurableWriter && r.Lane == Dedicated
 	writerAvailable := w.Owner == NoOwner || w.Owner == ThisSession
 	initialPolicy := r.Thread == Missing && r.Access == UnknownAccess && r.Verification == Unverified && r.Authority == Unowned && w.Owner == NoOwner
+	verifiedWriter := w.Owner == ThisSession && w.Authority == Active && r.Authority == Active && r.Access == Write && w.Access == Write && w.Verification == Verified
 	if quiescent && r.Lifecycle == Idle {
-		f.CanSubmitRead = c.Submit && (initialPolicy || policyReady && (r.Access == Read || r.Access == Write && !fixed))
+		f.CanSubmitRead = c.Submit && (initialPolicy || policyReady && (r.Access == Read || verifiedWriter))
 		firstWrite := initialPolicy && c.FirstWriteViaSubmit && r.Variant == DedicatedUnstarted
-		verifiedWriter := w.Owner == ThisSession && w.Authority == Active && r.Authority == Active && r.Access == Write && w.Access == Write && w.Verification == Verified
 		f.CanSubmitWrite = c.Submit && writeFeatures && writerAvailable && (firstWrite || policyReady && verifiedWriter)
 	}
 	if quiescent && policyReady && (r.Lifecycle == Idle || r.Lifecycle == Paused) && writeFeatures {
-		f.CanAcquireWriter = c.Acquire && w.Owner == NoOwner && (r.Thread == Present && transition || r.Thread == Missing && c.ThreadlessAcquire)
-		f.CanReleaseWriter = c.Release && w.Owner == ThisSession && w.Authority == Active && r.Authority == Active && r.Verification == Verified && w.Verification == Verified && transition
+		f.CanAcquireWriter = c.Acquire && w.Owner == NoOwner && (r.Thread == Present && transition)
+		f.CanReleaseWriter = c.Release && w.Owner == ThisSession && w.Authority == Active && r.Authority == Active && r.Verification == Verified && w.Verification == Verified
 	}
 	if w.Owner == ExternalOwner && in.Request.Intent == IntentWrite {
 		out.Blocker = WriterBusy
 	}
-	if r.Lineage == ContinuationRequired || fixed && (in.Request.Intent == IntentWrite && r.Access != Write || in.Request.Intent == IntentRead && r.Access != Read) {
+	if r.Lineage == ContinuationRequired || fixed && in.Request.Intent == IntentWrite && r.Access != Write {
 		out.Blocker = UnsupportedTransition
 		f.CanSubmitRead = false
 		f.CanSubmitWrite = false

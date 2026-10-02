@@ -27,10 +27,16 @@ func TestRenderLaunchdPlist(t *testing.T) {
 		Home: home, BinaryPath: filepath.Join(home, "Gul & <app>", "gul"),
 		DataRoot: filepath.Join(home, "Library", "Application Support", "Gul"),
 		Port:     18423, TailnetHost: "node.ts.net:443",
+		DolgoraeExecutable: filepath.Join(home, "provider & executable"), WorkspaceRoots: []string{filepath.Join(home, "workspace & root")}, Policies: []string{"policy & name"},
 	}
 	plist, err := RenderLaunchdPlist(config)
 	if err != nil {
 		t.Fatal(err)
+	}
+	for _, value := range []string{"--dolgorae-executable", "--workspace-root", "--policy", "provider &amp; executable", "workspace &amp; root", "policy &amp; name"} {
+		if !strings.Contains(string(plist), value) {
+			t.Fatal("provider configuration lost or unescaped", value)
+		}
 	}
 	decoder := xml.NewDecoder(bytes.NewReader(plist))
 	var stringsFound []string

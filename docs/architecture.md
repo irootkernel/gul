@@ -168,6 +168,36 @@ On crash, restart delay is 1, 2, 4, 8, then 16 seconds with ±20 percent jitter 
 
 Shutdown stops accepting mutations, cancels Run streams, drains unary operations for at most five seconds, closes the channel, requests graceful termination of the owned RPC child, and uses the remainder of the 10-second total budget before terminating that exact PID. Dolgorae performs socket cleanup; Gul only verifies post-exit state and reports an unsafe or stale result without unlinking it.
 
+E2-T1 implements this lifecycle in `internal/gateway` and the ordinary
+`internal/host` assembly shared by desktop and `gul serve`. The host accepts
+`--dolgorae-executable`, repeated `--workspace-root` and repeated `--policy` as
+trusted startup inputs; launchd rendering preserves them. PATH discovery remains
+subject to the embedded published executable digest. The provider's preprovisioned
+home generation and Profiles must already exist; Gul does not initialize them.
+A missing or unqualified provider leaves authenticated local routes available.
+Once the gateway accepts a handshake, service construction uses an isolated copy
+of that contract without another network startup gate. Provider loss during
+construction keeps the local host running; live probes still close runtime gates.
+Transient restart transport or readiness failures continue the same bounded
+backoff sequence. Identity, socket, collision and semantic incompatibility
+failures stop automatic restart, as does exhaustion of the rolling start budget.
+
+The generated transport has four read workers, a maximum of 16 read starts per
+second, a 250ms per-key refresh floor and at most 256 concurrent read keys.
+Concurrent callers share a read and receive isolated protobuf copies; results
+are not cached. Reads have a five-second deadline. Eight mutation slots and
+eight logical stream slots are separate from the read workers. Unary operation
+deadlines remain those in §6.3. Each restart creates one shared channel for the
+new server instance and accepts no response from the preceding instance.
+Messages are bounded to 8 MiB; domain adapters apply smaller negotiated artifact,
+Interaction and projection bounds. Admission requires advertised `MINIMAL`
+event projection support before the observation adapter can select it.
+Unknown optional wire bytes are discarded
+and unknown typed enums reject the response. Mutation bodies cannot be replayed
+by the HTTP transport. Diagnostics expose bounded health, release/protocol,
+restart allowance, channel availability, unsafe post-exit socket cleanup and
+independent capability flags.
+
 ### 6.2 Compatibility and schema policy
 
 E2-T0 records the published v0.1.3 identity in `contract/dependency-lock.json`
@@ -177,9 +207,12 @@ schema's actual `$id`, version 1 and exact digest. The release retains
 `reader_writer_access=false`; dedicated first-write admission depends on lane
 writer support, `first_write_via_submit_turn`, durable writer authority and
 fresh typed state. Existing-reader acquisition requires verified Profile
-transition support; the global release summary is unverified. Neither a
-handshake nor a successful read proves a write action safe. Production use of
-this policy is E2-T1-owned and actual action qualification is E2-T3-owned.
+transition support; the global release summary is unverified. A verified held
+writer can submit READ and release authority without that transition claim.
+Neither a
+handshake nor a successful read proves a write action safe. E2-T1
+applies this policy in the production probe and action inputs. Actual action
+qualification is E2-T3-owned.
 
 The handshake selects an explicitly supported public API version and verifies the required Runtime, Run, Observation, Controller verification/interaction, Writer, Recovery where used, Artifact, Timeline, and OrchestrationObservation capabilities using the pinned consumer profile, not equality with the server's entire supported-method set. Generated decoders for that version are necessary but not sufficient evidence of semantic compatibility. Unknown required enum values, missing typed error details, and missing capabilities are blockers. Unknown optional data is retained only when the accepted version policy permits it; otherwise it is discarded at the adapter boundary and never persisted or forwarded.
 
@@ -192,7 +225,7 @@ E2-T0 release qualification (2026-10-02): the published v0.1.3 source is
 `07dc31331d03aae9ed7c0c862a0cbe8a5184024e`. The current dependency-lock SHA-256
 is `223d2a72d7bd281dba0abdc8b1e966d792492546c3be63a67e593c94eed0c05a` and generated-lock SHA-256 is
 `8d02e824c36795221ee6d1b3fc7e2b43943d13701aa76d019c3b6aea30b26a6d`. The earlier E12 pin remains historical evidence.
-Actual production assembly, credentials and session actions remain E2-T1/T2/T3.
+E2-T1 supplies production gateway/host assembly; credentials and actual session actions remain E2-T2/T3.
 
 ### 6.3 RPC use and mutation policy
 
@@ -1083,11 +1116,11 @@ The serial command facade is `toolchain-check`, `generate-contract`, `contract-c
 
 ## 19. Current snapshot
 
-**Snapshot date:** 2026-10-02 (E2-T0 released contract qualification)
+**Snapshot date:** 2026-10-02 (E2-T1 production gateway integration)
 
-**Roadmap point:** E0 is `Completed`, E12 is `Completed`, E1 is `Completed`, and E13 is `Completed`; E1-T1 is `Completed` and E1-T2/T3/T4/T5 are `Completed`. E3 and E3-T1/T2/T3/T4 are `Completed`. E4 and E4-T1/T2/T3/T5 are `Completed`. E4-T4 remains Deferred outside its epic. E5 and E5-T1/T2/T3 are `Completed`. E6 and E6-T1/T2/T3 are `Completed`. E7 and E7-T1/T2/T3 are `Completed`. E8 is `Completed`; E8-T1/T2/T3 are `Completed`. Former E12-T2/T3 remain Retired. E14-T1 and E14 are Completed for the assembled fake-provider scope. E2-T0 is Completed for released contract qualification; E2-T1/T2/T3 remain Planned. The assembled application has explicit fake-provider verification; live-provider qualification remains E2/E9-owned.
+**Roadmap point:** E0 is `Completed`, E12 is `Completed`, E1 is `Completed`, and E13 is `Completed`; E1-T1 is `Completed` and E1-T2/T3/T4/T5 are `Completed`. E3 and E3-T1/T2/T3/T4 are `Completed`. E4 and E4-T1/T2/T3/T5 are `Completed`. E4-T4 remains Deferred outside its epic. E5 and E5-T1/T2/T3 are `Completed`. E6 and E6-T1/T2/T3 are `Completed`. E7 and E7-T1/T2/T3 are `Completed`. E8 is `Completed`; E8-T1/T2/T3 are `Completed`. Former E12-T2/T3 remain Retired. E14-T1 and E14 are Completed for the assembled fake-provider scope. E2-T0 is Completed for released contract qualification; E2-T1 is Completed; E2-T2/T3 remain Planned. The assembled application has explicit fake-provider verification; live-provider qualification remains E2/E9-owned.
 
-**Maturity:** delivery-independent Go core, shared React bundle, authenticated Gul API mounted by the E8-T3 host, typed provider ports and explicit scenario harness, host-opened Gul SQLite repositories with fake-scoped runtime attachment, local presentation and passive session reads, and a Wails shell foundation. E4 adds typed observation, Interaction cards, action eligibility and bounded history/result/artifact reads. E5 adds whole-session close, reconnect convergence and operation-specific recovery against fakes. E6 adds verified-root local FileService inspection, bounded previews, refresh, watcher and Git review through component-tested typed APIs mounted by E8-T3. E7-T1 adds three responsive panes, workspace/session navigation and read-only FileService presentation through injected typed clients. E7-T2 adds provider-projected activity, prioritized Interaction cards, conversation and accepted-user Prompt History, and guarded whole-session close to that injected-client view. E7-T3 adds composition-safe input and keyboard focus behavior to the same component scope. E8-T1 adds isolated local account setup, bounded password hashing and the injected first-run form. E8-T2 adds protected session routes and the checked auth entry within isolated delivery scope. E8-T3 accepts the shared authenticated host, verified native attachment, isolated deployment fixtures and installed PWA delivery. E14-T1 adds checked adapter assembly and real authenticated browser/native acceptance with explicit fakes. Live-provider qualification remains pending.
+**Maturity:** delivery-independent Go core, shared React bundle, authenticated Gul API mounted by the E8-T3 host, typed provider ports and explicit scenario harness, host-opened Gul SQLite repositories with fake-scoped runtime attachment, local presentation and passive session reads, and a Wails shell foundation. E4 adds typed observation, Interaction cards, action eligibility and bounded history/result/artifact reads. E5 adds whole-session close, reconnect convergence and operation-specific recovery against fakes. E6 adds verified-root local FileService inspection, bounded previews, refresh, watcher and Git review through component-tested typed APIs mounted by E8-T3. E7-T1 adds three responsive panes, workspace/session navigation and read-only FileService presentation through injected typed clients. E7-T2 adds provider-projected activity, prioritized Interaction cards, conversation and accepted-user Prompt History, and guarded whole-session close to that injected-client view. E7-T3 adds composition-safe input and keyboard focus behavior to the same component scope. E8-T1 adds isolated local account setup, bounded password hashing and the injected first-run form. E8-T2 adds protected session routes and the checked auth entry within isolated delivery scope. E8-T3 accepts the shared authenticated host, verified native attachment, isolated deployment fixtures and installed PWA delivery. E14-T1 adds checked adapter assembly and real authenticated browser/native acceptance with explicit fakes. Published gateway/ordinary-host transport qualification is supplied by E2-T1; actual session and device qualification remain E2-T2/T3/E9-owned.
 
 ### 19.1 Implemented components
 

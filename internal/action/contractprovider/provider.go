@@ -41,8 +41,14 @@ func New(port Port, caps *publicv1.GetCapabilitiesResponse) (*Provider, error) {
 		}
 		methods[method] = true
 	}
+	var dedicatedWriter bool
+	for _, lane := range caps.GetLanes().GetItems() {
+		if lane.GetLane() == publicv1.ExecutionLane_EXECUTION_LANE_DEDICATED {
+			dedicatedWriter = lane.GetWriterSupport()
+		}
+	}
 	f := caps.Features
-	c := action.Capabilities{Checked: f.PersistentRuns && f.ControllerBinding && f.SafeClientProjection && f.ControlModes, Submit: methods["RunService.SubmitTurn"] && f.PersistentRuns, Acquire: methods["WriterService.AcquireWriter"], Release: methods["WriterService.ReleaseWriter"], Interrupt: methods["RunService.InterruptTurn"], Resolve: methods["InteractionService.ResolveInteraction"], Recover: methods["RunService.RecoverRun"], Reconcile: methods["RunService.ReconcileRun"], VerifyController: methods["ControllerService.VerifyController"], Pause: methods["RunService.PauseRun"], Resume: methods["RunService.ResumeRun"], Close: methods["RunService.CloseRun"], ReaderWriter: f.ReaderWriterAccess, DurableWriter: f.DurableWriterAuthority, ThreadlessAcquire: f.ThreadlessAcquireWrite, FirstWriteViaSubmit: f.FirstWriteViaSubmitTurn, Transition: action.Support(caps.AccessPolicyTransition)}
+	c := action.Capabilities{Checked: f.PersistentRuns && f.ControllerBinding && f.SafeClientProjection && f.ControlModes, Submit: methods["RunService.SubmitTurn"] && f.PersistentRuns, Acquire: methods["WriterService.AcquireWriter"], Release: methods["WriterService.ReleaseWriter"], Interrupt: methods["RunService.InterruptTurn"], Resolve: methods["InteractionService.ResolveInteraction"], Recover: methods["RunService.RecoverRun"], Reconcile: methods["RunService.ReconcileRun"], VerifyController: methods["ControllerService.VerifyController"], Pause: methods["RunService.PauseRun"], Resume: methods["RunService.ResumeRun"], Close: methods["RunService.CloseRun"], ReaderWriter: f.ReaderWriterAccess, DedicatedWriter: dedicatedWriter, DurableWriter: f.DurableWriterAuthority, ThreadlessAcquire: f.ThreadlessAcquireWrite, FirstWriteViaSubmit: f.FirstWriteViaSubmitTurn, Transition: action.Support(caps.AccessPolicyTransition)}
 	return &Provider{port: port, capabilities: c, timelineVersion: caps.Protocol.TimelineProtocolVersion}, nil
 }
 func ref(b action.Bound) *publicv1.RunRef {

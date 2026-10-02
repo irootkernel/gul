@@ -81,6 +81,19 @@ func New(ctx context.Context, store *storage.Store, c Config) (*Runtime, error) 
 	if err != nil {
 		return nil, err
 	}
+	return NewQualified(store, c, caps)
+}
+
+// NewQualified assembles services from an accepted handshake without another
+// network startup gate. Live probes continue to guard runtime operations.
+func NewQualified(store *storage.Store, c Config, caps *publicv1.GetCapabilitiesResponse) (*Runtime, error) {
+	if store == nil || c.Port == nil || c.Carriers == nil {
+		return nil, reconnect.ErrUnavailable
+	}
+	if err := reconnectprovider.ValidateCapabilities(caps); err != nil {
+		return nil, err
+	}
+	probe := reconnectprovider.ContractProbe{Port: c.Port}
 	raw, err := actionprovider.New(c.Port, caps)
 	if err != nil {
 		return nil, err
