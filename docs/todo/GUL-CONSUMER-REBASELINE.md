@@ -7,7 +7,7 @@
 | Consumer contract | `dolgorae.gul-consumer/v1` |
 | Producer source | Dolgorae `docs/specs/gul-consumer-v1.md` |
 | Target provider | Exact released Dolgorae v0.1.3 artifact |
-| Updated | 2026-09-29 |
+| Updated | 2026-10-02 |
 
 ## 1. Scope
 
@@ -201,6 +201,15 @@ adapter, credentials, process supervision, UDS ownership, compatibility
 handshake, and native bindings. E9 runs actual-provider fault, security, browser,
 restart, artifact, history, result, and close scenarios. A floating worktree or
 provider-side test campaign cannot substitute for this evidence.
+
+The [E2 acceptance details](../roadmap.md#e2-t0-qualify-the-release-and-resolve-consumer-drift)
+own the release-drift inventory, credential schema ID, capability admission
+matrix, ordinary production-host wiring and real read/write acceptance. Keep
+`reader_writer_access` output separate from execution-lane and write-intent
+inputs. E2 must resolve their contract relationship without fabricating feature
+support. A source-tag smoke test diagnoses this boundary but neither satisfies
+the published-artifact gate nor promotes live-provider acceptance. Preserve the
+existing E2 Task identities and E9 qualification responsibilities.
 
 ## 9. Deferred Podway observation
 

@@ -2174,3 +2174,25 @@ consumer dossier remains for E2/E9; E14's roadmap link now points to its
 canonical outcomes. Live transport, credentials, session creation, image/effort
 handoff, supported devices and deployment remain unqualified by this fake
 acceptance. No installation or upstream publication is implied.
+
+### E2 integration plan amendment (2026-10-02)
+
+The approved E2 plan retains E2-T0 through E2-T3, their predecessors and
+Post-release phase. E2-T0 covers published-artifact qualification, release
+contract drift and an operation-specific capability admission matrix. E2-T1
+implements that matrix in the real generated gRPC adapter and ordinary host
+startup. E2-T2 supplies actual protected credential creation and verification;
+E2-T3 proves authenticated session creation, sequential read/write, approval,
+history, artifacts and whole-session close through Gul.
+
+Acceptance now explicitly compares the credential schema ID with the pinned
+schema's `$id` and distinguishes `reader_writer_access` output from lane and
+write-intent inputs. These checks must resolve provider support without changing
+advertised values. Source-tag diagnostics cannot satisfy the published-artifact
+gate, and a successful handshake/read cannot establish write acceptance.
+E9 retains fault, security, supported-device and deployment qualification.
+Existing architecture decisions apply. All E2 Tasks remain Planned, no Task is
+active, and implemented Current State is unchanged. This amendment authorizes
+planning only; it does not qualify a provider, install a binary or implement a
+Task. The shared consumer dossier continues to link to the roadmap's acceptance
+details.

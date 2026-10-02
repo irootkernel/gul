@@ -3,7 +3,7 @@
 | Field | Value |
 | --- | --- |
 | Role | Sole authority for task identity, order, status, dependencies, and phase |
-| Revision | 2026-10-01 E14 assembled acceptance closeout |
+| Revision | 2026-10-02 E2 released-provider integration plan |
 | Active Task | None |
 | Next | E2-T0 (after Provider released) |
 | Required provider | Released Dolgorae v0.1.3 implementing `dolgorae.gul-consumer/v1` |
@@ -307,13 +307,17 @@ Entry: E14 Completed and Provider released. Completion: released executable
 qualification, real gateway/UDS/carriers, and the full actual-provider vertical
 slice. This includes production headless assembly using the already completed
 core, authentication, files and UI; it does not rebuild those Epics.
+The accepted plan covers release contract drift and capability admission,
+production wiring, and actual read/write behavior. A source-tag test build may
+help diagnose these boundaries, but cannot satisfy the published-artifact gate
+or complete a Task. E2 remains Planned until its entry evidence is verified.
 
 | Task | Phase | Status | Predecessors | Owned result and verification |
 | --- | --- | --- | --- | --- |
-| E2-T0 | Post-release | Planned | E14-T1; Provider released | Pin and qualify exact released executable/contract/capabilities; no silent installation or replaced production binary |
-| E2-T1 | Post-release | Planned | E2-T0, E1-T3 | Real gateway supervision, private UDS ownership, shared channel, handshake and process isolation |
-| E2-T2 | Post-release | Planned | E2-T1, E1-T4 | Actual exclusive carriers under advertised fixed-home root, adoption and authorization, no Operator or child credential |
-| E2-T3 | Post-release | Planned | E2-T2, E3-T4, E4-T5, E8-T3, E14-T1 | Actual session start, sequential read/write submit with guarded image handoff, approval, timeline/history, public session/results and aggregate close vertical slice through the authenticated headless core/browser |
+| E2-T0 | Post-release | Planned | E14-T1; Provider released | Pin the published v0.1.3 artifact and matching immutable consumer inputs; regenerate release drift and document schema/capability admission; no silent installation or replaced production binary |
+| E2-T1 | Post-release | Planned | E2-T0, E1-T3 | Real gateway supervision, private UDS, shared generated gRPC transport, negotiated request contexts and contract checks; wire the accepted runtime into production host startup and diagnostics |
+| E2-T2 | Post-release | Planned | E2-T1, E1-T4 | Actual exclusive carriers under the advertised fixed-home root, exact credential schema, verification, adoption and authorization; no Operator or child credential |
+| E2-T3 | Post-release | Planned | E2-T2, E3-T4, E4-T5, E8-T3, E14-T1 | Authenticated production-host session creation and sequential read/write, guarded image handoff, approval, complete history/results/artifacts and aggregate close; unsupported and ambiguous operations remain blocked |
 
 ### E9: Qualify actual Gul and the first release
 
@@ -382,16 +386,100 @@ account/session protection on every assembled API and verify test-only injection
 is absent from production fallback. Inventory remaining live boundaries for
 E2/E9 and do not label them passed by inference.
 
-### E2/E9: Qualify the released provider, not a development substitute
+### E2-T0: Qualify the release and resolve consumer drift
 
-Build the actual adapter only after release pinning. Reuse the existing domain
-ports, action evaluator, and presentation. Run the same consumer scenarios with
-real UDS/gateway/credential semantics and isolated permitted upstream fakes;
-actual live Codex scenarios need separate explicit authorization and must be
-reported distinctly. Test large user-input and Specialist artifacts discovered
-through public methods, multi-page history, gateway/Worker/Gul/browser restart,
-and aggregate-close races. These tasks establish actual Gul compatibility;
-producer tests alone cannot complete them.
+Verify the exact published Dolgorae v0.1.3 artifact, its immutable source and
+consumer lock, binary digest, version and runtime capabilities. Keep installed,
+source-built and published identities separate. Reconcile the TASK-053 pin with
+the release's proto, descriptor metadata, credential schema, feature profile,
+error/action mapping, mutation policy and verification inventory. Include the
+release's `RunService.SubmitTurn` mapping for `SESSION_CLOSE_IN_PROGRESS`.
+Change contract authorities and regenerate through `make generate-contract`;
+require `make contract-check` reproducibility and the existing consumer checks.
+Historical E12 completion remains intact.
+
+Record an admission matrix for transport compatibility and each runtime action,
+with support established by the release contract. Compare the credential
+`schema_id` with the pinned schema's
+actual `$id`, including `https://dolgorae.local/schema/controller-credential/v1`,
+and require its exact version and digest. Distinguish the output capability
+`reader_writer_access` from the inputs `StartRun.execution_lane` and
+`SubmitTurn.write_intent`. Resolve its relationship to lane writer support,
+`first_write_via_submit_turn`, durable writer authority and typed Run/Profile
+state before changing the probe or evaluator. Never replace an advertised false
+value with true or infer write support from a successful handshake/read. If the
+release contract cannot justify a required operation, report the provider
+blocker and leave acceptance incomplete. Qualification must identify both
+supported behavior and the expected refusal for unsupported behavior.
+
+### E2-T1: Connect the production host to the real gateway
+
+Implement the generated public local-gRPC adapter behind the existing typed
+ports, with no Machine CLI fallback. Supply protocol-zero negotiation and a
+fresh request UUID with the negotiated protocol for later calls. Apply E2-T0's
+admission matrix to the compatibility probe and action inputs; test the actual
+release response and altered required fields independently. Map typed errors,
+including the release-specific Submit close outcome, without parsing prose.
+
+Supervise the exact qualified executable and one shared channel within the
+existing startup, shutdown, read-budget and restart bounds. Validate private
+socket parents; only Dolgorae binds, chmods and unlinks its socket. Verify startup
+readiness, ownership, collision refusal, cancellation and gateway restart.
+Wire this adapter and lifecycle into ordinary headless/native host startup,
+runtime choices and diagnostics. A configured qualified provider must reach the
+completed feature handlers without a test-only `Config.Assemble` injection.
+Missing or incompatible providers leave safe authenticated local presentation
+and files available while runtime mutations remain blocked. Test missing,
+replaced and incompatible executables and transport loss through that host.
+
+### E2-T2: Use real protected Controller carriers
+
+Create credentials locally through `DolgoraeControllerCredentialStore` under
+the advertised fixed-home root, using the pinned schema and logical SQLite
+references. Verify exclusive creation, UUID/generation/principal provenance,
+owner-only modes, durability and buffer handling. Resolve and revalidate the
+carrier immediately before each protected RPC, then use public
+`VerifyController` and fresh projections for adoption. Test replacement,
+traversal, symlinks, wrong owner/mode/generation and foreign Controller refusal
+against actual carrier semantics. No credential bytes or carrier paths reach
+the browser, ordinary SQLite or logs; Gul owns neither an Operator capability
+nor a Specialist Controller.
+
+### E2-T3: Prove the actual-provider session through Gul
+
+Use the ordinary authenticated host and checked browser bundle with a
+preinitialized workspace, preprovisioned Profile/Policy and qualified provider.
+Create a parentless Primary with explicit orchestration launch intent and its
+root Controller; require the public Orchestrated Session aggregate. Reuse the
+completed domain services and action evaluator. Verify sequential READ on an
+admitted lane and the first WRITE on a threadless dedicated Run through
+`SubmitTurn(write_intent=WRITE)`, without a preceding Acquire. Check the actual
+writer projection, resulting workspace change, later READ/WRITE eligibility,
+shared-readonly WRITE refusal and competing-writer refusal. A passed read or
+capability probe does not complete write acceptance.
+
+Cover guarded image submission, an Interaction reply while the Primary waits,
+busy input retained as a draft or rejected without automatic sending, exact
+accepted Prompt History across pages and restart, public Specialist results and
+digest/length-verified large artifacts. Close through root `CloseRun` and retain
+pending/unknown state until the aggregate confirms settlement; preserve history
+and unrelated sessions. Test exact StartRun reconciliation and uncertain Submit
+without duplicate allocation or blind replay. Require browser-visible behavior
+and provider-authoritative outcomes through the assembled Gul application;
+direct generated-client calls alone cannot complete acceptance.
+
+Run isolated permitted upstream fakes through the actual Dolgorae executable
+and real UDS/carriers, and label that provenance. Live Codex execution requires
+separate explicit authorization and distinct evidence; any unverified live
+requirement remains open. Required session behavior cannot be deferred to E9.
+
+### E9: Qualify faults, security and deployment after E2
+
+E9 retains the broader gateway/Worker/Gul/browser restart and mutation-loss
+campaign, bounded streams/artifacts/history, aggregate-close races, credential
+and secret canaries, supported devices and deployed headless/native behavior.
+Use E2's qualified artifact and production assembly. Neither a producer-only
+campaign nor source-build diagnostics completes actual Gul release acceptance.
 
 ## 6. Historical evidence and Task migration
 
