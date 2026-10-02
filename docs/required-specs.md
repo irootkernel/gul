@@ -7,8 +7,8 @@
 | Product | Gul (굴) |
 | Subtitle | Remote operator interface for local development runtimes |
 | Version | 0.1-dolgorae-consumer-v1 |
-| Status | Approved Required State; E1-T1 through E1-T5 foundations completed without assembled product acceptance |
-| Last updated | 2026-10-01 |
+| Status | Approved Required State; E1-T1 through E1-T5 foundations and E14-T1 assembled fake-provider acceptance completed; live-provider qualification remains E2/E9-owned |
+| Last updated | 2026-10-02 |
 | Target | macOS host; modern desktop, iPad, and iPhone browsers |
 
 ## 1. Purpose, authority, and lifecycle
@@ -404,7 +404,7 @@ scope. E2/E9 still own actual-provider proof.
 
 | ID | Requirement | Acceptance | Owner |
 |---|---|---|---|
-| REQ-API-001 | Application services MUST be declared in Protobuf and implemented with ConnectRPC. | Auth, Runtime, WorkspacePresentation, DirectSession, InteractionPresentation, WriterAction, File, ClientEvent, and Diagnostics clients are generated and versioned. E1-T3 proves the declarations and transport contracts; E14 verifies first-release service wiring across completed features with fake-provider diagnostics, while E9-T2 owns actual-provider diagnostic/security qualification. | E14-T1 |
+| REQ-API-001 | Application services MUST be declared in Protobuf and implemented with ConnectRPC. | Auth, Runtime, WorkspacePresentation, DirectSession, ArtifactPresentation, InteractionPresentation, WriterAction, File, ClientEvent, and Diagnostics clients are generated and versioned. E1-T3 proves the declarations and transport contracts; E14 verifies first-release service wiring across completed features with fake-provider diagnostics, while E9-T2 owns actual-provider diagnostic/security qualification. | E14-T1 |
 | REQ-API-002 | Retryable state-changing operations MUST use unary RPCs with typed provider-aware concurrency semantics. | Browser retry fault tests prove no duplicate provider effect using the E1-T3 contract and completed attempt/replay implementation; actual-provider proof remains E2/E9. | E5-T3 |
 | REQ-API-003 | Client updates MUST use server-streaming RPCs with a Gul delivery sequence distinct from upstream cursors. | Replay and snapshot fallback converge in order. | E4-T1 |
 | REQ-API-004 | Unknown, expired, stale, unauthorized, conflict, unavailable, and recovery-required conditions MUST have stable Gul error codes. | Clients never parse human text or raw provider errors. | E1-T3 |

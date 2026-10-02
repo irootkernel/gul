@@ -2167,7 +2167,7 @@ history, approval, results, close, files and recovery behavior. The committed
 implementation and its actual scoped checks support the whole-Epic acceptance;
 released-provider qualification remains E2/E9-owned. Independent regression
 coverage and diagnostic wording follow-ups are owned by E14-FB-001 through
-E14-FB-006 in `deferred-feedback.md`, with explicit re-entry conditions.
+E14-FB-015 in `deferred-feedback.md`, with explicit re-entry conditions.
 
 No Task is active. E2-T0 is next after the Provider released gate. The shared
 consumer dossier remains for E2/E9; E14's roadmap link now points to its
