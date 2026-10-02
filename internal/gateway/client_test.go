@@ -139,6 +139,44 @@ func transportFixture(t *testing.T) (*Gateway, *testRuntime, *testRun) {
 	return g, r, run
 }
 
+func TestCarrierValidationRunsAfterCapacityAndBeforeEveryProtectedCall(t *testing.T) {
+	g, _, run := transportFixture(t)
+	c := g.channel
+	var allowed atomic.Bool
+	allowed.Store(true)
+	var validations atomic.Int32
+	c.validateCarrier = func(context.Context, string, *publicv1.ControllerCarrierRef, *publicv1.StartRunRequest) error {
+		validations.Add(1)
+		if !allowed.Load() {
+			return connect.NewError(connect.CodeUnauthenticated, errors.New("controller carrier unavailable"))
+		}
+		return nil
+	}
+	request := &publicv1.SubmitTurnRequest{Controller: &publicv1.ControllerCarrierRef{ExpectedControllerId: "controller", ExpectedControllerGeneration: 1}}
+	for i := 0; i < 2; i++ {
+		_, _ = g.SubmitTurn(t.Context(), request)
+	}
+	if validations.Load() != 2 || run.calls.Load() != 2 {
+		t.Fatal("protected calls reused validation")
+	}
+	for i := 0; i < cap(c.mutations); i++ {
+		c.mutations <- struct{}{}
+	}
+	result := make(chan error, 1)
+	go func() { _, err := g.SubmitTurn(t.Context(), request); result <- err }()
+	allowed.Store(false) // The credential became unsafe while capacity was unavailable.
+	<-c.mutations
+	if err := <-result; connect.CodeOf(err) != connect.CodeUnauthenticated || run.calls.Load() != 2 || validations.Load() != 3 {
+		t.Fatal("queued request used an earlier credential check", err)
+	}
+	for len(c.mutations) > 0 {
+		<-c.mutations
+	}
+	if _, err := g.SubmitTurn(t.Context(), &publicv1.SubmitTurnRequest{}); connect.CodeOf(err) != connect.CodeUnauthenticated || run.calls.Load() != 2 {
+		t.Fatal("missing carrier reached provider", err)
+	}
+}
+
 func TestUnreadStreamsRespectLimitAndDoNotDelayUnaryMutation(t *testing.T) {
 	g, _, run := transportFixture(t)
 	var streams []port.EventStream

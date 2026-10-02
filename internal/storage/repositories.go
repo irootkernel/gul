@@ -143,7 +143,7 @@ func (r PresentationRepository) PutBinding(ctx context.Context, binding BindingR
 		return errors.New("invalid controller binding reference")
 	}
 	result, err := r.store.writer.ExecContext(ctx, `INSERT INTO controller_binding_references(binding_id, subject_id, credential_key, expected_controller_id, health)
-VALUES (?, ?, ?, ?, ?) ON CONFLICT(binding_id) DO UPDATE SET credential_key = excluded.credential_key, expected_controller_id = excluded.expected_controller_id, health = excluded.health WHERE subject_id = excluded.subject_id`,
+VALUES (?, ?, ?, ?, ?) ON CONFLICT(binding_id) DO UPDATE SET credential_key = excluded.credential_key, expected_controller_id = excluded.expected_controller_id, health = excluded.health WHERE subject_id = excluded.subject_id AND (NOT EXISTS(SELECT 1 FROM controller_credential_metadata m WHERE m.binding_id=excluded.binding_id) OR (credential_key=excluded.credential_key AND expected_controller_id=excluded.expected_controller_id))`,
 		binding.BindingID, binding.SubjectID, binding.CredentialKey, binding.ExpectedControllerID, binding.Health)
 	if err != nil {
 		return err

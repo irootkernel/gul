@@ -22,9 +22,11 @@ import (
 
 	"github.com/rootkernel/gul/internal/app"
 	"github.com/rootkernel/gul/internal/auth"
+	"github.com/rootkernel/gul/internal/composition"
 	"github.com/rootkernel/gul/internal/delivery/api"
 	"github.com/rootkernel/gul/internal/delivery/web"
 	"github.com/rootkernel/gul/internal/gateway"
+	"github.com/rootkernel/gul/internal/session"
 	"github.com/rootkernel/gul/internal/storage"
 	"golang.org/x/sys/unix"
 )
@@ -39,6 +41,7 @@ const DefaultPort = 17423
 // Assembly binds explicit application services to the host-owned store and lifetime.
 type Assembly struct {
 	gateway   *gateway.Gateway
+	runtime   *composition.Runtime
 	Provider  app.ProviderPort
 	Lifecycle app.LifecyclePort
 	Features  func(*app.Core) api.FeatureHandlers
@@ -78,6 +81,7 @@ type Host struct {
 	store     *storage.Store
 	Core      *app.Core
 	gateway   *gateway.Gateway
+	runtime   *composition.Runtime
 	Boundary  *api.BrowserBoundary
 	listener  net.Listener
 	server    *http.Server
@@ -207,6 +211,7 @@ func (h *Host) Start(ctx context.Context) (err error) {
 		provider, lifecycle = assembled.Provider, assembled.Lifecycle
 	}
 	h.gateway = assembled.gateway
+	h.runtime = assembled.runtime
 	h.Core = app.NewCore(app.Dependencies{Authorization: h.Boundary, Persistence: h.store, Provider: provider, Lifecycle: lifecycle})
 	if e = h.Core.Start(ctx); e != nil {
 		return e
@@ -353,7 +358,26 @@ func (h *Host) Stop(ctx context.Context) error {
 	h.server = nil
 	h.lock = nil
 	h.store = nil
+	h.runtime = nil
 	return err
+}
+
+// AdoptController accepts only a protected logical key from trusted local host
+// selection. The configured account supplies the principal, not a browser field.
+func (h *Host) AdoptController(ctx context.Context, sessionID, key string) error {
+	h.operation.Lock()
+	defer h.operation.Unlock()
+	h.mu.Lock()
+	r, store := h.runtime, h.store
+	h.mu.Unlock()
+	if r == nil || store == nil {
+		return session.ErrCarrierUnavailable
+	}
+	subject, err := store.Presentation().AccountSubject(ctx)
+	if err != nil {
+		return session.ErrCarrierUnavailable
+	}
+	return r.AdoptController(ctx, subject, sessionID, key)
 }
 
 // Attachment owns no core lifecycle. Closing a desktop window attached to a

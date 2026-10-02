@@ -225,7 +225,8 @@ E2-T0 release qualification (2026-10-02): the published v0.1.3 source is
 `07dc31331d03aae9ed7c0c862a0cbe8a5184024e`. The current dependency-lock SHA-256
 is `223d2a72d7bd281dba0abdc8b1e966d792492546c3be63a67e593c94eed0c05a` and generated-lock SHA-256 is
 `8d02e824c36795221ee6d1b3fc7e2b43943d13701aa76d019c3b6aea30b26a6d`. The earlier E12 pin remains historical evidence.
-E2-T1 supplies production gateway/host assembly; credentials and actual session actions remain E2-T2/T3.
+E2-T1 supplies production gateway/host assembly. E2-T2 implements protected
+carriers and verified adoption; actual session actions remain E2-T3-owned.
 
 ### 6.3 RPC use and mutation policy
 
@@ -453,6 +454,33 @@ Secret capability bytes reside in create-exclusive files below the capability-ad
 `Create` writes credential schema version 1 with a UUIDv7 `controller_id`, `kind=interactive_client`, stable trusted-local `instance_id` and `subject_id`, 32 crypto-random bytes encoded as unpadded base64url, and explicit orchestration_launch with the selected preprovisioned Policy name. It validates the actual advertised schema digest and the `~/.dolgorae/controller-carriers/gul/<installation-id>/` root policy. Creation is exclusive with no overwrite, fsyncs the file and parent, and clears capability buffers where practical. Installation and account identifiers originate in trusted local setup, never a browser field. Gul supplies the validated carrier to StartRun and Dolgorae verifies it before binding. Same-principal successor creation is deferred with E4-T4 and REQ-CTRL-013; it is not a first-release credential-store operation. Neither bytes nor path enter gRPC metadata or ConnectRPC. One distinct credential per Direct Session/Run is Gul policy, not a universal Dolgorae invariant.
 
 Controller adoption is a Gul application workflow, not a credential-store capability. A host-controlled selector supplies a protected carrier reference; the application calls the store's existing validation/resolution operations, invokes side-effect-free provider `VerifyController` against the session's `runtime_run_id`, atomically replaces the binding, and refreshes the Run including its RecoveryProjection, Writer status, pending Interactions, and timeline as needed. It never accepts capability bytes or an arbitrary absolute path through a browser/API message.
+
+E2-T2 implements this boundary in `internal/controller`,
+`internal/storage/controller.go` and `internal/composition/controller.go`.
+The accepted carrier locator is `home/.dolgorae/controller-carriers` with
+`<client>/<installation-id>/` descendants; Gul derives its fixed `gul` subtree.
+Directory descriptors reject symlinks. Directory identity comparisons keep
+Workspace aliases, including macOS case aliases, outside the store; registered
+file identity prevents silent retargeting. The 4096-byte limit follows the released capability.
+Generation is public binding metadata and stays outside the credential JSON.
+The gateway validates each carrier after acquiring transport capacity and
+before invoking the generated client. The first StartRun pins its workspace and idempotency key; only that allocation
+can retry with the same credential. Durable allocation attempts and binding
+transactions exclude unused-carrier removal. Removal moves an entry to a
+private temporary name and verifies its pinned identity before unlinking.
+
+`Host.AdoptController` derives the account subject locally and accepts a logical
+filename under that protected root. It exposes no browser route. The application
+compares the public Run/Controller principal, invokes `VerifyController`,
+revalidates the selected file and atomically replaces the exact prior binding.
+The readiness gate closes before replacement. Fresh Run/configuration/recovery,
+Writer, pending and Controller Interaction, timeline and artifact reads follow;
+the common aggregate refresher reads each pending Controller Interaction Card
+before completing Interaction freshness, including after reconnect or restart.
+The reconnect loop restores readiness only after full convergence. An ambiguous
+verification or refresh leaves mutations blocked. Protected files are never
+reset or rotated by Gul. E2-T2 is complete for this carrier/adoption scope.
+
 
 ### 7.6 RuntimeProjection
 
@@ -1116,11 +1144,11 @@ The serial command facade is `toolchain-check`, `generate-contract`, `contract-c
 
 ## 19. Current snapshot
 
-**Snapshot date:** 2026-10-02 (E2-T1 production gateway integration)
+**Snapshot date:** 2026-10-02 (E2-T2 protected Controller carriers)
 
-**Roadmap point:** E0 is `Completed`, E12 is `Completed`, E1 is `Completed`, and E13 is `Completed`; E1-T1 is `Completed` and E1-T2/T3/T4/T5 are `Completed`. E3 and E3-T1/T2/T3/T4 are `Completed`. E4 and E4-T1/T2/T3/T5 are `Completed`. E4-T4 remains Deferred outside its epic. E5 and E5-T1/T2/T3 are `Completed`. E6 and E6-T1/T2/T3 are `Completed`. E7 and E7-T1/T2/T3 are `Completed`. E8 is `Completed`; E8-T1/T2/T3 are `Completed`. Former E12-T2/T3 remain Retired. E14-T1 and E14 are Completed for the assembled fake-provider scope. E2-T0 is Completed for released contract qualification; E2-T1 is Completed; E2-T2/T3 remain Planned. The assembled application has explicit fake-provider verification; live-provider qualification remains E2/E9-owned.
+**Roadmap point:** E0 is `Completed`, E12 is `Completed`, E1 is `Completed`, and E13 is `Completed`; E1-T1 is `Completed` and E1-T2/T3/T4/T5 are `Completed`. E3 and E3-T1/T2/T3/T4 are `Completed`. E4 and E4-T1/T2/T3/T5 are `Completed`. E4-T4 remains Deferred outside its epic. E5 and E5-T1/T2/T3 are `Completed`. E6 and E6-T1/T2/T3 are `Completed`. E7 and E7-T1/T2/T3 are `Completed`. E8 is `Completed`; E8-T1/T2/T3 are `Completed`. Former E12-T2/T3 remain Retired. E14-T1 and E14 are Completed for the assembled fake-provider scope. E2-T0 is Completed for released contract qualification; E2-T1 is Completed; E2-T2 is Completed for protected carriers and verified adoption; E2-T3 remains Planned. The assembled application has explicit fake-provider verification; live-provider qualification remains E2/E9-owned.
 
-**Maturity:** delivery-independent Go core, shared React bundle, authenticated Gul API mounted by the E8-T3 host, typed provider ports and explicit scenario harness, host-opened Gul SQLite repositories with fake-scoped runtime attachment, local presentation and passive session reads, and a Wails shell foundation. E4 adds typed observation, Interaction cards, action eligibility and bounded history/result/artifact reads. E5 adds whole-session close, reconnect convergence and operation-specific recovery against fakes. E6 adds verified-root local FileService inspection, bounded previews, refresh, watcher and Git review through component-tested typed APIs mounted by E8-T3. E7-T1 adds three responsive panes, workspace/session navigation and read-only FileService presentation through injected typed clients. E7-T2 adds provider-projected activity, prioritized Interaction cards, conversation and accepted-user Prompt History, and guarded whole-session close to that injected-client view. E7-T3 adds composition-safe input and keyboard focus behavior to the same component scope. E8-T1 adds isolated local account setup, bounded password hashing and the injected first-run form. E8-T2 adds protected session routes and the checked auth entry within isolated delivery scope. E8-T3 accepts the shared authenticated host, verified native attachment, isolated deployment fixtures and installed PWA delivery. E14-T1 adds checked adapter assembly and real authenticated browser/native acceptance with explicit fakes. Published gateway/ordinary-host transport qualification is supplied by E2-T1; actual session and device qualification remain E2-T2/T3/E9-owned.
+**Maturity:** delivery-independent Go core, shared React bundle, authenticated Gul API mounted by the E8-T3 host, typed provider ports and explicit scenario harness, host-opened Gul SQLite repositories with fake-scoped runtime attachment, local presentation and passive session reads, and a Wails shell foundation. E4 adds typed observation, Interaction cards, action eligibility and bounded history/result/artifact reads. E5 adds whole-session close, reconnect convergence and operation-specific recovery against fakes. E6 adds verified-root local FileService inspection, bounded previews, refresh, watcher and Git review through component-tested typed APIs mounted by E8-T3. E7-T1 adds three responsive panes, workspace/session navigation and read-only FileService presentation through injected typed clients. E7-T2 adds provider-projected activity, prioritized Interaction cards, conversation and accepted-user Prompt History, and guarded whole-session close to that injected-client view. E7-T3 adds composition-safe input and keyboard focus behavior to the same component scope. E8-T1 adds isolated local account setup, bounded password hashing and the injected first-run form. E8-T2 adds protected session routes and the checked auth entry within isolated delivery scope. E8-T3 accepts the shared authenticated host, verified native attachment, isolated deployment fixtures and installed PWA delivery. E14-T1 adds checked adapter assembly and real authenticated browser/native acceptance with explicit fakes. E2-T1 supplies published gateway/ordinary-host transport qualification. E2-T2 implements protected local Controller files, public-only SQLite credential metadata, per-call generated-RPC validation and provider-verified atomic adoption with checked dependent projections. Its published carrier/native-fake qualification is distinct from ordinary authenticated host session-action acceptance in E2-T3 and device/fault/security/deployment qualification in E9.
 
 ### 19.1 Implemented components
 

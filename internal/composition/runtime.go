@@ -13,6 +13,7 @@ import (
 	"github.com/rootkernel/gul/internal/action"
 	actionprovider "github.com/rootkernel/gul/internal/action/contractprovider"
 	"github.com/rootkernel/gul/internal/app"
+	"github.com/rootkernel/gul/internal/controller"
 	"github.com/rootkernel/gul/internal/delivery/api"
 	"github.com/rootkernel/gul/internal/files"
 	"github.com/rootkernel/gul/internal/history"
@@ -51,6 +52,7 @@ type Runtime struct {
 	config       Config
 	Workspaces   *workspace.Service
 	Sessions     *session.Service
+	Controllers  *controller.Store
 	actions      *action.Service
 	history      *history.Service
 	interactions *interaction.Service
@@ -111,6 +113,7 @@ func NewQualified(store *storage.Store, c Config, caps *publicv1.GetCapabilities
 		return nil, err
 	}
 	r := &Runtime{store: store, config: c, raw: raw, probe: probe}
+	r.Controllers, _ = c.Carriers.(*controller.Store)
 	local := store.Presentation()
 	r.Workspaces = workspace.NewService(workspaceprovider.ContractProvider{Port: c.Port}, local, nil, c.Roots)
 	if err = r.Workspaces.RootConfigurationError(); err != nil {

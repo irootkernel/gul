@@ -42,6 +42,17 @@ WHERE subject_id = ? AND workspace_id = ? AND run_id = ?`, binding.SubjectID, bi
 	if !errors.Is(err, sql.ErrNoRows) {
 		return session.Binding{}, err
 	}
+	var reused int
+	if err = tx.QueryRowContext(ctx, `SELECT COUNT(*) FROM primary_session_bindings WHERE controller_binding_id=?`, binding.ControllerBindingID).Scan(&reused); err != nil {
+		return session.Binding{}, err
+	}
+	if reused != 0 {
+		return session.Binding{}, session.ErrBindingConflict
+	}
+	var removing int
+	if err = tx.QueryRowContext(ctx, `SELECT COUNT(*) FROM controller_credential_metadata WHERE binding_id=? AND removing=1`, binding.ControllerBindingID).Scan(&removing); err != nil || removing != 0 {
+		return session.Binding{}, session.ErrBindingConflict
+	}
 	name := binding.Configuration.PurposeLabel
 	if !presentation.ValidName(name) {
 		name = "Session"

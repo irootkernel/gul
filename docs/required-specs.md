@@ -480,8 +480,8 @@ consumer inputs in `contract/dependency-lock.json`. Its isolated gateway check,
 regenerated release drift and admission policy establish Current State for
 REQ-CONSUMER-003 and REQ-RUNTIME-008 within the release identity and contract
 boundary. E2-T1 adds the generated production transport and ordinary host
-assembly described below. Credentials and actual session actions remain
-E2-T2/T3-owned.
+assembly described below. E2-T2 implements protected carrier storage and
+verified adoption; actual session-action acceptance remains E2-T3-owned.
 
 E2-T1 supplies a verified executable copy, a private supervised
 Unix gateway, protocol-zero negotiation, fresh request UUIDs and one shared
@@ -490,9 +490,24 @@ restart, collision refusal, changed selection rejection and ordinary authenticat
 host profile/diagnostic reads. Missing or incompatible providers and transport
 loss preserve local presentation/files while Submit remains rejected. Transport
 fixtures check read single-flight, cancellation, typed close errors and enum/
-optional-data handling. The gateway and host are implemented; real carriers,
-Run creation and end-to-end session action acceptance remain E2-T2/T3-owned.
+optional-data handling. The gateway and host are implemented. End-to-end
+session action acceptance remains E2-T3-owned.
 E9 retains supported-device, fault/security and deployment qualification.
+
+E2-T2 implements `internal/controller` beneath the advertised home-root/client
+layout. Schema-v1 files have trusted installation/account identity and fresh
+32-byte capabilities; SQLite schema 10 retains public identity, generation,
+file identity and allocation/removal state. Every protected generated RPC
+revalidates its carrier after acquiring transport capacity. A trusted host hook
+verifies an existing Run before atomic adoption and refreshes its dependent
+projections. Exact root/launch property names are required. The common refresh
+path checks pending Controller Interaction Cards before marking them fresh,
+including after reconnect or runtime reassembly.
+Published v0.1.3 checks use an upstream native fake app-server and
+real files/public gRPC for StartRun, verification, matching adoption and
+foreign-Controller/capability/generation refusal. Local race, containment,
+mode/type/schema, migration and persistence checks cover the storage boundary.
+E2-T2 is complete for its carrier/adoption scope; E2-T3 and E9 retain their acceptance scopes.
 
 Earlier component entries retain the verification scope accepted at their task
 completion. Their "unmounted" and "disabled" route labels describe that earlier

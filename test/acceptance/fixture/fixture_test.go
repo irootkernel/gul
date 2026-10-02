@@ -456,6 +456,7 @@ func TestAssembledBindingLookupIsSubjectScopedAndCancellable(t *testing.T) {
 	}
 	other := f.Binding
 	other.ID, other.WorkspaceID = "ambiguous-session", attachment.ID
+	other.ControllerBindingID = "ambiguous-controller"
 	if _, err := f.Store.Presentation().InsertBinding(t.Context(), other); err != nil {
 		t.Fatal(err)
 	}

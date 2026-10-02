@@ -23,6 +23,7 @@ type WriterReader interface {
 }
 type PendingReader interface {
 	Pending(context.Context, interaction.Bound) (interaction.PendingState, error)
+	Card(context.Context, interaction.Bound, string) (interaction.Card, error)
 }
 type SessionReader interface {
 	GetExecutionState(context.Context, string, string) (session.ExecutionState, error)
@@ -89,8 +90,27 @@ func (r *AggregateRefresher) Refresh(ctx context.Context, b action.Bound, run ac
 	}
 	record(writerErr)
 	readCtx, readCancel = context.WithTimeout(ctx, 5*time.Second)
-	pending, pendingErr := r.Interactions.Pending(readCtx, interaction.Bound{Binding: b.Binding, Workspace: b.Workspace, Carrier: b.Carrier})
+	ib := interaction.Bound{Binding: b.Binding, Workspace: b.Workspace, Carrier: b.Carrier}
+	pending, pendingErr := r.Interactions.Pending(readCtx, ib)
 	readCancel()
+	if pendingErr == nil && (!pending.Stamp.Valid() || !pending.Stamp.Covers(stamp) || len(pending.Items) > 256) {
+		pendingErr = ErrUnavailable
+	}
+	if pendingErr == nil {
+		for _, item := range pending.Items {
+			readCtx, readCancel = context.WithTimeout(ctx, 5*time.Second)
+			card, err := r.Interactions.Card(readCtx, ib, item.ID)
+			readCancel()
+			if err != nil {
+				pendingErr = err
+				break
+			}
+			if card.Summary.ID != item.ID || card.Summary.Kind != item.Kind || card.Summary.Status != interaction.Pending {
+				pendingErr = ErrUnavailable
+				break
+			}
+		}
+	}
 	if pendingErr == nil {
 		pendingErr = r.Cache.CompleteRefresh(ctx, b, observation.Interaction, pending.Stamp)
 	}

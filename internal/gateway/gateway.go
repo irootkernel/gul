@@ -39,22 +39,40 @@ type Config struct {
 	WorkspaceRoots   []string
 }
 type Gateway struct {
-	config     Config
-	operation  sync.Mutex
-	mu         sync.Mutex
-	channel    *client
-	negotiated *publicv1.GetCapabilitiesResponse
-	child      *exec.Cmd
-	exited     chan struct{}
-	parent     string
-	socket     string
-	err        error
-	lifetime   context.Context
-	cancel     context.CancelFunc
-	done       chan struct{}
-	starts     []time.Time
-	failures   int
-	status     app.ProviderStatus
+	config          Config
+	operation       sync.Mutex
+	mu              sync.Mutex
+	channel         *client
+	negotiated      *publicv1.GetCapabilitiesResponse
+	child           *exec.Cmd
+	exited          chan struct{}
+	parent          string
+	socket          string
+	err             error
+	lifetime        context.Context
+	cancel          context.CancelFunc
+	done            chan struct{}
+	starts          []time.Time
+	failures        int
+	status          app.ProviderStatus
+	validateCarrier func(context.Context, string, *publicv1.ControllerCarrierRef, *publicv1.StartRunRequest) error
+}
+
+// SetCarrierValidator binds the trusted local store before production services
+// start. Restarted channels use this same host-owned validation boundary.
+func (g *Gateway) SetCarrierValidator(validate func(context.Context, string, *publicv1.ControllerCarrierRef, *publicv1.StartRunRequest) error) {
+	g.mu.Lock()
+	g.validateCarrier = validate
+	g.mu.Unlock()
+}
+func (g *Gateway) validate(ctx context.Context, method string, ref *publicv1.ControllerCarrierRef, allocation *publicv1.StartRunRequest) error {
+	g.mu.Lock()
+	validate := g.validateCarrier
+	g.mu.Unlock()
+	if validate == nil {
+		return connect.NewError(connect.CodeUnauthenticated, errors.New("controller carrier unavailable"))
+	}
+	return validate(ctx, method, ref, allocation)
 }
 
 func New(c Config) *Gateway {
@@ -281,6 +299,7 @@ func (g *Gateway) startChild(ctx context.Context) error {
 		}
 	}
 	c := newClient(socket)
+	c.validateCarrier = g.validate
 	caps, err := negotiate(readinessCtx, c)
 	if err != nil {
 		c.close(ctx)

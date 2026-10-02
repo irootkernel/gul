@@ -7,6 +7,7 @@ import (
 
 	"github.com/rootkernel/gul/internal/app"
 	"github.com/rootkernel/gul/internal/composition"
+	"github.com/rootkernel/gul/internal/controller"
 	"github.com/rootkernel/gul/internal/gateway"
 	"github.com/rootkernel/gul/internal/storage"
 )
@@ -51,13 +52,21 @@ func assembleGateway(store *storage.Store, config Config, g *gateway.Gateway) (A
 	lifetime := &productionLifecycle{gateway: g}
 	assembled := Assembly{Provider: g, Lifecycle: lifetime, gateway: g}
 	if caps := g.NegotiatedCapabilities(); caps != nil {
-		r, err := composition.NewQualified(store, composition.Config{Port: g, Carriers: offlineRuntime{}, Roots: config.WorkspaceRoots, Policies: config.Policies}, caps)
+		carriers, err := controller.New(context.Background(), store, config.ProviderHome, config.WorkspaceRoots, caps)
+		if err != nil {
+			stop, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			defer cancel()
+			return Assembly{}, errors.Join(err, g.Stop(stop))
+		}
+		g.SetCarrierValidator(carriers.ValidateRPC)
+		r, err := composition.NewQualified(store, composition.Config{Port: g, Carriers: carriers, Roots: config.WorkspaceRoots, Policies: config.Policies}, caps)
 		if err != nil {
 			stop, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 			defer cancel()
 			return Assembly{}, errors.Join(err, g.Stop(stop))
 		}
 		lifetime.runtime = r
+		assembled.runtime = r
 		assembled.Features = r.Features
 	}
 	return assembled, nil

@@ -2316,3 +2316,85 @@ deployment acceptance. No installation or upstream publication is implied.
 E2-T1 is Completed for the production gateway and host integration scope.
 Real protected carriers and actual session-action qualification remain
 E2-T2/T3-owned. E2 remains In Progress, with E2-T2 next.
+
+
+### E2-T2 protected Controller carriers (2026-10-02)
+
+`internal/controller` creates exclusive schema-v1 files beneath the fixed Gul
+client/installation subtree of the advertised Dolgorae home root. It validates
+schema ID/digest, carrier rules, owner/mode/type, every path component and the
+released 4096-byte bound.
+Root and optional launch properties require their exact schema names; unknown,
+duplicate and case-varied properties are refused before struct decoding.
+Installation ID is persistent local UUIDv7 metadata; account subject comes from
+the sole locally configured account. Each new
+Controller has a UUIDv7 ID and 32 crypto-random bytes encoded as canonical
+unpadded base64url. Optional orchestration launch intent names the selected
+preprovisioned Policy. Creation syncs the file, closes it, syncs the parent,
+revalidates identity and only then registers its logical binding.
+
+SQLite migration 10 adds public installation and credential metadata. It stores
+logical filenames, public Controller identity/generation, installation and file
+identity, health, allocation workspace/key and removal state. Capability material and absolute
+carrier/socket paths are excluded. A registered credential cannot be retargeted
+by a legacy reference upsert. New Direct Session bindings reject credential
+reuse; same-Run rediscovery preserves the existing binding. StartRun permits
+replay only with the same allocation workspace and key. Durable pending or
+unknown allocation attempts and StartRun dispatch protect credentials from
+unused-file removal. Removal reserves metadata and checks the moved file's
+identity before unlinking; a replacement is preserved and rejected.
+
+The shared gateway invokes carrier validation after transport capacity is
+acquired, immediately before each protected generated RPC. Candidate-file
+validation is available only for side-effect-free public `VerifyController`;
+other calls require the registered identity/generation and pinned file. Missing,
+changed, malformed, shared-linked or workspace-visible files produce a typed
+carrier blocker. Native/headless startup wires this store into the production
+runtime without fixture injection.
+
+The trusted host adoption hook derives the account subject locally from a session
+ID and logical filename. It checks the fresh parentless interactive Run and
+public Controller principal before invoking public `VerifyController`. It
+revalidates the selected file before closing readiness and replacing the exact
+prior binding in a short SQLite transaction. Dependent projections are invalidated
+atomically. Fresh Run including configuration/recovery, Writer, pending/Controller
+Interactions, timeline and artifacts are read before the normal reconnect loop
+can restore readiness. Pending Controller Interaction Cards are checked in the
+common aggregate refresher; a failed Card stays blocking across repeated
+synchronization and runtime reassembly until a checked read succeeds.
+No browser path, credential payload, Operator operation,
+Controller reset or Specialist credential is added.
+
+Published v0.1.3 qualification uses the pinned archive/executable and the exact
+release-source native fake app-server. The fixture preinitializes only a private
+HOME/workspace and preprovisions its Profile/Policy through public CLI bootstrap.
+Installed Codex 0.158.0 performs version/schema inspection only; model protocol
+traffic goes to the native fake. Real public gRPC creates and verifies a Run,
+adopts a matching protected credential and rejects a foreign Controller,
+incorrect capability and generation. Local checks cover mode, symlink and file
+replacement refusal. Cleanup closes only the fixture-owned Run; native fake
+processes stop when their private fixture disappears.
+
+Focused race checks cover strict JSON/schema and trusted identity, bounded reads,
+unsafe roots, Workspace directory aliases and file types, reopen persistence and
+SQLite secret/path canaries,
+per-call validation after transport capacity, atomic adoption rollback/stale
+binding refusal, distinct-session policy and removal/allocation exclusion.
+Unregistered candidate tests isolate schema parsing from registered file pins.
+Assembled checked providers verify Card failure after binding replacement,
+repeated reconnect refusal, runtime reassembly and successful recovery; the
+observation acknowledgement is a fixture in that focused regression.
+Wrong-owner checking uses a stat fixture because the test user cannot change file
+ownership. Durability ordering is implemented explicitly and checked by source
+review and reopen tests; no power-loss durability drill is claimed.
+Published-provider and related-package race checks passed, including the
+allocation replay/reuse and replacement-race cases. Serial `make test` passed
+with its required toolchain, generation drift, unit, integration and browser/native
+gates. Its extractor reported degraded evidence with linker warnings; the child
+exit was successful. E2-T2 is complete for its carrier/adoption scope. Its
+completion assessment confirms all required outputs and the corrected schema,
+Card-refresh and Current Architecture boundaries. E2 remains In Progress, with
+E2-T3 next. E2-T3 retains authenticated production-host
+session/action acceptance; E9 retains fault/security/device/deployment
+qualification. The supplemental exact-tag Rust build is separate T0 diagnostic
+evidence. No installed runtime or neighboring working tree is changed.

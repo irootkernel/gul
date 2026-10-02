@@ -30,30 +30,31 @@ type pendingRead struct {
 	err    error
 }
 type client struct {
-	transport     *http.Transport
-	runtime       dolgoraev1connect.RuntimeServiceClient
-	run           dolgoraev1connect.RunServiceClient
-	observation   dolgoraev1connect.ObservationServiceClient
-	interaction   dolgoraev1connect.InteractionServiceClient
-	writer        dolgoraev1connect.WriterServiceClient
-	controller    dolgoraev1connect.ControllerServiceClient
-	artifact      dolgoraev1connect.ArtifactServiceClient
-	orchestration dolgoraev1connect.OrchestrationServiceClient
-	instance      string
-	server        string
-	protocol      uint32
-	lifetime      context.Context
-	cancel        context.CancelFunc
-	reads         chan struct{}
-	mutations     chan struct{}
-	streams       chan struct{}
-	mu            sync.Mutex
-	pending       map[string]*pendingRead
-	last          map[string]time.Time
-	window        time.Time
-	started       int
-	closing       bool
-	active        sync.WaitGroup
+	transport       *http.Transport
+	runtime         dolgoraev1connect.RuntimeServiceClient
+	run             dolgoraev1connect.RunServiceClient
+	observation     dolgoraev1connect.ObservationServiceClient
+	interaction     dolgoraev1connect.InteractionServiceClient
+	writer          dolgoraev1connect.WriterServiceClient
+	controller      dolgoraev1connect.ControllerServiceClient
+	artifact        dolgoraev1connect.ArtifactServiceClient
+	orchestration   dolgoraev1connect.OrchestrationServiceClient
+	instance        string
+	server          string
+	protocol        uint32
+	lifetime        context.Context
+	cancel          context.CancelFunc
+	reads           chan struct{}
+	mutations       chan struct{}
+	streams         chan struct{}
+	mu              sync.Mutex
+	pending         map[string]*pendingRead
+	last            map[string]time.Time
+	window          time.Time
+	started         int
+	closing         bool
+	active          sync.WaitGroup
+	validateCarrier func(context.Context, string, *publicv1.ControllerCarrierRef, *publicv1.StartRunRequest) error
 }
 
 // A one-shot body disables net/http's request replay, including HTTP/2 retries.
@@ -182,6 +183,23 @@ func call[T, R any](ctx context.Context, c *client, method string, request *T, m
 			return nil, ErrUnavailable
 		}
 		defer func() { <-slots }()
+		if c.validateCarrier != nil {
+			m := any(copy).(proto.Message).ProtoReflect()
+			field := m.Descriptor().Fields().ByName("controller")
+			if field != nil && !m.Has(field) && method != "ArtifactService.ListArtifactMetadata" && method != "ArtifactService.ReadArtifactChunk" {
+				return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("controller carrier unavailable"))
+			}
+			if field != nil && m.Has(field) {
+				ref, ok := m.Get(field).Message().Interface().(*publicv1.ControllerCarrierRef)
+				if !ok {
+					return nil, recovery.ErrIncompatible
+				}
+				allocation, _ := any(copy).(*publicv1.StartRunRequest)
+				if err = c.validateCarrier(ctx, method, ref, allocation); err != nil {
+					return nil, err
+				}
+			}
+		}
 		response, err := invoke(ctx, connect.NewRequest(copy))
 		if err != nil {
 			return nil, err

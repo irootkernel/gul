@@ -770,4 +770,13 @@ is `223d2a72d7bd281dba0abdc8b1e966d792492546c3be63a67e593c94eed0c05a` and genera
 `8d02e824c36795221ee6d1b3fc7e2b43943d13701aa76d019c3b6aea30b26a6d`. The earlier E12 pin remains historical evidence.
 E2-T1 applies the accepted public-gRPC boundary to ordinary host
 startup and implements supervised gateway, read budgets and safe diagnostics.
-Credentials and actual session actions remain E2-T2/T3-owned.
+E2-T2 implements ADR-0047/0050 in the protected local store, per-call transport
+validator and trusted host adoption workflow. SQLite schema 10 records public
+identity and generation separately from the exact schema-v1 credential.
+The local parser requires exact root and optional launch property names.
+Controller Interaction Card checks belong to the common aggregate refresher
+so adoption failures remain blocking through reconnect and runtime reassembly.
+The fixed Gul subtree is derived from the released home-root locator and client
+pattern. Local identity checks supplement public `VerifyController`; they do
+not grant provider authority. E2-T2 is complete for its carrier/adoption scope. Actual
+session-action acceptance remains E2-T3-owned.

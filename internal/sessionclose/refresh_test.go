@@ -47,6 +47,8 @@ type refreshReads struct {
 	pages, artifacts    int
 	alwaysMore, advance bool
 	nextOverride        string
+	pending             []interaction.Summary
+	cardReads           int
 }
 
 func (r *refreshReads) check(kind string) error {
@@ -68,7 +70,16 @@ func (r *refreshReads) ReadWriter(context.Context, action.Bound) (action.WriterP
 	return action.WriterProjection{Stamp: r.stamp}, r.check("writer")
 }
 func (r *refreshReads) Pending(context.Context, interaction.Bound) (interaction.PendingState, error) {
-	return interaction.PendingState{Stamp: r.stamp}, r.check("interaction")
+	return interaction.PendingState{Items: r.pending, Stamp: r.stamp}, r.check("interaction")
+}
+func (r *refreshReads) Card(_ context.Context, _ interaction.Bound, id string) (interaction.Card, error) {
+	r.cardReads++
+	for _, item := range r.pending {
+		if item.ID == id {
+			return interaction.Card{Summary: item}, r.check("card")
+		}
+	}
+	return interaction.Card{}, sessionclose.ErrUnavailable
 }
 func (r *refreshReads) Timeline(_ context.Context, _ history.Bound, after string, _ uint32) (history.Timeline, error) {
 	r.pages++
@@ -146,6 +157,21 @@ func TestRecoveryRefreshKeepsIncompleteTimelineStale(t *testing.T) {
 				t.Fatalf("pages=%d fresh=%v artifacts=%d", r.pages, c.fresh, r.artifacts)
 			}
 		})
+	}
+}
+
+func TestRecoveryRefreshKeepsInteractionStaleUntilEveryCardSucceeds(t *testing.T) {
+	ref, r, c := refreshFixture(t)
+	r.pending = []interaction.Summary{{ID: "approval", Kind: interaction.CommandApproval, Status: interaction.Pending}}
+	r.fail = "card"
+	for attempt := 0; attempt < 3; attempt++ {
+		if err := ref.Refresh(t.Context(), action.Bound{}, action.RunFacts{Stamp: r.stamp}); err == nil || c.fresh[observation.Interaction] {
+			t.Fatal("failed card made Interaction fresh", err, c.fresh)
+		}
+	}
+	r.fail = ""
+	if err := ref.Refresh(t.Context(), action.Bound{}, action.RunFacts{Stamp: r.stamp}); err != nil || !c.fresh[observation.Interaction] || r.cardReads != 4 {
+		t.Fatal("card recovery did not complete Interaction", err, c.fresh, r.cardReads)
 	}
 }
 func TestRecoveryRefreshUnavailableFinalBlocksArtifactCompletion(t *testing.T) {

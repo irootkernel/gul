@@ -25,6 +25,27 @@ isolation. Their fixture bootstrap initializes only a temporary provider
 HOME/workspace. Production starts `serve` and uses generated public gRPC;
 it does not bootstrap a user's provider configuration.
 
+The E2-T2 carrier/adoption check additionally requires
+`GUL_E2_DOLGORAE_SOURCE=/absolute/path/to/exported-v0.1.3-source` for the matching
+upstream native fake app-server fixture. Run
+`GOTOOLCHAIN=local go test -race -count=1 ./test/provider` with all three artifact
+and source variables. `fixtures/prepare_controller.py` creates a private
+HOME/workspace, preprovisions the test Profile and Policy through public CLI
+bootstrap commands, and uses the installed exact Codex 0.158.0 only for version
+and schema inspection. Protocol/model traffic uses the native fake. The
+published Dolgorae executable handles real files and generated public gRPC.
+No Operator or child credential is used. Checks cover trusted principal/schema,
+StartRun, verification, atomic matching adoption, foreign Controller/capability
+and generation refusal, and local mode, replacement and symlink rejection.
+Owned Run cleanup uses public CloseRun; fixture app-servers stop themselves when
+the private fixture directory disappears. This qualifies the T2 carrier boundary;
+T3 owns the ordinary authenticated host session-action scenario.
+Focused controller tests also reject case-varied property aliases in
+unregistered candidates. Composition and aggregate-refresh regressions verify
+that Card failures block repeated reconnect and runtime reassembly until a
+checked Card read succeeds; the focused composition test stubs observation
+acknowledgement.
+
 Supplemental source testing exports the exact v0.1.3 tag into a separate
 temporary tree and runs `rustup run 1.97.1 cargo build --locked --bin dolgorae`
 with an isolated HOME, Cargo home and target directory. The installed Rust

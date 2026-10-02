@@ -89,6 +89,15 @@ func (r AttemptRepository) BeginMutation(ctx context.Context, candidate Mutation
 		return MutationAttempt{}, false, err
 	}
 	defer conn.ExecContext(context.Background(), "ROLLBACK")
+	for _, reference := range candidate.ControllerReferences {
+		var removing int
+		if err := conn.QueryRowContext(ctx, `SELECT COUNT(*) FROM controller_credential_metadata m JOIN controller_binding_references b USING(binding_id) WHERE m.binding_id=? AND b.subject_id=? AND m.removing=1`, reference.BindingID, candidate.SubjectID).Scan(&removing); err != nil {
+			return MutationAttempt{}, false, err
+		}
+		if removing != 0 {
+			return MutationAttempt{}, false, ErrMutationConflict
+		}
+	}
 	old, err := readMutation(ctx, conn, candidate.OperationID)
 	if err == nil {
 		if old.SubjectID != candidate.SubjectID || old.Kind != candidate.Kind || old.RequestSHA256 != candidate.RequestSHA256 ||
