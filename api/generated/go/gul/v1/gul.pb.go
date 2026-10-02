@@ -9459,8 +9459,8 @@ func (*GetSummaryRequest) Descriptor() ([]byte, []int) {
 type GetSummaryResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	ProviderReady bool                   `protobuf:"varint,1,opt,name=provider_ready,json=providerReady,proto3" json:"provider_ready,omitempty"`
-	// Successful responses are persistence-gated. Outages return a typed
-	// ERROR_CODE_PERSISTENCE_UNAVAILABLE error instead of false here.
+	// Successful responses are persistence-gated. Outages fail closed with an
+	// error instead of returning false here.
 	PersistenceReady bool `protobuf:"varint,2,opt,name=persistence_ready,json=persistenceReady,proto3" json:"persistence_ready,omitempty"`
 	unknownFields    protoimpl.UnknownFields
 	sizeCache        protoimpl.SizeCache

@@ -1056,7 +1056,7 @@ service DiagnosticsService {
 message GetSummaryRequest {}
 message GetSummaryResponse {
   bool provider_ready = 1;
-  // Successful responses are persistence-gated. Outages return a typed
-  // ERROR_CODE_PERSISTENCE_UNAVAILABLE error instead of false here.
+  // Successful responses are persistence-gated. Outages fail closed with an
+  // error instead of returning false here.
   bool persistence_ready = 2;
 }

@@ -3344,8 +3344,8 @@ export type GetSummaryResponse = Message<"gul.v1.GetSummaryResponse"> & {
   providerReady: boolean;
 
   /**
-   * Successful responses are persistence-gated. Outages return a typed
-   * ERROR_CODE_PERSISTENCE_UNAVAILABLE error instead of false here.
+   * Successful responses are persistence-gated. Outages fail closed with an
+   * error instead of returning false here.
    *
    * @generated from field: bool persistence_ready = 2;
    */
