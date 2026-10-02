@@ -6,13 +6,13 @@
 | Product | Gul |
 | Version | 0.1-dolgorae-consumer-v1 |
 | Status | Approved target rebaseline; E8-T1/T2/T3 accepted within account, authenticated route and isolated host/delivery scopes; E8 completed after bounded whole-Epic validation |
-| Last updated | 2026-10-01 |
+| Last updated | 2026-10-02 |
 
 ## 1. Purpose and change control
 
 This document translates `required-specs.md` and accepted ADRs into component, trust, data, API, event, recovery, and deployment boundaries. Required architecture is not implementation evidence. Part B remains the only Current Architecture statement.
 
-The canonical producer contract is Dolgorae `docs/specs/gul-consumer-v1.md`, ID `dolgorae.gul-consumer/v1`. E12-T1 pins immutable TASK-053 commit `21aefe5b2a8dc6fb18a58338090348b23d2f0a4a`. Its first-release profile requires 27 methods, including full timeline and two read-only aggregate queries, from a 36-method descriptor; nine descriptor methods remain unavailable to first-release Gul actions. The checked consumer boundary is locked by dependency-lock SHA-256 `8f52ae66e126f37013d7842b2113fc509d21af4e4fc465cecdbeef7e21619f01` and current generated-lock SHA-256 `96da1b0a5caeffac1bc9d387c4c4e4ee4159daf47e3877ed748d291be9bb5bc0` after the Go 1.27.1 toolchain rebaseline. E12-T1's original generated-lock digest was `6284064e720e2220d6960c42faef6a4c13292ce1327f44e00388dc52b2e17d4a`. This is contract/tooling evidence only, not product runtime or live-provider acceptance. Continuation and Delete remain optional future functions.
+The canonical producer contract is Dolgorae `docs/specs/gul-consumer-v1.md`, ID `dolgorae.gul-consumer/v1`. E12-T1 pins immutable TASK-053 commit `21aefe5b2a8dc6fb18a58338090348b23d2f0a4a`. Its first-release profile requires 27 methods, including full timeline and two read-only aggregate queries, from a 36-method descriptor; nine descriptor methods remain unavailable to first-release Gul actions. The pre-release Go 1.27.1 toolchain rebaseline used dependency-lock SHA-256 `8f52ae66e126f37013d7842b2113fc509d21af4e4fc465cecdbeef7e21619f01` and generated-lock SHA-256 `96da1b0a5caeffac1bc9d387c4c4e4ee4159daf47e3877ed748d291be9bb5bc0`. E2-T0's current released consumer pin is recorded in Section 6.2. E12-T1's original generated-lock digest was `6284064e720e2220d6960c42faef6a4c13292ce1327f44e00388dc52b2e17d4a`. This is contract/tooling evidence only, not product runtime or live-provider acceptance. Continuation and Delete remain optional future functions.
 
 # Part A. Target Architecture
 
@@ -170,11 +170,29 @@ Shutdown stops accepting mutations, cancels Run streams, drains unary operations
 
 ### 6.2 Compatibility and schema policy
 
+E2-T0 records the published v0.1.3 identity in `contract/dependency-lock.json`
+and derives operation admission from `contract/admission-policy.json`.
+Credential compatibility compares the advertised schema ID with the pinned
+schema's actual `$id`, version 1 and exact digest. The release retains
+`reader_writer_access=false`; dedicated first-write admission depends on lane
+writer support, `first_write_via_submit_turn`, durable writer authority and
+fresh typed state. Existing-reader acquisition requires verified Profile
+transition support; the global release summary is unverified. Neither a
+handshake nor a successful read proves a write action safe. Production use of
+this policy is E2-T1-owned and actual action qualification is E2-T3-owned.
+
 The handshake selects an explicitly supported public API version and verifies the required Runtime, Run, Observation, Controller verification/interaction, Writer, Recovery where used, Artifact, Timeline, and OrchestrationObservation capabilities using the pinned consumer profile, not equality with the server's entire supported-method set. Generated decoders for that version are necessary but not sufficient evidence of semantic compatibility. Unknown required enum values, missing typed error details, and missing capabilities are blockers. Unknown optional data is retained only when the accepted version policy permits it; otherwise it is discarded at the adapter boundary and never persisted or forwarded.
 
 Historical E0 evidence: the old Dolgorae contract at revision `85a8862f784cc57701751d81a9e03bf7c5722818` supplied its then-accepted service/method inventory and the typed Run, Turn, writer, policy, assurance, recovery, lineage, profile, event, Controller Interaction, Run configuration, required-action, Interaction-limit, path, timeline, and artifact projections required by Gul. Gate A is closed: its checked Protobuf source, descriptor, capabilities, mutation policy, error/action mapping, client policy, and conformance artifacts are internally consistent. The descriptor reproduces byte-for-byte with protoc 35.1 and the pinned Protobuf v32.1 `timestamp.proto` source-info input. Gate B pins the same source through dependency-lock SHA-256 `c4f91aa3e2add1093880684e5c96fdbb6239aef6a85261a0adf6b585e2db8863` and generated-lock SHA-256 `8a6a614a3a08c585f9a62f74095a0237d47feefba802e2dfa3ce13be5fbe0bf6`; the checked generator reproduces the descriptor, typed clients, exhaustive inventory/maps, policy fixtures, and descriptor-derived fake server.
 
 Every decision input remains independent even when another projection appears to imply it. Gul never parses `effective_access`, `writer_state`, `recovery_status`, `writer_policy_confirmation`, `compatibility`, or `action` strings to reconstruct typed semantics. New Interaction Card mapping and action evaluation require E12-T1's TASK-053 contract pin; historical Gate B does not supply the new consumer contract. Gul never infers compatibility from the Codex binary, and the Machine CLI keeps a separate exact closed-schema conformance contract that cannot be selected by production dependency injection.
+
+
+E2-T0 release qualification (2026-10-02): the published v0.1.3 source is
+`07dc31331d03aae9ed7c0c862a0cbe8a5184024e`. The current dependency-lock SHA-256
+is `223d2a72d7bd281dba0abdc8b1e966d792492546c3be63a67e593c94eed0c05a` and generated-lock SHA-256 is
+`8d02e824c36795221ee6d1b3fc7e2b43943d13701aa76d019c3b6aea30b26a6d`. The earlier E12 pin remains historical evidence.
+Actual production assembly, credentials and session actions remain E2-T1/T2/T3.
 
 ### 6.3 RPC use and mutation policy
 
@@ -233,7 +251,7 @@ This table records the immutable TASK-053 consumer profile pinned by E12-T1 and 
 | `ListPendingInteractions` | `InteractionService.ListPendingInteractions` | `ListPendingInteractionsRequest` → `ListPendingInteractionsResponse` | None | Required `RunRef`/`WorkspaceRef` | Read | Bounded read | Bounded repeat | Repeat read | Replace safe summaries | Advertised Interaction support | E12 pinned contract; not runtime/live evidence |
 | `GetControllerInteraction` | `InteractionService.GetControllerInteraction` | `GetControllerInteractionRequest` → `GetControllerInteractionResponse` | Session Controller | Required `RunRef`/`WorkspaceRef` | Read | Bounded read | Repeat after carrier validation | Refresh summary, then repeat | Replace typed Controller-only detail | Advertised Interaction support | E12 pinned contract; not runtime/live evidence |
 | `ResolveInteraction` | `InteractionService.ResolveInteraction` | `ResolveInteractionRequest` → `ResolveInteractionResponse` | Session Controller | Required `RunRef`/`WorkspaceRef` | Required key; response bytes never persisted | 20s | No automatic gRPC retry; no protected replay | Refresh summary/detail; finish if resolved, otherwise ask again | Apply receipt/status; invalidate summary/Run as needed | Advertised Interaction support and response limit | E12 pinned contract; not runtime/live evidence |
-| `GetWorkspaceWriterStatus` | `WriterService.GetWorkspaceWriterStatus` | `GetWorkspaceWriterStatusRequest` → `GetWorkspaceWriterStatusResponse` | None | Required `WorkspaceRef` | Read | Bounded read | Bounded repeat | Repeat read | Replace Writer projection | `reader_writer_access`, `durable_writer_authority` | E12 pinned contract; not runtime/live evidence |
+| `GetWorkspaceWriterStatus` | `WriterService.GetWorkspaceWriterStatus` | `GetWorkspaceWriterStatusRequest` → `GetWorkspaceWriterStatusResponse` | None | Required `WorkspaceRef` | Read | Bounded read | Bounded repeat | Repeat read | Replace Writer projection | `durable_writer_authority`; broad reader/writer flag does not gate this read | E12 pinned contract; not runtime/live evidence |
 | `AcquireWriter` | `WriterService.AcquireWriter` | `AcquireWriterRequest` → `WriterState` | Eligible existing-thread Session Controller | Required `RunRef`/`WorkspaceRef` | Tokenless expected revision | 15s | No automatic replay | Writer status + `GetRun` | Replace Writer; invalidate Run-derived actions until fresh | Writer features; transition supported | E12 pinned contract; not runtime/live evidence |
 | `ReleaseWriter` | `WriterService.ReleaseWriter` | `ReleaseWriterRequest` → `WriterState` | Writer-owning Session Controller | Required `RunRef`/`WorkspaceRef` | Tokenless expected revision | 15s | No automatic replay | Writer status + `GetRun` | Replace Writer; invalidate Run-derived actions until fresh | Writer features | E12 pinned contract; not runtime/live evidence |
 | `VerifyController` | `ControllerService.VerifyController` | `VerifyControllerRequest` → `VerifyControllerResponse` | Host-selected candidate carrier | Required `RunRef`/`WorkspaceRef` | Verification read | Bounded read | Repeat after carrier revalidation | Revalidate carrier and repeat | Replace verification result only | `controller_binding` | E12 pinned contract; not runtime/live evidence |
@@ -1065,9 +1083,9 @@ The serial command facade is `toolchain-check`, `generate-contract`, `contract-c
 
 ## 19. Current snapshot
 
-**Snapshot date:** 2026-10-01 (E14-T1 assembled acceptance)
+**Snapshot date:** 2026-10-02 (E2-T0 released contract qualification)
 
-**Roadmap point:** E0 is `Completed`, E12 is `Completed`, E1 is `Completed`, and E13 is `Completed`; E1-T1 is `Completed` and E1-T2/T3/T4/T5 are `Completed`. E3 and E3-T1/T2/T3/T4 are `Completed`. E4 and E4-T1/T2/T3/T5 are `Completed`. E4-T4 remains Deferred outside its epic. E5 and E5-T1/T2/T3 are `Completed`. E6 and E6-T1/T2/T3 are `Completed`. E7 and E7-T1/T2/T3 are `Completed`. E8 is `Completed`; E8-T1/T2/T3 are `Completed`. Former E12-T2/T3 remain Retired. E14-T1 and E14 are Completed for the assembled fake-provider scope. The assembled application has explicit fake-provider verification; live-provider qualification remains E2/E9-owned.
+**Roadmap point:** E0 is `Completed`, E12 is `Completed`, E1 is `Completed`, and E13 is `Completed`; E1-T1 is `Completed` and E1-T2/T3/T4/T5 are `Completed`. E3 and E3-T1/T2/T3/T4 are `Completed`. E4 and E4-T1/T2/T3/T5 are `Completed`. E4-T4 remains Deferred outside its epic. E5 and E5-T1/T2/T3 are `Completed`. E6 and E6-T1/T2/T3 are `Completed`. E7 and E7-T1/T2/T3 are `Completed`. E8 is `Completed`; E8-T1/T2/T3 are `Completed`. Former E12-T2/T3 remain Retired. E14-T1 and E14 are Completed for the assembled fake-provider scope. E2-T0 is Completed for released contract qualification; E2-T1/T2/T3 remain Planned. The assembled application has explicit fake-provider verification; live-provider qualification remains E2/E9-owned.
 
 **Maturity:** delivery-independent Go core, shared React bundle, authenticated Gul API mounted by the E8-T3 host, typed provider ports and explicit scenario harness, host-opened Gul SQLite repositories with fake-scoped runtime attachment, local presentation and passive session reads, and a Wails shell foundation. E4 adds typed observation, Interaction cards, action eligibility and bounded history/result/artifact reads. E5 adds whole-session close, reconnect convergence and operation-specific recovery against fakes. E6 adds verified-root local FileService inspection, bounded previews, refresh, watcher and Git review through component-tested typed APIs mounted by E8-T3. E7-T1 adds three responsive panes, workspace/session navigation and read-only FileService presentation through injected typed clients. E7-T2 adds provider-projected activity, prioritized Interaction cards, conversation and accepted-user Prompt History, and guarded whole-session close to that injected-client view. E7-T3 adds composition-safe input and keyboard focus behavior to the same component scope. E8-T1 adds isolated local account setup, bounded password hashing and the injected first-run form. E8-T2 adds protected session routes and the checked auth entry within isolated delivery scope. E8-T3 accepts the shared authenticated host, verified native attachment, isolated deployment fixtures and installed PWA delivery. E14-T1 adds checked adapter assembly and real authenticated browser/native acceptance with explicit fakes. Live-provider qualification remains pending.
 

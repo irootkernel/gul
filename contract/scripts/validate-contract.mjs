@@ -7,6 +7,7 @@ import {
   ListOrchestratedSessionResultsResponseSchema,
 } from "../generated/ts/dolgorae/public/v1/dolgorae_pb";
 import { validateGoManifest } from "./validate-go-manifest.mjs";
+import { releaseAdmission } from "./release-policy.mjs";
 
 const contractRoot = resolve(import.meta.dir, "..");
 const generatedRoot = join(contractRoot, "generated");
@@ -283,16 +284,19 @@ fromJson(ListOrchestratedSessionResultsResponseSchema, resultsFixture.grpc_json,
 if (conformance.freeze_policy?.status !== "blocked_runtime_evidence" || !Array.isArray(conformance.freeze_policy.runtime_evidence) || conformance.freeze_policy.runtime_evidence.length !== 0) throw new Error("producer runtime-evidence freeze boundary drifted");
 if (mutations.mutations.length !== 18) throw new Error(`expected 18 mutation policies, found ${mutations.mutations.length}`);
 
-if (dependencyLock.source.revision !== "21aefe5b2a8dc6fb18a58338090348b23d2f0a4a" || inventory.source_revision !== dependencyLock.source.revision || generatedLock.source_revision !== dependencyLock.source.revision) throw new Error("TASK-053 completion revision is not pinned consistently");
+if (dependencyLock.source.contract_ready_revision !== "21aefe5b2a8dc6fb18a58338090348b23d2f0a4a" || dependencyLock.source.revision !== dependencyLock.release?.source_revision || inventory.source_revision !== dependencyLock.source.revision || generatedLock.source_revision !== dependencyLock.source.revision) throw new Error("release and historical TASK-053 revisions are not pinned consistently");
+const admissionPolicy = JSON.parse(await readFile(join(contractRoot, "admission-policy.json"), "utf8"));
+const expectedAdmission = releaseAdmission(dependencyLock, consumerProfile, credentialSchema, sha256(credentialSchemaBytes), admissionPolicy);
+if (!equal(JSON.parse(await readFile(join(generatedRoot, "policy/release-admission.v1.json"), "utf8")), expectedAdmission)) throw new Error("release admission drifted");
 const expectedProducerTaskInputRevision = "a963f3601b1e7036432501b6d8946c8c62c1466d";
 if (dependencyLock.source.producer_task_input_revision !== expectedProducerTaskInputRevision || producerLock.source_revision.task_input_commit !== expectedProducerTaskInputRevision || consumerProfile.baseline_commit !== expectedProducerTaskInputRevision || expectedProducerTaskInputRevision === dependencyLock.source.revision) throw new Error("producer task-input identity is not pinned distinctly from the completion revision");
 const dependencyByPath = new Map(dependencyLock.files.map((entry) => [entry.path, entry.sha256]));
 for (const artifact of producerLock.artifacts.filter((entry) => !entry.path.startsWith("generated/"))) {
-  const relativePath = artifact.path.startsWith("baselines/") ? `upstream/${artifact.path}` : `upstream/${artifact.path}`;
+  const relativePath = `upstream/${artifact.path}`;
   const bytes = await readFile(join(contractRoot, relativePath));
   if (sha256(bytes) !== artifact.sha256 || dependencyByPath.get(relativePath) !== artifact.sha256) throw new Error(`producer lock correlation failed for ${artifact.path}`);
 }
-if (descriptorMetadata.buf_breaking?.result !== "compatible_additive" || descriptorMetadata.buf_breaking?.baseline_sha256 !== dependencyByPath.get("upstream/baselines/dolgorae-public-v1-pre-task-053.descriptor.pb")) throw new Error("additive descriptor baseline evidence drifted");
+if (descriptorMetadata.buf_breaking?.result !== "compatible_frozen_consumer" || descriptorMetadata.buf_breaking?.baseline_sha256 !== dependencyByPath.get("upstream/baselines/dolgorae-public-v1-task-053.descriptor.pb")) throw new Error("released descriptor baseline evidence drifted");
 const credentialArtifact = producerLock.artifacts.find((entry) => entry.path === "dolgorae-controller-credential-v1.schema.json");
 const credentialProperties = capabilities.properties.controller_credential.properties;
 if (!credentialArtifact || credentialArtifact.sha256 !== sha256(credentialSchemaBytes) || credentialProperties.schema_sha256.const !== credentialArtifact.sha256) throw new Error("credential schema digest drifted from producer lock or capabilities");
@@ -384,10 +388,11 @@ if (!equal(dependencyLock.files.map((entry) => entry.path).sort(), upstreamPaths
 const dependencyLockDigest = sha256(dependencyLockBytes);
 const generatedLockDigest = sha256(generatedLockBytes);
 // required-specs.md names promoted requirements but deliberately carries no
-// lock digest; these four documents are the E12 lifecycle and design records.
+// lock digest; these four documents retain the historical E12 identities and
+// record the current E2 release pin separately.
 for (const document of ["architecture-decision-records.md", "architecture.md", "implementation-memo.md", "roadmap.md"]) {
   const text = await readFile(join(contractRoot, "../docs", document), "utf8");
-  if (!text.includes(dependencyLockDigest) || !text.includes(generatedLockDigest)) throw new Error(`${document} does not carry the current E12 lock digests`);
+  if (!text.includes(dependencyLockDigest) || !text.includes(generatedLockDigest)) throw new Error(`${document} does not carry the current release lock digests`);
 }
 const implementationMemoText = await readFile(join(contractRoot, "../docs/implementation-memo.md"), "utf8");
 const testingText = await readFile(join(contractRoot, "../TESTING.md"), "utf8");

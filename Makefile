@@ -52,6 +52,7 @@ test-prepare:
 
 test-unit:
 	@./scripts/toolchain-check.sh --go-only
+	@node contract/scripts/test-release-policy.mjs
 	@node scripts/test-validate-product-go-manifest.mjs
 	@node scripts/test-validate-product-package.mjs
 	@node scripts/test-validate-product-makefile.mjs

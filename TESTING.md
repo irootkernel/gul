@@ -1,5 +1,29 @@
 # Testing and developer commands
 
+The E2-T0 opt-in release gate is
+`GUL_E2_DOLGORAE_ARCHIVE=/absolute/path/to/published/archive.tar.gz GUL_E2_DOLGORAE_EXECUTABLE=/absolute/path/to/published/dolgorae GOTOOLCHAIN=local go test -race -count=1 -v ./test/provider`.
+It requires the published archive and pinned darwin/arm64 executable digests,
+copies the executable into its private directory before verifying and running
+it, and creates a private
+temporary HOME and workspace, starts that gateway over its owned Unix socket,
+and checks generated gRPC version negotiation, required methods, feature
+parity, exact credential schema, lane writer support and typed protocol refusal.
+The child receives an explicit minimal environment. The gate terminates only
+its own child. Without the explicit executable it skips;
+`make test` alone therefore does not establish this release qualification.
+Offline fixture tests require digest or I/O failure to return no executable
+path, without launching a provider.
+`node contract/scripts/test-release-policy.mjs`, also part of `make test-unit`,
+covers admission and release drift independently of a running provider.
+
+Supplemental source testing exports the exact v0.1.3 tag into a separate
+temporary tree and runs `rustup run 1.97.1 cargo build --locked --bin dolgorae`
+with an isolated HOME, Cargo home and target directory. The installed Rust
+toolchain may be selected through an explicit `RUSTUP_HOME`. The source-built
+binary is diagnostic evidence; the published artifact remains the release gate
+and final-qualification executable. Neither check uses a neighboring working
+tree or a user runtime.
+
 E0-T8 defines a serial command facade, E1-T1 extends it with the root Go product
 module, E1-T2 adds the exact-pinned React bundle, and E1-T3 adds checked Gul
 ConnectRPC declarations and the typed consumer-port error catalog. E1-T4 adds

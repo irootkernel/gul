@@ -475,6 +475,13 @@ REQ-WRITER-004 retains its original ID and meaning and is deferred, not supersed
 
 ## 7. Current State ledger
 
+E2-T0 pins the qualified published v0.1.3 artifact and matching immutable
+consumer inputs in `contract/dependency-lock.json`. Its isolated gateway check,
+regenerated release drift and admission policy establish Current State for
+REQ-CONSUMER-003 and REQ-RUNTIME-008 within the release identity and contract
+boundary. Production transport, credentials and actual session actions retain
+their E2-T1/T2/T3 owners below.
+
 Earlier component entries retain the verification scope accepted at their task
 completion. Their "unmounted" and "disabled" route labels describe that earlier
 scope, not the current host route inventory. References to later work in those

@@ -1,17 +1,37 @@
 # Dolgorae public contract fixture
 
-This directory is E12-T1's checked consumer boundary. `dependency-lock.json`
-binds every imported public input to immutable Dolgorae TASK-053 commit
-`21aefe5b2a8dc6fb18a58338090348b23d2f0a4a`. The descriptor records 36 known
-methods while the consumer profile separately identifies 27 required and nine
-unavailable methods. Nothing here is executable-release, product-runtime, or
-live-provider evidence.
+This directory contains the checked consumer boundary. `dependency-lock.json`
+binds every imported public input to the published Dolgorae v0.1.3 source
+`07dc31331d03aae9ed7c0c862a0cbe8a5184024e` and records the published archive,
+executable digest and advertised capabilities. The unchanged descriptor records
+36 known methods; the consumer profile identifies 27 required and nine
+unavailable methods. E12-T1's original TASK-053 completion at
+`21aefe5b2a8dc6fb18a58338090348b23d2f0a4a` remains historical contract evidence.
+Production assembly and action acceptance belong to E2-T1 through E2-T3.
 
 The imported producer lock names task-input revision
 `a963f3601b1e7036432501b6d8946c8c62c1466d` because its immutable identity is
 the recorded Git blobs plus artifact digests. Gul's dependency lock names the
-TASK-053 completion commit that contains that producer lock and correlates the
-task-input revision explicitly.
+released source and retains the TASK-053 completion identity separately from
+the producer's task-input revision.
+
+`admission-policy.json` is Gul's operation-specific policy authority. Generation
+derives `generated/policy/release-admission.v1.json` from it and the published
+capability snapshot. Transport admission requires the 27 methods and their
+relevant features. `reader_writer_access=false` and
+`brokered_independent_subagent_runs=false` remain advertised facts and do not
+decide every action. A dedicated threadless first WRITE requires lane writer
+support, `first_write_via_submit_turn`, durable authority and fresh typed state;
+it uses SubmitTurn without AcquireWriter. Existing-reader acquisition requires
+verified Profile transition support. The release advertises that transition as
+unverified. Shared-readonly WRITE, threadless Acquire and Gul continuation are
+unavailable. Every release-admitted action still requires current Run, Profile,
+Controller, Writer and Session guards at execution.
+
+The release changes descriptor metadata, the producer lock, verification index
+and SubmitTurn's `SESSION_CLOSE_IN_PROGRESS` action mapping. Proto, descriptor
+bytes, credential schema, consumer profile and client/mutation policies are
+unchanged. Imported inputs retain producer bytes and exact per-file digests.
 
 `generate.sh` reproduces the Buf descriptor, proves additive compatibility
 against the pre-TASK-053 baseline, and generates typed Go and TypeScript clients,

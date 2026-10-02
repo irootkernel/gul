@@ -256,7 +256,7 @@
     },
     {
       "operation": "GetWorkspaceWriterStatus",
-      "capability": "reader_writer_access, durable_writer_authority"
+      "capability": "durable_writer_authority; broad reader/writer flag does not gate this read"
     },
     {
       "operation": "AcquireWriter",

@@ -2,26 +2,270 @@
   "schema_version": 1,
   "source": {
     "repository": "git@github-irootkernel:irootkernel/dolgorae.git",
-    "revision": "21aefe5b2a8dc6fb18a58338090348b23d2f0a4a",
+    "revision": "07dc31331d03aae9ed7c0c862a0cbe8a5184024e",
     "producer_task_input_revision": "a963f3601b1e7036432501b6d8946c8c62c1466d",
-    "identity": "TASK-053 completion commit containing the producer lock; imported artifact identity remains its Git blobs plus SHA-256 digests"
+    "identity": "Published Dolgorae v0.1.3 source tree; TASK-053 contract-ready provenance remains distinct from this released executable identity",
+    "contract_ready_revision": "21aefe5b2a8dc6fb18a58338090348b23d2f0a4a"
   },
   "files": [
-    {"path": "upstream/buf.yaml", "sha256": "a32eac9dd30b3fd48850c5001946ff7bb60f6fac951824e6be0b6c70e4785275"},
-    {"path": "upstream/baselines/dolgorae-public-v1-pre-task-053.descriptor.pb", "sha256": "c29b70f6d1bfca5447ddfc396cb62a9ff4f3bbd10532518af78e4726b7de1252"},
-    {"path": "upstream/dolgorae/public/v1/dolgorae.proto", "sha256": "561ccf51658b50703f9fb1a37c4de7c52188b34ab4db2ac9885ef3ccabdf0e48"},
-    {"path": "upstream/dolgorae-public-v1.descriptor.json", "sha256": "9b983ef25d67c7306b35b3f78823efe8dde16d1049a919e898f172515a888137"},
-    {"path": "upstream/dolgorae-public-v1.descriptor.pb", "sha256": "28b132842bbeb48123c2b7cc529de689e6e6286b0783cbde8551d17ba4921ed5"},
-    {"path": "upstream/dolgorae-capabilities-v1.schema.json", "sha256": "bdcb76265d6508f73b791e5f289e09f28fda9a6dcc67a5ca03c2a425e8ea9b79"},
-    {"path": "upstream/dolgorae-controller-credential-v1.schema.json", "sha256": "6e888023fa6f12964afbd2867832944307dc626cad3fe6c6bc517768ab98b84f"},
-    {"path": "upstream/dolgorae-grpc-client-policy-v1.json", "sha256": "01237c8f8f7c43934fee457b587c46f288a4ec9bf68081ef7719d1ce31edf3fd"},
-    {"path": "upstream/dolgorae-grpc-conformance-v1.json", "sha256": "5abffb57914829399bde0c2fc9b7852e143cab847e8ad40b7beee077bfa1fb72"},
-    {"path": "upstream/dolgorae-grpc-error-mapping-v1.json", "sha256": "ccb8f43430f98d434b0fd37640357b1bb36ff84767f9ad6ded92e624f1421437"},
-    {"path": "upstream/dolgorae-gul-consumer-v1.fixtures.json", "sha256": "18a5a48b3240eb684225f5f1d7f41538dc874c724268c7794e481119907a5274"},
-    {"path": "upstream/dolgorae-gul-consumer-v1.json", "sha256": "8211b403960edc114ac9f874d4c739e2a23674504d8dbb304284b5ef31eaa71b"},
-    {"path": "upstream/dolgorae-gul-consumer-v1.lock.json", "sha256": "90c23c0ba6ba98b2f4790bd733298908998fcb51430748151c888508678b03b3"},
-    {"path": "upstream/dolgorae-rpc-mutation-policy-v1.json", "sha256": "2c2e62ef464c4fa587f9023a404cd83de0622bffda5bd05eca852f70eba73e06"},
-    {"path": "upstream/dolgorae-machine-v1.schema.json", "sha256": "19b97f95a5ea1d5e25d10662d476fb9cefb5c98358c0de5f51b583d7a7a6a630"},
-    {"path": "upstream/verification-index-v1.json", "sha256": "21d9ac63da8aa4ae15dedd38cd5debd180b4aa30dca823c58d978167d73d9cfc"}
-  ]
+    {
+      "path": "upstream/buf.yaml",
+      "sha256": "a32eac9dd30b3fd48850c5001946ff7bb60f6fac951824e6be0b6c70e4785275"
+    },
+    {
+      "path": "upstream/baselines/dolgorae-public-v1-pre-task-053.descriptor.pb",
+      "sha256": "c29b70f6d1bfca5447ddfc396cb62a9ff4f3bbd10532518af78e4726b7de1252"
+    },
+    {
+      "path": "upstream/baselines/dolgorae-public-v1-task-053.descriptor.pb",
+      "sha256": "28b132842bbeb48123c2b7cc529de689e6e6286b0783cbde8551d17ba4921ed5"
+    },
+    {
+      "path": "upstream/dolgorae/public/v1/dolgorae.proto",
+      "sha256": "561ccf51658b50703f9fb1a37c4de7c52188b34ab4db2ac9885ef3ccabdf0e48"
+    },
+    {
+      "path": "upstream/dolgorae-public-v1.descriptor.json",
+      "sha256": "f7d9dd2b604fec954ac4ef149a80b5bdc81cf205156fa2f61d05b15267e874db"
+    },
+    {
+      "path": "upstream/dolgorae-public-v1.descriptor.pb",
+      "sha256": "28b132842bbeb48123c2b7cc529de689e6e6286b0783cbde8551d17ba4921ed5"
+    },
+    {
+      "path": "upstream/dolgorae-capabilities-v1.schema.json",
+      "sha256": "bdcb76265d6508f73b791e5f289e09f28fda9a6dcc67a5ca03c2a425e8ea9b79"
+    },
+    {
+      "path": "upstream/dolgorae-controller-credential-v1.schema.json",
+      "sha256": "6e888023fa6f12964afbd2867832944307dc626cad3fe6c6bc517768ab98b84f"
+    },
+    {
+      "path": "upstream/dolgorae-grpc-client-policy-v1.json",
+      "sha256": "01237c8f8f7c43934fee457b587c46f288a4ec9bf68081ef7719d1ce31edf3fd"
+    },
+    {
+      "path": "upstream/dolgorae-grpc-conformance-v1.json",
+      "sha256": "5abffb57914829399bde0c2fc9b7852e143cab847e8ad40b7beee077bfa1fb72"
+    },
+    {
+      "path": "upstream/dolgorae-grpc-error-mapping-v1.json",
+      "sha256": "e50a3cfec9e6d9beb95edd21e9427bff28cf11c452d3a4369ba8d5eeb20f2b08"
+    },
+    {
+      "path": "upstream/dolgorae-gul-consumer-v1.fixtures.json",
+      "sha256": "18a5a48b3240eb684225f5f1d7f41538dc874c724268c7794e481119907a5274"
+    },
+    {
+      "path": "upstream/dolgorae-gul-consumer-v1.json",
+      "sha256": "8211b403960edc114ac9f874d4c739e2a23674504d8dbb304284b5ef31eaa71b"
+    },
+    {
+      "path": "upstream/dolgorae-gul-consumer-v1.lock.json",
+      "sha256": "ed0f04fb60dc067738183a769889b243ff842c221d8e972b8c77e7d36c7defd0"
+    },
+    {
+      "path": "upstream/dolgorae-rpc-mutation-policy-v1.json",
+      "sha256": "2c2e62ef464c4fa587f9023a404cd83de0622bffda5bd05eca852f70eba73e06"
+    },
+    {
+      "path": "upstream/dolgorae-machine-v1.schema.json",
+      "sha256": "19b97f95a5ea1d5e25d10662d476fb9cefb5c98358c0de5f51b583d7a7a6a630"
+    },
+    {
+      "path": "upstream/verification-index-v1.json",
+      "sha256": "625b7182ea7306cd6349c21d319bfce937b285ce0949cc8010c6bd631c37f3d4"
+    }
+  ],
+  "release": {
+    "version": "0.1.3",
+    "tag": "v0.1.3",
+    "source_revision": "07dc31331d03aae9ed7c0c862a0cbe8a5184024e",
+    "url": "https://github.com/irootkernel/dolgorae/releases/tag/v0.1.3",
+    "archive": {
+      "name": "dolgorae-v0.1.3-aarch64-apple-darwin.tar.gz",
+      "asset_id": 602572904,
+      "sha256": "91fff11625ec546730d7bc18c68c51f5b367a6623700b09661a2b9589ce35bd2"
+    },
+    "executable": {
+      "target": "aarch64-apple-darwin",
+      "sha256": "8154564ffaa3014bef235aed6a8cc0da017cdc1501267fa9c85aa927227bc824",
+      "version": "0.1.3"
+    },
+    "advertised_capabilities": {
+      "access_policy_transition": "unverified",
+      "app_server_transport": "direct_websocket_unix",
+      "artifact_bounds": {
+        "digest": "sha256",
+        "exact_byte_length": true,
+        "maximum_artifact_bytes": 33554432,
+        "maximum_chunk_bytes": 1048576,
+        "maximum_inline_response_bytes": 1048576,
+        "visibility_classes": [
+          "observer",
+          "controller_only"
+        ]
+      },
+      "assurance": {
+        "maximum_achievable": "best_effort_personal_alpha",
+        "selection_time": "before_run_allocation",
+        "supported": [
+          "best_effort_personal_alpha"
+        ]
+      },
+      "background_execution_control": {
+        "mechanism": "dedicated_lane_process_census",
+        "support": "unverified"
+      },
+      "control_modes": [
+        "direct_interactive",
+        "managed_agent"
+      ],
+      "controller_carrier_root": "home/.dolgorae/controller-carriers",
+      "controller_credential": {
+        "accepted_kinds": [
+          "human_cli",
+          "interactive_client",
+          "workflow_orchestrator",
+          "automation",
+          "other"
+        ],
+        "capability_byte_length": 32,
+        "capability_encoding": "base64url_no_padding",
+        "client_descendant_pattern": "<client>/<installation-id>/",
+        "create_exclusive": true,
+        "file_mode": "0600",
+        "initial_generation": 1,
+        "maximum_file_bytes": 4096,
+        "normalized_principal": "kind+subject_id_else_kind+instance_id",
+        "parent_directory_mode": "0700",
+        "regular_file": true,
+        "same_uid": true,
+        "schema_id": "https://dolgorae.local/schema/controller-credential/v1",
+        "schema_sha256": "6e888023fa6f12964afbd2867832944307dc626cad3fe6c6bc517768ab98b84f",
+        "schema_version": 1,
+        "symlinks": "forbidden"
+      },
+      "dolgorae_version": "0.1.3",
+      "event_projection_version": 1,
+      "event_protocol_version": 1,
+      "execution_lanes": [
+        "shared_readonly",
+        "dedicated"
+      ],
+      "features": {
+        "artifact_retrieval": true,
+        "assurance_negotiation": false,
+        "brokered_independent_subagent_runs": false,
+        "control_modes": true,
+        "controller_binding": true,
+        "controller_timeline": true,
+        "durable_writer_authority": true,
+        "event_replay": true,
+        "first_write_via_submit_turn": true,
+        "operator_capability": true,
+        "operator_controller_reset": true,
+        "persistent_runs": true,
+        "profile_diagnostics": true,
+        "profile_membership_repair": true,
+        "profile_server_migration": true,
+        "public_local_socket": true,
+        "reader_writer_access": false,
+        "run_fork": false,
+        "safe_client_projection": true,
+        "sticky_dedicated_lanes": true,
+        "threadless_acquire_write": false,
+        "worker_controller_revalidation": true,
+        "workspace_event_stream": false,
+        "write_continuation": false,
+        "writer_handoff": false
+      },
+      "grpc_error_detail_version": 1,
+      "grpc_methods": [
+        "ArtifactService.GetArtifact",
+        "ArtifactService.ReadArtifactChunk",
+        "ControllerService.VerifyController",
+        "InteractionService.GetControllerInteraction",
+        "InteractionService.ListPendingInteractions",
+        "InteractionService.ResolveInteraction",
+        "ObservationService.ListRunTimelineItems",
+        "ObservationService.WatchRunEvents",
+        "OrchestrationService.GetOrchestratedSession",
+        "OrchestrationService.ListOrchestratedSessionResults",
+        "RunService.CloseRun",
+        "RunService.GetRun",
+        "RunService.InterruptTurn",
+        "RunService.ListRuns",
+        "RunService.PauseRun",
+        "RunService.ReconcileRun",
+        "RunService.RecoverRun",
+        "RunService.ResumeRun",
+        "RunService.StartRun",
+        "RunService.SubmitTurn",
+        "RuntimeService.GetCapabilities",
+        "RuntimeService.GetProfile",
+        "RuntimeService.InspectWorkspace",
+        "RuntimeService.ListProfiles",
+        "WriterService.AcquireWriter",
+        "WriterService.GetWorkspaceWriterStatus",
+        "WriterService.ReleaseWriter"
+      ],
+      "independent_run_concurrency": {
+        "basic_same_home_coexistence": "unverified",
+        "resource_warning_live_dedicated": 6,
+        "storage_and_long_duration": "unverified"
+      },
+      "interactions": {
+        "command_execution_approval": "supported",
+        "connector_approval": "recognized_unsupported",
+        "file_change_approval": "supported",
+        "maximum_response_bytes": 1048576,
+        "maximum_safe_payload_bytes": 8388608,
+        "mcp_elicitation": "recognized_unsupported",
+        "permission_request": "recognized_unsupported",
+        "user_input": "supported"
+      },
+      "lane_capabilities": {
+        "dedicated": {
+          "background_control": "best_effort_personal_alpha",
+          "command_execution": "supported",
+          "maximum_assurance": "best_effort_personal_alpha",
+          "per_run_process_cleanup": "bounded_process_census",
+          "physical_start": "lazy_first_input",
+          "writer_support": true
+        },
+        "shared_readonly": {
+          "background_control": "profile_aggregate_only",
+          "codex_mode": "plan",
+          "command_execution": "bounded_best_effort",
+          "maximum_assurance": "best_effort_personal_alpha",
+          "per_run_process_cleanup": "unavailable",
+          "writer_support": false
+        }
+      },
+      "machine_protocol_version": 1,
+      "maximum_rpc_client_version": 1,
+      "minimum_rpc_client_version": 1,
+      "native_subagents": {
+        "disable_enforcement": "unavailable",
+        "lifecycle_observation": "unverified",
+        "quiescence_tracking": "unverified",
+        "reason": "TASK-005 validates the enabled-only launch policy, while complete native child observation remains unverified until a run exercises it."
+      },
+      "native_subagents_policy": "enabled",
+      "profile": null,
+      "profile_launch_mode": "dolgorae_owned_direct_executable",
+      "projection_profiles": [
+        "minimal",
+        "operational"
+      ],
+      "rpc_descriptor_sha256": "28b132842bbeb48123c2b7cc529de689e6e6286b0783cbde8551d17ba4921ed5",
+      "rpc_protocol_version": 1,
+      "supported_transports": [
+        "machine_cli",
+        "local_grpc"
+      ],
+      "timeline_protocol_version": 1
+    }
+  }
 }

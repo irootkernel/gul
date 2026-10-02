@@ -5,7 +5,7 @@
 | Role | Non-normative implementation observations, dependencies, risks, and handoff |
 | Product | Gul |
 | Version | 0.1-dolgorae-consumer-v1 |
-| Last updated | 2026-10-01 |
+| Last updated | 2026-10-02 |
 
 ## 1. Boundary
 
@@ -112,8 +112,8 @@ E12-T1 imports immutable TASK-053 commit
 `8f52ae66e126f37013d7842b2113fc509d21af4e4fc465cecdbeef7e21619f01` plus
 generated-lock SHA-256
 `6284064e720e2220d6960c42faef6a4c13292ce1327f44e00388dc52b2e17d4a`.
-The Go 1.27.1 toolchain rebaseline retains this historical completion digest;
-the current generated-lock SHA-256 is
+The pre-release Go 1.27.1 toolchain rebaseline retained this historical completion digest;
+its generated-lock SHA-256 was
 `96da1b0a5caeffac1bc9d387c4c4e4ee4159daf47e3877ed748d291be9bb5bc0`
 after regenerating the Go header with host protoc 36.2.
 The generator reproduces the 8-service, 36-method descriptor with Buf 1.69,
@@ -2196,3 +2196,56 @@ active, and implemented Current State is unchanged. This amendment authorizes
 planning only; it does not qualify a provider, install a binary or implement a
 Task. The shared consumer dossier continues to link to the roadmap's acceptance
 details.
+
+### E2-T0 release qualification (2026-10-02)
+
+E2-T0 release qualification (2026-10-02): the published v0.1.3 source is
+`07dc31331d03aae9ed7c0c862a0cbe8a5184024e`. The current dependency-lock SHA-256
+is `223d2a72d7bd281dba0abdc8b1e966d792492546c3be63a67e593c94eed0c05a` and generated-lock SHA-256 is
+`8d02e824c36795221ee6d1b3fc7e2b43943d13701aa76d019c3b6aea30b26a6d`. The earlier E12 pin remains historical evidence.
+Actual production assembly, credentials and session actions remain E2-T1/T2/T3.
+
+The published archive `dolgorae-v0.1.3-aarch64-apple-darwin.tar.gz` has SHA-256
+`91fff11625ec546730d7bc18c68c51f5b367a6623700b09661a2b9589ce35bd2`; its executable
+has SHA-256 `8154564ffaa3014bef235aed6a8cc0da017cdc1501267fa9c85aa927227bc824`.
+The published release is stable, identifies the exact source above, and records
+TASK-026 acceptance plus separate release-candidate QA. The installed binary
+and neighboring dirty producer tree were not used for qualification.
+
+The exact tag was exported into a separate temporary tree. With isolated HOME,
+Cargo home and build target, `rustup run 1.97.1 cargo build --locked --bin dolgorae`
+passed. Its binary SHA-256 is
+`0e7ae137ba699eb63d67c4319839939513ca9b7a7476e6714ddeeabe26431d03` and its Machine
+capabilities equal the published binary's snapshot. This is supplemental source
+provenance; the source-built executable does not satisfy the release gate.
+
+The opt-in published-artifact test checks the archive digest, copies the binary
+into its private directory and verifies that copy before execution. It uses a
+minimal child environment and generated public gRPC clients over a private Unix
+socket in an isolated HOME/workspace. It passes version negotiation
+with a protocol-zero handshake and fresh request UUIDs, negotiated ListProfiles,
+27 required methods, feature parity, exact credential schema ID/version/digest,
+dedicated/shared lane writer support, and typed unsupported-protocol refusal.
+No Profile, carrier, account or live Codex runtime is configured by this test.
+The fixture initializes its own home/workspace using the public CLI; production
+operations retain the public-gRPC-only boundary.
+
+Release inputs change descriptor metadata, error/action mapping, producer lock
+and verification index. The additional frozen TASK-053 descriptor baseline is
+imported and locked. Wire proto/descriptor, credential schema, consumer profile,
+client and mutation policy bytes are unchanged. Regeneration adds SubmitTurn's
+`SESSION_CLOSE_IN_PROGRESS` action mapping and the release-admission map.
+`admission-policy.json` owns the operation conditions. Transport admission keeps
+all 27 methods separate from conditional Writer actions, preserves false broad
+flags, admits dedicated first WRITE with fresh typed guards, and refuses
+threadless Acquire, shared-readonly WRITE and continuation. Existing-reader
+transition remains blocked until the selected Profile proves supported.
+
+E2-T1 must implement the admission policy in the production probe and transport;
+E2-T2 owns carrier creation and verification. E2-T3 supplies action and assembled
+browser acceptance against this published executable. Handshake/read evidence
+alone supplies no live write acceptance. E9 keeps fault/security/device and
+deployment qualification. Release notes are not enrolled. The shared dossier
+remains for E2/E9. `make contract-check`, admission-policy negatives and the
+serial `make test` facade passed. Corrected-target completion source review
+confirms the release-qualification scope. E2-T0 is Completed; E2-T1 is next.

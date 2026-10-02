@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "source_revision": "21aefe5b2a8dc6fb18a58338090348b23d2f0a4a",
+  "source_revision": "07dc31331d03aae9ed7c0c862a0cbe8a5184024e",
   "source_descriptor_sha256": "28b132842bbeb48123c2b7cc529de689e6e6286b0783cbde8551d17ba4921ed5",
   "package": "dolgorae.public.v1",
   "service_count": 8,

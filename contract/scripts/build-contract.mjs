@@ -3,6 +3,7 @@ import { mkdir, readFile, readdir, stat, writeFile } from "node:fs/promises";
 import { join, relative, resolve } from "node:path";
 import { fromBinary } from "@bufbuild/protobuf";
 import { FileDescriptorSetSchema } from "@bufbuild/protobuf/wkt";
+import { releaseAdmission } from "./release-policy.mjs";
 
 const contractRoot = resolve(import.meta.dir, "..");
 const repoRoot = resolve(contractRoot, "..");
@@ -311,6 +312,10 @@ const providerFixtures = JSON.parse(await readFile(join(contractRoot, "upstream/
 const fixtures = consumerFixtures(operations, events, clientPolicy, mutations, descriptorMetadata, consumerProfile, providerFixtures);
 
 if (!process.argv.includes("--lock-only")) {
+  const credentialBytes = await readFile(join(contractRoot, "upstream/dolgorae-controller-credential-v1.schema.json"));
+  const admissionPolicy = JSON.parse(await readFile(join(contractRoot, "admission-policy.json"), "utf8"));
+  await writeJson(join(outputRoot, "policy/release-admission.v1.json"),
+    releaseAdmission(lock, consumerProfile, JSON.parse(credentialBytes), sha256(credentialBytes), admissionPolicy));
   await writeJson(join(outputRoot, "contract-inventory.v1.json"), inventory);
   await writeJson(join(outputRoot, "gul-operation-map.v1.json"), operations);
   await writeJson(join(outputRoot, "event-invalidation-map.v1.json"), events);

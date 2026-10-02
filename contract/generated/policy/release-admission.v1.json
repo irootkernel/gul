@@ -1,0 +1,365 @@
+{
+  "schema_version": 1,
+  "source_revision": "07dc31331d03aae9ed7c0c862a0cbe8a5184024e",
+  "version": "0.1.3",
+  "credential_schema_id": "https://dolgorae.local/schema/controller-credential/v1",
+  "credential_schema_sha256": "6e888023fa6f12964afbd2867832944307dc626cad3fe6c6bc517768ab98b84f",
+  "operations": [
+    {
+      "method": "ArtifactService.GetArtifact",
+      "required_features": [
+        "artifact_retrieval"
+      ],
+      "release_admitted": true
+    },
+    {
+      "method": "ArtifactService.ReadArtifactChunk",
+      "required_features": [
+        "artifact_retrieval"
+      ],
+      "release_admitted": true
+    },
+    {
+      "method": "ControllerService.VerifyController",
+      "required_features": [
+        "controller_binding"
+      ],
+      "release_admitted": true
+    },
+    {
+      "method": "InteractionService.GetControllerInteraction",
+      "required_features": [
+        "controller_binding"
+      ],
+      "release_admitted": true
+    },
+    {
+      "method": "InteractionService.ListPendingInteractions",
+      "required_features": [],
+      "release_admitted": true
+    },
+    {
+      "method": "InteractionService.ResolveInteraction",
+      "required_features": [
+        "controller_binding"
+      ],
+      "release_admitted": true
+    },
+    {
+      "method": "ObservationService.ListRunTimelineItems",
+      "required_features": [
+        "controller_timeline"
+      ],
+      "release_admitted": true
+    },
+    {
+      "method": "ObservationService.WatchRunEvents",
+      "required_features": [
+        "event_replay",
+        "safe_client_projection"
+      ],
+      "release_admitted": true
+    },
+    {
+      "method": "OrchestrationService.GetOrchestratedSession",
+      "required_features": [],
+      "release_admitted": true
+    },
+    {
+      "method": "OrchestrationService.ListOrchestratedSessionResults",
+      "required_features": [],
+      "release_admitted": true
+    },
+    {
+      "method": "RunService.CloseRun",
+      "required_features": [
+        "persistent_runs"
+      ],
+      "release_admitted": true
+    },
+    {
+      "method": "RunService.GetRun",
+      "required_features": [
+        "persistent_runs"
+      ],
+      "release_admitted": true
+    },
+    {
+      "method": "RunService.InterruptTurn",
+      "required_features": [
+        "persistent_runs"
+      ],
+      "release_admitted": true
+    },
+    {
+      "method": "RunService.ListRuns",
+      "required_features": [
+        "persistent_runs"
+      ],
+      "release_admitted": true
+    },
+    {
+      "method": "RunService.PauseRun",
+      "required_features": [
+        "persistent_runs"
+      ],
+      "release_admitted": true
+    },
+    {
+      "method": "RunService.ReconcileRun",
+      "required_features": [
+        "persistent_runs"
+      ],
+      "release_admitted": true
+    },
+    {
+      "method": "RunService.RecoverRun",
+      "required_features": [
+        "persistent_runs"
+      ],
+      "release_admitted": true
+    },
+    {
+      "method": "RunService.ResumeRun",
+      "required_features": [
+        "persistent_runs"
+      ],
+      "release_admitted": true
+    },
+    {
+      "method": "RunService.StartRun",
+      "required_features": [
+        "persistent_runs",
+        "controller_binding"
+      ],
+      "release_admitted": true
+    },
+    {
+      "method": "RunService.SubmitTurn",
+      "required_features": [
+        "persistent_runs"
+      ],
+      "release_admitted": true
+    },
+    {
+      "method": "RuntimeService.GetCapabilities",
+      "required_features": [],
+      "release_admitted": true
+    },
+    {
+      "method": "RuntimeService.GetProfile",
+      "required_features": [],
+      "release_admitted": true
+    },
+    {
+      "method": "RuntimeService.InspectWorkspace",
+      "required_features": [],
+      "release_admitted": true
+    },
+    {
+      "method": "RuntimeService.ListProfiles",
+      "required_features": [],
+      "release_admitted": true
+    },
+    {
+      "method": "WriterService.AcquireWriter",
+      "required_features": [
+        "durable_writer_authority"
+      ],
+      "release_admitted": true
+    },
+    {
+      "method": "WriterService.GetWorkspaceWriterStatus",
+      "required_features": [
+        "durable_writer_authority"
+      ],
+      "release_admitted": true
+    },
+    {
+      "method": "WriterService.ReleaseWriter",
+      "required_features": [
+        "durable_writer_authority"
+      ],
+      "release_admitted": true
+    }
+  ],
+  "actions": [
+    {
+      "action": "create_direct_session",
+      "release_admitted": true,
+      "condition": {
+        "required_features": [
+          "persistent_runs",
+          "controller_binding",
+          "control_modes"
+        ],
+        "requires": "verified interactive-client carrier with explicit orchestration_launch and named Policy; parentless direct_interactive Primary with explicit settings"
+      }
+    },
+    {
+      "action": "submit_read",
+      "release_admitted": true,
+      "condition": {
+        "required_features": [
+          "persistent_runs"
+        ],
+        "requires": "fresh typed compatible Run/Profile/Session state, verified Controller and eligible READ policy; no active Turn, unresolved attempt or aggregate close"
+      }
+    },
+    {
+      "action": "release_writer",
+      "release_admitted": true,
+      "condition": {
+        "lane": "dedicated",
+        "lane_writer_support": true,
+        "required_features": [
+          "durable_writer_authority"
+        ],
+        "requires": "fresh same-Run Writer ownership, expected writer revision and verified Controller"
+      }
+    },
+    {
+      "action": "pause_primary",
+      "release_admitted": true,
+      "condition": {
+        "required_features": [
+          "persistent_runs"
+        ],
+        "requires": "fresh eligible Primary state, expected state revision and verified Controller"
+      }
+    },
+    {
+      "action": "resume_primary",
+      "release_admitted": true,
+      "condition": {
+        "required_features": [
+          "persistent_runs"
+        ],
+        "requires": "fresh eligible paused Primary state, expected state revision and verified Controller"
+      }
+    },
+    {
+      "action": "interrupt_turn",
+      "release_admitted": true,
+      "condition": {
+        "required_features": [
+          "persistent_runs"
+        ],
+        "requires": "fresh active Turn and expected state revision with verified Controller"
+      }
+    },
+    {
+      "action": "resolve_interaction",
+      "release_admitted": true,
+      "condition": {
+        "required_features": [
+          "controller_binding"
+        ],
+        "requires": "fresh supported pending Interaction and bounded protected response; verified Controller and original idempotency key; no replay of protected body"
+      }
+    },
+    {
+      "action": "recover_run",
+      "release_admitted": true,
+      "condition": {
+        "required_features": [
+          "persistent_runs"
+        ],
+        "requires": "fresh typed recovery-required state and verified Controller; reconcile aggregate close separately"
+      }
+    },
+    {
+      "action": "reconcile_run",
+      "release_admitted": true,
+      "condition": {
+        "required_features": [
+          "persistent_runs"
+        ],
+        "requires": "fresh typed reconcile-required state and verified Controller; no semantic mutation replay"
+      }
+    },
+    {
+      "action": "close_session",
+      "release_admitted": true,
+      "condition": {
+        "required_features": [
+          "persistent_runs",
+          "controller_binding"
+        ],
+        "requires": "fresh owned root and aggregate state, verified Controller and explicit interrupt confirmation when owned work is active; pending is not closed; no automatic tokenless replay"
+      }
+    },
+    {
+      "action": "first_dedicated_write",
+      "release_admitted": true,
+      "condition": {
+        "lane": "dedicated",
+        "lane_writer_support": true,
+        "required_features": [
+          "first_write_via_submit_turn",
+          "durable_writer_authority"
+        ],
+        "requires": "threadless Run, fresh typed state, no competing Writer, verified Controller and fresh Session; SubmitTurn WRITE without Acquire"
+      }
+    },
+    {
+      "action": "held_writer_submit",
+      "release_admitted": true,
+      "condition": {
+        "lane": "dedicated",
+        "required_features": [
+          "durable_writer_authority"
+        ],
+        "requires": "fresh same-Run Writer authority and verified WRITE policy; READ does not release authority",
+        "lane_writer_support": true
+      }
+    },
+    {
+      "action": "existing_reader_to_writer",
+      "release_admitted": false,
+      "condition": {
+        "lane": "dedicated",
+        "required_profile_access_policy_transition": "supported",
+        "requires": "fresh typed Run/Profile/Writer state; unverified or unavailable blocks the transition",
+        "lane_writer_support": true,
+        "required_features": [
+          "durable_writer_authority"
+        ]
+      }
+    },
+    {
+      "action": "threadless_acquire",
+      "release_admitted": false,
+      "condition": {
+        "required_features": [
+          "threadless_acquire_write"
+        ],
+        "supported_by_release": false
+      }
+    },
+    {
+      "action": "shared_readonly_write",
+      "release_admitted": false,
+      "condition": {
+        "lane": "shared_readonly",
+        "supported_by_release": false,
+        "lane_writer_support": true,
+        "required_features": [
+          "durable_writer_authority"
+        ]
+      }
+    },
+    {
+      "action": "continuation",
+      "release_admitted": false,
+      "condition": {
+        "required_method": "RunService.CreateWriteContinuation",
+        "supported_by_gul": false
+      }
+    }
+  ],
+  "non_admission_features": [
+    "reader_writer_access",
+    "brokered_independent_subagent_runs"
+  ]
+}

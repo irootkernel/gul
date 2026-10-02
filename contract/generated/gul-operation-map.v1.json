@@ -292,7 +292,7 @@
       "retry": "Bounded repeat",
       "reconciliation": "Repeat read",
       "projection": "Replace Writer projection",
-      "capability": "reader_writer_access, durable_writer_authority",
+      "capability": "durable_writer_authority; broad reader/writer flag does not gate this read",
       "verification": "E12 pinned contract; not runtime/live evidence"
     },
     {

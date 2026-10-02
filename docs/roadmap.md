@@ -3,13 +3,13 @@
 | Field | Value |
 | --- | --- |
 | Role | Sole authority for task identity, order, status, dependencies, and phase |
-| Revision | 2026-10-02 E2 released-provider integration plan |
+| Revision | 2026-10-02 E2-T0 released-provider qualification |
 | Active Task | None |
-| Next | E2-T0 (after Provider released) |
+| Next | E2-T1 |
 | Required provider | Released Dolgorae v0.1.3 implementing `dolgorae.gul-consumer/v1` |
 
-E14 is Completed. `Next` names E2-T0, which cannot start until the Provider
-released gate is satisfied.
+E14 is Completed. The published v0.1.3 artifact and immutable release source
+have been qualified by E2-T0, including the release contract and admission matrix.
 
 ## 1. Status and execution rules
 
@@ -139,7 +139,7 @@ second owner of membership, order or status.
 | E7 | Completed | Responsive UI, mandatory Prompt History, accessibility and IME | [Roadmap](#e7-complete-the-usable-responsive-interface); [Memo](implementation-memo.md#e7-epic-closeout-2026-09-30) |
 | E8 | Completed | Authentication, browser protection and headless/PWA/tailnet packaging together | [Roadmap](#e8-complete-authentication-and-deployment-packaging); [Memo](implementation-memo.md#e8-epic-closeout-2026-10-01) |
 | E14 | Completed | Assembled pre-release application acceptance and live handoff; E14-T1 | [Roadmap](#e14-accept-the-assembled-pre-release-application); [Memo](implementation-memo.md#e14-epic-closeout-2026-10-01) |
-| E2 | Planned | Released provider qualification and real integration | [Shared](todo/GUL-CONSUMER-REBASELINE.md) |
+| E2 | In Progress | Released provider qualification and real integration | [Shared](todo/GUL-CONSUMER-REBASELINE.md) |
 | E9 | Planned | Actual-provider fault/security/E2E and Gul release qualification | [Shared](todo/GUL-CONSUMER-REBASELINE.md) |
 | Deferred-Gorae | Deferred | Separate future managed provider, not Dolgorae orchestration | None |
 | Deferred-Podway | Deferred | Read-only FSM graph/execution visualization after v0.1.3 | None |
@@ -310,11 +310,12 @@ core, authentication, files and UI; it does not rebuild those Epics.
 The accepted plan covers release contract drift and capability admission,
 production wiring, and actual read/write behavior. A source-tag test build may
 help diagnose these boundaries, but cannot satisfy the published-artifact gate
-or complete a Task. E2 remains Planned until its entry evidence is verified.
+or complete a Task. The published artifact and matching source identity have
+been qualified; E2-T0 is Completed. Later Tasks remain gated on their predecessors.
 
 | Task | Phase | Status | Predecessors | Owned result and verification |
 | --- | --- | --- | --- | --- |
-| E2-T0 | Post-release | Planned | E14-T1; Provider released | Pin the published v0.1.3 artifact and matching immutable consumer inputs; regenerate release drift and document schema/capability admission; no silent installation or replaced production binary |
+| E2-T0 | Post-release | Completed | E14-T1; Provider released | Pin the published v0.1.3 artifact and matching immutable consumer inputs; regenerate release drift and document schema/capability admission; no silent installation or replaced production binary |
 | E2-T1 | Post-release | Planned | E2-T0, E1-T3 | Real gateway supervision, private UDS, shared generated gRPC transport, negotiated request contexts and contract checks; wire the accepted runtime into production host startup and diagnostics |
 | E2-T2 | Post-release | Planned | E2-T1, E1-T4 | Actual exclusive carriers under the advertised fixed-home root, exact credential schema, verification, adoption and authorization; no Operator or child credential |
 | E2-T3 | Post-release | Planned | E2-T2, E3-T4, E4-T5, E8-T3, E14-T1 | Authenticated production-host session creation and sequential read/write, guarded image handoff, approval, complete history/results/artifacts and aggregate close; unsupported and ambiguous operations remain blocked |
@@ -412,6 +413,13 @@ release contract cannot justify a required operation, report the provider
 blocker and leave acceptance incomplete. Qualification must identify both
 supported behavior and the expected refusal for unsupported behavior.
 
+
+E2-T0 release qualification (2026-10-02): the published v0.1.3 source is
+`07dc31331d03aae9ed7c0c862a0cbe8a5184024e`. The current dependency-lock SHA-256
+is `223d2a72d7bd281dba0abdc8b1e966d792492546c3be63a67e593c94eed0c05a` and generated-lock SHA-256 is
+`8d02e824c36795221ee6d1b3fc7e2b43943d13701aa76d019c3b6aea30b26a6d`. The earlier E12 pin remains historical evidence.
+Actual production assembly, credentials and session actions remain E2-T1/T2/T3.
+
 ### E2-T1: Connect the production host to the real gateway
 
 Implement the generated public local-gRPC adapter behind the existing typed
@@ -494,10 +502,10 @@ The accepted E12 consumer boundary pins TASK-053 commit
 `8f52ae66e126f37013d7842b2113fc509d21af4e4fc465cecdbeef7e21619f01` and
 generated-lock SHA-256
 `6284064e720e2220d6960c42faef6a4c13292ce1327f44e00388dc52b2e17d4a`.
-The current generated-lock SHA-256 after the Go 1.27.1 toolchain rebaseline is
+Before the E2-T0 release pin, the Go 1.27.1 toolchain rebaseline generated-lock SHA-256 was
 `96da1b0a5caeffac1bc9d387c4c4e4ee4159daf47e3877ed748d291be9bb5bc0`;
 the E12-T1 completion digest above remains historical.
-It is contract/tooling Current State only; product runtime and live-provider
+The E12 scope is contract/tooling Current State only; product runtime and live-provider
 evidence remain with their later owners.
 The historical pin remains bound to dependency-lock SHA-256
 `c4f91aa3e2add1093880684e5c96fdbb6239aef6a85261a0adf6b585e2db8863` and

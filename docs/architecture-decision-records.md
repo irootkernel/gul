@@ -5,7 +5,7 @@
 | Role | Durable architecture decisions and supersession history |
 | Product | Gul |
 | Version | 0.1-dolgorae-consumer-v1 |
-| Last updated | 2026-09-30 |
+| Last updated | 2026-10-02 |
 
 ## 1. Status model
 
@@ -466,12 +466,12 @@ Startup has a 15-second total budget and a 5-second readiness budget. Shutdown h
 
 The Machine CLI remains available through an explicit diagnostic/conformance adapter only. Its supported schema is validated as a closed exact contract. It is not registered as a production Runtime Provider and is never invoked automatically after gRPC failure.
 
-The accepted contract at Dolgorae revision `85a8862f784cc57701751d81a9e03bf7c5722818` provides the concrete Runtime, Run, Observation, Interaction, Writer, Controller, and Artifact method inventory, including unary artifact chunks and typed Run streams. Gate A closes publication and deterministic descriptor reproduction. Gate B pins that source and checked generated fixtures through dependency-lock SHA-256 `c4f91aa3e2add1093880684e5c96fdbb6239aef6a85261a0adf6b585e2db8863` and generated-lock SHA-256 `8a6a614a3a08c585f9a62f74095a0237d47feefba802e2dfa3ce13be5fbe0bf6`. E2-T0 remains blocked until an executable, API version, capability set, typed-error contract, and live smoke evidence are pinned; this ADR is not evidence that runtime software is accepted or implemented.
+The accepted contract at Dolgorae revision `85a8862f784cc57701751d81a9e03bf7c5722818` provides the concrete Runtime, Run, Observation, Interaction, Writer, Controller, and Artifact method inventory, including unary artifact chunks and typed Run streams. Gate A closes publication and deterministic descriptor reproduction. Gate B pins that source and checked generated fixtures through dependency-lock SHA-256 `c4f91aa3e2add1093880684e5c96fdbb6239aef6a85261a0adf6b585e2db8863` and generated-lock SHA-256 `8a6a614a3a08c585f9a62f74095a0237d47feefba802e2dfa3ce13be5fbe0bf6`. At this historical acceptance, E2-T0 remained blocked until an executable, API version, capability set, typed-error contract, and live smoke evidence are pinned; this ADR is not evidence that runtime software is accepted or implemented.
 
 E12-T1 supersedes that historical consumer pin for new implementation with immutable TASK-053 commit `21aefe5b2a8dc6fb18a58338090348b23d2f0a4a`, dependency-lock SHA-256 `8f52ae66e126f37013d7842b2113fc509d21af4e4fc465cecdbeef7e21619f01`, and generated-lock SHA-256 `6284064e720e2220d6960c42faef6a4c13292ce1327f44e00388dc52b2e17d4a`. The checked profile distinguishes 27 required methods from nine unavailable descriptor methods and retains the Machine CLI as diagnostic-only. This decision accepts reproducible contract tooling, not runtime implementation, executable qualification, or live compatibility.
 
-The Go 1.27.1 toolchain rebaseline preserves that historical E12-T1 digest and
-updates the current generated-lock SHA-256 to
+The pre-release Go 1.27.1 toolchain rebaseline preserved that historical E12-T1 digest and
+used generated-lock SHA-256
 `96da1b0a5caeffac1bc9d387c4c4e4ee4159daf47e3877ed748d291be9bb5bc0`.
 The generated Go header now records host protoc 36.2; the descriptor and
 dependency lock remain unchanged.
@@ -761,3 +761,11 @@ fixtures. Direct same-origin rendering is rejected.
 | ADR-0042 | New record for a change that had none: the product identity and its two prior names. Scoped to this repository; the upstream contract's obsolete client name stays an inventory annotation. |
 | ADR-0043..0046 | Accepted local-gRPC transport, closed action evaluation, required timeline/artifact, and shared headless/desktop lifecycle decisions. Exact upstream executable/release qualification remains E2-T0. |
 | ADR-0047..0049 | Accepted caller-owned Controller carrier, per-aggregate projection convergence, and operation-class-specific replay-material decisions. |
+
+### E2-T0 released contract qualification
+
+E2-T0 release qualification (2026-10-02): the published v0.1.3 source is
+`07dc31331d03aae9ed7c0c862a0cbe8a5184024e`. The current dependency-lock SHA-256
+is `223d2a72d7bd281dba0abdc8b1e966d792492546c3be63a67e593c94eed0c05a` and generated-lock SHA-256 is
+`8d02e824c36795221ee6d1b3fc7e2b43943d13701aa76d019c3b6aea30b26a6d`. The earlier E12 pin remains historical evidence.
+Actual production assembly, credentials and session actions remain E2-T1/T2/T3.

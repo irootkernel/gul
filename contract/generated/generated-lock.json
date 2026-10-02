@@ -1,10 +1,10 @@
 {
   "schema_version": 1,
-  "source_revision": "21aefe5b2a8dc6fb18a58338090348b23d2f0a4a",
+  "source_revision": "07dc31331d03aae9ed7c0c862a0cbe8a5184024e",
   "files": [
     {
       "path": "contract-inventory.v1.json",
-      "sha256": "4705fd3a3d9c63bb57590a69de666b71069c7ee23ec96677df2c9aca8f8468a3"
+      "sha256": "715a5c1707771bf99e76b43e0fa5cd466e6241ec5be7220ae6e3cd95ecb55f99"
     },
     {
       "path": "event-invalidation-map.v1.json",
@@ -36,11 +36,11 @@
     },
     {
       "path": "gul-operation-map.v1.json",
-      "sha256": "56ef2d2d33af7941e7f39ee2ecd9afcfdffc70fe6b0efab8722a812e875c6563"
+      "sha256": "30724827be9eecce371ea5ae2747ca6ec15fb03a1b47c93a493efe7e8ada3763"
     },
     {
       "path": "policy/capability-map.v1.json",
-      "sha256": "651ee9b623f24c3e1b7bd56acfdfa90bdb87dd7d72f07d37022f284df25edf29"
+      "sha256": "963970f9d92fad5a490fccb29cac3aac926f43769716a4ed3fccb1420d6b75c3"
     },
     {
       "path": "policy/credential-boundary.v1.json",
@@ -48,7 +48,7 @@
     },
     {
       "path": "policy/error-action-map.v1.json",
-      "sha256": "e0fb5a866acb17daf921e8b6b70e8b2b081ece76cde664d70e0022403a838714"
+      "sha256": "65c4e8e9b5393c8192825e45d59e582d69902601df3dd97b6f70767c78339f7d"
     },
     {
       "path": "policy/identifier-enum-map.v1.json",
@@ -61,6 +61,10 @@
     {
       "path": "policy/projection-replay-map.v1.json",
       "sha256": "12038c586ad72398a8ff2f8ac49a4fd942eadfa8033097120089b381cdd1cc5d"
+    },
+    {
+      "path": "policy/release-admission.v1.json",
+      "sha256": "2df3203bafecebce6fd800f87427a6d9297aa9a959fdc65982de54e1687edd19"
     },
     {
       "path": "ts/dolgorae/public/v1/dolgorae_pb.ts",

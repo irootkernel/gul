@@ -1,0 +1,205 @@
+{
+  "schema_version": 1,
+  "contract_id": "dolgorae.gul-consumer/v1",
+  "transport_required_features": [
+    "persistent_runs",
+    "event_replay",
+    "controller_timeline",
+    "safe_client_projection",
+    "controller_binding",
+    "public_local_socket",
+    "artifact_retrieval",
+    "control_modes"
+  ],
+  "method_required_features": {
+    "ArtifactService.GetArtifact": [
+      "artifact_retrieval"
+    ],
+    "ArtifactService.ReadArtifactChunk": [
+      "artifact_retrieval"
+    ],
+    "ControllerService.VerifyController": [
+      "controller_binding"
+    ],
+    "InteractionService.GetControllerInteraction": [
+      "controller_binding"
+    ],
+    "InteractionService.ListPendingInteractions": [],
+    "InteractionService.ResolveInteraction": [
+      "controller_binding"
+    ],
+    "ObservationService.ListRunTimelineItems": [
+      "controller_timeline"
+    ],
+    "ObservationService.WatchRunEvents": [
+      "event_replay",
+      "safe_client_projection"
+    ],
+    "OrchestrationService.GetOrchestratedSession": [],
+    "OrchestrationService.ListOrchestratedSessionResults": [],
+    "RunService.CloseRun": [
+      "persistent_runs"
+    ],
+    "RunService.GetRun": [
+      "persistent_runs"
+    ],
+    "RunService.InterruptTurn": [
+      "persistent_runs"
+    ],
+    "RunService.ListRuns": [
+      "persistent_runs"
+    ],
+    "RunService.PauseRun": [
+      "persistent_runs"
+    ],
+    "RunService.ReconcileRun": [
+      "persistent_runs"
+    ],
+    "RunService.RecoverRun": [
+      "persistent_runs"
+    ],
+    "RunService.ResumeRun": [
+      "persistent_runs"
+    ],
+    "RunService.StartRun": [
+      "persistent_runs",
+      "controller_binding"
+    ],
+    "RunService.SubmitTurn": [
+      "persistent_runs"
+    ],
+    "RuntimeService.GetCapabilities": [],
+    "RuntimeService.GetProfile": [],
+    "RuntimeService.InspectWorkspace": [],
+    "RuntimeService.ListProfiles": [],
+    "WriterService.AcquireWriter": [
+      "durable_writer_authority"
+    ],
+    "WriterService.GetWorkspaceWriterStatus": [
+      "durable_writer_authority"
+    ],
+    "WriterService.ReleaseWriter": [
+      "durable_writer_authority"
+    ]
+  },
+  "conditional_actions": {
+    "create_direct_session": {
+      "required_features": [
+        "persistent_runs",
+        "controller_binding",
+        "control_modes"
+      ],
+      "requires": "verified interactive-client carrier with explicit orchestration_launch and named Policy; parentless direct_interactive Primary with explicit settings"
+    },
+    "submit_read": {
+      "required_features": [
+        "persistent_runs"
+      ],
+      "requires": "fresh typed compatible Run/Profile/Session state, verified Controller and eligible READ policy; no active Turn, unresolved attempt or aggregate close"
+    },
+    "release_writer": {
+      "lane": "dedicated",
+      "lane_writer_support": true,
+      "required_features": [
+        "durable_writer_authority"
+      ],
+      "requires": "fresh same-Run Writer ownership, expected writer revision and verified Controller"
+    },
+    "pause_primary": {
+      "required_features": [
+        "persistent_runs"
+      ],
+      "requires": "fresh eligible Primary state, expected state revision and verified Controller"
+    },
+    "resume_primary": {
+      "required_features": [
+        "persistent_runs"
+      ],
+      "requires": "fresh eligible paused Primary state, expected state revision and verified Controller"
+    },
+    "interrupt_turn": {
+      "required_features": [
+        "persistent_runs"
+      ],
+      "requires": "fresh active Turn and expected state revision with verified Controller"
+    },
+    "resolve_interaction": {
+      "required_features": [
+        "controller_binding"
+      ],
+      "requires": "fresh supported pending Interaction and bounded protected response; verified Controller and original idempotency key; no replay of protected body"
+    },
+    "recover_run": {
+      "required_features": [
+        "persistent_runs"
+      ],
+      "requires": "fresh typed recovery-required state and verified Controller; reconcile aggregate close separately"
+    },
+    "reconcile_run": {
+      "required_features": [
+        "persistent_runs"
+      ],
+      "requires": "fresh typed reconcile-required state and verified Controller; no semantic mutation replay"
+    },
+    "close_session": {
+      "required_features": [
+        "persistent_runs",
+        "controller_binding"
+      ],
+      "requires": "fresh owned root and aggregate state, verified Controller and explicit interrupt confirmation when owned work is active; pending is not closed; no automatic tokenless replay"
+    },
+    "first_dedicated_write": {
+      "lane": "dedicated",
+      "lane_writer_support": true,
+      "required_features": [
+        "first_write_via_submit_turn",
+        "durable_writer_authority"
+      ],
+      "requires": "threadless Run, fresh typed state, no competing Writer, verified Controller and fresh Session; SubmitTurn WRITE without Acquire"
+    },
+    "held_writer_submit": {
+      "lane": "dedicated",
+      "required_features": [
+        "durable_writer_authority"
+      ],
+      "requires": "fresh same-Run Writer authority and verified WRITE policy; READ does not release authority",
+      "lane_writer_support": true
+    },
+    "existing_reader_to_writer": {
+      "lane": "dedicated",
+      "required_profile_access_policy_transition": "supported",
+      "requires": "fresh typed Run/Profile/Writer state; unverified or unavailable blocks the transition",
+      "lane_writer_support": true,
+      "required_features": [
+        "durable_writer_authority"
+      ]
+    },
+    "threadless_acquire": {
+      "required_features": [
+        "threadless_acquire_write"
+      ],
+      "supported_by_release": false
+    },
+    "shared_readonly_write": {
+      "lane": "shared_readonly",
+      "supported_by_release": false,
+      "lane_writer_support": true,
+      "required_features": [
+        "durable_writer_authority"
+      ]
+    },
+    "continuation": {
+      "required_method": "RunService.CreateWriteContinuation",
+      "supported_by_gul": false
+    }
+  },
+  "non_admission_features": [
+    "reader_writer_access",
+    "brokered_independent_subagent_runs"
+  ],
+  "source_authorities": [
+    "docs/roadmap.md#e2-t0-qualify-the-release-and-resolve-consumer-drift",
+    "docs/architecture.md#62-compatibility-and-schema-policy",
+    "irootkernel/dolgorae@07dc31331d03aae9ed7c0c862a0cbe8a5184024e:docs/specs/gul-consumer-v1.md#4-sequential-human-prompt-admission"
+  ]
+}
