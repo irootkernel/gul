@@ -13,7 +13,7 @@ const blockers: Partial<Record<ActionBlocker, string>> = {
   [ActionBlocker.FRESH_SNAPSHOT_REQUIRED]: "Refresh current state before acting.",
   [ActionBlocker.CREDENTIAL_BLOCKED]: "Controller access is unavailable.",
   [ActionBlocker.UNRESOLVED_OUTCOME]: "The previous outcome is unresolved.",
-  [ActionBlocker.BACKGROUND_BLOCKED]: "Background execution blocks this action.",
+  [ActionBlocker.BACKGROUND_BLOCKED]: "Background execution blocks prompts and writer changes.",
   [ActionBlocker.WRITER_BUSY]: "Writer busy. Another owner controls write access.",
   [ActionBlocker.UNSUPPORTED_TRANSITION]: "This session cannot change access. Its source remains unchanged.",
   [ActionBlocker.ACTIVE_TURN_DRAFT]: "A Turn is active. Your new prompt remains a draft.",
@@ -55,7 +55,7 @@ export function WriterPanel({state, acquire, release, onState}: WriterPanelProps
   return <section aria-label="Writer state">
     <h3>Writer state</h3>
     <dl>
-      <dt>Mode</dt><dd>{state.mode === WriterAccessMode.WRITE ? "WRITE" : state.mode === WriterAccessMode.READ_ONLY ? "Read only" : "Blocked"}</dd>
+      <dt>Mode</dt><dd>{state.mode === WriterAccessMode.WRITE ? "WRITE" : state.mode === WriterAccessMode.READ_ONLY ? "Read only" : state.mode === WriterAccessMode.UNVERIFIED ? "Policy unverified" : "Blocked"}</dd>
       <dt>Authority</dt><dd>{w ? WriterAuthority[w.authority] ?? "Unknown" : "Unavailable"}</dd>
       <dt>Generation</dt><dd>{w?.generation.toString() ?? "Unavailable"}</dd>
       <dt>Effective access</dt><dd>{w ? WriterEffectiveAccess[w.effectiveAccess] ?? "Unknown" : "Unavailable"}</dd>

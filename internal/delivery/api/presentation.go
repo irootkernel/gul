@@ -9,6 +9,8 @@ import (
 	"github.com/rootkernel/gul/api/generated/go/gul/v1/gulv1connect"
 	"github.com/rootkernel/gul/internal/app"
 	"github.com/rootkernel/gul/internal/history"
+	"github.com/rootkernel/gul/internal/interrupt"
+	"github.com/rootkernel/gul/internal/launch"
 	"github.com/rootkernel/gul/internal/presentation"
 	"github.com/rootkernel/gul/internal/session"
 	"github.com/rootkernel/gul/internal/sessionclose"
@@ -123,7 +125,15 @@ type DirectPresentationHandler struct {
 	Close        *sessionclose.Service
 	History      *history.Service
 	Submissions  *submit.Service
+	Interrupts   *interrupt.Service
+	Creator      SessionCreator
 	Principal    PrincipalResolver
+}
+
+type SessionCreator interface {
+	PendingCreations(context.Context, string, string) ([]string, error)
+	CreateSession(context.Context, string, string, string, launch.Choice) (session.CreationOutcome, error)
+	RecoverCreation(context.Context, string, string, string) (session.CreationOutcome, error)
 }
 
 var _ gulv1connect.DirectSessionServiceHandler = (*DirectPresentationHandler)(nil)

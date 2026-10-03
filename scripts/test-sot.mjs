@@ -175,6 +175,7 @@ expectFailure('active row mismatch', root => {
 
 expectFailure('next header misses first eligible task', root => {
   write(root, 'docs/roadmap.md', text => clearActiveTask(text)
+    .replace('| E1-T5 | Pre-release | Completed |', '| E1-T5 | Pre-release | Planned |')
     .replace(/^\| Next \|[^\n]+$/m, '| Next | E0-T1 |'));
 }, /Next header must identify first eligible Task E[0-9]+-T[0-9]+/);
 

@@ -84,6 +84,8 @@ func browserActionState(e action.Evaluation) *gulv1.ActionState {
 		mode = gulv1.WriterAccessMode_WRITER_ACCESS_MODE_READ_ONLY
 	case action.WriterWrite:
 		mode = gulv1.WriterAccessMode_WRITER_ACCESS_MODE_WRITE
+	case action.WriterUnverified:
+		mode = gulv1.WriterAccessMode_WRITER_ACCESS_MODE_UNVERIFIED
 	}
 	return &gulv1.ActionState{Flags: browserActionFlags(e.Flags), Blocker: gulv1.ActionBlocker(e.Blocker + 1), Mode: mode, Writer: &gulv1.WriterPresentation{Authority: gulv1.WriterAuthority(w.Authority), Generation: w.Generation, EffectiveAccess: gulv1.WriterEffectiveAccess(w.Access), PolicyVerification: gulv1.WriterPolicyVerification(w.Verification), Lane: lane, RequestedAssurance: gulv1.LaunchAssurance(w.Requested), AchievedAssurance: gulv1.LaunchAssurance(w.Achieved), Owner: gulv1.WriterOwner(w.Owner), BackgroundBlocked: w.BackgroundBlocked, RecoveryBlocked: w.RecoveryBlocked}}
 }

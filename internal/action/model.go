@@ -258,6 +258,7 @@ type RunFacts struct {
 	Control             Control
 	Lane                Lane
 	Thread, ActiveTurn  Presence
+	ActiveTurnID        string // backend-only identity for tokenless Interrupt correlation
 	Pending             uint32
 	Access              Access
 	Verification        Verification

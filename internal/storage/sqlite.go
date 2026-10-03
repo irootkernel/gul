@@ -17,7 +17,7 @@ import (
 	_ "modernc.org/sqlite"
 )
 
-const schemaVersion = 10
+const schemaVersion = 12
 
 var ErrSchemaDrift = errors.New("Gul SQLite schema drift")
 
@@ -63,6 +63,10 @@ outcome_status='outcome_unknown',code='OUTCOME_UNKNOWN',next_action='RECONCILE_R
 		return nil, err
 	}
 	if _, err := writer.ExecContext(ctx, "UPDATE writer_attempt_details SET dispatch_finished=1 WHERE dispatch_finished=0"); err != nil {
+		writer.Close()
+		return nil, err
+	}
+	if _, err := writer.ExecContext(ctx, "UPDATE interrupt_attempt_details SET dispatch_finished=1 WHERE dispatch_finished=0"); err != nil {
 		writer.Close()
 		return nil, err
 	}
@@ -238,6 +242,10 @@ func migrationStatements(version int) []string {
 		return passwordAccountStatements
 	case 10:
 		return controllerStoreStatements
+	case 11:
+		return creationStatements
+	case 12:
+		return interruptStatements
 	default:
 		return nil
 	}

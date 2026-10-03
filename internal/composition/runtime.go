@@ -20,6 +20,7 @@ import (
 	historyprovider "github.com/rootkernel/gul/internal/history/contractprovider"
 	"github.com/rootkernel/gul/internal/interaction"
 	interactionprovider "github.com/rootkernel/gul/internal/interaction/contractprovider"
+	"github.com/rootkernel/gul/internal/interrupt"
 	"github.com/rootkernel/gul/internal/launch"
 	launchprovider "github.com/rootkernel/gul/internal/launch/contractprovider"
 	"github.com/rootkernel/gul/internal/mutation"
@@ -29,6 +30,7 @@ import (
 	"github.com/rootkernel/gul/internal/presentation"
 	"github.com/rootkernel/gul/internal/reconnect"
 	reconnectprovider "github.com/rootkernel/gul/internal/reconnect/contractprovider"
+	"github.com/rootkernel/gul/internal/replay"
 	"github.com/rootkernel/gul/internal/session"
 	sessionprovider "github.com/rootkernel/gul/internal/session/contractprovider"
 	"github.com/rootkernel/gul/internal/sessionclose"
@@ -41,34 +43,42 @@ import (
 const providerID = "dolgorae"
 
 type Config struct {
-	Port     port.PublicContractPort
-	Carriers session.CarrierResolver
-	Roots    []string
-	Policies []string
+	Port       port.PublicContractPort
+	Carriers   session.CarrierResolver
+	Roots      []string
+	Policies   []string
+	ReplayRoot string
+	InputRoot  string
 }
 
 type Runtime struct {
-	store        *storage.Store
-	config       Config
-	Workspaces   *workspace.Service
-	Sessions     *session.Service
-	Controllers  *controller.Store
-	actions      *action.Service
-	history      *history.Service
-	interactions *interaction.Service
-	close        *sessionclose.Service
-	submissions  *submit.Service
-	mutations    *mutation.SubmitService
-	raw          *actionprovider.Provider
-	refresh      *sessionclose.AggregateRefresher
-	observer     *interaction.Observer
-	reconnect    *reconnect.Service
-	probe        reconnectprovider.ContractProbe
-	mu           sync.Mutex
-	syncMu       sync.Mutex
-	cancel       context.CancelFunc
-	done         chan struct{}
-	lifetime     context.Context
+	store                *storage.Store
+	config               Config
+	Workspaces           *workspace.Service
+	Sessions             *session.Service
+	Controllers          *controller.Store
+	actions              *action.Service
+	history              *history.Service
+	interactions         *interaction.Service
+	close                *sessionclose.Service
+	submissions          *submit.Service
+	interrupts           *interrupt.Service
+	mutations            *mutation.SubmitService
+	starts               *mutation.StartService
+	launch               *launch.Service
+	createMu             sync.Mutex
+	inputImages          *files.SubmitImages
+	creationPurgeBlocked bool
+	raw                  *actionprovider.Provider
+	refresh              *sessionclose.AggregateRefresher
+	observer             *interaction.Observer
+	reconnect            *reconnect.Service
+	probe                reconnectprovider.ContractProbe
+	mu                   sync.Mutex
+	syncMu               sync.Mutex
+	cancel               context.CancelFunc
+	done                 chan struct{}
+	lifetime             context.Context
 }
 
 func New(ctx context.Context, store *storage.Store, c Config) (*Runtime, error) {
@@ -114,6 +124,10 @@ func NewQualified(store *storage.Store, c Config, caps *publicv1.GetCapabilities
 	}
 	r := &Runtime{store: store, config: c, raw: raw, probe: probe}
 	r.Controllers, _ = c.Carriers.(*controller.Store)
+	r.launch = launch.NewService(launchprovider.Provider{Port: c.Port}, c.Policies)
+	if r.Controllers != nil && c.ReplayRoot != "" {
+		r.starts = &mutation.StartService{Attempts: store.Attempts(), Replay: replay.Store{Root: c.ReplayRoot}, Resolver: r, Provider: mutationprovider.StartProvider{Port: c.Port}, Gate: r.startReady}
+	}
 	local := store.Presentation()
 	r.Workspaces = workspace.NewService(workspaceprovider.ContractProvider{Port: c.Port}, local, nil, c.Roots)
 	if err = r.Workspaces.RootConfigurationError(); err != nil {
@@ -129,16 +143,18 @@ func NewQualified(store *storage.Store, c Config, caps *publicv1.GetCapabilities
 	r.observer.Poll = &interaction.Poller{Service: r.interactions, Notify: store.Observation()}
 	r.close = &sessionclose.Service{Repository: store.SessionClose(), Actions: r.actions, Sessions: r.Sessions, Provider: cp, Refresh: r.refresh}
 	r.mutations = &mutation.SubmitService{Attempts: store.Attempts(), Provider: mutationprovider.SubmitProvider{Port: c.Port, Bindings: r}, Gate: r.runReady}
-	r.submissions = &submit.Service{Actions: r.actions, Dispatcher: mutationprovider.TextDispatcher{Service: r.mutations}}
+	r.inputImages = &files.SubmitImages{Root: c.InputRoot, Files: files.NewService(local)}
+	r.submissions = &submit.Service{Actions: r.actions, Dispatcher: mutationprovider.TextDispatcher{Service: r.mutations, Images: r.inputImages, Port: c.Port, Profiles: launchprovider.Provider{Port: c.Port}}}
+	r.interrupts = &interrupt.Service{Actions: r.actions, Repository: store.InterruptAttempts(), Provider: raw, Timeline: hp}
 	return r, nil
 }
 
 func (r *Runtime) Features(core *app.Core) api.FeatureHandlers {
 	metadata := presentation.NewService(r.store.Presentation())
 	return api.FeatureHandlers{
-		Runtime:   &api.RuntimeHandler{Core: core, Launch: launch.NewService(launchprovider.Provider{Port: r.config.Port}, r.config.Policies)},
+		Runtime:   &api.RuntimeHandler{Core: core, Launch: r.launch},
 		Workspace: &api.WorkspaceHandler{Core: core, Workspaces: r.Workspaces, Presentation: metadata},
-		Direct:    &api.DirectPresentationHandler{Core: core, Presentation: metadata, Sessions: r.Sessions, History: r.history, Close: r.close, Submissions: r.submissions},
+		Direct:    &api.DirectPresentationHandler{Core: core, Presentation: metadata, Sessions: r.Sessions, History: r.history, Close: r.close, Submissions: r.submissions, Interrupts: r.interrupts, Creator: r},
 		Artifact:  &api.ArtifactHandler{Core: core, History: r.history}, Interaction: &api.InteractionHandler{Core: core, Interactions: r.interactions}, Writer: &api.WriterHandler{Core: core, Actions: r.actions},
 		Files: &api.FileHandler{Core: core, Files: files.NewService(r.store.Presentation())}, Events: &api.ClientEventHandler{Core: core, Events: r.store.Observation()}, Diagnostics: &api.DiagnosticsHandler{Core: core},
 	}
@@ -155,6 +171,11 @@ func (r *Runtime) Start(ctx context.Context) error {
 	}
 	if err := ctx.Err(); err != nil {
 		return err
+	}
+	if r.starts != nil {
+		if err := r.starts.Purge(ctx); err != nil {
+			return err
+		}
 	}
 	r.lifetime, r.cancel = context.WithCancel(context.Background())
 	r.done = make(chan struct{})
@@ -186,7 +207,18 @@ func (r *Runtime) run(ctx context.Context, done chan struct{}) {
 	defer r.observer.Close()
 	ticker := time.NewTicker(time.Second)
 	defer ticker.Stop()
+	nextPurge := time.Now().Add(mutation.PurgeInterval)
 	for {
+		if r.starts != nil && !time.Now().Before(nextPurge) {
+			err := r.starts.Purge(ctx)
+			r.mu.Lock()
+			r.creationPurgeBlocked = err != nil
+			r.mu.Unlock()
+			nextPurge = time.Now().Add(mutation.PurgeInterval)
+			if err != nil {
+				nextPurge = time.Now().Add(time.Minute)
+			}
+		}
 		_ = r.Synchronize(ctx)
 		select {
 		case <-ctx.Done():
@@ -231,6 +263,7 @@ func (r *Runtime) Synchronize(ctx context.Context) error {
 			needsRecovery = true
 			continue
 		}
+		observedAfter := time.Now()
 		input, e := r.raw.Read(ctx, b)
 		if e != nil {
 			return errors.Join(e, r.disconnect(ctx, bounds))
@@ -243,6 +276,7 @@ func (r *Runtime) Synchronize(ctx context.Context) error {
 			if e = r.refresh.Refresh(ctx, b, input.Run); e != nil {
 				return e
 			}
+			observedAfter = time.Now()
 			input, e = r.raw.Read(ctx, b)
 			if e != nil {
 				return e
@@ -256,7 +290,11 @@ func (r *Runtime) Synchronize(ctx context.Context) error {
 			}
 		}
 		if input.Run.Lifecycle == action.Closed || input.Run.Lifecycle == action.StartFailed {
+			r.inputImages.ReleaseRun(b.Binding.RunID, true, observedAfter)
 			continue
+		}
+		if input.Run.ActiveTurn == action.Missing && input.Run.Lifecycle == action.Idle {
+			r.inputImages.ReleaseRun(b.Binding.RunID, false, observedAfter)
 		}
 		watched = append(watched, observation.WatchedRun{Candidate: observation.Candidate{RunID: b.Binding.RunID, PendingInteraction: input.Run.Pending > 0, Recovery: input.Run.Recovery != action.NoRecovery, ActiveTurn: input.Run.ActiveTurn == action.Present}, Binding: observation.Binding{SubjectID: b.Binding.SubjectID, SessionID: b.Binding.ID, ProviderID: providerID, RunID: b.Binding.RunID, WorkspaceID: b.Workspace.ProviderID, AbsoluteRoot: b.Workspace.CanonicalRoot}})
 	}

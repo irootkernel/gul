@@ -22,7 +22,11 @@ relevant features. `reader_writer_access=false` and
 `brokered_independent_subagent_runs=false` remain advertised facts and do not
 decide every action. A dedicated threadless first WRITE requires lane writer
 support, `first_write_via_submit_turn`, durable authority and fresh typed state;
-it uses SubmitTurn without AcquireWriter. Existing-reader acquisition requires
+it uses SubmitTurn without AcquireWriter. A declared UNKNOWN/UNVERIFIED
+best-effort policy can admit READ and same-Run ACTIVE Writer WRITE without
+claiming verified access. Release uses fresh held-writer authority and its
+ownerless response preserves the workspace-only projection. Existing-reader
+acquisition requires
 verified Profile transition support. The release advertises that transition as
 unverified. Shared-readonly WRITE, threadless Acquire and Gul continuation are
 unavailable. Every release-admitted action still requires current Run, Profile,

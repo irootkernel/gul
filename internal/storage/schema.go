@@ -222,3 +222,13 @@ writer_generation_before TEXT NOT NULL,
 dispatch_finished INTEGER NOT NULL DEFAULT 0 CHECK(dispatch_finished IN (0,1))
 )`,
 }
+
+var interruptStatements = []string{
+	`CREATE TABLE interrupt_attempt_details (
+operation_id TEXT PRIMARY KEY REFERENCES provider_operation_attempts(operation_id) ON DELETE CASCADE,
+turn_id TEXT NOT NULL,
+run_revision_before TEXT NOT NULL,
+head_before TEXT NOT NULL,
+dispatch_finished INTEGER NOT NULL DEFAULT 0 CHECK(dispatch_finished IN (0,1))
+)`,
+}

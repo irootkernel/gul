@@ -28,9 +28,9 @@ func runFacts(r *publicv1.RunProjection) (action.RunFacts, error) {
 		}
 		lineage = action.ValidLineage
 	}
-	return action.RunFacts{Lifecycle: action.Lifecycle(r.Lifecycle), Variant: action.Variant(r.StateVariant), Control: action.Control(r.ControlMode), Lane: action.Lane(r.ExecutionLane), Thread: thread, ActiveTurn: active, Pending: r.PendingInteractionCount, Access: action.Access(r.EffectivePolicy.Access), Verification: action.Verification(r.EffectivePolicy.Verification), Authority: action.Authority(r.WriterAuthority.State), Generation: r.WriterAuthority.WriterGeneration, Reconciliation: action.Reconciliation(r.WriterAuthority.ReconciliationAction), Requested: action.Assurance(r.RequestedAssurance), Achieved: action.Assurance(r.AchievedAssurance), Background: action.Background(r.BackgroundExecution.State), Server: action.ServerState(r.ServerLane.State), Recovery: action.Recovery(r.Recovery.State), RecoveryAction: action.RecoveryAction(r.Recovery.RequiredAction), Lineage: lineage, Stamp: stamp(r.Stamp)}, nil
+	return action.RunFacts{Lifecycle: action.Lifecycle(r.Lifecycle), Variant: action.Variant(r.StateVariant), Control: action.Control(r.ControlMode), Lane: action.Lane(r.ExecutionLane), Thread: thread, ActiveTurn: active, ActiveTurnID: r.GetActiveTurn().GetTurnId(), Pending: r.PendingInteractionCount, Access: action.Access(r.EffectivePolicy.Access), Verification: action.Verification(r.EffectivePolicy.Verification), Authority: action.Authority(r.WriterAuthority.State), Generation: r.WriterAuthority.WriterGeneration, Reconciliation: action.Reconciliation(r.WriterAuthority.ReconciliationAction), Requested: action.Assurance(r.RequestedAssurance), Achieved: action.Assurance(r.AchievedAssurance), Background: action.Background(r.BackgroundExecution.State), Server: action.ServerState(r.ServerLane.State), Recovery: action.Recovery(r.Recovery.State), RecoveryAction: action.RecoveryAction(r.Recovery.RequiredAction), Lineage: lineage, Stamp: stamp(r.Stamp)}, nil
 }
-func writerProjection(w *publicv1.WriterState, b action.Bound, released bool) (action.WriterProjection, error) {
+func writerProjection(w *publicv1.WriterState, b action.Bound) (action.WriterProjection, error) {
 	if w == nil || !known(w.ProtoReflect()) || w.WorkspaceId != b.Workspace.ProviderID || w.Stamp == nil || w.StateRevision != w.Stamp.WriterStateRevision || w.AuthorityState == 0 || w.EffectiveAccess == 0 || w.PolicyVerification == 0 || w.ReconciliationAction == 0 {
 		return action.WriterProjection{}, action.ErrBlocked
 	}
@@ -44,12 +44,7 @@ func writerProjection(w *publicv1.WriterState, b action.Bound, released bool) (a
 		if w.AuthorityState != publicv1.WriterAuthorityState_WRITER_AUTHORITY_STATE_NONE {
 			return action.WriterProjection{}, action.ErrBlocked
 		}
-		if released {
-			// ReleaseWriter returns the released Run's policy and complete stamp.
-			if w.ExecutionLane == 0 || w.RequestedAssurance == 0 || w.AchievedAssurance == 0 || !stamp(w.Stamp).Valid() {
-				return action.WriterProjection{}, action.ErrBlocked
-			}
-		} else if w.ExecutionLane != 0 || w.RequestedAssurance != 0 || w.AchievedAssurance != 0 || w.EffectiveAccess != publicv1.EffectiveAccess_EFFECTIVE_ACCESS_UNKNOWN || w.PolicyVerification != publicv1.PolicyVerification_POLICY_VERIFICATION_UNVERIFIED || w.Stamp.CapturedHeadCursor != "" || w.Stamp.RunStateRevision != 0 || w.Stamp.InteractionStateRevision != 0 {
+		if w.ExecutionLane != 0 || w.RequestedAssurance != 0 || w.AchievedAssurance != 0 || w.EffectiveAccess != publicv1.EffectiveAccess_EFFECTIVE_ACCESS_UNKNOWN || w.PolicyVerification != publicv1.PolicyVerification_POLICY_VERIFICATION_UNVERIFIED || w.Stamp.CapturedHeadCursor != "" || w.Stamp.RunStateRevision != 0 || w.Stamp.InteractionStateRevision != 0 {
 			return action.WriterProjection{}, action.ErrBlocked
 		}
 	} else if w.AuthorityState == publicv1.WriterAuthorityState_WRITER_AUTHORITY_STATE_NONE || w.WriterGeneration == 0 || w.ExecutionLane == 0 || w.RequestedAssurance == 0 || w.AchievedAssurance == 0 || !stamp(w.Stamp).Valid() {

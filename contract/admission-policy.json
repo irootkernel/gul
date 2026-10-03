@@ -95,7 +95,7 @@
       "required_features": [
         "persistent_runs"
       ],
-      "requires": "fresh typed compatible Run/Profile/Session state, verified Controller and eligible READ policy; no active Turn, unresolved attempt or aggregate close"
+      "requires": "fresh typed compatible Run/Profile/Session state, verified Controller and either eligible verified access or declared UNKNOWN/UNVERIFIED policy with requested and achieved BEST_EFFORT_PERSONAL_ALPHA; no active Turn, unresolved attempt or aggregate close"
     },
     "release_writer": {
       "lane": "dedicated",
@@ -103,7 +103,7 @@
       "required_features": [
         "durable_writer_authority"
       ],
-      "requires": "fresh same-Run Writer ownership, expected writer revision and verified Controller"
+      "requires": "fresh quiescent same-Run ACTIVE Writer ownership, matching generation, expected Run state revision and verified Controller; declared UNKNOWN/UNVERIFIED best-effort policy does not prevent release"
     },
     "pause_primary": {
       "required_features": [
@@ -162,7 +162,7 @@
       "required_features": [
         "durable_writer_authority"
       ],
-      "requires": "fresh same-Run Writer authority and verified WRITE policy; READ does not release authority",
+      "requires": "fresh quiescent same-Run ACTIVE Writer authority and either verified WRITE policy or declared UNKNOWN/UNVERIFIED policy with requested and achieved BEST_EFFORT_PERSONAL_ALPHA; explicit READ does not release authority or verify effective access",
       "lane_writer_support": true
     },
     "existing_reader_to_writer": {

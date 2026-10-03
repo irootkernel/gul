@@ -31,10 +31,11 @@ func (p *startWire) ListRuns(_ context.Context, request *publicv1.ListRunsReques
 
 func validRun() *publicv1.RunProjection {
 	return &publicv1.RunProjection{RunId: "run", WorkspaceId: "provider-workspace", StateRevision: 1,
-		Controller:    &publicv1.ControllerProjection{ControllerId: "controller", Generation: 1},
-		ControlMode:   publicv1.ControlMode_CONTROL_MODE_DIRECT_INTERACTIVE,
-		ExecutionLane: publicv1.ExecutionLane_EXECUTION_LANE_DEDICATED,
-		Configuration: &publicv1.RunConfigurationProjection{ProfileName: "profile"}}
+		Controller:         &publicv1.ControllerProjection{ControllerId: "controller", Generation: 1, Kind: publicv1.ControllerKind_CONTROLLER_KIND_INTERACTIVE_CLIENT},
+		ControlMode:        publicv1.ControlMode_CONTROL_MODE_DIRECT_INTERACTIVE,
+		ExecutionLane:      publicv1.ExecutionLane_EXECUTION_LANE_DEDICATED,
+		RequestedAssurance: publicv1.AssuranceLevel_ASSURANCE_LEVEL_BEST_EFFORT_PERSONAL_ALPHA,
+		Configuration:      &publicv1.RunConfigurationProjection{ProfileName: "profile", Purpose: publicv1.PurposeKind_PURPOSE_KIND_INTERACTIVE}}
 }
 
 func TestStartAdapterReconstructsCarrierAndChecksExactResponse(t *testing.T) {

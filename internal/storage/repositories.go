@@ -261,7 +261,7 @@ type ControllerReference = operation.ControllerReference
 
 func validateAttempt(attempt OperationAttempt) error {
 	if attempt.OperationID == "" || attempt.SubjectID == "" || attempt.Kind == "" ||
-		(attempt.Kind != "StartRun" && attempt.Kind != "SubmitTurn" && attempt.Kind != "ResolveInteraction" && attempt.Kind != "CloseRun" && attempt.Kind != "RecoverRun" && attempt.Kind != "ReconcileRun" && attempt.Kind != "AcquireWriter" && attempt.Kind != "ReleaseWriter") ||
+		(attempt.Kind != "StartRun" && attempt.Kind != "SubmitTurn" && attempt.Kind != "InterruptTurn" && attempt.Kind != "ResolveInteraction" && attempt.Kind != "CloseRun" && attempt.Kind != "RecoverRun" && attempt.Kind != "ReconcileRun" && attempt.Kind != "AcquireWriter" && attempt.Kind != "ReleaseWriter") ||
 		!sha256Hex.MatchString(attempt.RequestSHA256) || attempt.CreatedAt.IsZero() ||
 		attempt.State != "pending" ||
 		(attempt.ReplayKey != "" && (attempt.Kind != "StartRun" || !validLogicalKey(attempt.ReplayKey))) ||

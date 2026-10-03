@@ -18,14 +18,14 @@ import (
 // This wire fixture models the pinned producer's ownerless Writer projection;
 // its absent Run stamp domains must not be replaced with the current Run's.
 type wireActions struct {
-	run                         *pb.RunProjection
-	writer                      *pb.WriterState
-	profile                     *pb.ProfileProjection
-	aggregate                   *pb.OrchestratedSessionProjection
-	caps                        *pb.GetCapabilitiesResponse
-	sensitive, acquire, release int
-	requestRevision             uint64
-	mutationErr                 error
+	run                                     *pb.RunProjection
+	writer                                  *pb.WriterState
+	profile                                 *pb.ProfileProjection
+	aggregate                               *pb.OrchestratedSessionProjection
+	caps                                    *pb.GetCapabilitiesResponse
+	sensitive, acquire, release, interrupts int
+	requestRevision                         uint64
+	mutationErr                             error
 }
 
 func fixture() (*wireActions, action.Bound) {
@@ -92,13 +92,12 @@ func (f *wireActions) ReleaseWriter(_ context.Context, q *pb.ReleaseWriterReques
 	released := proto.Clone(f.writer).(*pb.WriterState)
 	released.OwnerRunId = nil
 	released.AuthorityState = pb.WriterAuthorityState_WRITER_AUTHORITY_STATE_NONE
-	released.EffectiveAccess = pb.EffectiveAccess_EFFECTIVE_ACCESS_READ
-	released.PolicyVerification = pb.PolicyVerification_POLICY_VERIFICATION_VERIFIED
-	released.ExecutionLane = f.run.ExecutionLane
-	released.RequestedAssurance = f.run.RequestedAssurance
-	released.AchievedAssurance = f.run.AchievedAssurance
-	released.Stamp = proto.Clone(f.run.Stamp).(*pb.ProjectionStamp)
-	released.StateRevision = released.Stamp.WriterStateRevision
+	released.EffectiveAccess = pb.EffectiveAccess_EFFECTIVE_ACCESS_UNKNOWN
+	released.PolicyVerification = pb.PolicyVerification_POLICY_VERIFICATION_UNVERIFIED
+	released.ExecutionLane = 0
+	released.RequestedAssurance = 0
+	released.AchievedAssurance = 0
+	released.Stamp = &pb.ProjectionStamp{WriterStateRevision: f.writer.StateRevision}
 	return released, f.mutationErr
 }
 func evaluateWire(t *testing.T, f *wireActions, b action.Bound) action.Evaluation {
@@ -225,20 +224,21 @@ func TestPinnedThreadlessPolicyAllowsFirstWriteOnlyThroughSubmit(t *testing.T) {
 	}
 	f.run.Thread = &pb.ThreadProjection{ThreadId: "thread", ThreadGeneration: 1}
 	f.run.StateVariant = pb.RunStateVariant_RUN_STATE_VARIANT_DEDICATED_READER
-	if evaluateWire(t, f, b).Flags.CanSubmitWrite {
+	if got := evaluateWire(t, f, b); got.Flags.CanSubmitWrite || !got.Flags.CanSubmitRead || got.Mode != action.WriterUnverified {
 		t.Fatal("existing unknown policy admitted")
 	}
 }
 
-func TestPinnedReleasePreservesRunScopedUnownedProjection(t *testing.T) {
+func TestReleasedWriterResponsePreservesOwnerlessWorkspaceProjection(t *testing.T) {
 	f, b := fixture()
 	p, _ := New(f, f.caps)
 	got, err := p.Release(t.Context(), b, 4)
-	if err != nil || got.Owner != action.NoOwner || got.Access != action.Read || got.Verification != action.Verified || got.Lane != action.Dedicated || got.Requested != action.BestEffort || got.Generation != 7 || got.Stamp.Run != 4 || f.release != 1 {
+	if err != nil || got.Owner != action.NoOwner || got.Access != action.UnknownAccess || got.Verification != action.Unverified || got.Lane != 0 || got.Requested != 0 || got.Generation != 7 || got.Stamp.Run != 0 || f.release != 1 {
 		t.Fatal(got, err)
 	}
-	// The full released-Run shape is valid only at that response boundary.
+	// Run-scoped facts in an ownerless Workspace projection are malformed.
 	released, _ := f.ReleaseWriter(t.Context(), &pb.ReleaseWriterRequest{})
+	released.ExecutionLane = pb.ExecutionLane_EXECUTION_LANE_DEDICATED
 	f.writer = released
 	if _, err := p.Read(t.Context(), b); err != action.ErrBlocked {
 		t.Fatal("workspace-only read contract weakened", err)
@@ -261,5 +261,68 @@ func TestPinnedUnknownActiveTurnKeepsExplicitReconciliation(t *testing.T) {
 	got := action.Evaluate(in)
 	if !got.Flags.CanReconcile || !got.Flags.BlockedByOutcomeUnknown || got.Flags.CanSubmitRead || got.Flags.CanAcquireWriter {
 		t.Fatal(got)
+	}
+}
+
+func TestPinnedDeclaredUnverifiedHeldWriterAndRelease(t *testing.T) {
+	f, b := fixture()
+	f.run.EffectivePolicy.Access = pb.EffectiveAccess_EFFECTIVE_ACCESS_UNKNOWN
+	f.run.EffectivePolicy.Verification = pb.PolicyVerification_POLICY_VERIFICATION_UNVERIFIED
+	f.run.WriterAuthority.State = pb.WriterAuthorityState_WRITER_AUTHORITY_STATE_ACTIVE
+	f.run.WriterAuthority.WriterGeneration = 7
+	f.run.StateVariant = pb.RunStateVariant_RUN_STATE_VARIANT_DEDICATED_WRITER_ACTIVE
+	f.profile.AccessPolicyTransition = pb.SupportState_SUPPORT_STATE_UNVERIFIED
+	f.writer.OwnerRunId = &f.run.RunId
+	f.writer.AuthorityState = pb.WriterAuthorityState_WRITER_AUTHORITY_STATE_ACTIVE
+	f.writer.ExecutionLane = f.run.ExecutionLane
+	f.writer.RequestedAssurance, f.writer.AchievedAssurance = f.run.RequestedAssurance, f.run.AchievedAssurance
+	f.writer.Stamp = proto.Clone(f.run.Stamp).(*pb.ProjectionStamp)
+	got := evaluateWire(t, f, b)
+	if !got.Flags.CanSubmitRead || !got.Flags.CanSubmitWrite || !got.Flags.CanReleaseWriter || got.Flags.CanAcquireWriter || got.Mode != action.WriterUnverified {
+		t.Fatal(got)
+	}
+	p, _ := New(f, f.caps)
+	released, err := p.Release(t.Context(), b, 4)
+	if err != nil || released.Owner != action.NoOwner || released.Authority != action.Unowned || released.Generation != 7 || released.Access != action.UnknownAccess || released.Verification != action.Unverified || f.release != 1 || f.requestRevision != 4 {
+		t.Fatal(released, err)
+	}
+}
+
+func (f *wireActions) InterruptTurn(_ context.Context, q *pb.InterruptTurnRequest) (*pb.RunMutationResponse, error) {
+	f.interrupts++
+	if q.GetRun().GetRunId() != "run" || q.GetController().GetExpectedControllerId() != "controller" || q.GetController().GetAbsoluteFilePath() != "/private/carrier" || q.GetController().GetExpectedControllerGeneration() != 1 {
+		return nil, errors.New("wrong Interrupt authority")
+	}
+	f.requestRevision = q.ExpectedStateRevision
+	if f.mutationErr != nil {
+		return nil, f.mutationErr
+	}
+	return &pb.RunMutationResponse{Run: proto.Clone(f.run).(*pb.RunProjection)}, nil
+}
+
+func TestInterruptUsesFreshRevisionAndRejectsUntrustedReceipt(t *testing.T) {
+	f, b := fixture()
+	p, err := New(f, f.caps)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := p.Interrupt(t.Context(), b, 4); err != nil || f.interrupts != 1 || f.requestRevision != 4 {
+		t.Fatalf("Interrupt delegation: %v calls%d revision%d", err, f.interrupts, f.requestRevision)
+	}
+	for name, change := range map[string]func(*pb.RunProjection){
+		"Run":        func(r *pb.RunProjection) { r.RunId = "foreign" },
+		"Controller": func(r *pb.RunProjection) { r.Controller.ControllerId = "foreign" },
+		"generation": func(r *pb.RunProjection) { r.Controller.Generation = 2 },
+		"revision":   func(r *pb.RunProjection) { r.StateRevision = 3 },
+		"malformed":  func(r *pb.RunProjection) { r.Recovery = nil },
+	} {
+		t.Run(name, func(t *testing.T) {
+			f, b := fixture()
+			p, _ := New(f, f.caps)
+			change(f.run)
+			if err := p.Interrupt(t.Context(), b, 4); !errors.Is(err, action.ErrOutcomeUnknown) || f.interrupts != 1 {
+				t.Fatalf("untrusted Interrupt receipt: %v calls%d", err, f.interrupts)
+			}
+		})
 	}
 }

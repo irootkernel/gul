@@ -2,7 +2,7 @@ import {useCallback, useEffect, useRef, useState} from "react";
 import type {DirectSessionPresentation, NavigationResponse, WorkspaceEntry} from "../../api/generated/ts/gul/v1/gul_pb";
 import {FilePane, rootFileLocation, type FileClient, type FileLocation} from "./file-pane";
 import {externalActionRequired, operatorError} from "./domain-errors";
-import {RuntimeChoices, type RuntimeClient} from "./runtime-choices";
+import {RuntimeChoices, type RuntimeClient, type CreationClient} from "./runtime-choices";
 import {ProviderDiagnostics, type DiagnosticsClient} from "./provider-diagnostics";
 import {SessionDetail, type SessionActivity, type SessionDetailClient} from "./session-detail";
 
@@ -12,8 +12,8 @@ type WorkspaceClient = {
   setNavigation(request: {workspaceId: string; sessionId: string}): Promise<NavigationResponse>;
 };
 
-type SessionClient = {
-  listDirectSessions(request: {workspaceId: string}): Promise<{sessions: DirectSessionPresentation[]}>;
+type SessionClient = CreationClient & {
+  listDirectSessions(request: {workspaceId: string}): Promise<{sessions: DirectSessionPresentation[]; pendingCreationAttemptIds?: string[]}>;
 };
 
 export type OperatorClients = {workspace: WorkspaceClient; sessions: SessionClient; files: FileClient; details?: SessionDetailClient; runtime?: RuntimeClient; diagnostics?: DiagnosticsClient};
@@ -32,6 +32,7 @@ function savedTab(): OperatorTab {
 export function OperatorApp({clients, writerActive = false}: {clients: OperatorClients; writerActive?: boolean}) {
   const [workspaces, setWorkspaces] = useState<WorkspaceEntry[]>([]);
   const [sessions, setSessions] = useState<DirectSessionPresentation[]>([]);
+  const [pendingCreations, setPendingCreations] = useState<string[]>([]);
   const [workspaceId, setWorkspaceId] = useState("");
   const [sessionId, setSessionId] = useState("");
   const [tab, setTab] = useState<OperatorTab>(savedTab);
@@ -75,12 +76,13 @@ export function OperatorApp({clients, writerActive = false}: {clients: OperatorC
   useEffect(() => {
     let current = true;
     setSessions([]);
+    setPendingCreations([]);
     setSessionsError("");
     setSessionsExternal(false);
     if (!workspaceId) {setSessionsLoading(false); return () => {current = false;};}
     setSessionsLoading(true);
     void clients.sessions.listDirectSessions({workspaceId})
-      .then(result => {if (current) setSessions(result.sessions.filter(entry => !entry.archived));})
+      .then(result => {if (current) {setSessions(result.sessions.filter(entry => !entry.archived)); setPendingCreations(result.pendingCreationAttemptIds ?? []);}})
       .catch(reason => {if (current) {setSessionsError(operatorError(reason, "Sessions are unavailable. Retry sessions.")); setSessionsExternal(externalActionRequired(reason));}})
       .finally(() => {if (current) setSessionsLoading(false);});
     return () => {current = false;};
@@ -136,7 +138,7 @@ export function OperatorApp({clients, writerActive = false}: {clients: OperatorC
       <aside className="operator__pane operator__sessions" aria-label="Workspaces and sessions">
         <h2>Sessions</h2>
         {clients.diagnostics && <ProviderDiagnostics client={clients.diagnostics} />}
-        {clients.runtime && <RuntimeChoices client={clients.runtime} />}
+        {clients.runtime && <RuntimeChoices key={workspaceId} client={clients.runtime} creator={clients.sessions} workspaceId={workspaceId} pendingAttempts={pendingCreations} onCreated={id => {setSessionsReload(value => value+1); void chooseSession(id);}} />}
         <label>Workspace <select aria-label="Workspace" value={workspaceId} disabled={navigationBusy} onChange={event => void chooseWorkspace(event.currentTarget.value)}>
           {!workspaceId && <option value="">Choose a workspace</option>}
           {workspaces.map(entry => <option key={entry.workspaceId} value={entry.workspaceId}>{entry.displayName}</option>)}
@@ -156,7 +158,7 @@ export function OperatorApp({clients, writerActive = false}: {clients: OperatorC
       <section className="operator__pane operator__chat" aria-label="Conversation">
         <h2 ref={chatHeading} tabIndex={-1}>Chat</h2>
         {session ? <><p>{session.displayName}</p>{clients.details
-          ? <SessionDetail key={sessionId} sessionId={sessionId} client={clients.details} onActivity={onActivity} />
+          ? <SessionDetail key={sessionId} sessionId={sessionId} workspaceId={workspaceId} client={clients.details} onActivity={onActivity} />
           : <p>Current session presentation is unavailable.</p>}</> : <p>Select a session to view its conversation.</p>}
       </section>
       <div className="operator__pane operator__files">

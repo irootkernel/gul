@@ -22,7 +22,7 @@ func Evaluate(in Input) Evaluation {
 		out.Blocker = FreshSnapshotRequired
 		return out
 	}
-	out.Mode = EvaluateWriter(WriterFacts{Fresh: true, ActiveAuthority: w.Owner == ThisSession && w.Authority == Active, VerifiedPolicy: r.Verification == Verified && (w.Owner != ThisSession || w.Verification == Verified), EffectiveRead: r.Access == Read, EffectiveWrite: r.Access == Write}, in.Request.Intent).Mode
+	out.Mode = EvaluateWriter(WriterFacts{Fresh: true, ActiveAuthority: w.Owner == ThisSession && w.Authority == Active, VerifiedPolicy: r.Verification == Verified && (w.Owner != ThisSession || w.Verification == Verified), UnverifiedPolicy: r.Access == UnknownAccess && r.Verification == Unverified, EffectiveRead: r.Access == Read, EffectiveWrite: r.Access == Write}, in.Request.Intent).Mode
 	if a.Freshness != Fresh || a.Revision == 0 {
 		f.RequiresFreshSnapshot = true
 		out.Blocker = FreshSnapshotRequired
@@ -118,6 +118,9 @@ func Evaluate(in Input) Evaluation {
 		out.Blocker = FreshSnapshotRequired
 	}
 	policyReady := r.Verification == Verified && (r.Access == Read || r.Access == Write)
+	// The pinned release admits explicit requests with a declared unverified
+	// best-effort policy. That admission does not verify effective access.
+	unverifiedPolicy := r.Access == UnknownAccess && r.Verification == Unverified && r.Requested == BestEffort && r.Achieved == BestEffort && (w.Owner != ThisSession || w.Requested == BestEffort && w.Achieved == BestEffort)
 	quiescent := !transitionBusy && (r.Server == ServerReady || r.Server == ServerAbsent) && !active && r.Pending == 0 && backgroundSafe && !w.BackgroundBlocked && !w.RecoveryBlocked
 	f.CanPausePrimary = c.Pause && quiescent && r.Lifecycle == Idle
 	f.CanResumePrimary = c.Resume && quiescent && r.Lifecycle == Paused
@@ -125,21 +128,27 @@ func Evaluate(in Input) Evaluation {
 	fixed := r.Thread == Present && !transition
 	writeFeatures := c.DedicatedWriter && c.DurableWriter && r.Lane == Dedicated
 	writerAvailable := w.Owner == NoOwner || w.Owner == ThisSession
-	initialPolicy := r.Thread == Missing && r.Access == UnknownAccess && r.Verification == Unverified && r.Authority == Unowned && w.Owner == NoOwner
+	initialPolicy := r.Thread == Missing && unverifiedPolicy && r.Authority == Unowned && w.Owner == NoOwner
+	heldWriter := w.Owner == ThisSession && w.Authority == Active && r.Authority == Active
 	verifiedWriter := w.Owner == ThisSession && w.Authority == Active && r.Authority == Active && r.Access == Write && w.Access == Write && w.Verification == Verified
 	if quiescent && r.Lifecycle == Idle {
-		f.CanSubmitRead = c.Submit && (initialPolicy || policyReady && (r.Access == Read || verifiedWriter))
+		f.CanSubmitRead = c.Submit && (unverifiedPolicy && (r.Authority == Unowned || heldWriter) || policyReady && (r.Access == Read || verifiedWriter))
 		firstWrite := initialPolicy && c.FirstWriteViaSubmit && r.Variant == DedicatedUnstarted
-		f.CanSubmitWrite = c.Submit && writeFeatures && writerAvailable && (firstWrite || policyReady && verifiedWriter)
+		f.CanSubmitWrite = c.Submit && writeFeatures && writerAvailable && (firstWrite || policyReady && verifiedWriter || unverifiedPolicy && heldWriter)
 	}
-	if quiescent && policyReady && (r.Lifecycle == Idle || r.Lifecycle == Paused) && writeFeatures {
-		f.CanAcquireWriter = c.Acquire && w.Owner == NoOwner && (r.Thread == Present && transition)
-		f.CanReleaseWriter = c.Release && w.Owner == ThisSession && w.Authority == Active && r.Authority == Active && r.Verification == Verified && w.Verification == Verified
+	if quiescent && (r.Lifecycle == Idle || r.Lifecycle == Paused) && writeFeatures {
+		f.CanAcquireWriter = c.Acquire && policyReady && w.Owner == NoOwner && (r.Thread == Present && transition)
+		f.CanReleaseWriter = c.Release && heldWriter && (policyReady || unverifiedPolicy)
+	}
+	if fixed && in.Request.Intent == IntentWrite && !heldWriter && r.Access != Write {
+		out.Blocker = UnsupportedTransition
+		f.CanSubmitWrite = false
+		f.CanAcquireWriter = false
 	}
 	if w.Owner == ExternalOwner && in.Request.Intent == IntentWrite {
 		out.Blocker = WriterBusy
 	}
-	if r.Lineage == ContinuationRequired || fixed && in.Request.Intent == IntentWrite && r.Access != Write {
+	if r.Lineage == ContinuationRequired {
 		out.Blocker = UnsupportedTransition
 		f.CanSubmitRead = false
 		f.CanSubmitWrite = false
@@ -149,9 +158,12 @@ func Evaluate(in Input) Evaluation {
 	if active {
 		out.Blocker = ActiveTurnDraft
 	}
-	if a.Freshness == Fresh && a.Revision > 0 && (a.Lifecycle == SessionActive || a.Lifecycle == SessionDegraded) && c.Close && r.Background != BackgroundUnverified {
-		f.RequiresCloseConfirmation = ownedWork && !in.Request.InterruptConfirmed
-		f.CanRequestSessionClose = (in.Request.CloseIntent == CompleteSession || in.Request.CloseIntent == AbortSession) && (!ownedWork || in.Request.InterruptConfirmed)
+	if a.Freshness == Fresh && a.Revision > 0 && (a.Lifecycle == SessionActive || a.Lifecycle == SessionDegraded) && c.Close && !(w.Owner == ThisSession && w.RecoveryBlocked) {
+		// Root close asks the Broker to settle owned effects. An unverified
+		// background requires consent, while ordinary mutations remain blocked.
+		closeConsent := ownedWork || r.Background == BackgroundUnverified
+		f.RequiresCloseConfirmation = closeConsent && !in.Request.InterruptConfirmed
+		f.CanRequestSessionClose = (in.Request.CloseIntent == CompleteSession || in.Request.CloseIntent == AbortSession) && (!closeConsent || in.Request.InterruptConfirmed)
 	}
 	return out
 }

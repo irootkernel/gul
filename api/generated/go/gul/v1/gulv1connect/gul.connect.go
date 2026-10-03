@@ -105,9 +105,18 @@ const (
 	// WorkspacePresentationServiceSetNavigationProcedure is the fully-qualified name of the
 	// WorkspacePresentationService's SetNavigation RPC.
 	WorkspacePresentationServiceSetNavigationProcedure = "/gul.v1.WorkspacePresentationService/SetNavigation"
+	// DirectSessionServiceCreateSessionProcedure is the fully-qualified name of the
+	// DirectSessionService's CreateSession RPC.
+	DirectSessionServiceCreateSessionProcedure = "/gul.v1.DirectSessionService/CreateSession"
+	// DirectSessionServiceRecoverCreationProcedure is the fully-qualified name of the
+	// DirectSessionService's RecoverCreation RPC.
+	DirectSessionServiceRecoverCreationProcedure = "/gul.v1.DirectSessionService/RecoverCreation"
 	// DirectSessionServiceSubmitProcedure is the fully-qualified name of the DirectSessionService's
 	// Submit RPC.
 	DirectSessionServiceSubmitProcedure = "/gul.v1.DirectSessionService/Submit"
+	// DirectSessionServiceInterruptPrimaryProcedure is the fully-qualified name of the
+	// DirectSessionService's InterruptPrimary RPC.
+	DirectSessionServiceInterruptPrimaryProcedure = "/gul.v1.DirectSessionService/InterruptPrimary"
 	// DirectSessionServiceListConversationProcedure is the fully-qualified name of the
 	// DirectSessionService's ListConversation RPC.
 	DirectSessionServiceListConversationProcedure = "/gul.v1.DirectSessionService/ListConversation"
@@ -799,7 +808,10 @@ func (UnimplementedWorkspacePresentationServiceHandler) SetNavigation(context.Co
 
 // DirectSessionServiceClient is a client for the gul.v1.DirectSessionService service.
 type DirectSessionServiceClient interface {
+	CreateSession(context.Context, *connect.Request[v1.CreateSessionRequest]) (*connect.Response[v1.CreateSessionResponse], error)
+	RecoverCreation(context.Context, *connect.Request[v1.RecoverCreationRequest]) (*connect.Response[v1.CreateSessionResponse], error)
 	Submit(context.Context, *connect.Request[v1.SubmitRequest]) (*connect.Response[v1.SubmitResponse], error)
+	InterruptPrimary(context.Context, *connect.Request[v1.InterruptPrimaryRequest]) (*connect.Response[v1.InterruptPrimaryResponse], error)
 	ListConversation(context.Context, *connect.Request[v1.ListConversationRequest]) (*connect.Response[v1.ListConversationResponse], error)
 	GetConversationEntry(context.Context, *connect.Request[v1.GetConversationEntryRequest]) (*connect.Response[v1.GetConversationEntryResponse], error)
 	ListDirectSessions(context.Context, *connect.Request[v1.ListDirectSessionsRequest]) (*connect.Response[v1.ListDirectSessionsResponse], error)
@@ -825,10 +837,28 @@ func NewDirectSessionServiceClient(httpClient connect.HTTPClient, baseURL string
 	baseURL = strings.TrimRight(baseURL, "/")
 	directSessionServiceMethods := v1.File_gul_v1_gul_proto.Services().ByName("DirectSessionService").Methods()
 	return &directSessionServiceClient{
+		createSession: connect.NewClient[v1.CreateSessionRequest, v1.CreateSessionResponse](
+			httpClient,
+			baseURL+DirectSessionServiceCreateSessionProcedure,
+			connect.WithSchema(directSessionServiceMethods.ByName("CreateSession")),
+			connect.WithClientOptions(opts...),
+		),
+		recoverCreation: connect.NewClient[v1.RecoverCreationRequest, v1.CreateSessionResponse](
+			httpClient,
+			baseURL+DirectSessionServiceRecoverCreationProcedure,
+			connect.WithSchema(directSessionServiceMethods.ByName("RecoverCreation")),
+			connect.WithClientOptions(opts...),
+		),
 		submit: connect.NewClient[v1.SubmitRequest, v1.SubmitResponse](
 			httpClient,
 			baseURL+DirectSessionServiceSubmitProcedure,
 			connect.WithSchema(directSessionServiceMethods.ByName("Submit")),
+			connect.WithClientOptions(opts...),
+		),
+		interruptPrimary: connect.NewClient[v1.InterruptPrimaryRequest, v1.InterruptPrimaryResponse](
+			httpClient,
+			baseURL+DirectSessionServiceInterruptPrimaryProcedure,
+			connect.WithSchema(directSessionServiceMethods.ByName("InterruptPrimary")),
 			connect.WithClientOptions(opts...),
 		),
 		listConversation: connect.NewClient[v1.ListConversationRequest, v1.ListConversationResponse](
@@ -908,7 +938,10 @@ func NewDirectSessionServiceClient(httpClient connect.HTTPClient, baseURL string
 
 // directSessionServiceClient implements DirectSessionServiceClient.
 type directSessionServiceClient struct {
+	createSession                *connect.Client[v1.CreateSessionRequest, v1.CreateSessionResponse]
+	recoverCreation              *connect.Client[v1.RecoverCreationRequest, v1.CreateSessionResponse]
 	submit                       *connect.Client[v1.SubmitRequest, v1.SubmitResponse]
+	interruptPrimary             *connect.Client[v1.InterruptPrimaryRequest, v1.InterruptPrimaryResponse]
 	listConversation             *connect.Client[v1.ListConversationRequest, v1.ListConversationResponse]
 	getConversationEntry         *connect.Client[v1.GetConversationEntryRequest, v1.GetConversationEntryResponse]
 	listDirectSessions           *connect.Client[v1.ListDirectSessionsRequest, v1.ListDirectSessionsResponse]
@@ -923,9 +956,24 @@ type directSessionServiceClient struct {
 	closeRuntime                 *connect.Client[v1.CloseRuntimeRequest, v1.CloseRuntimeResponse]
 }
 
+// CreateSession calls gul.v1.DirectSessionService.CreateSession.
+func (c *directSessionServiceClient) CreateSession(ctx context.Context, req *connect.Request[v1.CreateSessionRequest]) (*connect.Response[v1.CreateSessionResponse], error) {
+	return c.createSession.CallUnary(ctx, req)
+}
+
+// RecoverCreation calls gul.v1.DirectSessionService.RecoverCreation.
+func (c *directSessionServiceClient) RecoverCreation(ctx context.Context, req *connect.Request[v1.RecoverCreationRequest]) (*connect.Response[v1.CreateSessionResponse], error) {
+	return c.recoverCreation.CallUnary(ctx, req)
+}
+
 // Submit calls gul.v1.DirectSessionService.Submit.
 func (c *directSessionServiceClient) Submit(ctx context.Context, req *connect.Request[v1.SubmitRequest]) (*connect.Response[v1.SubmitResponse], error) {
 	return c.submit.CallUnary(ctx, req)
+}
+
+// InterruptPrimary calls gul.v1.DirectSessionService.InterruptPrimary.
+func (c *directSessionServiceClient) InterruptPrimary(ctx context.Context, req *connect.Request[v1.InterruptPrimaryRequest]) (*connect.Response[v1.InterruptPrimaryResponse], error) {
+	return c.interruptPrimary.CallUnary(ctx, req)
 }
 
 // ListConversation calls gul.v1.DirectSessionService.ListConversation.
@@ -990,7 +1038,10 @@ func (c *directSessionServiceClient) CloseRuntime(ctx context.Context, req *conn
 
 // DirectSessionServiceHandler is an implementation of the gul.v1.DirectSessionService service.
 type DirectSessionServiceHandler interface {
+	CreateSession(context.Context, *connect.Request[v1.CreateSessionRequest]) (*connect.Response[v1.CreateSessionResponse], error)
+	RecoverCreation(context.Context, *connect.Request[v1.RecoverCreationRequest]) (*connect.Response[v1.CreateSessionResponse], error)
 	Submit(context.Context, *connect.Request[v1.SubmitRequest]) (*connect.Response[v1.SubmitResponse], error)
+	InterruptPrimary(context.Context, *connect.Request[v1.InterruptPrimaryRequest]) (*connect.Response[v1.InterruptPrimaryResponse], error)
 	ListConversation(context.Context, *connect.Request[v1.ListConversationRequest]) (*connect.Response[v1.ListConversationResponse], error)
 	GetConversationEntry(context.Context, *connect.Request[v1.GetConversationEntryRequest]) (*connect.Response[v1.GetConversationEntryResponse], error)
 	ListDirectSessions(context.Context, *connect.Request[v1.ListDirectSessionsRequest]) (*connect.Response[v1.ListDirectSessionsResponse], error)
@@ -1012,10 +1063,28 @@ type DirectSessionServiceHandler interface {
 // and JSON codecs. They also support gzip compression.
 func NewDirectSessionServiceHandler(svc DirectSessionServiceHandler, opts ...connect.HandlerOption) (string, http.Handler) {
 	directSessionServiceMethods := v1.File_gul_v1_gul_proto.Services().ByName("DirectSessionService").Methods()
+	directSessionServiceCreateSessionHandler := connect.NewUnaryHandler(
+		DirectSessionServiceCreateSessionProcedure,
+		svc.CreateSession,
+		connect.WithSchema(directSessionServiceMethods.ByName("CreateSession")),
+		connect.WithHandlerOptions(opts...),
+	)
+	directSessionServiceRecoverCreationHandler := connect.NewUnaryHandler(
+		DirectSessionServiceRecoverCreationProcedure,
+		svc.RecoverCreation,
+		connect.WithSchema(directSessionServiceMethods.ByName("RecoverCreation")),
+		connect.WithHandlerOptions(opts...),
+	)
 	directSessionServiceSubmitHandler := connect.NewUnaryHandler(
 		DirectSessionServiceSubmitProcedure,
 		svc.Submit,
 		connect.WithSchema(directSessionServiceMethods.ByName("Submit")),
+		connect.WithHandlerOptions(opts...),
+	)
+	directSessionServiceInterruptPrimaryHandler := connect.NewUnaryHandler(
+		DirectSessionServiceInterruptPrimaryProcedure,
+		svc.InterruptPrimary,
+		connect.WithSchema(directSessionServiceMethods.ByName("InterruptPrimary")),
 		connect.WithHandlerOptions(opts...),
 	)
 	directSessionServiceListConversationHandler := connect.NewUnaryHandler(
@@ -1092,8 +1161,14 @@ func NewDirectSessionServiceHandler(svc DirectSessionServiceHandler, opts ...con
 	)
 	return "/gul.v1.DirectSessionService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
+		case DirectSessionServiceCreateSessionProcedure:
+			directSessionServiceCreateSessionHandler.ServeHTTP(w, r)
+		case DirectSessionServiceRecoverCreationProcedure:
+			directSessionServiceRecoverCreationHandler.ServeHTTP(w, r)
 		case DirectSessionServiceSubmitProcedure:
 			directSessionServiceSubmitHandler.ServeHTTP(w, r)
+		case DirectSessionServiceInterruptPrimaryProcedure:
+			directSessionServiceInterruptPrimaryHandler.ServeHTTP(w, r)
 		case DirectSessionServiceListConversationProcedure:
 			directSessionServiceListConversationHandler.ServeHTTP(w, r)
 		case DirectSessionServiceGetConversationEntryProcedure:
@@ -1127,8 +1202,20 @@ func NewDirectSessionServiceHandler(svc DirectSessionServiceHandler, opts ...con
 // UnimplementedDirectSessionServiceHandler returns CodeUnimplemented from all methods.
 type UnimplementedDirectSessionServiceHandler struct{}
 
+func (UnimplementedDirectSessionServiceHandler) CreateSession(context.Context, *connect.Request[v1.CreateSessionRequest]) (*connect.Response[v1.CreateSessionResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("gul.v1.DirectSessionService.CreateSession is not implemented"))
+}
+
+func (UnimplementedDirectSessionServiceHandler) RecoverCreation(context.Context, *connect.Request[v1.RecoverCreationRequest]) (*connect.Response[v1.CreateSessionResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("gul.v1.DirectSessionService.RecoverCreation is not implemented"))
+}
+
 func (UnimplementedDirectSessionServiceHandler) Submit(context.Context, *connect.Request[v1.SubmitRequest]) (*connect.Response[v1.SubmitResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("gul.v1.DirectSessionService.Submit is not implemented"))
+}
+
+func (UnimplementedDirectSessionServiceHandler) InterruptPrimary(context.Context, *connect.Request[v1.InterruptPrimaryRequest]) (*connect.Response[v1.InterruptPrimaryResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("gul.v1.DirectSessionService.InterruptPrimary is not implemented"))
 }
 
 func (UnimplementedDirectSessionServiceHandler) ListConversation(context.Context, *connect.Request[v1.ListConversationRequest]) (*connect.Response[v1.ListConversationResponse], error) {

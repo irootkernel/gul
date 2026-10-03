@@ -3,9 +3,9 @@
 | Field | Value |
 | --- | --- |
 | Role | Sole authority for task identity, order, status, dependencies, and phase |
-| Revision | 2026-10-02 E2-T2 protected Controller carriers |
+| Revision | 2026-10-03 E2-T3 published-provider acceptance |
 | Active Task | None |
-| Next | E2-T3 |
+| Next | E9-T1 follows the E2-T3 commit and E2 whole-Epic audit |
 | Required provider | Released Dolgorae v0.1.3 implementing `dolgorae.gul-consumer/v1` |
 
 E14 is Completed. The published v0.1.3 artifact and immutable release source
@@ -16,7 +16,7 @@ have been qualified by E2-T0, including the release contract and admission matri
 Allowed executable states are `Planned`, `In Progress`, `In Review`, `Completed`,
 `Blocked`, and `Deferred`. `Retired` preserves a historical non-executable ID.
 At most one Task is In Progress or In Review globally. No Task is active;
-E2-T0/T1/T2 are Completed.
+E2-T0/T1/T2/T3 are Completed.
 E14-T1 and E14 are Completed for the assembled fake-provider scope.
 A Task completes only after its scoped outputs, verification, documentation,
 review, and ordinary completion commit requirements pass. No status implies live
@@ -312,14 +312,22 @@ The accepted plan covers release contract drift and capability admission,
 production wiring, and actual read/write behavior. A source-tag test build may
 help diagnose these boundaries, but cannot satisfy the published-artifact gate
 or complete a Task. The published artifact and matching source identity have
-been qualified; E2-T0/T1/T2 are Completed. E2-T3 remains gated on its predecessors.
+been qualified; E2-T0/T1/T2 are Completed. E2-T3's committed predecessors are
+satisfied. Published v0.1.3 reports UNKNOWN effective access and UNVERIFIED
+policy after Thread binding while accepting explicit best-effort requests.
+Gul separates request eligibility from verified access presentation. Same-Run
+ACTIVE Writer submissions and release retain their independent guards; an
+unverified reader-to-writer transition remains unavailable. E2-T3 acceptance
+and corrected-target review pass against the unchanged published artifact with
+permitted native fakes. E2 remains In Progress pending its committed whole-Epic
+audit and closeout; live execution and device/deployment qualification remain E9.
 
 | Task | Phase | Status | Predecessors | Owned result and verification |
 | --- | --- | --- | --- | --- |
 | E2-T0 | Post-release | Completed | E14-T1; Provider released | Pin the published v0.1.3 artifact and matching immutable consumer inputs; regenerate release drift and document schema/capability admission; no silent installation or replaced production binary |
 | E2-T1 | Post-release | Completed | E2-T0, E1-T3 | Real gateway supervision, private UDS, shared generated gRPC transport, negotiated request contexts and contract checks; wire the accepted runtime into production host startup and diagnostics |
 | E2-T2 | Post-release | Completed | E2-T1, E1-T4 | Actual exclusive carriers under the advertised fixed-home root, exact credential schema, verification, adoption and authorization; no Operator or child credential |
-| E2-T3 | Post-release | Planned | E2-T2, E3-T4, E4-T5, E8-T3, E14-T1 | Authenticated production-host session creation and sequential read/write, guarded image handoff, approval, complete history/results/artifacts and aggregate close; unsupported and ambiguous operations remain blocked |
+| E2-T3 | Post-release | Completed | E2-T2, E3-T4, E4-T5, E8-T3, E14-T1 | Authenticated production-host session creation and sequential read/write, guarded image handoff, approval, complete history/results/artifacts and aggregate close; separate request eligibility from truthful UNKNOWN/UNVERIFIED presentation against published v0.1.3 |
 
 ### E9: Qualify actual Gul and the first release
 
@@ -418,7 +426,7 @@ supported behavior and the expected refusal for unsupported behavior.
 E2-T0 release qualification (2026-10-02): the published v0.1.3 source is
 `07dc31331d03aae9ed7c0c862a0cbe8a5184024e`. The current dependency-lock SHA-256
 is `223d2a72d7bd281dba0abdc8b1e966d792492546c3be63a67e593c94eed0c05a` and generated-lock SHA-256 is
-`8d02e824c36795221ee6d1b3fc7e2b43943d13701aa76d019c3b6aea30b26a6d`. The earlier E12 pin remains historical evidence.
+`912c2e1b530efe176fdc5f953217f55c1812a77cbe5425ccb25965fb1130fbd6`. The earlier E12 pin remains historical evidence.
 Actual production assembly, credentials and session actions remain E2-T1/T2/T3.
 
 ### E2-T1: Connect the production host to the real gateway

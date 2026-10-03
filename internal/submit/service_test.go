@@ -17,7 +17,7 @@ type forbiddenState struct {
 }
 type forbiddenDispatch struct{ t *testing.T }
 
-func (d forbiddenDispatch) Submit(context.Context, action.Bound, action.Input, string, string, action.WriteIntent) error {
+func (d forbiddenDispatch) SubmitInput(context.Context, action.Bound, action.Input, string, string, action.WriteIntent, Options) error {
 	d.t.Fatal("invalid prompt reached dispatch")
 	return nil
 }
@@ -34,5 +34,14 @@ func TestInvalidPromptNeverReadsAuthorityOrDispatches(t *testing.T) {
 				t.Fatalf("invalid prompt = %v", err)
 			}
 		})
+	}
+}
+
+func TestClosedReadinessGateReturnsTypedFreshnessRefusalWithoutDispatch(t *testing.T) {
+	forbidden := forbiddenState{}
+	s := Service{Actions: &action.Service{Repository: forbidden, Workspaces: forbidden, Provider: forbidden, Gate: func(string, string) bool { return false }}, Dispatcher: forbiddenDispatch{t}}
+	state, err := s.Send(t.Context(), "owner", "session", "attempt", "draft", action.IntentWrite)
+	if !errors.Is(err, action.ErrBlocked) || state.Blocker != action.FreshSnapshotRequired || !state.Flags.RequiresFreshSnapshot || state.Flags.CanSubmitWrite {
+		t.Fatal("closed readiness lost its refusal reason", state, err)
 	}
 }

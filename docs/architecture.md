@@ -6,7 +6,7 @@
 | Product | Gul |
 | Version | 0.1-dolgorae-consumer-v1 |
 | Status | Approved target rebaseline; E8-T1/T2/T3 accepted within account, authenticated route and isolated host/delivery scopes; E8 completed after bounded whole-Epic validation |
-| Last updated | 2026-10-02 |
+| Last updated | 2026-10-03 |
 
 ## 1. Purpose and change control
 
@@ -207,8 +207,16 @@ schema's actual `$id`, version 1 and exact digest. The release retains
 `reader_writer_access=false`; dedicated first-write admission depends on lane
 writer support, `first_write_via_submit_turn`, durable writer authority and
 fresh typed state. Existing-reader acquisition requires verified Profile
-transition support; the global release summary is unverified. A verified held
-writer can submit READ and release authority without that transition claim.
+transition support; the global release summary is unverified. A same-Run ACTIVE writer can submit explicit requests and release authority
+without a new transition claim. For declared UNKNOWN/UNVERIFIED policy, requested
+and achieved assurance must both be BEST_EFFORT_PERSONAL_ALPHA. READ admission
+also requires fresh compatible authenticated owned idle state and no active Turn,
+pending Interaction, unresolved mutation, recovery, background execution or close.
+The public UNVERIFIED presentation mode preserves unknown effective access;
+submission flags do not claim verified READ or WRITE. READ may retain the held
+writer and its workspaceWrite sandbox. Missing or unrecognized enum values,
+failed/transitioning/unsupported policy and higher unverified assurance remain
+closed. Acquire still requires verified policy and transition support.
 Neither a
 handshake nor a successful read proves a write action safe. E2-T1
 applies this policy in the production probe and action inputs. Actual action
@@ -224,7 +232,7 @@ Every decision input remains independent even when another projection appears to
 E2-T0 release qualification (2026-10-02): the published v0.1.3 source is
 `07dc31331d03aae9ed7c0c862a0cbe8a5184024e`. The current dependency-lock SHA-256
 is `223d2a72d7bd281dba0abdc8b1e966d792492546c3be63a67e593c94eed0c05a` and generated-lock SHA-256 is
-`8d02e824c36795221ee6d1b3fc7e2b43943d13701aa76d019c3b6aea30b26a6d`. The earlier E12 pin remains historical evidence.
+`912c2e1b530efe176fdc5f953217f55c1812a77cbe5425ccb25965fb1130fbd6`. The earlier E12 pin remains historical evidence.
 E2-T1 supplies production gateway/host assembly. E2-T2 implements protected
 carriers and verified adoption; actual session actions remain E2-T3-owned.
 
@@ -367,7 +375,12 @@ actual carrier and StartRun mutation; the E8-T3 host mounts the Runtime route.
 
 `shared_readonly` is permanent. The first release blocks a later write request with a typed unsupported-transition result and preserves the source. E4-T4 owns any future `CreateWriteContinuation` flow. Starting a fresh Orchestrated Session is a new launch and is never labeled or recorded as lineage continuation.
 
-An existing-thread `dedicated` Run offers in-place write only while the selected profile reports transition support. When unsupported or unverified, the first release blocks the write without offering continuation. An upstream transition rejection is a typed blocker, never a retryable failure.
+Promoting an existing-thread `dedicated` reader to a writer requires verified
+Profile transition support. An unsupported or unverified transition blocks that
+promotion without offering continuation. A matching same-Run ACTIVE writer may
+submit explicit READ or WRITE under the bounded admission rules in Section 6;
+it does not acquire new authority or claim a policy transition. An upstream
+transition rejection is a typed blocker, never a retryable failure.
 
 ## 7. Domain model
 
@@ -615,8 +628,9 @@ from its recovery classification.
 `WriterActionService` exposes the shared result and performs guarded Acquire or
 Release once with a freshly read Run revision. Accepted responses display the
 provider projection and require a new complete snapshot before further actions.
-Release returns the released Run policy, lane, assurance and full stamp even when
-the owner is absent; it has a separate validation boundary from workspace status.
+The published Release response is the ownerless workspace Writer projection:
+UNKNOWN/UNVERIFIED access, no Run lane or assurance, and only the workspace
+Writer revision. Gul refreshes the Run independently after Release.
 The initial threadless Unknown/Unverified policy permits the first eligible Turn
 without claiming verified WRITE before its accepted provider response.
 The Interaction service uses the same evaluator before response admission.
@@ -694,7 +708,7 @@ AND effective_policy.verification = verified
 
 Acquire and release are upstream commands. Writer status is an observation read, so writer state stays visible even when a Controller binding is missing or unhealthy. Acquire is offered only for an eligible existing-thread Run; it is absent for a threadless Run when `threadless_acquire_write=false`.
 
-The first-release closed evaluator emits only `CanSubmitRead`, `CanSubmitWrite`, `CanAcquireWriter`, `CanReleaseWriter`, `CanInterrupt`, `CanResolveInteraction`, `CanRecover`, `CanReconcile`, `CanAdoptController`, `CanPausePrimary`, `CanResumePrimary`, `CanRequestSessionClose`, `RequiresCloseConfirmation`, `RequiresOperatorAction`, `RequiresFreshSnapshot`, `BlockedByOutcomeUnknown`, `BlockedByCredentialState`, `BlockedByBackgroundExecution`, and `BlockedByProviderCompatibility`. These are Gul-owned decisions, not upstream RPC enums. Close request eligibility never asserts that closure is already complete; active owned work requires explicit interrupt confirmation. A continuation-required state maps to a typed unsupported blocker, not a successor action. Inputs are the typed Run projection, workspace-writer projection, profile capabilities/compatibility, effective access and verification, transition support, lane, writer authority and generation, requested/achieved assurance, background execution, recovery/action state, lineage, Controller-binding health, Gul session ownership, and unresolved operation state. Unknown or string-only decision state fails closed.
+The first-release closed evaluator emits only `CanSubmitRead`, `CanSubmitWrite`, `CanAcquireWriter`, `CanReleaseWriter`, `CanInterrupt`, `CanResolveInteraction`, `CanRecover`, `CanReconcile`, `CanAdoptController`, `CanPausePrimary`, `CanResumePrimary`, `CanRequestSessionClose`, `RequiresCloseConfirmation`, `RequiresOperatorAction`, `RequiresFreshSnapshot`, `BlockedByOutcomeUnknown`, `BlockedByCredentialState`, `BlockedByBackgroundExecution`, and `BlockedByProviderCompatibility`. These are Gul-owned decisions, not upstream RPC enums. Close request eligibility never asserts that closure is already complete; active owned work or typed UNVERIFIED background requires explicit interrupt confirmation. Root Close can then ask the Broker to settle owned effects under the independent freshness, authentication, ownership, capability, outcome and recovery guards. Background uncertainty still blocks ordinary Submit, Acquire and Release. A continuation-required state maps to a typed unsupported blocker, not a successor action. Inputs are the typed Run projection, workspace-writer projection, profile capabilities/compatibility, effective access and verification, transition support, lane, writer authority and generation, requested/achieved assurance, background execution, recovery/action state, lineage, Controller-binding health, Gul session ownership, and unresolved operation state. Missing, unrecognized enum, malformed or string-only decision state fails closed. Declared UNKNOWN/UNVERIFIED values follow their explicit per-action rules.
 
 Because every Gul Direct Session holds its own Controller (ADR-0035), any other session that owns the writer is a different Controller upstream, and the provider's same-controller handoff precondition never holds. Writer transfer is therefore Release in the owning session followed by a separate Acquire in the target session. Gul presents the intervening unowned window, keeps no queue or reservation, and reports a competing acquisition from the provider result. When the owning Controller is one of Gul's own sessions, Gul may offer navigation to it where the provider allows Release from there; when the owner is outside Gul, no mutation action is offered.
 
@@ -1144,11 +1158,11 @@ The serial command facade is `toolchain-check`, `generate-contract`, `contract-c
 
 ## 19. Current snapshot
 
-**Snapshot date:** 2026-10-02 (E2-T2 protected Controller carriers)
+**Snapshot date:** 2026-10-03 (E2-T3 released-provider admission correction)
 
-**Roadmap point:** E0 is `Completed`, E12 is `Completed`, E1 is `Completed`, and E13 is `Completed`; E1-T1 is `Completed` and E1-T2/T3/T4/T5 are `Completed`. E3 and E3-T1/T2/T3/T4 are `Completed`. E4 and E4-T1/T2/T3/T5 are `Completed`. E4-T4 remains Deferred outside its epic. E5 and E5-T1/T2/T3 are `Completed`. E6 and E6-T1/T2/T3 are `Completed`. E7 and E7-T1/T2/T3 are `Completed`. E8 is `Completed`; E8-T1/T2/T3 are `Completed`. Former E12-T2/T3 remain Retired. E14-T1 and E14 are Completed for the assembled fake-provider scope. E2-T0 is Completed for released contract qualification; E2-T1 is Completed; E2-T2 is Completed for protected carriers and verified adoption; E2-T3 remains Planned. The assembled application has explicit fake-provider verification; live-provider qualification remains E2/E9-owned.
+**Roadmap point:** E0 is `Completed`, E12 is `Completed`, E1 is `Completed`, and E13 is `Completed`; E1-T1 is `Completed` and E1-T2/T3/T4/T5 are `Completed`. E3 and E3-T1/T2/T3/T4 are `Completed`. E4 and E4-T1/T2/T3/T5 are `Completed`. E4-T4 remains Deferred outside its epic. E5 and E5-T1/T2/T3 are `Completed`. E6 and E6-T1/T2/T3 are `Completed`. E7 and E7-T1/T2/T3 are `Completed`. E8 is `Completed`; E8-T1/T2/T3 are `Completed`. Former E12-T2/T3 remain Retired. E14-T1 and E14 are Completed for the assembled fake-provider scope. E2-T0 is Completed for released contract qualification; E2-T1 is Completed; E2-T2 is Completed for protected carriers and verified adoption; E2-T3 is Completed for published v0.1.3 admission and ordinary authenticated host acceptance with permitted native fakes. E2 remains In Progress pending whole-Epic audit and closeout. Live execution, broader provider/Worker faults and device/deployment qualification remain E9-owned.
 
-**Maturity:** delivery-independent Go core, shared React bundle, authenticated Gul API mounted by the E8-T3 host, typed provider ports and explicit scenario harness, host-opened Gul SQLite repositories with fake-scoped runtime attachment, local presentation and passive session reads, and a Wails shell foundation. E4 adds typed observation, Interaction cards, action eligibility and bounded history/result/artifact reads. E5 adds whole-session close, reconnect convergence and operation-specific recovery against fakes. E6 adds verified-root local FileService inspection, bounded previews, refresh, watcher and Git review through component-tested typed APIs mounted by E8-T3. E7-T1 adds three responsive panes, workspace/session navigation and read-only FileService presentation through injected typed clients. E7-T2 adds provider-projected activity, prioritized Interaction cards, conversation and accepted-user Prompt History, and guarded whole-session close to that injected-client view. E7-T3 adds composition-safe input and keyboard focus behavior to the same component scope. E8-T1 adds isolated local account setup, bounded password hashing and the injected first-run form. E8-T2 adds protected session routes and the checked auth entry within isolated delivery scope. E8-T3 accepts the shared authenticated host, verified native attachment, isolated deployment fixtures and installed PWA delivery. E14-T1 adds checked adapter assembly and real authenticated browser/native acceptance with explicit fakes. E2-T1 supplies published gateway/ordinary-host transport qualification. E2-T2 implements protected local Controller files, public-only SQLite credential metadata, per-call generated-RPC validation and provider-verified atomic adoption with checked dependent projections. Its published carrier/native-fake qualification is distinct from ordinary authenticated host session-action acceptance in E2-T3 and device/fault/security/deployment qualification in E9.
+**Maturity:** delivery-independent Go core, shared React bundle, authenticated Gul API mounted by the E8-T3 host, typed provider ports and explicit scenario harness, host-opened Gul SQLite repositories with fake-scoped runtime attachment, local presentation and passive session reads, and a Wails shell foundation. E4 adds typed observation, Interaction cards, action eligibility and bounded history/result/artifact reads. E5 adds whole-session close, reconnect convergence and operation-specific recovery against fakes. E6 adds verified-root local FileService inspection, bounded previews, refresh, watcher and Git review through component-tested typed APIs mounted by E8-T3. E7-T1 adds three responsive panes, workspace/session navigation and read-only FileService presentation through injected typed clients. E7-T2 adds provider-projected activity, prioritized Interaction cards, conversation and accepted-user Prompt History, and guarded whole-session close to that injected-client view. E7-T3 adds composition-safe input and keyboard focus behavior to the same component scope. E8-T1 adds isolated local account setup, bounded password hashing and the injected first-run form. E8-T2 adds protected session routes and the checked auth entry within isolated delivery scope. E8-T3 accepts the shared authenticated host, verified native attachment, isolated deployment fixtures and installed PWA delivery. E14-T1 adds checked adapter assembly and real authenticated browser/native acceptance with explicit fakes. E2-T1 supplies published gateway/ordinary-host transport qualification. E2-T2 implements protected local Controller files, public-only SQLite credential metadata, per-call generated-RPC validation and provider-verified atomic adoption with checked dependent projections. E2-T3 accepts ordinary authenticated host session actions against the same published provider with permitted native fakes, including separate Primary Interrupt and retained reads after confirmed Close and host restart. E9 retains live/device/fault/security/deployment qualification.
 
 ### 19.1 Implemented components
 
@@ -1332,7 +1346,9 @@ outcomes. No response body or content-derived value enters persistence.
 `internal/action` evaluates the closed 19-action set from typed provider facts,
 local coordination metadata and a fresh independent session aggregate. Recovery
 and Close share the same owned-work consent rule, including background work,
-member Runs, Spawns, pending approvals and accepted unfinished tasks. A pending
+member Runs, Spawns, pending approvals and accepted unfinished tasks. Root Close
+also requires interrupt consent for typed UNVERIFIED background, so the Broker
+can settle those effects; ordinary Submit, Acquire and Release remain blocked. A pending
 local call blocks recovery even when another matching attempt has an unknown
 outcome. Backend Acquire and Release re-evaluate these facts before one provider
 call; accepted projections require a fresh read before another mutation.
@@ -1609,3 +1625,49 @@ TLS certificates and client state. Production commands neither import these
 fixtures nor select them when dependencies fail. These checks qualify the fake
 assembly; real UDS, carrier issuance, live execution, deployment and supported
 devices remain E2/E9 boundaries.
+
+### E2-T3 published-provider session acceptance
+
+The ordinary protected host now composes public session creation and submission
+with the generated Dolgorae adapter. Creation uses a preprovisioned Profile and
+Policy, explicit parentless orchestration launch and an exclusive root Controller
+carrier. Durable Gul retry labels retain the exact StartRun request for recovery;
+unknown allocation blocks another creation until authoritative reconciliation.
+
+Submit accepts Workspace-relative image references and a checked effort override.
+The guarded FileService accessor revalidates the Workspace and resolves private
+path aliases before copying image bytes to owner-only submission storage. Known
+refusal and authoritative settlement remove those copies, including after restart.
+Provider image ordinals are zero-based; accepted Prompt History remains one-based.
+
+The checked UI exposes creation/recovery and displays declared best-effort policy
+as `Policy unverified`. Explicit READ and bounded WRITE admission follow section
+6.2 without inferring verified access or a read-only sandbox. A matching writer
+Release uses the workspace Writer projection and a separate fresh Run read. Root
+Close requires interrupt consent when background execution is UNVERIFIED and
+retains all independent outcome, credential, capability, freshness and recovery
+guards, including recovery on the Writer owned by this root. Another Run's
+Writer recovery does not block an unrelated root Close. A receipt is not confirmed closure; subsequent whole-aggregate reads
+remain authoritative.
+
+Primary Interrupt is a separate protected action that retains the whole session.
+Its admission uses fresh active-Turn, Controller, revision and explicit consent.
+The host records the exact backend Turn and observation floor before one
+`InterruptTurn` call. Durable client-attempt labels read the existing receipt;
+they never retransmit the tokenless RPC. A lost receipt stays unknown until a
+fresh matching timeline records that captured Turn's terminal state. Current
+state observation does not claim that the original Interrupt RPC succeeded.
+
+The initial published Go suite, serial facade and full Chrome campaign passed,
+but the first independent T3 review requested three corrections: owned Writer
+recovery admission for Close, the original Primary Interrupt execution path,
+and post-close/restart result and artifact retention qualification. Those
+corrections pass related-package race checks, the serial facade, the published
+Go suite and the complete published-provider Chrome campaign. That campaign
+checks 54 accepted Primary prompts, one Specialist native input, protected
+Primary interruption, and fresh public result and verified artifact reads after
+confirmed Close and host restart. Corrected-target independent review confirms
+the complete original T3 scope and all three corrections, with no remaining
+finding or unmet/unverified criterion. T3 Current State is accepted for this
+published-provider/native-fake scope. Whole-Epic audit, live Codex, broader
+provider/Worker faults, devices and deployment remain separate.

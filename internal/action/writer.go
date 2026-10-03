@@ -4,11 +4,12 @@ package action
 // WriterFacts are independent provider facts. Missing or unknown values remain
 // false; a caller must not infer verified policy from writer authority.
 type WriterFacts struct {
-	Fresh           bool
-	ActiveAuthority bool
-	VerifiedPolicy  bool
-	EffectiveRead   bool
-	EffectiveWrite  bool
+	Fresh            bool
+	ActiveAuthority  bool
+	VerifiedPolicy   bool
+	UnverifiedPolicy bool
+	EffectiveRead    bool
+	EffectiveWrite   bool
 }
 type WriteIntent uint8
 
@@ -20,9 +21,10 @@ const (
 type WriterMode string
 
 const (
-	WriterBlocked  WriterMode = "blocked"
-	WriterReadOnly WriterMode = "read_only"
-	WriterWrite    WriterMode = "write"
+	WriterBlocked    WriterMode = "blocked"
+	WriterReadOnly   WriterMode = "read_only"
+	WriterWrite      WriterMode = "write"
+	WriterUnverified WriterMode = "unverified"
 )
 
 type WriterDecision struct {
@@ -32,6 +34,10 @@ type WriterDecision struct {
 
 func EvaluateWriter(f WriterFacts, intent WriteIntent) WriterDecision {
 	result := WriterDecision{Mode: WriterBlocked}
+	if f.Fresh && f.UnverifiedPolicy && !f.VerifiedPolicy && !f.EffectiveRead && !f.EffectiveWrite {
+		result.Mode = WriterUnverified
+		return result
+	}
 	if !f.Fresh || !f.VerifiedPolicy || f.EffectiveRead == f.EffectiveWrite {
 		return result
 	}

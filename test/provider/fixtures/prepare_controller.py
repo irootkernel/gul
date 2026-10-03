@@ -12,6 +12,7 @@ import subprocess
 import sys
 
 binary, root, source = map(pathlib.Path, sys.argv[1:4])
+session_scenario = pathlib.Path(sys.argv[4]) if len(sys.argv) > 4 else None
 root = root.resolve()
 for name in ("home", "workspace", "codex-home", "bin", "tmp"):
     directory = root / name
@@ -28,15 +29,19 @@ def cli(*arguments):
     )
     document = json.loads(result.stdout)
     if result.returncode or not document.get("ok"):
-        raise RuntimeError(document.get("error", {}).get("code", "FIXTURE_SETUP_FAILED"))
+        error = document.get("error", {})
+        if error.get("code") == "COMPATIBILITY_REJECTED":
+            raise RuntimeError(json.dumps(error.get("details", {})))
+        raise RuntimeError(error.get("code", "FIXTURE_SETUP_FAILED") + ": " + error.get("message", ""))
     return document["data"]
 
 cli("init", str(root / "workspace"), "--non-git")
 native_codex.create_native_codex(
     root / "bin/codex",
-    scenario=native_codex.scenario_path("run_start_model_list.json"),
+    scenario=session_scenario or native_codex.scenario_path("run_start_model_list.json"),
     codex_home=root / "codex-home",
     schema_source=native_codex.installed_codex(),
+    transcript=(root / "native-protocol.jsonl") if session_scenario else None,
 )
 
 # Every fixture app-server stops itself after the private fixture disappears.
@@ -45,6 +50,10 @@ sentinel = root / "alive"
 sentinel.write_text("fixture active\n")
 driver = root / "bin/codex-driver.py"
 text = driver.read_text()
+if session_scenario is not None:
+    hook = pathlib.Path(__file__).with_name("session_fake_hook.py").read_text()
+    hook = hook.replace("FIXTURE_ROOT", repr(str(root)))
+    text = text.replace("    fake.bind()\n", "\n".join("    " + line if line else "" for line in hook.splitlines()) + "\n    fake.bind()\n")
 watchdog = f'''
     import os, threading, time
     def stop_with_fixture():
@@ -86,7 +95,7 @@ policy.write_text(json.dumps({
             "native_subagent_policy": "enabled"
         },
         "max_active_instances": 1, "reuse_policy": "never", "allowed_access": ["read_only"],
-        "activation_policy": "keep_resident", "primary_may_request": False,
+        "activation_policy": "keep_resident", "primary_may_request": session_scenario is not None,
         "collaboration_source": False, "collaboration_target": False,
         "auto_approve_when_fully_delegated": True
     }]

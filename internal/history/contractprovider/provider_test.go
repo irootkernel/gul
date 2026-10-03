@@ -256,3 +256,21 @@ func TestTimelineInteractionStatusMatchesAppendOnlyEvent(t *testing.T) {
 		}
 	}
 }
+
+func TestReleasedImageMetadataUsesZeroBasedOrdinals(t *testing.T) {
+	p, w, b := fixture(t)
+	w.timeline.Items[0].Images = []*publicv1.ImageInputMetadata{
+		{Ordinal: 0, Detail: publicv1.ImageDetail_IMAGE_DETAIL_AUTO, MediaType: "image/png", ByteLength: 67, Sha256: strings.Repeat("a", 64)},
+		{Ordinal: 1, Detail: publicv1.ImageDetail_IMAGE_DETAIL_HIGH, MediaType: "image/jpeg", ByteLength: 91, Sha256: strings.Repeat("b", 64)},
+	}
+	page, err := p.Timeline(t.Context(), b, "", 1)
+	if err != nil || len(page.Items[0].Images) != 2 || page.Items[0].Images[0].Ordinal != 0 || page.Items[0].Images[1].Ordinal != 1 || page.Items[0].Images[0].SHA256 != strings.Repeat("a", 64) {
+		t.Fatal(page, err)
+	}
+	for _, ordinal := range []uint32{0, 2} {
+		w.timeline.Items[0].Images[1].Ordinal = ordinal
+		if _, err = p.Timeline(t.Context(), b, "", 1); err == nil {
+			t.Fatal("duplicate or missing image ordinal admitted")
+		}
+	}
+}

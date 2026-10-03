@@ -60,10 +60,12 @@ type Props = {
   policyNames: string[];
   sharedReadOnlyWarning: string;
   onCheck: (choice: CheckCompatibilityRequest) => void;
+  onCreate?: (choice: CheckCompatibilityRequest) => void;
+  creating?: boolean;
 };
 
-// This form checks a prospective configuration. It does not start a Run.
-export function LaunchSelection({profiles, policyNames, sharedReadOnlyWarning, onCheck}: Props) {
+// Backend compatibility and creation each revalidate the explicit selection.
+export function LaunchSelection({profiles, policyNames, sharedReadOnlyWarning, onCheck, onCreate, creating}: Props) {
   const [selection, setSelection] = useState<Selection>({profileName: "", modelId: "", effort: "",
     lane: LaunchExecutionLane.UNSPECIFIED, requiredAssurance: LaunchAssurance.UNSPECIFIED,
     policyName: "", acknowledgeSharedReadonly: false});
@@ -122,6 +124,10 @@ export function LaunchSelection({profiles, policyNames, sharedReadOnlyWarning, o
         <label><input type="checkbox" checked={selection.acknowledgeSharedReadonly} onChange={event => setSelection({...selection, acknowledgeSharedReadonly: event.target.checked})} />I understand this session will remain read-only.</label>
       </div>}
       <button type="submit" disabled={!canCheckLaunch(selection, profiles, policyNames)}>Check configuration</button>
+      {onCreate && <button type="button" disabled={creating || !canCheckLaunch(selection, profiles, policyNames)} onClick={() => {
+        const choice = buildLaunchChoice(selection, profiles, policyNames);
+        if (choice) onCreate(choice);
+      }}>Create session</button>}
     </form>
   );
 }

@@ -66,7 +66,7 @@ func TestOpenMigratesAndRejectsDrift(t *testing.T) {
 		}
 		count++
 	}
-	if err := rows.Err(); err != nil || count != len(schemaStatements)+len(attachmentStatements)+len(presentationStatements)+len(sessionStatements)+len(observationStatements)+len(closeStatements)+len(mutationStatements)+len(writerReconciliationStatements)+len(passwordAccountStatements)+len(controllerStoreStatements) {
+	if err := rows.Err(); err != nil || count != len(schemaStatements)+len(attachmentStatements)+len(presentationStatements)+len(sessionStatements)+len(observationStatements)+len(closeStatements)+len(mutationStatements)+len(writerReconciliationStatements)+len(passwordAccountStatements)+len(controllerStoreStatements)+len(creationStatements)+len(interruptStatements) {
 		t.Fatalf("schema inventory = %d, %v", count, err)
 	}
 	rows.Close()

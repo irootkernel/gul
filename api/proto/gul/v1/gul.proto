@@ -227,7 +227,10 @@ message ListWorkspacesResponse {
 }
 
 service DirectSessionService {
+  rpc CreateSession(CreateSessionRequest) returns (CreateSessionResponse);
+  rpc RecoverCreation(RecoverCreationRequest) returns (CreateSessionResponse);
   rpc Submit(SubmitRequest) returns (SubmitResponse);
+  rpc InterruptPrimary(InterruptPrimaryRequest) returns (InterruptPrimaryResponse);
   rpc ListConversation(ListConversationRequest) returns (ListConversationResponse);
   rpc GetConversationEntry(GetConversationEntryRequest) returns (GetConversationEntryResponse);
   rpc ListDirectSessions(ListDirectSessionsRequest) returns (ListDirectSessionsResponse);
@@ -240,6 +243,21 @@ service DirectSessionService {
   rpc GetExecutionState(GetExecutionStateRequest) returns (GetExecutionStateResponse);
   rpc ListSpecialistResults(ListSpecialistResultsRequest) returns (ListSpecialistResultsResponse);
   rpc CloseRuntime(CloseRuntimeRequest) returns (CloseRuntimeResponse);
+}
+
+// Choices and retry labels carry no provider or credential authority.
+message CreateSessionRequest {
+  string workspace_id = 1;
+  string attempt_id = 2;
+  CheckCompatibilityRequest choice = 3;
+}
+message RecoverCreationRequest {
+  string workspace_id = 1;
+  string attempt_id = 2;
+}
+message CreateSessionResponse {
+  string session_id = 1;
+  bool outcome_unknown = 2;
 }
 
 message DirectSessionPresentation {
@@ -279,6 +297,7 @@ message ListDirectSessionsRequest {
 
 message ListDirectSessionsResponse {
   repeated DirectSessionPresentation sessions = 1;
+  repeated string pending_creation_attempt_ids = 2;
 }
 
 service ArtifactPresentationService {
@@ -683,6 +702,7 @@ enum WriterAccessMode {
   WRITER_ACCESS_MODE_READ_ONLY = 1;
   WRITER_ACCESS_MODE_WRITE = 2;
   WRITER_ACCESS_MODE_BLOCKED = 3;
+  WRITER_ACCESS_MODE_UNVERIFIED = 4;
 }
 
 service InteractionPresentationService {
@@ -1031,14 +1051,22 @@ message FileChange {
   string relative_path = 2;
 }
 
-// E14 Submit carries Gul identity, intent and text; provider authority is backend-owned.
-// REQ-DIRECT-004 image references and effort override remain E2-T3-owned additions.
+// Submit carries Gul identity and relative image references; paths and provider
+// authority are resolved by the host. Protected bytes are never replay material.
 // attempt_id is a client retry label; the backend derives and persists operation identity.
 message SubmitRequest {
   string session_id = 1;
   string attempt_id = 2;
   string text = 3;
   ActionWriteIntent write_intent = 4;
+  repeated SubmitImage images = 5;
+  optional string effort = 6;
+}
+message SubmitImage {
+  string workspace_id = 1;
+  string relative_path = 2;
+  // Exactly auto, low or high.
+  string detail = 3;
 }
 enum SubmitOutcome {
   SUBMIT_OUTCOME_UNSPECIFIED = 0;
@@ -1048,6 +1076,25 @@ enum SubmitOutcome {
 }
 message SubmitResponse {
   SubmitOutcome outcome = 1;
+  ActionState state = 2;
+}
+
+// Interrupt affects the current Primary Turn, retaining the whole session.
+// A repeated attempt_id reads the durable receipt and never retransmits.
+message InterruptPrimaryRequest {
+  string session_id = 1;
+  string attempt_id = 2;
+  bool interrupt_confirmed = 3;
+}
+enum InterruptOutcome {
+  INTERRUPT_OUTCOME_UNSPECIFIED = 0;
+  INTERRUPT_OUTCOME_ACCEPTED = 1;
+  INTERRUPT_OUTCOME_REJECTED = 2;
+  INTERRUPT_OUTCOME_UNKNOWN = 3;
+  INTERRUPT_OUTCOME_STATE_OBSERVED = 4;
+}
+message InterruptPrimaryResponse {
+  InterruptOutcome outcome = 1;
   ActionState state = 2;
 }
 service DiagnosticsService {

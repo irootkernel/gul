@@ -27,6 +27,12 @@ func (h *DirectPresentationHandler) ListDirectSessions(ctx context.Context, requ
 		return nil, sessionError(err)
 	}
 	response := &gulv1.ListDirectSessionsResponse{}
+	if h.Creator != nil {
+		response.PendingCreationAttemptIds, err = h.Creator.PendingCreations(ctx, subject, request.Msg.GetWorkspaceId())
+		if err != nil {
+			return nil, sessionError(err)
+		}
+	}
 	for _, binding := range bindings {
 		entry, err := h.Presentation.DirectSession(ctx, subject, binding.ID)
 		if err != nil {
@@ -51,6 +57,9 @@ func (h *DirectPresentationHandler) GetExecutionState(ctx context.Context, reque
 	if h.Close != nil {
 		// Observe existing attempts only; reads never dispatch Close or recovery.
 		_ = h.Close.ObservePending(ctx, subject, request.Msg.GetSessionId())
+	}
+	if h.Interrupts != nil {
+		_ = h.Interrupts.ObservePending(ctx, subject, request.Msg.GetSessionId())
 	}
 	state, err := h.Sessions.GetExecutionState(ctx, subject, request.Msg.GetSessionId())
 	if err != nil {

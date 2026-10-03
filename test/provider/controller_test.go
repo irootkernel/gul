@@ -31,7 +31,7 @@ func TestPublishedControllerCarriersAndAdoption(t *testing.T) {
 	if source == "" {
 		t.Fatal("matching v0.1.3 source fixtures required")
 	}
-	root, err := os.MkdirTemp("/private/tmp", "gul-c-")
+	root, err := os.MkdirTemp(providerTemporaryBase(), "gul-c-")
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -38,6 +38,7 @@ export function createOperatorClients(transport: Transport): OperatorClients {
       getPromptHistoryItem: request => sessions.getPromptHistoryItem(request),
       getExecutionState: request => sessions.getExecutionState(request),
       closeRuntime: request => sessions.closeRuntime(request),
+      interruptPrimary: request => sessions.interruptPrimary(request),
       getMetadata: request => artifacts.getMetadata(request),
       readChunk: request => artifacts.readChunk(request),
       listPending: request => interactions.listPending(request),

@@ -299,7 +299,7 @@ func (p *Provider) entry(v *publicv1.TimelineItem) (history.SourceEntry, error) 
 		return e, history.ErrLimit
 	}
 	for i, img := range v.Images {
-		if img == nil || img.Ordinal != uint32(i+1) || img.Detail == 0 || !sha(img.Sha256) || img.ByteLength == 0 || len(img.MediaType) > 128 || !strings.HasPrefix(img.MediaType, "image/") {
+		if img == nil || img.Ordinal != uint32(i) || img.Detail == 0 || !sha(img.Sha256) || img.ByteLength == 0 || len(img.MediaType) > 128 || !strings.HasPrefix(img.MediaType, "image/") {
 			return e, history.ErrBlocked
 		}
 		e.Images = append(e.Images, history.Image{Ordinal: img.Ordinal, Detail: strings.ToLower(strings.TrimPrefix(img.Detail.String(), "IMAGE_DETAIL_")), MediaType: img.MediaType, Length: img.ByteLength, SHA256: img.Sha256})

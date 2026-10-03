@@ -92,6 +92,7 @@ func TestUnsupportedTransitionPreservesSourceAndExternalWriterHasNoTakeover(t *t
 	in := readerInput()
 	in.Writer = writerInput().Writer
 	in.Writer.Owner = ExternalOwner
+	in.Profile.Transition = SupportUnverified
 	in.Writer.Stamp = observation.Stamp{Head: "99", Run: 99, Writer: 2, Interaction: 90}
 	in.Request.Intent = IntentWrite
 	got := Evaluate(in)
@@ -192,6 +193,7 @@ func TestAggregateDirectionsAndCloseWorkMatrix(t *testing.T) {
 	}
 	for _, change := range []func(*Input){
 		func(in *Input) { in.Run.Background = BackgroundActive },
+		func(in *Input) { in.Run.Background = BackgroundUnverified },
 		func(in *Input) { in.Aggregate.NonretiredMembers = 2 },
 		func(in *Input) { in.Aggregate.NonterminalSpawns = 1 },
 		func(in *Input) { in.Aggregate.PendingApprovals = 1 },
@@ -206,6 +208,32 @@ func TestAggregateDirectionsAndCloseWorkMatrix(t *testing.T) {
 		if got := Evaluate(in); !got.Flags.CanRequestSessionClose || got.Flags.RequiresCloseConfirmation {
 			t.Fatal(got)
 		}
+	}
+}
+
+func TestUnverifiedBackgroundCloseRetainsIndependentGuards(t *testing.T) {
+	in := unverifiedWriterInput()
+	in.Run.Background = BackgroundUnverified
+	in.Request.InterruptConfirmed = true
+	if got := Evaluate(in); !got.Flags.CanRequestSessionClose || !got.Flags.BlockedByBackgroundExecution || got.Flags.CanSubmitRead || got.Flags.CanSubmitWrite || got.Flags.CanAcquireWriter || got.Flags.CanReleaseWriter {
+		t.Fatal("confirmed root close granted ordinary mutation eligibility", got)
+	}
+	for name, change := range map[string]func(*Input){
+		"stale aggregate":       func(in *Input) { in.Aggregate.Freshness = Stale },
+		"foreign controller":    func(in *Input) { in.ControllerMatches = false },
+		"missing credential":    func(in *Input) { in.Local.Credential = CredentialMissing },
+		"pending mutation":      func(in *Input) { in.Local.Operation = OperationPending },
+		"unknown owned outcome": func(in *Input) { in.Aggregate.UnknownOutcomeTasks = 1 },
+		"recovery":              func(in *Input) { in.Run.Recovery = RecoveryRequired; in.Run.RecoveryAction = Recover },
+		"unsupported close":     func(in *Input) { in.Capabilities.Close = false },
+	} {
+		t.Run(name, func(t *testing.T) {
+			candidate := in
+			change(&candidate)
+			if got := Evaluate(candidate); got.Flags.CanRequestSessionClose {
+				t.Fatal(got)
+			}
+		})
 	}
 }
 
@@ -303,20 +331,89 @@ func TestExplicitUnknownOutcomeReconciliationAndFailedRunRecovery(t *testing.T) 
 	}
 }
 
-func TestUnknownPolicyOnlyAdmitsTheUnstartedFirstTurn(t *testing.T) {
+func unverifiedWriterInput() Input {
+	in := writerInput()
+	in.Run.Access, in.Writer.Access = UnknownAccess, UnknownAccess
+	in.Run.Verification, in.Writer.Verification = Unverified, Unverified
+	in.Profile.Transition = SupportUnverified
+	return in
+}
+
+func TestDeclaredUnverifiedBestEffortPolicyAdmitsRequestsWithoutVerifyingAccess(t *testing.T) {
 	in := readerInput()
-	in.Run.Thread = Missing
-	in.Run.Variant = DedicatedUnstarted
-	in.Run.Access = UnknownAccess
-	in.Run.Verification = Unverified
+	in.Run.Thread, in.Run.Variant = Missing, DedicatedUnstarted
+	in.Run.Access, in.Run.Verification = UnknownAccess, Unverified
 	in.Request.Intent = IntentWrite
-	if got := Evaluate(in); !got.Flags.CanSubmitWrite || !got.Flags.CanSubmitRead || got.Flags.CanAcquireWriter || got.Mode == WriterWrite {
-		t.Fatal(got)
+	if got := Evaluate(in); !got.Flags.CanSubmitRead || !got.Flags.CanSubmitWrite || got.Flags.CanAcquireWriter || got.Mode != WriterUnverified {
+		t.Fatal("first explicit WRITE", got)
 	}
-	in.Run.Thread = Present
-	in.Run.Variant = DedicatedReader
-	if got := Evaluate(in); got.Flags.CanSubmitRead || got.Flags.CanSubmitWrite {
-		t.Fatal("unknown existing-thread policy admitted", got)
+	in.Run.Thread, in.Run.Variant = Present, DedicatedReader
+	in.Profile.Transition = SupportUnverified
+	if got := Evaluate(in); !got.Flags.CanSubmitRead || got.Flags.CanSubmitWrite || got.Flags.CanAcquireWriter || got.Mode != WriterUnverified {
+		t.Fatal("reader promotion must remain unavailable", got)
+	}
+	for _, intent := range []WriteIntent{IntentRead, IntentWrite} {
+		in = unverifiedWriterInput()
+		in.Request.Intent = intent
+		got := Evaluate(in)
+		if !got.Flags.CanSubmitRead || !got.Flags.CanSubmitWrite || !got.Flags.CanReleaseWriter || got.Flags.CanAcquireWriter || got.Mode != WriterUnverified || got.Writer != in.Writer || got.Blocker == UnsupportedTransition {
+			t.Fatal("held writer is not a new policy transition", got)
+		}
+	}
+}
+
+func TestUnverifiedPolicyRetainsAdmissionGuards(t *testing.T) {
+	cases := map[string]func(*Input){
+		"unknown verified": func(in *Input) { in.Run.Verification, in.Writer.Verification = Verified, Verified },
+		"write unverified": func(in *Input) { in.Run.Access, in.Writer.Access = Write, Write },
+		"failed":           func(in *Input) { in.Run.Verification, in.Writer.Verification = Failed, Failed },
+		"transitioning":    func(in *Input) { in.Run.Access, in.Writer.Access = Transitioning, Transitioning },
+		"unsupported":      func(in *Input) { in.Run.Access, in.Writer.Access = Unsupported, Unsupported },
+		"missing":          func(in *Input) { in.Run.Access, in.Writer.Access = 0, 0 },
+		"unknown enum":     func(in *Input) { in.Run.Access, in.Writer.Access = 99, 99 },
+		"higher assurance": func(in *Input) {
+			in.Run.Requested, in.Run.Achieved = ThreadScoped, ThreadScoped
+			in.Writer.Requested, in.Writer.Achieved = ThreadScoped, ThreadScoped
+		},
+		"writer assurance":      func(in *Input) { in.Writer.Requested, in.Writer.Achieved = ThreadScoped, ThreadScoped },
+		"incompatible":          func(in *Input) { in.Profile.Compatibility = Incompatible },
+		"stale":                 func(in *Input) { in.Freshness = Stale },
+		"mismatched generation": func(in *Input) { in.Writer.Generation++ },
+		"active turn":           func(in *Input) { in.Run.ActiveTurn = Present },
+		"reserved threadless": func(in *Input) {
+			in.Run.Thread, in.Run.Variant = Missing, DedicatedUnstarted
+			in.Run.Authority, in.Writer.Authority = Reserved, Reserved
+		},
+		"interaction":     func(in *Input) { in.Run.Pending = 1 },
+		"unresolved":      func(in *Input) { in.Local.Operation = OperationUnknown },
+		"recovery":        func(in *Input) { in.Run.Recovery = RecoveryRequired },
+		"background":      func(in *Input) { in.Run.Background = BackgroundActive },
+		"aggregate close": func(in *Input) { in.Aggregate.CloseProgress = CloseRecovery },
+		"credential":      func(in *Input) { in.Local.Credential = CredentialMissing },
+	}
+	for name, change := range cases {
+		t.Run(name, func(t *testing.T) {
+			in := unverifiedWriterInput()
+			change(&in)
+			if got := Evaluate(in); got.Flags.CanSubmitRead || got.Flags.CanSubmitWrite || got.Flags.CanAcquireWriter || got.Flags.CanReleaseWriter {
+				t.Fatal(got)
+			}
+		})
+	}
+	in := readerInput()
+	in.Run.Access, in.Run.Verification = UnknownAccess, Unverified
+	in.Run.Lane, in.Run.Variant = Shared, SharedReadonly
+	if got := Evaluate(in); !got.Flags.CanSubmitRead || got.Flags.CanSubmitWrite || got.Flags.CanAcquireWriter || got.Flags.CanReleaseWriter {
+		t.Fatal("shared readonly", got)
+	}
+	in.Run.Lane, in.Run.Variant = Dedicated, DedicatedReader
+	in.Writer = unverifiedWriterInput().Writer
+	in.Writer.Owner = ExternalOwner
+	in.Profile.Transition = SupportUnverified
+	in.Writer.Stamp = observation.Stamp{Head: "99", Run: 99, Writer: 2, Interaction: 90}
+	in.Request.Intent = IntentWrite
+	if got := Evaluate(in); got.Flags.CanSubmitWrite || got.Flags.CanAcquireWriter || got.Flags.CanReleaseWriter || got.Blocker != WriterBusy {
+		t.Fatal("external writer", got)
 	}
 }
 
@@ -361,6 +458,24 @@ func TestStaleAggregateCannotEnableControllerAdoption(t *testing.T) {
 	in.Aggregate.Freshness = Stale
 	if got := Evaluate(in); got.Flags.CanAdoptController || !got.Flags.RequiresFreshSnapshot {
 		t.Fatal(got)
+	}
+}
+
+func TestUnverifiedBackgroundCloseHonorsOwnedWriterRecovery(t *testing.T) {
+	in := unverifiedWriterInput()
+	in.Run.Background = BackgroundUnverified
+	in.Request.InterruptConfirmed = true
+	in.Writer.RecoveryBlocked = true
+	if got := Evaluate(in); got.Flags.CanRequestSessionClose {
+		t.Fatal("same-Run Writer recovery was bypassed by root Close", got)
+	}
+	in = readerInput()
+	in.Writer = unverifiedWriterInput().Writer
+	in.Writer.Owner = ExternalOwner
+	in.Writer.RecoveryBlocked = true
+	in.Request.InterruptConfirmed = true
+	if got := Evaluate(in); !got.Flags.CanRequestSessionClose {
+		t.Fatal("another Run's Writer recovery blocked this root Close", got)
 	}
 }
 

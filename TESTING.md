@@ -225,3 +225,41 @@ The fixtures close their temporary hosts, windows and browser profiles.
 Released executable/UDS integration, real Controller/carrier creation, image
 handoff, live runtimes, launchd/Serve deployment and supported devices need E2/E9
 qualification.
+
+## Released-provider session qualification
+
+`python3 frontend/browser/verify-provider.py` is an opt-in Chrome check of the
+ordinary production host and checked bundle against the published Dolgorae
+v0.1.3 binary. Set `GUL_E2_DOLGORAE_EXECUTABLE`, `GUL_E2_DOLGORAE_ARCHIVE` and
+`GUL_E2_DOLGORAE_SOURCE` to the published executable/archive and exact exported
+tag source. Both release artifact hashes must match. Set
+`DOLGORAE_TEST_CODEX_BIN` to the installed Codex 0.158.0 executable used only for
+version/schema inspection. Provider protocol behavior uses the matching
+upstream native fake in an isolated HOME/workspace; Chrome uses its own profile
+and the fixture certificate pin. The driver injects no provider or host assembly.
+
+`go test ./test/provider -run TestPublishedAuthenticatedSessionCreation -count=1`
+with the same environment verifies protected creation and stable retries,
+threadless first WRITE without Acquire, subsequent explicit READ/WRITE on the
+same Thread and writer generation, exact native dispatch counts, paged original
+history with preserved CRLF and distinct IDs for separate same-text requests,
+guarded input refusals, explicit quiescent Release, lost allocation
+receipt recovery and owned close settlement with unrelated-session retention.
+Declared UNKNOWN/UNVERIFIED remains visible
+throughout; READ may retain workspaceWrite authority. The browser campaign adds
+Interaction, private image/effort, busy Primary interruption, public result/artifact,
+restart and settlement checks. Primary interruption requires consent, targets the
+fresh active Turn and retains the whole session; lost receipt and restart checks
+verify that neither the tokenless request nor the retained draft is replayed. It records paged prompt originals before Specialist publication, then
+reads the large public result. Gul requests root close with the Specialist still
+resident; typed UNVERIFIED background requires explicit interrupt consent and
+the provider Broker owns settlement. Independent fresh aggregate, Controller,
+capability, unknown-outcome and recovery guards remain blocking. The host restarts after
+confirmed close to rediscover the same public result identity and reread its
+complete digest/length-verified artifact, alongside retained history without
+mutation replay. This
+sequence does not qualify submitting after restart while background execution
+remains unverified.
+These opt-in checks supplement `make test` and do not qualify live Codex
+or devices. Agent scratch uses the mounted writable RootKernel volume when
+available, otherwise the system temporary directory.

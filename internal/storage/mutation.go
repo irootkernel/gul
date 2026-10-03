@@ -24,15 +24,18 @@ type mutationQuerier interface {
 
 func readMutation(ctx context.Context, q mutationQuerier, id string) (MutationAttempt, error) {
 	var a MutationAttempt
-	var replay, writerRevision, writerGeneration sql.NullString
+	var replay, writerRevision, writerGeneration, interruptTurn, interruptRevision, interruptHead sql.NullString
+	var interruptFinished sql.NullBool
 	var refs, created, deadline string
 	err := q.QueryRowContext(ctx, `SELECT p.subject_id,p.operation_kind,p.request_sha256,p.replay_key,p.replay_available,
 p.controller_references,p.state,p.created_at,d.target_ref,d.deadline_at,d.reconciliation_route,d.outcome_ref,
-w.writer_revision_before,w.writer_generation_before
+w.writer_revision_before,w.writer_generation_before,i.turn_id,i.run_revision_before,i.head_before,i.dispatch_finished
 FROM provider_operation_attempts p JOIN mutation_attempt_details d ON d.operation_id=p.operation_id
-LEFT JOIN writer_attempt_details w ON w.operation_id=p.operation_id WHERE p.operation_id=?`, id).
+LEFT JOIN writer_attempt_details w ON w.operation_id=p.operation_id
+LEFT JOIN interrupt_attempt_details i ON i.operation_id=p.operation_id WHERE p.operation_id=?`, id).
 		Scan(&a.SubjectID, &a.Kind, &a.RequestSHA256, &replay, &a.ReplayAvailable, &refs, &a.State, &created,
-			&a.TargetRef, &deadline, &a.ReconciliationRoute, &a.OutcomeRef, &writerRevision, &writerGeneration)
+			&a.TargetRef, &deadline, &a.ReconciliationRoute, &a.OutcomeRef, &writerRevision, &writerGeneration,
+			&interruptTurn, &interruptRevision, &interruptHead, &interruptFinished)
 	if err != nil {
 		return MutationAttempt{}, err
 	}
@@ -56,7 +59,14 @@ LEFT JOIN writer_attempt_details w ON w.operation_id=p.operation_id WHERE p.oper
 	}
 	if writerGeneration.Valid {
 		a.WriterGenerationBefore, err = strconv.ParseUint(writerGeneration.String, 10, 64)
+		if err != nil {
+			return MutationAttempt{}, err
+		}
 	}
+	if interruptRevision.Valid {
+		a.InterruptRevisionBefore, err = strconv.ParseUint(interruptRevision.String, 10, 64)
+	}
+	a.InterruptTurnID, a.InterruptHeadBefore, a.InterruptDispatchFinished = interruptTurn.String, interruptHead.String, interruptFinished.Bool
 	return a, err
 }
 
@@ -78,6 +88,11 @@ func (r AttemptRepository) BeginMutation(ctx context.Context, candidate Mutation
 	}
 	writerAttempt := candidate.Kind == "AcquireWriter" || candidate.Kind == "ReleaseWriter"
 	if writerAttempt && candidate.WriterRevisionBefore == 0 || !writerAttempt && (candidate.WriterRevisionBefore != 0 || candidate.WriterGenerationBefore != 0) {
+		return MutationAttempt{}, false, ErrMutationConflict
+	}
+	interruptAttempt := candidate.Kind == "InterruptTurn"
+	if interruptAttempt && (candidate.InterruptTurnID == "" || len(candidate.InterruptTurnID) > 256 || candidate.InterruptRevisionBefore == 0 || candidate.InterruptHeadBefore != strconv.FormatUint(candidate.InterruptRevisionBefore, 10) || candidate.InterruptDispatchFinished) ||
+		!interruptAttempt && (candidate.InterruptTurnID != "" || candidate.InterruptRevisionBefore != 0 || candidate.InterruptHeadBefore != "" || candidate.InterruptDispatchFinished) {
 		return MutationAttempt{}, false, ErrMutationConflict
 	}
 	conn, err := r.store.writer.Conn(ctx)
@@ -165,6 +180,13 @@ VALUES (?,?,?,?,?)`, candidate.OperationID, candidate.TargetRef, timestamp(candi
 	if writerAttempt {
 		_, err = conn.ExecContext(ctx, `INSERT INTO writer_attempt_details(operation_id,writer_revision_before,writer_generation_before)
 VALUES (?,?,?)`, candidate.OperationID, strconv.FormatUint(candidate.WriterRevisionBefore, 10), strconv.FormatUint(candidate.WriterGenerationBefore, 10))
+		if err != nil {
+			return MutationAttempt{}, false, err
+		}
+	}
+	if interruptAttempt {
+		_, err = conn.ExecContext(ctx, `INSERT INTO interrupt_attempt_details(operation_id,turn_id,run_revision_before,head_before) VALUES (?,?,?,?)`,
+			candidate.OperationID, candidate.InterruptTurnID, strconv.FormatUint(candidate.InterruptRevisionBefore, 10), candidate.InterruptHeadBefore)
 		if err != nil {
 			return MutationAttempt{}, false, err
 		}

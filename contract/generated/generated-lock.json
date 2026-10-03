@@ -64,7 +64,7 @@
     },
     {
       "path": "policy/release-admission.v1.json",
-      "sha256": "2df3203bafecebce6fd800f87427a6d9297aa9a959fdc65982de54e1687edd19"
+      "sha256": "ce1a453ea4e45c58f789cb7afe26196a5e1e6861c97746e0ee4c3f71db1f6cec"
     },
     {
       "path": "ts/dolgorae/public/v1/dolgorae_pb.ts",

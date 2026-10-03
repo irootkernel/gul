@@ -16,7 +16,7 @@ import (
 )
 
 func TestConcurrentSameKeyMutationBegin(t *testing.T) {
-	for _, kind := range []string{"StartRun", "SubmitTurn"} {
+	for _, kind := range []string{"StartRun", "SubmitTurn", "InterruptTurn"} {
 		t.Run(kind, func(t *testing.T) {
 			s, filename := openTestStore(t)
 			now := time.Now().UTC()
@@ -37,6 +37,10 @@ func TestConcurrentSameKeyMutationBegin(t *testing.T) {
 				candidate.ReplayKey, candidate.ReplayAvailable = candidate.OperationID, true
 				candidate.ControllerReferences[0] = ControllerReference{Role: "destination", CredentialKey: "controllers/destination", ExpectedControllerID: "controller"}
 				candidate.TargetRef, candidate.ReconciliationRoute = "workspace", "exact_start_then_controller_list"
+			}
+			if kind == "InterruptTurn" {
+				candidate.InterruptTurnID, candidate.InterruptRevisionBefore, candidate.InterruptHeadBefore = "turn-1", 4, "4"
+				candidate.ReconciliationRoute = "exact_turn_terminal"
 			}
 			const workers = 12
 			start := make(chan struct{})

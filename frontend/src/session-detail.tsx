@@ -1,7 +1,7 @@
 import {useEffect, useRef, useState} from "react";
 import {Code, ConnectError} from "@connectrpc/connect";
 import {
-  ActionBlocker, ActionFailureSchema, SubmitOutcome, type SubmitResponse, type ListSpecialistResultsResponse, type ClientEvent,
+  ActionBlocker, ActionFailureSchema, SubmitOutcome, InterruptOutcome, type InterruptPrimaryResponse, type SubmitResponse, type ListSpecialistResultsResponse, type ClientEvent,
   ActionCloseIntent, ActionWriteIntent, ApprovalPolicy, CloseProgress, CloseStatus,
   Freshness, InteractionCardStatus, LaunchAssurance, ProviderState, SessionLifecycle, WriterAccessMode,
   type ActionState, type CloseRuntimeResponse, type GetActionStateResponse,
@@ -18,7 +18,7 @@ import {ActionBlockerMessage, InterruptConsent, WriterPanel, PromptDraft} from "
 import {WriterStatus} from "./writer-status";
 
 export type SessionDetailClient = ConversationClient & PromptHistoryClient & {
-  submit?(request: {sessionId: string; attemptId: string; text: string; writeIntent: ActionWriteIntent}): Promise<SubmitResponse>;
+  submit?(request: {sessionId: string; attemptId: string; text: string; writeIntent: ActionWriteIntent; images?: {workspaceId: string; relativePath: string; detail: string}[]; effort?: string}): Promise<SubmitResponse>;
   listSpecialistResults?(request: {sessionId: string; pageSize: number; pageToken?: string}): Promise<ListSpecialistResultsResponse>;
   watch?(request: {sessionId: string; afterDeliverySequence: bigint}, signal: AbortSignal): AsyncIterable<ClientEvent>;
   getExecutionState(request: {sessionId: string}): Promise<GetExecutionStateResponse>;
@@ -27,6 +27,7 @@ export type SessionDetailClient = ConversationClient & PromptHistoryClient & {
   getCard(request: {sessionId: string; interactionId: string}): Promise<GetCardResponse>;
   resolve(request: {sessionId: string; interactionId: string; responseJson: Uint8Array}): Promise<ResolveResponse>;
   closeRuntime(request: {sessionId: string; interrupt: boolean; attemptId: string}): Promise<CloseRuntimeResponse>;
+  interruptPrimary?(request: {sessionId: string; attemptId: string; interruptConfirmed: boolean}): Promise<InterruptPrimaryResponse>;
   acquireWriter(request: {sessionId: string}): Promise<{state?: ActionState}>;
   releaseWriter(request: {sessionId: string}): Promise<{state?: ActionState}>;
 };
@@ -48,8 +49,11 @@ function closeLabel(progress: CloseProgress) {
   }
 }
 
-export function SessionDetail({sessionId, client, onActivity}: {sessionId: string; client: SessionDetailClient; onActivity: (value: SessionActivity | undefined) => void}) {
+export function SessionDetail({sessionId, workspaceId, client, onActivity}: {sessionId: string; workspaceId?: string; client: SessionDetailClient; onActivity: (value: SessionActivity | undefined) => void}) {
   const [write, setWrite] = useState(false);
+  const [imagePaths, setImagePaths] = useState("");
+  const [imageDetail, setImageDetail] = useState("auto");
+  const [effort, setEffort] = useState("");
   const [contentRevision, setContentRevision] = useState(0);
   const [eventError, setEventError] = useState("");
   const [eventReconnect, setEventReconnect] = useState(0);
@@ -76,6 +80,10 @@ export function SessionDetail({sessionId, client, onActivity}: {sessionId: strin
   const [closeAttemptRecorded, setCloseAttemptRecorded] = useState(false);
   const [closeExternalRejected, setCloseExternalRejected] = useState(false);
   const [closing, setClosing] = useState(false);
+  const [interrupting, setInterrupting] = useState(false);
+  const [interruptAttemptRecorded, setInterruptAttemptRecorded] = useState(false);
+  const [interruptMessage, setInterruptMessage] = useState("");
+  const interruptPending = useRef(false);
   const closePending = useRef(false);
   const actionGeneration = useRef(0);
   const lastConsent = useRef(interrupt);
@@ -86,6 +94,18 @@ export function SessionDetail({sessionId, client, onActivity}: {sessionId: strin
     const timer = setInterval(() => setReload(value => value + 1), 5000);
     return () => clearInterval(timer);
   }, [closeAttemptRecorded, execution?.closeProgress]);
+
+  useEffect(() => {
+    if (!interruptAttemptRecorded) return;
+    const timer = setInterval(() => setReload(value => value + 1), 5000);
+    return () => clearInterval(timer);
+  }, [interruptAttemptRecorded]);
+
+  useEffect(() => {
+    if (interruptAttemptRecorded && !eligibilityPending && action?.flags?.canSubmitRead && execution?.freshness === Freshness.FRESH) {
+      setInterruptAttemptRecorded(false);
+    }
+  }, [interruptAttemptRecorded, eligibilityPending, action, execution]);
 
   useEffect(() => {
     let current = true;
@@ -185,7 +205,10 @@ export function SessionDetail({sessionId, client, onActivity}: {sessionId: strin
 
   async function send(text: string) {
     if (!client.submit) throw new Error("Submit unavailable");
-    const result = await client.submit({sessionId, attemptId: crypto.randomUUID(), text, writeIntent: write ? ActionWriteIntent.WRITE : ActionWriteIntent.READ});
+    const paths = imagePaths.split("\n").filter(path => path.length > 0);
+    if (paths.length && !workspaceId) throw new Error("Select a workspace before attaching images.");
+    const result = await client.submit({sessionId, attemptId: crypto.randomUUID(), text, writeIntent: write ? ActionWriteIntent.WRITE : ActionWriteIntent.READ,
+      images: paths.map(relativePath => ({workspaceId: workspaceId!, relativePath, detail:imageDetail})), ...(effort ? {effort} : {})});
     setAction(result.state);
     setReload(value => value + 1);
     if (result.outcome !== SubmitOutcome.ACCEPTED) {
@@ -195,6 +218,7 @@ export function SessionDetail({sessionId, client, onActivity}: {sessionId: strin
         [{desc: ActionFailureSchema, value: {blocker}}]);
     }
     setContentRevision(value => value + 1);
+    setImagePaths("");
   }
 
   async function changeWriter(kind: "acquire" | "release") {
@@ -210,6 +234,26 @@ export function SessionDetail({sessionId, client, onActivity}: {sessionId: strin
     !action.flags.requiresOperatorAction && execution?.freshness === Freshness.FRESH && execution.closeProgress === CloseProgress.NONE &&
     (!action.flags.requiresCloseConfirmation || interrupt);
   const actionsCurrent = execution?.freshness === Freshness.FRESH && !!action && !eligibilityPending && !externalError && !closeExternalRejected && !action.flags?.requiresOperatorAction;
+
+  async function interruptPrimary() {
+    if (interruptPending.current || interruptAttemptRecorded || !client.interruptPrimary || !actionsCurrent || !action?.flags?.canInterrupt || !interrupt) return;
+    interruptPending.current = true; setInterrupting(true); setInterruptMessage("");
+    try {
+      const reply = await client.interruptPrimary({sessionId, attemptId: crypto.randomUUID(), interruptConfirmed: interrupt});
+      setAction(reply.state);
+      setInterruptAttemptRecorded(reply.outcome !== InterruptOutcome.REJECTED);
+      setInterruptMessage(reply.outcome === InterruptOutcome.ACCEPTED ? "Primary interruption requested. Waiting for current provider state."
+        : reply.outcome === InterruptOutcome.STATE_OBSERVED ? "Current Primary state observed. The request was not repeated."
+          : reply.outcome === InterruptOutcome.REJECTED ? "Primary interruption was not admitted. Refresh current state."
+            : "Primary interruption outcome unresolved. Inspect provider state; do not repeat the request.");
+    } catch {
+      setInterruptAttemptRecorded(true);
+      setInterruptMessage("Primary interruption outcome unresolved. Inspect provider state; do not repeat the request.");
+    } finally {
+      interruptPending.current = false; setInterrupting(false);
+      setReload(value => value + 1); setContentRevision(value => value + 1);
+    }
+  }
 
   async function close() {
     if (closePending.current || !closeEligible) return;
@@ -277,11 +321,23 @@ export function SessionDetail({sessionId, client, onActivity}: {sessionId: strin
       onOpenTurn={entryId => {setFocusEntryId(entryId); setFocusRequest(value => value + 1);
         setView("conversation"); conversationTab.current?.focus();}} /></div>
     {client.submit && <section aria-label="Submit prompt">
+      {workspaceId && <>
+        <label>Image paths in this workspace (one per line)<textarea aria-label="Image paths in this workspace (one per line)" value={imagePaths} onChange={event => setImagePaths(event.currentTarget.value)} /></label>
+        <label>Image detail<select value={imageDetail} onChange={event => setImageDetail(event.currentTarget.value)}><option value="auto">Auto</option><option value="low">Low</option><option value="high">High</option></select></label>
+      </>}
+      <label>Effort override (optional)<input value={effort} onChange={event => setEffort(event.currentTarget.value)} /></label>
       <label>Prompt access <select value={write ? "write" : "read"} onChange={event => setWrite(event.currentTarget.value === "write")}><option value="read">Read</option><option value="write">Write</option></select></label>
       <PromptDraft state={actionsCurrent && !eventError ? action : undefined} write={write} send={send} />
     </section>}
     {client.listSpecialistResults && <SpecialistResults sessionId={sessionId} client={client} refreshRevision={contentRevision} />}
     {action && actionsCurrent && <WriterPanel state={action} acquire={() => changeWriter("acquire")} release={() => changeWriter("release")} onState={setAction} />}
+    {client.interruptPrimary && <section aria-label="Primary interruption">
+      <h3>Interrupt Primary turn</h3>
+      <p>Interrupt the active Primary turn while retaining this session and its other work. Confirm interruption below before requesting it.</p>
+      <button type="button" disabled={interrupting || interruptAttemptRecorded || !actionsCurrent || !action?.flags?.canInterrupt || !interrupt}
+        onClick={() => void interruptPrimary()}>Interrupt Primary turn</button>
+      {interruptMessage && <p role="status">{interruptMessage}</p>}
+    </section>}
     <section aria-label="Session close">
       <h3>Close session</h3>
       <p>Close coordinates all owned work. Active work may be interrupted.</p>

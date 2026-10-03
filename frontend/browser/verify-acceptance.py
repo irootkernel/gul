@@ -220,7 +220,7 @@ def main():
               await page.getByLabel(/^Required assurance/).selectOption({label:'BEST_EFFORT_PERSONAL_ALPHA'});
               await page.getByLabel(/^Specialist Policy/).selectOption('preprovisioned');
               await page.getByRole('button', {name:'Check configuration', exact:true}).click();
-              await page.getByRole('status').filter({hasText:'Configuration is compatible. Session creation requires the runtime integration.'}).waitFor();
+              await page.getByRole('status').filter({hasText:'Configuration is compatible.'}).waitFor();
               await page.getByText('Launch compatibility', {exact:true}).click();
               await page.getByRole('button', {name:'Session', exact:true}).click();
               await page.getByRole('button', {name:'Send prompt'}).waitFor();

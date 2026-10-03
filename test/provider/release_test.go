@@ -68,7 +68,7 @@ func TestPublishedReleaseHandshake(t *testing.T) {
 	if archive == "" {
 		t.Fatal("set GUL_E2_DOLGORAE_ARCHIVE to the pinned published archive")
 	}
-	root, err := os.MkdirTemp("/private/tmp", "gul-v013-")
+	root, err := os.MkdirTemp(providerTemporaryBase(), "gul-v013-")
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -6,8 +6,8 @@ import (
 	"github.com/rootkernel/gul/internal/observation"
 )
 
-// WriterDecision is shared by presentation and submission admission. Freshness
-// comes from aggregate convergence; no raw browser flag establishes authority.
+// WriterDecision maps Writer-only facts to verified access presentation.
+// Complete request admission uses action.Evaluate and fresh Run facts.
 func WriterDecision(writer *publicv1.WriterState, runID string, fresh bool, intent publicv1.WriteIntent) (action.WriterDecision, publicv1.WriteIntent) {
 	stamp := writer.GetStamp()
 	validStamp := stamp != nil && (observation.Stamp{Head: observation.Cursor(stamp.GetCapturedHeadCursor()), Run: stamp.GetRunStateRevision(), Writer: stamp.GetWriterStateRevision(), Interaction: stamp.GetInteractionStateRevision()}).Valid()

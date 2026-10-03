@@ -3,6 +3,7 @@ package host
 import (
 	"context"
 	"errors"
+	"path/filepath"
 	"time"
 
 	"github.com/rootkernel/gul/internal/app"
@@ -52,6 +53,18 @@ func assembleGateway(store *storage.Store, config Config, g *gateway.Gateway) (A
 	lifetime := &productionLifecycle{gateway: g}
 	assembled := Assembly{Provider: g, Lifecycle: lifetime, gateway: g}
 	if caps := g.NegotiatedCapabilities(); caps != nil {
+		replayRoot := filepath.Join(config.DataDirectory, "replay")
+		inputRoot := filepath.Join(config.DataDirectory, "inputs")
+		if err := privateDirectory(replayRoot); err != nil {
+			stop, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			defer cancel()
+			return Assembly{}, errors.Join(err, g.Stop(stop))
+		}
+		if err := privateDirectory(inputRoot); err != nil {
+			stop, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			defer cancel()
+			return Assembly{}, errors.Join(err, g.Stop(stop))
+		}
 		carriers, err := controller.New(context.Background(), store, config.ProviderHome, config.WorkspaceRoots, caps)
 		if err != nil {
 			stop, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -59,7 +72,7 @@ func assembleGateway(store *storage.Store, config Config, g *gateway.Gateway) (A
 			return Assembly{}, errors.Join(err, g.Stop(stop))
 		}
 		g.SetCarrierValidator(carriers.ValidateRPC)
-		r, err := composition.NewQualified(store, composition.Config{Port: g, Carriers: carriers, Roots: config.WorkspaceRoots, Policies: config.Policies}, caps)
+		r, err := composition.NewQualified(store, composition.Config{Port: g, Carriers: carriers, Roots: config.WorkspaceRoots, Policies: config.Policies, ReplayRoot: replayRoot, InputRoot: inputRoot}, caps)
 		if err != nil {
 			stop, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 			defer cancel()

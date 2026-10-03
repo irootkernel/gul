@@ -54,8 +54,8 @@ test("the generated browser surface is explicit and contains no upstream private
   expect(Object.keys(DiagnosticsService.method)).toEqual(["getSummary"]);
   expect(Object.keys(RuntimeService.method).sort()).toEqual(["checkCompatibility", "listRuntimeProfiles"]);
   expect(Object.keys(DirectSessionService.method).sort()).toEqual([
-    "closeRuntime", "getConversationEntry", "getDirectSessionPresentation", "getExecutionState", "getPromptHistoryItem", "listConversation", "listDirectSessions", "listPromptHistory", "listSpecialistResults",
-    "renameDirectSession", "setDirectSessionArchived", "setDirectSessionFavorite", "submit",
+    "closeRuntime", "createSession", "getConversationEntry", "getDirectSessionPresentation", "getExecutionState", "getPromptHistoryItem", "interruptPrimary", "listConversation", "listDirectSessions", "listPromptHistory", "listSpecialistResults",
+    "recoverCreation", "renameDirectSession", "setDirectSessionArchived", "setDirectSessionFavorite", "submit",
   ]);
   expect(Object.keys(WorkspacePresentationService.method).sort()).toEqual([
     "browseRegistrableRoot", "getNavigation", "listRegistrableRoots", "listWorkspaces", "registerFromAllowlistPath",

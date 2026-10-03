@@ -5,6 +5,7 @@ package contractprovider
 import (
 	"context"
 	"errors"
+	"slices"
 
 	publicv1 "github.com/rootkernel/gul/contract/generated/go/dolgorae/public/v1"
 	"github.com/rootkernel/gul/internal/mutation"
@@ -44,7 +45,10 @@ func (p StartProvider) StartRun(ctx context.Context, request replay.StartRun, ro
 	}
 	run := response.GetRun()
 	if !matchesRun(run, request) || run.GetConfiguration().GetProfileName() != request.ProfileName ||
-		run.GetControlMode() != message.ControlMode || run.GetExecutionLane() != message.ExecutionLane {
+		run.GetControlMode() != message.ControlMode || run.GetExecutionLane() != message.ExecutionLane ||
+		run.GetRequestedAssurance() != message.RequiredAssurance || run.GetConfiguration().GetPurpose() != message.Purpose ||
+		run.GetConfiguration().GetPurposeLabel() != message.GetPurposeLabel() || !slices.Equal(run.GetConfiguration().GetRequiredCapabilities(), message.RequiredCapabilities) ||
+		(request.Model != nil && run.GetConfiguration().GetModelId() != *request.Model) || (request.Effort != nil && run.GetConfiguration().GetDefaultEffort() != *request.Effort) {
 		return mutation.StartResult{}, ErrInvalidProjection
 	}
 	return mutation.StartResult{RunID: run.GetRunId(), WorkspaceID: run.GetWorkspaceId(), ControllerID: run.GetController().GetControllerId()}, nil
@@ -76,6 +80,7 @@ func matchesRun(run *publicv1.RunProjection, request replay.StartRun) bool {
 	return run != nil && run.GetRunId() != "" && run.GetWorkspaceId() == request.ProviderWorkspaceID &&
 		run.GetController().GetControllerId() == request.ControllerID &&
 		run.GetController().GetGeneration() == request.ControllerGeneration && run.GetConfiguration() != nil &&
+		run.GetController().GetKind() == publicv1.ControllerKind_CONTROLLER_KIND_INTERACTIVE_CLIENT &&
 		run.GetConfiguration().GetParent() == nil && run.GetStateRevision() > 0
 }
 

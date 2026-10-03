@@ -5,7 +5,7 @@
 | Role | Non-normative implementation observations, dependencies, risks, and handoff |
 | Product | Gul |
 | Version | 0.1-dolgorae-consumer-v1 |
-| Last updated | 2026-10-02 |
+| Last updated | 2026-10-03 |
 
 ## 1. Boundary
 
@@ -655,7 +655,8 @@ conflict and unsupported-transition errors stay distinct; ambiguous results
 remain unknown. No local writer authority, reservation or transfer queue is
 stored. A threadless Run without direct-acquire support can activate first write
 only through eligible SubmitTurn(WRITE) from its Unknown/Unverified initial policy.
-Release preserves the full released-Run projection, including its unowned window.
+E2-T3 corrects the fixture interpretation of Release: published v0.1.3 returns
+the neutral ownerless workspace Writer projection, without Run policy facts.
 This task supplies the Submit admission port,
 while E2 owns Submit execution.
 
@@ -2149,7 +2150,8 @@ real-provider and live deployment qualification remain E2/E9-owned.
 | Exact released executable and runtime capabilities, install identity and immutable version pin | E2-T0 |
 | Public local gRPC/UDS permissions, dial/reconnect, no Machine CLI fallback | E2-T1 |
 | Real Controller/carrier issuance and fixed-home credential validation | E2-T2 |
-| Actual session creation, live sequential read/write, guarded image handoff, provider/Worker/Gul/browser restart and large artifacts | E2-T3 |
+| Actual-provider authenticated session creation, sequential read/write, guarded image handoff, retained history/results/artifacts and Gul host restart | E2-T3 |
+| Provider/Worker restart and mutation-loss fault campaigns | E9-T1 |
 | Supported browser/device layouts and touch, live diagnostics/security, deployed authentication and stream revocation | E9-T1/T2 |
 | Installed launchd login/upgrade/sleep/wake and actual Tailscale Serve exposure/reachability | E2/E9 deployment qualification |
 
@@ -2202,7 +2204,7 @@ details.
 E2-T0 release qualification (2026-10-02): the published v0.1.3 source is
 `07dc31331d03aae9ed7c0c862a0cbe8a5184024e`. The current dependency-lock SHA-256
 is `223d2a72d7bd281dba0abdc8b1e966d792492546c3be63a67e593c94eed0c05a` and generated-lock SHA-256 is
-`8d02e824c36795221ee6d1b3fc7e2b43943d13701aa76d019c3b6aea30b26a6d`. The earlier E12 pin remains historical evidence.
+`912c2e1b530efe176fdc5f953217f55c1812a77cbe5425ccb25965fb1130fbd6`. The earlier E12 pin remains historical evidence.
 Actual production assembly, credentials and session actions remain E2-T1/T2/T3.
 
 The published archive `dolgorae-v0.1.3-aarch64-apple-darwin.tar.gz` has SHA-256
@@ -2398,3 +2400,158 @@ E2-T3 next. E2-T3 retains authenticated production-host
 session/action acceptance; E9 retains fault/security/device/deployment
 qualification. The supplemental exact-tag Rust build is separate T0 diagnostic
 evidence. No installed runtime or neighboring working tree is changed.
+
+### E2-T3 published-provider qualification (2026-10-03)
+
+The initial E2-T3 candidate passed the published v0.1.3 Go suite, complete Chrome
+campaign and serial `make test` facade. Its first independent native Codex review
+requested changes: two completion items were unmet and one remained unverified.
+Corrected-target qualification and the second full native review pass. The
+completion candidate marks E2-T3 Completed and clears the active slot; exact
+final Goal approval and its planned completion commit remain pending. E2 remains
+In Progress for whole-Epic audit. The shared E2/E9 dossier remains linked to both
+consumers; no whole-Epic audit has run.
+
+Published v0.1.3 and its matching immutable source tag remain unchanged. The
+earlier blocker misclassified declared UNKNOWN/UNVERIFIED policy as a provider
+defect. Gul now separates explicit best-effort request admission from verified
+access presentation. READ, threadless first WRITE through SubmitTurn without
+Acquire, and subsequent same-Run ACTIVE Writer WRITE retain independent
+authentication, freshness, authority, assurance, quiescence and recovery guards.
+Existing-reader acquisition still requires verified transition support. Release
+accepts the published neutral ownerless workspace Writer projection and refreshes
+the Run separately. Gul preserves policy facts, owner and generation, displays
+`Policy unverified`, and does not automatically release a Writer on READ or
+promise a read-only sandbox. Missing, malformed, unrecognized, failed,
+transitioning, unsupported or higher-assurance policy remains closed.
+
+The ordinary authenticated host uses generated public gRPC and protected root
+carriers. Creation supplies parentless orchestration launch and a preprovisioned
+Profile/Policy, requires the public aggregate, and retains exact retry labels
+for StartRun recovery without duplicate allocation. Submit uses guarded private
+image snapshots and validates effort. Image checks cover resolved provider-private
+paths and nested aliases, copied bytes, owner-only modes, known refusals and
+cleanup after authoritative settlement, including restart. Producer image
+ordinals are zero-based; malformed, duplicate or skipped image metadata remains
+rejected. Prompt History ordinals remain one-based.
+
+A protected public-gRPC diagnostic confirmed that one root CloseRun with explicit
+interrupt consent settles a resident Specialist while Primary is IDLE and
+background execution is UNVERIFIED. The following public aggregate reported
+ABORTED closure and one remaining member. Gul's former blanket refusal blocked that
+request before dispatch. The candidate requires consent for that state and
+retains fresh aggregate, Controller, capability, outcome and recovery guards.
+Ordinary Submit, Acquire and Release remain blocked by unverified background.
+The assembled browser campaign independently confirms root Close and subsequent
+whole-aggregate settlement; the diagnostic alone is not Gul acceptance.
+
+The native protocol fixture is installed before the shared Profile server starts,
+so Primary and Specialist use the same scenario. Its absent-Thread probe still
+returns `thread not found`. The previous startup order produced an empty
+Specialist response. The earlier fixture also invoked `release_specialist`,
+which the published worker slice rejected with `ORCHESTRATION_NOT_AVAILABLE`.
+That unsupported operation was removed. The browser closes with the Specialist
+still resident and leaves settlement to the provider Broker. These fixture
+failures do not establish a released-provider defect.
+
+The published Go suite verifies protected creation/recovery, sequential
+submission, guarded refusals, Release, competing/shared-readonly WRITE refusal,
+root close and retained history after host restart. It preserves CRLF originals
+and distinct accepted IDs for separate same-text requests. The initial full Chrome
+campaign checked 53 accepted prompt ordinals across pages, Korean/multiline and
+large originals, waiting Interaction, guarded image/effort, a public Specialist
+result with a digest/length-verified artifact larger than 1 MiB, retained drafts
+and no automatic replay after an accepted Submit receipt is lost. It also tests
+exact creation recovery, lost Close receipt, aggregate-confirmed resident close,
+unrelated-session retention and history after restart.
+
+Chrome sets and replaces the 40,000-line draft through the native textarea value
+setter and a bubbling input event after checking that it is enabled and editable.
+Submission uses the ordinary UI Send control and verifies exact native input,
+retention and no replay. This method does not qualify interactive typing
+performance. The host restarts after confirmed closure; ordinary Submit after
+restart while background remains UNVERIFIED is outside the demonstrated sequence
+and remains blocked.
+
+Verification uses the exact published executable/archive from the pinned release
+lock with isolated HOME, Workspace, carriers, UDS and Chrome profile. Codex
+0.158.0 supplies version/schema inspection only; protocol/model behavior uses the
+matching permitted native fake. The supplemental exact-tag build passed
+`rustup run 1.97.1 cargo build --locked --bin dolgorae` in separate isolated
+HOME/source/Cargo/target directories. Its binary is diagnostic only.
+
+The focused evaluator/close tests, published Go suite and full Chrome campaign
+exit 0 with no extracted failure. Serial `make test` exits 0; Gaori extraction is
+degraded by linker warnings and remains separate from command status. Focused
+SOT checks cover documentation changes after that serial gate. These checks
+qualify the initial candidate; they do not settle the later review findings.
+No T3 commit, install, push, Operator/child capability or live/device/deployment
+qualification is claimed. Accepted Current State promotion remains pending.
+
+The first T3 review found that root Close could bypass a same-Run Writer recovery
+blocker, that REQ-DIRECT-005's Primary Interrupt execution was absent, and that
+the published campaign had not reread public results/artifacts after Close and
+host restart. All three findings are valid in the original task scope. Gate
+success did not establish completion. The review used a fresh native Codex
+`gpt-6.1-sol` reviewer with `high` effort; no backend check or native capture
+assurance was supplied. Its single isolated-index `write-tree` call is a method
+exception. Coordinator/reviewer readbacks preserved the logical frozen target,
+source blobs, HEAD and empty shared index; raw isolated-index byte identity was
+not attested.
+
+The correction independently blocks Close when this root owns a Writer recovery
+blocker, without blocking an unrelated root due to another Run's Writer. Primary
+Interrupt now connects the authenticated API, ordinary host and checked UI to
+one revision-fenced public RPC after explicit consent. It retains the whole
+session. SQLite schema 12 stores the captured Turn and observation floor,
+dispatch completion and the non-secret attempt identity; no tokenless replay
+payload is stored. A repeated request reads the receipt even after restart.
+A lost provider receipt remains unknown until fully fresh matching projections
+and that exact Turn's terminal timeline record establish current state. That
+settlement is distinct from an accepted Interrupt receipt and never advances
+Turn state locally.
+
+Focused checks passed for Close's owned/foreign Writer recovery distinction,
+Interrupt consent/freshness/Controller/recovery/capability refusal, durable
+accepted/unknown/pending receipts, restart without replay and exact terminal
+correlation. A schema inventory assertion was updated for the new migration.
+The browser campaign now includes busy Primary interruption with a lost browser
+receipt, retained draft and whole session, no automatic retransmission across
+Gul restart, and post-close/restart public result identity and digest/length-
+verified artifact rereads. The first corrected browser diagnostic confirmed
+Primary interruption and receipt-loss handling, then stopped because its extra
+mid-session restart produced typed UNVERIFIED background and correctly blocked
+later Submit. The campaign now checks session retention immediately after
+Interrupt and performs its existing restart after confirmed Close. It does not
+relax the background guard or qualify Submit after an unverified restart.
+Pending-attempt observation checks local metadata first and performs provider
+snapshot/timeline reads only for a finished unknown Interrupt. A no-pending
+regression and related-package race checks pass. Browser eligibility waits use
+bounded explicit refreshes; they never repeat a mutation to make state converge.
+The corrected candidate passes related-package race checks, serial `make test`,
+the published Go provider suite and the complete published-provider Chrome
+campaign. The full campaign accepts 54 Primary prompts and one Specialist native
+input, preserves the 40,000-line prompt at ordinal 52 and crosses the history page
+boundary. It confirms one native Primary interrupt, retained session and draft,
+no automatic retransmission, and the same public result identity, original and
+fresh digest/length-verified multi-chunk artifact after confirmed Close and host
+restart. The published executable and archive remain unchanged, and all 72
+non-prose qualification inputs match their pre-campaign hashes. The serial gate
+exits 0 with degraded extraction from linker warnings; extraction status is not
+the command result. The second full independent native review confirms all
+three original findings corrected, with no new finding and 15 met, zero unmet,
+zero unverified and one not-applicable review subitem. It verifies the complete
+original task, rather than only the corrections, and uses strictly read-only
+Git/source reads. Its backend check is not provided; no CI, publication or native
+capture assurance is inferred. The first review's method exception remains part
+of the historical evidence.
+
+The completion projection accepts the nine T3-owned requirements, including
+REQ-FILE-015's final cross-surface image handoff, within the published-provider/
+permitted-native-fake scope. It marks T3 Completed, leaves no active Task and
+keeps E2 In Progress pending the committed whole-Epic audit and closeout. The
+projection changes no implementation or qualification input. The shared dossier
+and E9 live/provider-Worker fault/device/deployment boundaries remain intact.
+Release notes are not enrolled; no promoted evidence, Low settlement, hardening
+deferral, installation or publication applies. Exact final Goal approval and the
+covered ordinary T3 completion commit remain pending.

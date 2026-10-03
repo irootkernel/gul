@@ -5,7 +5,7 @@
 | Role | Durable architecture decisions and supersession history |
 | Product | Gul |
 | Version | 0.1-dolgorae-consumer-v1 |
-| Last updated | 2026-10-02 |
+| Last updated | 2026-10-03 |
 
 ## 1. Status model
 
@@ -362,6 +362,11 @@ Rejected alternative: sharing one Controller per Workspace to unlock handoff. It
 typed blocker without offering continuation. The successor branch below applies
 only after deferred E4-T4 is adopted; in-place safety remains required now.
 
+**E2-T3 clarification:** this transition requirement applies to reader promotion.
+A matching same-Run ACTIVE writer can accept explicit READ or WRITE under the
+bounded best-effort admission rules below without acquiring new authority or
+claiming verified effective access. READ does not release its writer.
+
 **Status:** Accepted
 
 Per-submission `write_intent` assumes one Run can serve both read and write turns. That depends on the provider's access-policy transition support, which is reported per profile as supported, unsupported, or unverified and which the provider may refuse for an existing thread.
@@ -488,7 +493,7 @@ below retains its original context rather than adding a second current set.
 
 Dolgorae projections are authoritative state inputs, but they do not provide one Gul-authoritative `allowed_actions` list because they cannot know Gul session ownership, local credential health, browser operation state, or upstream compatibility. A single domain evaluator consumes those inputs and emits only the closed Gul action and blocker variants. Every button and mutation endpoint invokes the same evaluator immediately before action.
 
-The evaluator's explicit typed input contract contains Run lifecycle, thread presence, active Turn, pending Interaction, control mode, execution lane, writer authority/generation, effective access and policy verification, profile capabilities and compatibility, access-policy transition support, background execution, requested/achieved assurance, recovery state and required recovery action, lineage, Controller binding health, Gul Direct Session ownership, unresolved mutation state, and provider compatibility state. Each is independently required even when another aggregate appears to imply it. It does not parse decision-critical strings; a missing, unknown, or string-only input produces `BlockedByProviderCompatibility`. Under ADR-0050 the first release has no successor or continuation action.
+The evaluator's explicit typed input contract contains Run lifecycle, thread presence, active Turn, pending Interaction, control mode, execution lane, writer authority/generation, effective access and policy verification, profile capabilities and compatibility, access-policy transition support, background execution, requested/achieved assurance, recovery state and required recovery action, lineage, Controller binding health, Gul Direct Session ownership, unresolved mutation state, and provider compatibility state. Each is independently required even when another aggregate appears to imply it. It does not parse decision-critical strings; a missing, unrecognized enum, malformed, or string-only input produces `BlockedByProviderCompatibility`. Under ADR-0050 the first release has no successor or continuation action.
 
 Under ADR-0050, `REQUIRED_CLIENT_ACTION_CREATE_WRITE_CONTINUATION` maps to a typed unsupported blocker in the first release. A shared-readonly write or unsupported access transition offers neither another source write nor continuation. A threadless dedicated Run requiring its first write offers `SubmitTurn(WRITE)`; valid existing-thread acquisition offers `AcquireWriter`; outcome unknown and recovery-required states block conflicts and offer only their typed reconciliation or recovery actions. E4-T4 owns any later continuation action.
 
@@ -595,8 +600,12 @@ Pause/Interrupt is not an aggregate-pause feature. Root Recover/Reconcile follow
 provider-owned aggregate recovery when retained close intent requires it, with
 fresh separate observations; it does not auto-resume paused work.
 
-When owned work is active, close requires explicit interrupt intent and rejects
-`interrupt=false`. A successful root call is not final closure until the fresh
+When owned work is active or typed background execution is UNVERIFIED, close
+requires explicit interrupt intent and rejects `interrupt=false`. The Broker
+settles those effects through the authorized root call. Background uncertainty
+still blocks ordinary Submit, Acquire and Release; unknown mutation or owned-task
+outcomes, stale observations and required recovery remain independent Close
+blockers. A successful root call is not final closure until the fresh
 aggregate read accounts for all owned work. Browser close and hide remain local.
 
 WriteContinuation and Delete remain optional future capabilities. Existing
@@ -767,7 +776,7 @@ fixtures. Direct same-origin rendering is rejected.
 E2-T0 release qualification (2026-10-02): the published v0.1.3 source is
 `07dc31331d03aae9ed7c0c862a0cbe8a5184024e`. The current dependency-lock SHA-256
 is `223d2a72d7bd281dba0abdc8b1e966d792492546c3be63a67e593c94eed0c05a` and generated-lock SHA-256 is
-`8d02e824c36795221ee6d1b3fc7e2b43943d13701aa76d019c3b6aea30b26a6d`. The earlier E12 pin remains historical evidence.
+`912c2e1b530efe176fdc5f953217f55c1812a77cbe5425ccb25965fb1130fbd6`. The earlier E12 pin remains historical evidence.
 E2-T1 applies the accepted public-gRPC boundary to ordinary host
 startup and implements supervised gateway, read budgets and safe diagnostics.
 E2-T2 implements ADR-0047/0050 in the protected local store, per-call transport
@@ -780,3 +789,30 @@ The fixed Gul subtree is derived from the released home-root locator and client
 pattern. Local identity checks supplement public `VerifyController`; they do
 not grant provider authority. E2-T2 is complete for its carrier/adoption scope. Actual
 session-action acceptance remains E2-T3-owned.
+
+E2-T3 corrects consumer admission against unchanged published v0.1.3.
+Declared UNKNOWN/UNVERIFIED policy with requested and achieved
+BEST_EFFORT_PERSONAL_ALPHA permits explicit READ under fresh idle owned state,
+threadless first WRITE through SubmitTurn, and subsequent explicit WRITE with
+matching same-Run ACTIVE Writer authority. Existing-reader acquisition still
+requires verified transition support. Release retains matching authority and
+quiescence without requiring verified access. Gul displays `Policy unverified`
+and preserves all provider stamps, generations and policy facts; READ neither
+releases a Writer nor promises a read-only sandbox. Missing or unrecognized
+facts, failed policy and higher-assurance unverified requests remain closed.
+Root Close uses explicit interrupt consent for typed UNVERIFIED background under
+fresh aggregate, Controller, capability, outcome and recovery guards. It does not
+relax ordinary Submit, Acquire or Release eligibility and confirms closure only
+from subsequent whole-aggregate observations. A Writer recovery blocker owned
+by this root remains independent of background consent; another Run's Writer
+recovery does not block an unrelated root Close. Primary Interrupt retains the
+session and dispatches one revision-fenced public RPC after explicit consent.
+Its durable attempt has no replay authority; matching terminal evidence may
+settle observed state without asserting success of a lost receipt.
+The first T3 review requested these admission/execution corrections and
+post-close/restart public result/artifact qualification. The corrected candidate
+passes the related-package race checks, serial facade, published Go suite and
+complete published-provider Chrome campaign. Corrected-target independent review
+confirms all original T3 criteria and the three corrections, with no remaining
+finding. T3 Current State is accepted within the published-provider/native-fake
+scope; whole-Epic audit and E9 live/device/deployment qualification are separate.

@@ -24,5 +24,5 @@ func (p *Provider) ReadWriter(ctx context.Context, b action.Bound) (action.Write
 	if response == nil || !known(response.ProtoReflect()) {
 		return action.WriterProjection{}, action.ErrBlocked
 	}
-	return writerProjection(response.Writer, b, false)
+	return writerProjection(response.Writer, b)
 }

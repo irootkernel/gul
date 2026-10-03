@@ -23,6 +23,7 @@ type Port interface {
 	GetOrchestratedSession(context.Context, *publicv1.GetOrchestratedSessionRequest) (*publicv1.GetOrchestratedSessionResponse, error)
 	AcquireWriter(context.Context, *publicv1.AcquireWriterRequest) (*publicv1.WriterState, error)
 	ReleaseWriter(context.Context, *publicv1.ReleaseWriterRequest) (*publicv1.WriterState, error)
+	InterruptTurn(context.Context, *publicv1.InterruptTurnRequest) (*publicv1.RunMutationResponse, error)
 }
 type Provider struct {
 	port            Port
@@ -86,7 +87,7 @@ func (p *Provider) Read(ctx context.Context, b action.Bound) (action.Input, erro
 	if wr == nil {
 		return action.Input{}, action.ErrBlocked
 	}
-	writer, err := writerProjection(wr.Writer, b, false)
+	writer, err := writerProjection(wr.Writer, b)
 	if err != nil {
 		return action.Input{}, err
 	}
@@ -161,14 +162,36 @@ func (p *Provider) Acquire(ctx context.Context, b action.Bound, revision uint64)
 	if err != nil {
 		return action.WriterProjection{}, safeError(err)
 	}
-	return writerProjection(w, b, false)
+	return writerProjection(w, b)
 }
 func (p *Provider) Release(ctx context.Context, b action.Bound, revision uint64) (action.WriterProjection, error) {
 	w, err := p.port.ReleaseWriter(ctx, &publicv1.ReleaseWriterRequest{Run: ref(b), Controller: carrier(b), ExpectedStateRevision: revision})
 	if err != nil {
 		return action.WriterProjection{}, safeError(err)
 	}
-	return writerProjection(w, b, true)
+	return writerProjection(w, b)
+}
+
+func (p *Provider) Interrupt(ctx context.Context, b action.Bound, revision uint64) error {
+	if revision == 0 || b.Carrier.ControllerID == "" {
+		return action.ErrInvalid
+	}
+	reply, err := p.port.InterruptTurn(ctx, &publicv1.InterruptTurnRequest{Run: ref(b), Controller: carrier(b), ExpectedStateRevision: revision})
+	if err != nil {
+		return safeError(err)
+	}
+	if reply == nil || reply.Run == nil || !known(reply.ProtoReflect()) {
+		return action.ErrOutcomeUnknown
+	}
+	r := reply.Run
+	if r.RunId != b.Binding.RunID || r.WorkspaceId != b.Workspace.ProviderID || r.Controller == nil || r.Controller.ControllerId != b.Carrier.ControllerID || r.Controller.Generation != b.Carrier.Generation ||
+		r.StateRevision < revision || r.StateRevision != r.GetStamp().GetRunStateRevision() || r.EventCursor != r.GetStamp().GetCapturedHeadCursor() || !stamp(r.Stamp).Valid() {
+		return action.ErrOutcomeUnknown
+	}
+	if _, err := runFacts(r); err != nil {
+		return action.ErrOutcomeUnknown
+	}
+	return nil
 }
 func safeError(err error) error {
 	var rpc *connect.Error

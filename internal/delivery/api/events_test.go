@@ -121,7 +121,10 @@ func TestClientEventRPCSnapshotAndAccessBoundaries(t *testing.T) {
 	}
 }
 func TestWriterModeMappingFailsClosed(t *testing.T) {
-	for _, mode := range []action.WriterMode{action.WriterWrite, action.WriterReadOnly, action.WriterBlocked, "unknown"} {
+	if browserWriterMode(action.WriterUnverified) != gulv1.WriterAccessMode_WRITER_ACCESS_MODE_UNVERIFIED || browserActionState(action.Evaluation{Mode: action.WriterUnverified}).Mode != gulv1.WriterAccessMode_WRITER_ACCESS_MODE_UNVERIFIED {
+		t.Fatal("unverified presentation was lost")
+	}
+	for _, mode := range []action.WriterMode{action.WriterWrite, action.WriterReadOnly, action.WriterBlocked, action.WriterUnverified, "unknown"} {
 		if (browserWriterMode(mode) == gulv1.WriterAccessMode_WRITER_ACCESS_MODE_WRITE) != (mode == action.WriterWrite) {
 			t.Fatal(mode)
 		}

@@ -93,6 +93,8 @@ func browserWriterMode(mode action.WriterMode) gulv1.WriterAccessMode {
 		return gulv1.WriterAccessMode_WRITER_ACCESS_MODE_WRITE
 	case action.WriterReadOnly:
 		return gulv1.WriterAccessMode_WRITER_ACCESS_MODE_READ_ONLY
+	case action.WriterUnverified:
+		return gulv1.WriterAccessMode_WRITER_ACCESS_MODE_UNVERIFIED
 	default:
 		return gulv1.WriterAccessMode_WRITER_ACCESS_MODE_BLOCKED
 	}

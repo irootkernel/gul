@@ -26,6 +26,7 @@ import (
 	"github.com/rootkernel/gul/internal/delivery/api"
 	"github.com/rootkernel/gul/internal/operation"
 	"github.com/rootkernel/gul/internal/session"
+	"github.com/rootkernel/gul/internal/submit"
 )
 
 type credentials struct{ cookie, csrf string }
@@ -467,7 +468,7 @@ func TestAssembledBindingLookupIsSubjectScopedAndCancellable(t *testing.T) {
 
 type persistenceFailureDispatcher struct{}
 
-func (persistenceFailureDispatcher) Submit(context.Context, action.Bound, action.Input, string, string, action.WriteIntent) error {
+func (persistenceFailureDispatcher) SubmitInput(context.Context, action.Bound, action.Input, string, string, action.WriteIntent, submit.Options) error {
 	return action.ErrPersistence
 }
 
