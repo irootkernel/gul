@@ -5,7 +5,7 @@
 | Role | Non-normative implementation observations, dependencies, risks, and handoff |
 | Product | Gul |
 | Version | 0.1-dolgorae-consumer-v1 |
-| Last updated | 2026-10-03 |
+| Last updated | 2026-10-04 |
 
 ## 1. Boundary
 
@@ -2555,3 +2555,53 @@ and E9 live/provider-Worker fault/device/deployment boundaries remain intact.
 Release notes are not enrolled; no promoted evidence, Low settlement, hardening
 deferral, installation or publication applies. Exact final Goal approval and the
 covered ordinary T3 completion commit remain pending.
+
+
+### E2-T1 lifecycle-boundary remediation (2026-10-04)
+
+The first whole-E2 static completion review found one missing original
+acceptance proof under REQ-RUNTIME-017 and no confirmed code defect.
+E2-T1 was reopened In Progress, reviewed In Review and is now Completed
+at this correction checkpoint. The first whole-Epic
+assessment remains consumed and incomplete; earlier member completion
+records retain their historical scope. E2 remains In Progress until the
+correction is reviewed and committed, followed by the complete Epic re-audit.
+
+`internal/gateway/boundary_test.go` holds a public gRPC readiness response,
+checks that product mutation is withheld, and exercises the five-second
+readiness and startup-handshake deadlines. A stopped child of the unchanged
+published v0.1.3 executable exercises the startup deadline while mutation
+remains unavailable. A SIGTERM-resistant test child exercises real Stop,
+unary cancellation within five seconds, the ten-second shutdown bound and
+owned-child SIGKILL after grace expiry; another test process remains alive
+and receives no termination signal. Every child has a private fixture HOME.
+These are deliberate boundary fixtures, separate from successful lifecycle
+checks and the supplemental exact-tag Rust build.
+
+The fresh published-host race check also found that `PendingCreations`
+called live Workspace revalidation. Provider loss therefore blocked the
+local Direct Session list. The correction checks the stored subject-scoped
+attachment before reading local labels. Creation and recovery mutations
+retain live revalidation. SQLite regression coverage checks nonempty pending
+labels without provider calls and rejects foreign subjects and missing
+Workspaces. Both published-host loss cases now pass. This second gap belongs
+to E2-T1's original host-loss/local-presentation acceptance.
+
+The corrected gateway/core/host/composition race suite, serial `make test`
+and complete published-provider Go suite pass. The serial command exits 0;
+its linker warnings degrade output extraction and do not change that result.
+The prior complete published-provider Chrome campaign remains evidence for
+unchanged creation, input, history, Interrupt, result/artifact and Close flows;
+this correction changes one local-label read and requalifies it through
+actual published-host loss checks and the provider Go suite. It does not
+claim a new complete Chrome campaign. The published artifact, contract pin,
+gateway and checked frontend remain unchanged.
+
+Independent correction review accepts all ten original T1 requirement IDs
+and 35 compound criteria. Both gaps are corrected, with zero new findings
+and zero required evidence gaps. The advisory static review uses retained
+caller verification and provides no backend CI or publication assurance.
+Exact final candidate acceptance and separate one-commit authorization remain
+pending; the correction commit must precede the complete Epic re-audit.
+E9 acceptance, installation and upstream publication remain outside this
+correction.

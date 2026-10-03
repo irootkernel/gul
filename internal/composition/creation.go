@@ -95,7 +95,7 @@ func (r *Runtime) createSession(ctx context.Context, subject, workspace, attempt
 }
 
 func (r *Runtime) PendingCreations(ctx context.Context, subject, workspace string) ([]string, error) {
-	if _, err := r.Workspaces.Revalidate(ctx, subject, workspace); err != nil {
+	if _, err := r.store.Presentation().Attachment(ctx, subject, workspace); err != nil {
 		return nil, err
 	}
 	return r.store.Presentation().PendingCreationLabels(ctx, subject, workspace)

@@ -24,6 +24,7 @@ import (
 
 type testRuntime struct {
 	capabilityError   error
+	capabilityBlock   <-chan struct{}
 	alterCapabilities func(*publicv1.GetCapabilitiesResponse)
 	dolgoraev1connect.UnimplementedRuntimeServiceHandler
 	requests chan *publicv1.RequestContext
@@ -35,6 +36,13 @@ type testRuntime struct {
 
 func (r *testRuntime) GetCapabilities(ctx context.Context, q *connect.Request[publicv1.GetCapabilitiesRequest]) (*connect.Response[publicv1.GetCapabilitiesResponse], error) {
 	r.requests <- q.Msg.Context
+	if r.capabilityBlock != nil {
+		select {
+		case <-r.capabilityBlock:
+		case <-ctx.Done():
+			return nil, ctx.Err()
+		}
+	}
 	if r.capabilityError != nil {
 		return nil, r.capabilityError
 	}
@@ -109,7 +117,11 @@ func (r *testRun) SubmitTurn(context.Context, *connect.Request[publicv1.SubmitTu
 
 func transportFixture(t *testing.T) (*Gateway, *testRuntime, *testRun) {
 	t.Helper()
-	root, err := os.MkdirTemp("/private/tmp", "gul-rpc-")
+	tmp, err := filepath.EvalSymlinks(os.TempDir())
+	if err != nil {
+		t.Fatal(err)
+	}
+	root, err := os.MkdirTemp(tmp, "gul-rpc-")
 	if err != nil {
 		t.Fatal(err)
 	}

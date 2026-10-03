@@ -8,7 +8,7 @@
 | Subtitle | Remote operator interface for local development runtimes |
 | Version | 0.1-dolgorae-consumer-v1 |
 | Status | Approved Required State; E1-T1 through E1-T5 foundations and E14-T1 assembled fake-provider acceptance completed; live-provider qualification remains E2/E9-owned |
-| Last updated | 2026-10-03 |
+| Last updated | 2026-10-04 |
 | Target | macOS host; modern desktop, iPad, and iPhone browsers |
 
 ## 1. Purpose, authority, and lifecycle
@@ -503,6 +503,13 @@ fixtures check read single-flight, cancellation, typed close errors and enum/
 optional-data handling. The gateway and host are implemented. End-to-end
 session action acceptance remains E2-T3-owned.
 E9 retains supported-device, fault/security and deployment qualification.
+E2-T1's correction verifies REQ-RUNTIME-017 through delayed public readiness,
+stalled published startup, bounded unary drain and owned-child grace-expiry
+fixtures. The published-host loss checks also confirm that subject-scoped
+local session and pending-creation lists remain readable without a provider
+probe. Actual creation and recovery mutations keep their live gates.
+Fresh race, serial and published Go checks and independent correction review
+accept this scope; E2 whole-Epic re-audit remains separate.
 
 E2-T2 implements `internal/controller` beneath the advertised home-root/client
 layout. Schema-v1 files have trusted installation/account identity and fresh

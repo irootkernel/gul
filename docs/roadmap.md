@@ -3,9 +3,9 @@
 | Field | Value |
 | --- | --- |
 | Role | Sole authority for task identity, order, status, dependencies, and phase |
-| Revision | 2026-10-03 E2-T3 published-provider acceptance |
+| Revision | 2026-10-04 E2-T1 lifecycle-boundary remediation |
 | Active Task | None |
-| Next | E9-T1 follows the E2-T3 commit and E2 whole-Epic audit |
+| Next | E9-T1 follows the E2-T1 correction commit and E2 whole-Epic re-audit |
 | Required provider | Released Dolgorae v0.1.3 implementing `dolgorae.gul-consumer/v1` |
 
 E14 is Completed. The published v0.1.3 artifact and immutable release source
@@ -16,7 +16,7 @@ have been qualified by E2-T0, including the release contract and admission matri
 Allowed executable states are `Planned`, `In Progress`, `In Review`, `Completed`,
 `Blocked`, and `Deferred`. `Retired` preserves a historical non-executable ID.
 At most one Task is In Progress or In Review globally. No Task is active;
-E2-T0/T1/T2/T3 are Completed.
+E2-T0/T1/T2/T3 are Completed at their accepted completion checkpoints.
 E14-T1 and E14 are Completed for the assembled fake-provider scope.
 A Task completes only after its scoped outputs, verification, documentation,
 review, and ordinary completion commit requirements pass. No status implies live
@@ -312,8 +312,10 @@ The accepted plan covers release contract drift and capability admission,
 production wiring, and actual read/write behavior. A source-tag test build may
 help diagnose these boundaries, but cannot satisfy the published-artifact gate
 or complete a Task. The published artifact and matching source identity have
-been qualified; E2-T0/T1/T2 are Completed. E2-T3's committed predecessors are
-satisfied. Published v0.1.3 reports UNKNOWN effective access and UNVERIFIED
+been qualified; E2-T0/T1/T2 are Completed. E2-T1's lifecycle-boundary and
+local-list-after-loss correction passes fresh verification and independent
+review; its separate correction commit precedes the next whole-Epic audit.
+E2-T3 completed against its committed predecessors before this correction. Published v0.1.3 reports UNKNOWN effective access and UNVERIFIED
 policy after Thread binding while accepting explicit best-effort requests.
 Gul separates request eligibility from verified access presentation. Same-Run
 ACTIVE Writer submissions and release retain their independent guards; an

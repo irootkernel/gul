@@ -5,7 +5,7 @@
 | Role | Durable architecture decisions and supersession history |
 | Product | Gul |
 | Version | 0.1-dolgorae-consumer-v1 |
-| Last updated | 2026-10-03 |
+| Last updated | 2026-10-04 |
 
 ## 1. Status model
 
@@ -816,3 +816,13 @@ complete published-provider Chrome campaign. Corrected-target independent review
 confirms all original T3 criteria and the three corrections, with no remaining
 finding. T3 Current State is accepted within the published-provider/native-fake
 scope; whole-Epic audit and E9 live/device/deployment qualification are separate.
+
+
+The 2026-10-04 whole-E2 review reopened E2-T1's REQ-RUNTIME-017
+acceptance for missing delayed-readiness and termination-grace fixtures.
+The implemented lifecycle policy remains unchanged. Deliberate boundary
+fixtures and the local-list-after-provider-loss correction pass fresh race,
+serial and published Go checks and independent review. E2-T1 is Completed
+at this correction checkpoint; the implementation memo records its scope.
+E2 remains In Progress pending the correction commit, whole-Epic re-audit
+and closeout.
