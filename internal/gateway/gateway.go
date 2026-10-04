@@ -150,6 +150,10 @@ func (g *Gateway) Start(ctx context.Context) error {
 	err := g.startChild(ctx)
 	if err != nil {
 		g.setFailure(err)
+		g.mu.Lock()
+		// Initial failure has no monitor to spend the restart budget.
+		g.status.RestartsRemaining = 0
+		g.mu.Unlock()
 		close(g.done)
 		if ctx.Err() != nil {
 			return ctx.Err()

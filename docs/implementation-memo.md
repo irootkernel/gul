@@ -2285,6 +2285,10 @@ Startup, shutdown and restart limits follow §6.1. Transient restart readiness o
 transport failure retries within the same backoff and rolling budget. Semantic,
 identity, socket and collision rejection remains terminal. An earlier failed
 startup must settle its owned child before the next attempt.
+Initial startup failure leaves no restart monitor and reports zero automatic
+restart attempts. After checking the qualified executable and protected runtime
+directories, the operator restarts the Gul host to retry. The diagnostic view
+also gives this recovery step when the restart budget is exhausted.
 Coalesced reads have four
 workers, 16 starts per second and a 250ms per-key floor; mutations and streams
 have independent eight-slot bounds. The transport retains no read-result cache.

@@ -143,6 +143,9 @@ func TestMissingAndWrongExecutableRemainUnavailable(t *testing.T) {
 		if g.Ready(t.Context()) == nil {
 			t.Fatal("unqualified executable admitted")
 		}
+		if g.Status().RestartsRemaining != 0 {
+			t.Fatal("initial failure advertised automatic restarts without a monitor")
+		}
 		if err := g.Stop(t.Context()); err != nil {
 			t.Fatal(err)
 		}

@@ -15,6 +15,7 @@ export function ProviderSummary({summary}: {summary: DiagnosticSummary}) {
   return <div role="status" aria-label="Runtime provider">
     <p>Dolgorae: {health}{summary.providerVersion && ` · Version ${summary.providerVersion}`}</p>
     {summary.providerRestartsRemaining !== undefined && <p>Remaining restart attempts: {summary.providerRestartsRemaining}</p>}
+    {!summary.providerReady && summary.providerRestartsRemaining === 0 && (summary.providerHealth === "unavailable" || summary.providerHealth === "incompatible" || summary.providerHealth === "restart_exhausted") && <p>Check the qualified Dolgorae executable and protected runtime directories, then restart the Gul host to retry.</p>}
     {summary.providerSocketCleanupUnsafe && <p>Gateway socket cleanup requires inspection.</p>}
     {capabilities && <dl>
       <dt>Persistent runs</dt><dd>{capabilities.persistentRuns ? "Supported" : "Unavailable"}</dd>

@@ -15,8 +15,20 @@ test("released general access and dedicated writing remain independent", () => {
 });
 
 test("provider loss changes availability without promoting cached support to readiness", () => {
-  const summary = create(GetSummaryResponseSchema, {providerHealth: "restarting", persistenceReady: true});
+  const summary = create(GetSummaryResponseSchema, {providerHealth: "restarting", providerRestartsRemaining: 3, persistenceReady: true});
   const html = renderToStaticMarkup(<ProviderSummary summary={summary} />);
   expect(html).toContain("Restarting");
   expect(html).not.toContain("Connected");
+  expect(html).toContain("Remaining restart attempts: 3");
+  expect(html).not.toContain("restart the Gul host");
+});
+
+test("a provider with no automatic retry reports host restart recovery", () => {
+  for (const providerHealth of ["unavailable", "incompatible", "restart_exhausted"]) {
+    const summary = create(GetSummaryResponseSchema, {providerHealth, providerRestartsRemaining: 0, persistenceReady: true});
+    const html = renderToStaticMarkup(<ProviderSummary summary={summary} />);
+    expect(html).toContain("Remaining restart attempts: 0");
+    expect(html).toContain("Check the qualified Dolgorae executable and protected runtime directories");
+    expect(html).toContain("restart the Gul host to retry");
+  }
 });
