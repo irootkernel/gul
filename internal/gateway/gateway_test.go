@@ -166,7 +166,38 @@ func publishedExecutable(t *testing.T) string {
 	if hex.EncodeToString(digest[:]) != contract.QualifiedRelease().Archive.SHA256 {
 		t.Fatal("published archive identity rejected")
 	}
-	return binary
+	qualified := filepath.Join(t.TempDir(), "dolgorae")
+	if err := copyQualifiedExecutable(t.Context(), binary, qualified); err != nil {
+		t.Fatal("published executable identity rejected", err)
+	}
+	return qualified
+}
+
+func TestSocketWorkspaceCaseAliasRefused(t *testing.T) {
+	root := filepath.Join(t.TempDir(), "workspace")
+	if err := os.Mkdir(root, 0700); err != nil {
+		t.Fatal(err)
+	}
+	alias := filepath.Join(filepath.Dir(root), "WORKSPACE")
+	original, err := os.Stat(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	same, err := os.Stat(alias)
+	if err != nil || !os.SameFile(original, same) {
+		t.Skip("case-sensitive fixture filesystem")
+	}
+	parent := filepath.Join(root, "gateway")
+	if err := os.Mkdir(parent, 0700); err != nil {
+		t.Fatal(err)
+	}
+	if outsideWorkspaces(filepath.Join(parent, "rpc.sock"), []string{alias}) {
+		t.Fatal("physical Workspace case alias admitted provider socket")
+	}
+	outside := filepath.Join(t.TempDir(), "rpc.sock")
+	if !outsideWorkspaces(outside, []string{alias}) {
+		t.Fatal("unrelated private socket refused")
+	}
 }
 
 func TestPublishedGatewayLifecycleRestartAndReplacement(t *testing.T) {

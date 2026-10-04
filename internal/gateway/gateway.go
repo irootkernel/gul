@@ -592,6 +592,20 @@ func outsideWorkspaces(socket string, roots []string) bool {
 		if err != nil || rel == "." || rel != ".." && !strings.HasPrefix(rel, ".."+string(filepath.Separator)) {
 			return false
 		}
+		workspace, err := os.Stat(resolved)
+		if err != nil || !workspace.IsDir() {
+			return false
+		}
+		// Case aliases can survive EvalSymlinks on case-insensitive filesystems.
+		for parent := filepath.Dir(socket); ; parent = filepath.Dir(parent) {
+			info, err := os.Stat(parent)
+			if err != nil || os.SameFile(workspace, info) {
+				return false
+			}
+			if filepath.Dir(parent) == parent {
+				break
+			}
+		}
 	}
 	return true
 }

@@ -186,7 +186,7 @@ func call[T, R any](ctx context.Context, c *client, method string, request *T, m
 		if c.validateCarrier != nil {
 			m := any(copy).(proto.Message).ProtoReflect()
 			field := m.Descriptor().Fields().ByName("controller")
-			if field != nil && !m.Has(field) && method != "ArtifactService.ListArtifactMetadata" && method != "ArtifactService.ReadArtifactChunk" {
+			if field != nil && !m.Has(field) && method != "ArtifactService.GetArtifact" && method != "ArtifactService.ReadArtifactChunk" {
 				return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("controller carrier unavailable"))
 			}
 			if field != nil && m.Has(field) {

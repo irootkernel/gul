@@ -55,7 +55,7 @@ func runCommand(ctx context.Context, args []string, openDesktop func(host.Attach
 		return e
 	}
 	if flags.NArg() != 0 {
-		return errors.New("usage: gul [serve|launchd-plist|diagnose] [--data-directory PATH] [--port PORT] [--tailnet-host HOST:PORT]")
+		return errors.New("usage: gul [serve|launchd-plist|diagnose] [--data-directory PATH] [--port PORT] [--tailnet-host HOST:PORT] [--dolgorae-executable PATH] [--workspace-root PATH ...] [--policy NAME ...]")
 	}
 	if mode == "launchd-plist" {
 		home, e := os.UserHomeDir()

@@ -2269,12 +2269,16 @@ Release without it. Typed Submit close errors pass through
 the wire adapter to the existing safe domain mapper. Unknown optional bytes are
 discarded before projection use, while unknown typed enums and stale response
 contexts block the call.
+Observer `GetArtifact` and `ReadArtifactChunk` calls may omit the Controller;
+the provider still decides artifact visibility. A supplied Controller always
+passes the local carrier guard before dispatch.
 
 The host singleton precedes provider work. Gul verifies a private executable
 copy against the embedded published digest, creates protected runtime parents
 below the selected user's cache and chooses an unused socket outside configured
-and saved Workspace roots. It launches only `serve`, without a shell. The
-provider owns socket bind, chmod, stale proof and unlink. A bounded serve
+and saved Workspace roots, comparing directory identities to reject physical
+aliases on case-insensitive filesystems. It launches only `serve`, without a
+shell. The provider owns socket bind, chmod, stale proof and unlink. A bounded serve
 readiness envelope supplies safe failure codes; socket ownership and the gRPC
 handshake decide admission. Source selection is rechecked at every later start.
 Startup, shutdown and restart limits follow §6.1. Transient restart readiness or
@@ -2296,7 +2300,8 @@ operator view expose health, release identity, unsafe socket cleanup and
 independent capability flags.
 Trusted executable, root and policy flags also survive launchd rendering.
 Production never invokes a Machine CLI operation to bootstrap or replace RPCs.
-The opt-in tests initialize only their private provider HOME/workspace.
+The opt-in tests initialize only their private provider HOME/workspace, using
+a private executable copy checked against the published digest before `init`.
 
 Published-artifact qualification checks live startup, protocol/schema/feature
 refusal, active-gateway collision, owned-child shutdown, crash re-handshake and

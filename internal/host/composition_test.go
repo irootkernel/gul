@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	contract "github.com/rootkernel/gul/contract"
 	"io"
@@ -56,12 +57,15 @@ func TestPublishedProductionHostChoicesAndTransportLoss(t *testing.T) {
 func publishedHostConfig(t *testing.T, binary string) Config {
 	t.Helper()
 	c := config(t)
-	c.DolgoraeExecutable = binary
 	fixtureRoot, err := os.MkdirTemp("/private/tmp", "gul-host-")
 	if err != nil {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() { os.RemoveAll(fixtureRoot) })
+	c.DolgoraeExecutable, err = copyPublishedHostExecutable(binary, filepath.Join(fixtureRoot, "dolgorae"))
+	if err != nil {
+		t.Fatal("published executable identity", err)
+	}
 	c.ProviderHome = filepath.Join(fixtureRoot, "home")
 	work := filepath.Join(filepath.Dir(c.ProviderHome), "workspace")
 	for _, path := range []string{c.ProviderHome, work} {
@@ -69,13 +73,51 @@ func publishedHostConfig(t *testing.T, binary string) Config {
 			t.Fatal(err)
 		}
 	}
-	init := exec.CommandContext(t.Context(), binary, "init", work, "--non-git")
+	init := exec.CommandContext(t.Context(), c.DolgoraeExecutable, "init", work, "--non-git")
 	init.Env, init.Dir, init.Stdout, init.Stderr = []string{"HOME=" + c.ProviderHome, "PATH=/usr/bin:/bin", "TMPDIR=" + filepath.Dir(work)}, work, io.Discard, io.Discard
 	if err = init.Run(); err != nil {
 		t.Fatal("isolated fixture bootstrap", err)
 	}
 	c.WorkspaceRoots = []string{work}
 	return c
+}
+
+func copyPublishedHostExecutable(source, destination string) (string, error) {
+	input, err := os.Open(source)
+	if err != nil {
+		return "", err
+	}
+	defer input.Close()
+	info, err := input.Stat()
+	if err != nil || !info.Mode().IsRegular() || info.Mode().Perm()&0111 == 0 || info.Size() > 256<<20 {
+		return "", errors.New("invalid published executable")
+	}
+	output, err := os.OpenFile(destination, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0700)
+	if err != nil {
+		return "", err
+	}
+	hash := sha256.New()
+	_, err = io.Copy(io.MultiWriter(output, hash), io.LimitReader(input, (256<<20)+1))
+	if err == nil {
+		err = output.Sync()
+	}
+	closeErr := output.Close()
+	if err != nil || closeErr != nil || hex.EncodeToString(hash.Sum(nil)) != contract.QualifiedRelease().Executable.SHA256 {
+		return "", errors.New("published executable digest mismatch")
+	}
+	return destination, nil
+}
+
+func TestPublishedHostBootstrapRejectsUnqualifiedExecutable(t *testing.T) {
+	root := t.TempDir()
+	source := filepath.Join(root, "selected")
+	if err := os.WriteFile(source, []byte("#!/bin/sh\nexit 0\n"), 0700); err != nil {
+		t.Fatal(err)
+	}
+	qualified, err := copyPublishedHostExecutable(source, filepath.Join(root, "dolgorae"))
+	if err == nil || qualified != "" {
+		t.Fatal("unqualified bootstrap executable admitted", qualified, err)
+	}
 }
 
 func TestPublishedProductionAssemblyPreservesLocalHostAfterHandshakeLoss(t *testing.T) {
@@ -95,7 +137,7 @@ func TestPublishedProductionAssemblyPreservesLocalHostAfterHandshakeLoss(t *test
 	// Exercise the production assembly boundary deterministically, after its
 	// accepted handshake but before construction, using the actual released child.
 	c.Assemble = func(store *storage.Store) (Assembly, error) {
-		g := gateway.New(gateway.Config{Executable: binary, Home: c.ProviderHome, WorkspaceRoots: c.WorkspaceRoots})
+		g := gateway.New(gateway.Config{Executable: c.DolgoraeExecutable, Home: c.ProviderHome, WorkspaceRoots: c.WorkspaceRoots})
 		if err := g.Start(t.Context()); err != nil {
 			return Assembly{}, err
 		}

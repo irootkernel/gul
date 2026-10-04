@@ -84,7 +84,29 @@ func (r *testRuntime) GetProfile(ctx context.Context, q *connect.Request[publicv
 
 type testRun struct {
 	dolgoraev1connect.UnimplementedRunServiceHandler
-	calls atomic.Int32
+	calls         atomic.Int32
+	artifactCalls atomic.Int32
+}
+
+type testArtifact struct {
+	dolgoraev1connect.UnimplementedArtifactServiceHandler
+	calls *atomic.Int32
+}
+
+func (a testArtifact) GetArtifact(_ context.Context, q *connect.Request[publicv1.GetArtifactRequest]) (*connect.Response[publicv1.GetArtifactResponse], error) {
+	a.calls.Add(1)
+	if q.Msg.ArtifactId == "private" && q.Msg.Controller == nil {
+		err := connect.NewError(connect.CodePermissionDenied, errors.New("untrusted provider detail"))
+		detail, _ := connect.NewErrorDetail(&publicv1.DolgoraeErrorDetail{DetailVersion: 1, DolgoraeErrorCode: "CONTROLLER_MISMATCH", RetryClassification: publicv1.RetryClassification_RETRY_CLASSIFICATION_FORBIDDEN, RecoveryClassification: publicv1.RecoveryClassification_RECOVERY_CLASSIFICATION_NONE, Action: publicv1.RequiredClientAction_REQUIRED_CLIENT_ACTION_VERIFY_CONTROLLER})
+		err.AddDetail(detail)
+		return nil, err
+	}
+	return connect.NewResponse(&publicv1.GetArtifactResponse{Context: &publicv1.ResponseContext{ProtocolVersion: 1, ServerInstanceId: "test-server"}, MaximumChunkSize: 1024}), nil
+}
+
+func (a testArtifact) ReadArtifactChunk(context.Context, *connect.Request[publicv1.ReadArtifactChunkRequest]) (*connect.Response[publicv1.ReadArtifactChunkResponse], error) {
+	a.calls.Add(1)
+	return connect.NewResponse(&publicv1.ReadArtifactChunkResponse{Context: &publicv1.ResponseContext{ProtocolVersion: 1, ServerInstanceId: "test-server"}, Data: []byte("public"), Length: 6, Eof: true, TotalByteLength: 6}), nil
 }
 
 type testObservation struct {
@@ -139,6 +161,7 @@ func transportFixture(t *testing.T) (*Gateway, *testRuntime, *testRun) {
 	mux.Handle(dolgoraev1connect.NewRuntimeServiceHandler(r))
 	mux.Handle(dolgoraev1connect.NewRunServiceHandler(run))
 	mux.Handle(dolgoraev1connect.NewObservationServiceHandler(testObservation{}))
+	mux.Handle(dolgoraev1connect.NewArtifactServiceHandler(testArtifact{calls: &run.artifactCalls}))
 	protocols := new(http.Protocols)
 	protocols.SetUnencryptedHTTP2(true)
 	server := &http.Server{Handler: mux, Protocols: protocols}
@@ -186,6 +209,37 @@ func TestCarrierValidationRunsAfterCapacityAndBeforeEveryProtectedCall(t *testin
 	}
 	if _, err := g.SubmitTurn(t.Context(), &publicv1.SubmitTurnRequest{}); connect.CodeOf(err) != connect.CodeUnauthenticated || run.calls.Load() != 2 {
 		t.Fatal("missing carrier reached provider", err)
+	}
+}
+
+func TestObserverArtifactReadsPreserveProviderAndCarrierGuards(t *testing.T) {
+	g, _, run := transportFixture(t)
+	var validations atomic.Int32
+	g.channel.validateCarrier = func(context.Context, string, *publicv1.ControllerCarrierRef, *publicv1.StartRunRequest) error {
+		validations.Add(1)
+		return connect.NewError(connect.CodeUnauthenticated, errors.New("controller carrier unavailable"))
+	}
+	metadata, err := g.GetArtifact(t.Context(), &publicv1.GetArtifactRequest{ArtifactId: "public"})
+	if err != nil || metadata.GetMaximumChunkSize() != 1024 {
+		t.Fatal("observer metadata did not reach provider", metadata, err)
+	}
+	chunk, err := g.ReadArtifactChunk(t.Context(), &publicv1.ReadArtifactChunkRequest{ArtifactId: "public", Length: 6})
+	if err != nil || string(chunk.GetData()) != "public" || validations.Load() != 0 || run.artifactCalls.Load() != 2 {
+		t.Fatal("observer content did not reach provider", chunk, err)
+	}
+	_, err = g.GetArtifact(t.Context(), &publicv1.GetArtifactRequest{ArtifactId: "private"})
+	if connect.CodeOf(err) != connect.CodePermissionDenied || port.MapProviderError(err).Code != "CONTROLLER_MISMATCH" || run.artifactCalls.Load() != 3 {
+		t.Fatal("provider private-artifact refusal lost", err)
+	}
+	carrier := &publicv1.ControllerCarrierRef{ExpectedControllerId: "controller", ExpectedControllerGeneration: 1}
+	if _, err = g.GetArtifact(t.Context(), &publicv1.GetArtifactRequest{ArtifactId: "public", Controller: carrier}); connect.CodeOf(err) != connect.CodeUnauthenticated {
+		t.Fatal("unsafe metadata carrier admitted", err)
+	}
+	if _, err = g.ReadArtifactChunk(t.Context(), &publicv1.ReadArtifactChunkRequest{ArtifactId: "public", Length: 6, Controller: carrier}); connect.CodeOf(err) != connect.CodeUnauthenticated || validations.Load() != 2 || run.artifactCalls.Load() != 3 {
+		t.Fatal("unsafe content carrier reached provider", err)
+	}
+	if _, err = g.SubmitTurn(t.Context(), &publicv1.SubmitTurnRequest{}); connect.CodeOf(err) != connect.CodeUnauthenticated || run.calls.Load() != 0 {
+		t.Fatal("protected mutation admitted without carrier", err)
 	}
 }
 
