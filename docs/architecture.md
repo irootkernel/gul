@@ -5,7 +5,7 @@
 | Role | Target and Current Architecture source of truth |
 | Product | Gul |
 | Version | 0.1-dolgorae-consumer-v1 |
-| Status | Approved target rebaseline; E8-T1/T2/T3 accepted within account, authenticated route and isolated host/delivery scopes; E8 completed after bounded whole-Epic validation |
+| Status | Approved target rebaseline; E8 completed for authenticated host/delivery; E14 completed for assembled fake-provider acceptance; E2 completed for released-provider integration with permitted native fakes; E9 retains live/device/fault/security/deployment qualification |
 | Last updated | 2026-10-04 |
 
 ## 1. Purpose and change control
