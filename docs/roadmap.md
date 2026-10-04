@@ -3,9 +3,9 @@
 | Field | Value |
 | --- | --- |
 | Role | Sole authority for task identity, order, status, dependencies, and phase |
-| Revision | 2026-10-04 E2-T1 lifecycle-boundary remediation |
+| Revision | 2026-10-04 E2 epic closeout |
 | Active Task | None |
-| Next | E9-T1 follows the E2-T1 correction commit and E2 whole-Epic re-audit |
+| Next | E9-T1 after E2 closeout |
 | Required provider | Released Dolgorae v0.1.3 implementing `dolgorae.gul-consumer/v1` |
 
 E14 is Completed. The published v0.1.3 artifact and immutable release source
@@ -140,7 +140,7 @@ second owner of membership, order or status.
 | E7 | Completed | Responsive UI, mandatory Prompt History, accessibility and IME | [Roadmap](#e7-complete-the-usable-responsive-interface); [Memo](implementation-memo.md#e7-epic-closeout-2026-09-30) |
 | E8 | Completed | Authentication, browser protection and headless/PWA/tailnet packaging together | [Roadmap](#e8-complete-authentication-and-deployment-packaging); [Memo](implementation-memo.md#e8-epic-closeout-2026-10-01) |
 | E14 | Completed | Assembled pre-release application acceptance and live handoff; E14-T1 | [Roadmap](#e14-accept-the-assembled-pre-release-application); [Memo](implementation-memo.md#e14-epic-closeout-2026-10-01) |
-| E2 | In Progress | Released provider qualification and real integration | [Shared](todo/GUL-CONSUMER-REBASELINE.md) |
+| E2 | Completed | Released provider qualification and real integration | [Roadmap](#e2-integrate-the-released-provider); [Memo](implementation-memo.md#e2-epic-closeout-2026-10-04) |
 | E9 | Planned | Actual-provider fault/security/E2E and Gul release qualification | [Shared](todo/GUL-CONSUMER-REBASELINE.md) |
 | Deferred-Gorae | Deferred | Separate future managed provider, not Dolgorae orchestration | None |
 | Deferred-Podway | Deferred | Read-only FSM graph/execution visualization after v0.1.3 | None |
@@ -314,15 +314,17 @@ help diagnose these boundaries, but cannot satisfy the published-artifact gate
 or complete a Task. The published artifact and matching source identity have
 been qualified; E2-T0/T1/T2 are Completed. E2-T1's lifecycle-boundary and
 local-list-after-loss correction passes fresh verification and independent
-review; its separate correction commit precedes the next whole-Epic audit.
-E2-T3 completed against its committed predecessors before this correction. Published v0.1.3 reports UNKNOWN effective access and UNVERIFIED
-policy after Thread binding while accepting explicit best-effort requests.
+review and is committed as `dc090a3` before the complete whole-Epic re-audit.
+E2-T3 completed against its committed predecessors before this correction.
+Published v0.1.3 reports UNKNOWN effective access and UNVERIFIED policy after Thread binding while accepting explicit best-effort requests.
 Gul separates request eligibility from verified access presentation. Same-Run
 ACTIVE Writer submissions and release retain their independent guards; an
 unverified reader-to-writer transition remains unavailable. E2-T3 acceptance
 and corrected-target review pass against the unchanged published artifact with
-permitted native fakes. E2 remains In Progress pending its committed whole-Epic
-audit and closeout; live execution and device/deployment qualification remain E9.
+permitted native fakes. All four member completion commits and the owning T1
+correction are present. The complete audit and second independent native review
+confirm the committed E2 scope. E2 is Completed; E9 retains live execution, broader provider/Worker
+faults, security, devices and deployment qualification.
 
 | Task | Phase | Status | Predecessors | Owned result and verification |
 | --- | --- | --- | --- | --- |

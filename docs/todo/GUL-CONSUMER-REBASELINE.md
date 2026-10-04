@@ -241,7 +241,7 @@ state changes. Missing Podway observation cannot block existing functionality.
 - [ ] No pre-release Task depends on E2 or E9.
 - [ ] E4-T4 remains Deferred outside current E4 membership, and no first-release
       action offers continuation.
-- [ ] E2 pins the exact released v0.1.3 artifact after RC QA.
+- [x] E2 pins the exact released v0.1.3 artifact after RC QA.
 - [ ] E9 records actual-provider acceptance separately from fake evidence.
 - [ ] All canonical documents, requirement owners, DAG phases, and local links
       pass `scripts/check-sot.sh`.

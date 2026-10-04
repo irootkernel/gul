@@ -815,7 +815,9 @@ passes the related-package race checks, serial facade, published Go suite and
 complete published-provider Chrome campaign. Corrected-target independent review
 confirms all original T3 criteria and the three corrections, with no remaining
 finding. T3 Current State is accepted within the published-provider/native-fake
-scope; whole-Epic audit and E9 live/device/deployment qualification are separate.
+scope. The audit of the committed E2 target and independent native review confirm
+E2-T0 through E2-T3 against these accepted boundaries. E9 retains live execution,
+broader provider/Worker faults, security and device/deployment qualification.
 
 
 The 2026-10-04 whole-E2 review reopened E2-T1's REQ-RUNTIME-017
@@ -824,5 +826,6 @@ The implemented lifecycle policy remains unchanged. Deliberate boundary
 fixtures and the local-list-after-provider-loss correction pass fresh race,
 serial and published Go checks and independent review. E2-T1 is Completed
 at this correction checkpoint; the implementation memo records its scope.
-E2 remains In Progress pending the correction commit, whole-Epic re-audit
-and closeout.
+The owning correction is committed as `dc090a3`. Complete whole-Epic re-audit
+and second independent review confirm all E2 requirements and seams; E2 is
+Completed after its separately authorized documentation closeout.

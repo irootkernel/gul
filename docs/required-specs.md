@@ -7,7 +7,7 @@
 | Product | Gul (굴) |
 | Subtitle | Remote operator interface for local development runtimes |
 | Version | 0.1-dolgorae-consumer-v1 |
-| Status | Approved Required State; E1-T1 through E1-T5 foundations and E14-T1 assembled fake-provider acceptance completed; live-provider qualification remains E2/E9-owned |
+| Status | Approved Required State; E1-T1 through E1-T5 foundations, E14-T1 assembled fake-provider acceptance and E2 released-provider/native-fake integration completed; live/fault/device/deployment qualification remains E9-owned |
 | Last updated | 2026-10-04 |
 | Target | macOS host; modern desktop, iPad, and iPhone browsers |
 
@@ -21,9 +21,10 @@ UNKNOWN/UNVERIFIED policy is distinct from missing or malformed facts. Explicit
 requests with requested and achieved BEST_EFFORT_PERSONAL_ALPHA may be eligible
 under the closed evaluator without claiming verified access. Published-artifact
 Go and full Chrome qualification and corrected-target independent review pass.
-The scoped Current State ledger below records that acceptance. Whole-Epic E2
-audit and E9 live execution, provider/Worker faults and device/deployment
-qualification remain separate.
+The scoped Current State ledger below records that acceptance. E2 whole-Epic
+audit and independent review confirm all 29 E2-owned requirements and their
+integration seams. E9 retains live execution, broader provider/Worker faults,
+security and device/deployment qualification.
 
 The source-of-truth order is:
 
@@ -509,7 +510,8 @@ fixtures. The published-host loss checks also confirm that subject-scoped
 local session and pending-creation lists remain readable without a provider
 probe. Actual creation and recovery mutations keep their live gates.
 Fresh race, serial and published Go checks and independent correction review
-accept this scope; E2 whole-Epic re-audit remains separate.
+accept this scope. The complete E2 re-audit and second independent review
+confirm its integration seams.
 
 E2-T2 implements `internal/controller` beneath the advertised home-root/client
 layout. Schema-v1 files have trusted installation/account identity and fresh
@@ -530,7 +532,8 @@ fakes: explicit creation and sequential access, guarded image/effort input,
 Interaction, separate Primary Interrupt, paged history, public results/artifacts
 and aggregate Close with retained reads after host restart. Tokenless ambiguity
 never authorizes replay. E9 retains live and broader fault/device/deployment
-qualification; E2's whole-Epic audit is pending.
+qualification. The complete E2 audit and second independent review confirm
+this accepted published-provider/native-fake scope.
 
 Earlier component entries retain the verification scope accepted at their task
 completion. Their "unmounted" and "disabled" route labels describe that earlier

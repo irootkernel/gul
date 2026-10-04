@@ -2605,3 +2605,51 @@ Exact final candidate acceptance and separate one-commit authorization remain
 pending; the correction commit must precede the complete Epic re-audit.
 E9 acceptance, installation and upstream publication remain outside this
 correction.
+
+
+### E2 epic closeout (2026-10-04)
+
+E2-T0, E2-T1, E2-T2 and E2-T3 have completion commits `88a162c`, `f23c278`,
+`24ab371` and `58412bb`. The reopened E2-T1 correction is committed as `dc090a3`.
+The complete audit covers all 29 E2-owned requirements, 50 compound acceptance
+parts and eight production integration seams. The second independent native
+Codex whole-Epic review confirms the original scope. All criteria are met;
+there are no unresolved findings or required evidence gaps.
+Its backend check is not provided; the static report does not attest CI,
+native capture or publication.
+
+The first whole-Epic review found missing deliberate lifecycle boundary proof.
+The owning T1 correction adds delayed readiness with mutations withheld,
+stalled startup of the published child, bounded unary drain and termination
+grace expiry with unrelated process preservation. A fresh published-host check
+also exposed a local-list dependency on live Workspace inspection. The correction
+reads saved subject-scoped attachment metadata for pending labels while creation
+and recovery retain live revalidation. Fresh owner review accepted all ten T1
+requirements and 35 compound parts. Both gaps are closed on the committed target. The first incomplete Epic
+assessment and dated member checkpoints retain their historical scope.
+
+The corrected gateway/core/host/composition race suite, serial `make test` and
+complete published-provider Go suite pass. The serial command exits 0 with
+failure extraction degraded by linker warnings. The prior complete authenticated
+Chrome campaign remains evidence for unchanged creation, input, history,
+Interrupt, result/artifact and Close flows. Of its 72 relevant non-prose inputs,
+71 are identical; the changed local-label lookup is requalified by actual
+published-host loss checks, the complete provider Go suite and a SQLite regression.
+No new complete Chrome campaign is claimed. Published archive, executable,
+immutable source and consumer lock hashes match. Focused SOT, lifecycle-negative
+and link checks pass for this documentation closeout.
+
+Qualification uses unchanged published Dolgorae v0.1.3 with permitted native
+protocol fakes and isolated HOME, workspace, UDS, carriers and browser profile.
+The exact-tag `rustup run 1.97.1 cargo build --locked --bin dolgorae` is
+supplemental diagnostic evidence. Live Codex execution, broader provider/Worker
+faults, security, supported devices and deployment qualification remain E9-owned.
+Ordinary Submit after restart under UNVERIFIED background remains outside the
+qualified sequence. The neighboring Dolgorae working tree and release are
+preserved.
+
+E2 is Completed with no active Task; E9-T1 is next. Only E2's roadmap link to
+the shared dossier is removed; the dossier remains for E9. Release notes are not
+enrolled. No promoted evidence, Low settlement or hardening deferral applies.
+This closeout changes documentation and lifecycle records only. Installation,
+push, release and live execution require their own authority.
