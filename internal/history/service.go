@@ -6,6 +6,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"slices"
 	"strconv"
 	"strings"
@@ -16,6 +17,7 @@ import (
 	"github.com/rootkernel/gul/internal/domain"
 	"github.com/rootkernel/gul/internal/observation"
 	"github.com/rootkernel/gul/internal/session"
+	"github.com/rootkernel/gul/internal/workspace"
 )
 
 type object struct {
@@ -56,20 +58,45 @@ func (s *Service) begin(ctx context.Context, subject, id string) (context.Contex
 		return ctx, func() {}, Bound{}, ctx.Err()
 	}
 	done := func() { <-s.slots; cancel() }
-	b, err := s.Repository.Binding(ctx, subject, id)
-	if err != nil || b.ID != id || b.SubjectID != subject || b.RunID == "" || b.ControllerBindingID == "" {
+	fail := func(err error) (context.Context, context.CancelFunc, Bound, error) {
 		done()
-		return ctx, func() {}, Bound{}, ErrAuthority
+		return ctx, func() {}, Bound{}, err
+	}
+	b, err := s.Repository.Binding(ctx, subject, id)
+	if err != nil {
+		if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
+			return fail(err)
+		}
+		if errors.Is(err, session.ErrNotFound) || errors.Is(err, ErrAuthority) {
+			return fail(ErrAuthority)
+		}
+		return fail(ErrUnavailable)
+	}
+	if b.ID != id || b.SubjectID != subject || b.RunID == "" || b.ControllerBindingID == "" {
+		return fail(ErrAuthority)
 	}
 	w, err := s.Workspaces.Revalidate(ctx, subject, b.WorkspaceID)
-	if err != nil || w.SubjectID != subject || w.ID != b.WorkspaceID || w.ProviderID == "" || w.CanonicalRoot == "" {
-		done()
-		return ctx, func() {}, Bound{}, ErrAuthority
+	if err != nil {
+		switch {
+		case errors.Is(err, context.Canceled), errors.Is(err, context.DeadlineExceeded):
+			return fail(err)
+		case errors.Is(err, workspace.ErrReattachRequired), errors.Is(err, workspace.ErrIdentityMismatch), errors.Is(err, workspace.ErrAttachmentNotFound), errors.Is(err, ErrAuthority):
+			return fail(ErrAuthority)
+		case errors.Is(err, workspace.ErrWorkspaceBlocked), errors.Is(err, workspace.ErrWorkspaceUninitialized), errors.Is(err, workspace.ErrProfileMissing):
+			return fail(ErrBlocked)
+		default:
+			return fail(ErrUnavailable)
+		}
+	}
+	if w.SubjectID != subject || w.ID != b.WorkspaceID || w.ProviderID == "" || w.CanonicalRoot == "" {
+		return fail(ErrAuthority)
 	}
 	c, err := s.Carriers.Resolve(ctx, subject, b.ControllerBindingID)
+	if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
+		return fail(err)
+	}
 	if err != nil || c.ControllerID == "" || c.AbsolutePath == "" || c.Generation == 0 {
-		done()
-		return ctx, func() {}, Bound{}, ErrAuthority
+		return fail(ErrAuthority)
 	}
 	bound := Bound{Binding: b, Workspace: w, Carrier: c}
 	snapshot, err := s.Provider.Snapshot(ctx, bound)

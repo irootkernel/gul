@@ -3,6 +3,7 @@ import type {CheckCompatibilityRequest, CheckCompatibilityResponse, ListRuntimeP
 import {LaunchSelection} from "./launch-selection";
 import {operatorError} from "./domain-errors";
 import {Code, ConnectError} from "@connectrpc/connect";
+import {ActionClass, DomainErrorSchema, ErrorCode} from "../../api/generated/ts/gul/v1/gul_pb";
 
 export type RuntimeClient = {
   listRuntimeProfiles(request: object): Promise<ListRuntimeProfilesResponse>;
@@ -28,7 +29,10 @@ export function RuntimeChoices({client, creator, workspaceId, pendingAttempts = 
       if (result.outcomeUnknown || !result.sessionId) {setUnresolved(true); setMessage("Session creation is unresolved. Inspect its outcome before creating another session.");}
       else {pending.current = undefined; setMessage("Session created."); onCreated?.(result.sessionId);}
     } catch (reason) {
-      if (reason instanceof ConnectError && (reason.code === Code.InvalidArgument || reason.code === Code.Unauthenticated || reason.code === Code.PermissionDenied)) pending.current = undefined;
+      const details = reason instanceof ConnectError ? reason.findDetails(DomainErrorSchema) : [];
+      const unsupported = reason instanceof ConnectError && reason.code === Code.FailedPrecondition && details.length === 1 &&
+        details[0]!.code === ErrorCode.PROVIDER_BLOCKED && details[0]!.action === ActionClass.USE_SUPPORTED_PROFILE;
+      if (reason instanceof ConnectError && (reason.code === Code.InvalidArgument || reason.code === Code.Unauthenticated || reason.code === Code.PermissionDenied || unsupported)) {pending.current = undefined; setUnresolved(false);}
       else setUnresolved(true);
       setMessage(operatorError(reason));
     }

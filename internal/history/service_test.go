@@ -17,24 +17,42 @@ import (
 	"github.com/rootkernel/gul/internal/workspace"
 )
 
-type repository struct{ b session.Binding }
+type repository struct {
+	b   session.Binding
+	err error
+}
 
 func (r *repository) Binding(_ context.Context, subject, id string) (session.Binding, error) {
+	if r.err != nil {
+		return session.Binding{}, r.err
+	}
 	if subject != r.b.SubjectID || id != r.b.ID {
 		return session.Binding{}, ErrAuthority
 	}
 	return r.b, nil
 }
 
-type spaces struct{}
+type spaces struct {
+	err     error
+	foreign bool
+}
 
-func (spaces) Revalidate(_ context.Context, subject, id string) (workspace.Attachment, error) {
+func (s spaces) Revalidate(_ context.Context, subject, id string) (workspace.Attachment, error) {
+	if s.err != nil {
+		return workspace.Attachment{}, s.err
+	}
+	if s.foreign {
+		subject = "other-subject"
+	}
 	return workspace.Attachment{SubjectID: subject, ID: id, ProviderID: "provider-workspace", CanonicalRoot: "/workspace"}, nil
 }
 
-type carriers struct{}
+type carriers struct{ err error }
 
-func (carriers) Resolve(context.Context, string, string) (session.Carrier, error) {
+func (c carriers) Resolve(context.Context, string, string) (session.Carrier, error) {
+	if c.err != nil {
+		return session.Carrier{}, c.err
+	}
 	return session.Carrier{ControllerID: "controller", AbsolutePath: "/private/carrier", Generation: 1}, nil
 }
 
@@ -42,6 +60,7 @@ type readProvider struct {
 	mu            sync.Mutex
 	items         []SourceEntry
 	timelineCalls int
+	snapshotCalls int
 	body          map[string][]byte
 	state         string
 }
@@ -49,6 +68,7 @@ type readProvider struct {
 func (p *readProvider) Snapshot(context.Context, Bound) (Snapshot, error) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
+	p.snapshotCalls++
 	n := uint64(len(p.items) + 1)
 	return Snapshot{Stamp: observation.Stamp{Head: observation.Cursor(strconv.FormatUint(n, 10)), Run: n}, State: p.state}, nil
 }
@@ -95,9 +115,49 @@ func (p *readProvider) add(kind Kind, text string) {
 	p.items = append(p.items, e)
 }
 func fixture() (*Service, *readProvider, *repository) {
-	r := &repository{session.Binding{SubjectID: "owner", ID: "session", RunID: "private-run", WorkspaceID: "workspace", ControllerBindingID: "binding"}}
+	r := &repository{b: session.Binding{SubjectID: "owner", ID: "session", RunID: "private-run", WorkspaceID: "workspace", ControllerBindingID: "binding"}}
 	p := &readProvider{body: map[string][]byte{}, state: "idle"}
 	return New(r, spaces{}, carriers{}, p), p, r
+}
+
+func TestHistoryAuthorityFailuresAndRetryableSources(t *testing.T) {
+	for _, test := range []struct {
+		name       string
+		repository error
+		workspace  spaces
+		carrier    error
+		want       error
+	}{
+		{name: "missing binding", repository: session.ErrNotFound, want: ErrAuthority},
+		{name: "binding storage", repository: errors.New("private database unavailable"), want: ErrUnavailable},
+		{name: "workspace transport", workspace: spaces{err: workspace.ErrProviderUnavailable}, want: ErrUnavailable},
+		{name: "profile server", workspace: spaces{err: workspace.ErrProfileServerUnavailable}, want: ErrUnavailable},
+		{name: "workspace storage", workspace: spaces{err: workspace.ErrPersistenceUnavailable}, want: ErrUnavailable},
+		{name: "workspace identity", workspace: spaces{err: workspace.ErrReattachRequired}, want: ErrAuthority},
+		{name: "foreign workspace", workspace: spaces{foreign: true}, want: ErrAuthority},
+		{name: "unsupported workspace", workspace: spaces{err: workspace.ErrWorkspaceBlocked}, want: ErrBlocked},
+		{name: "canceled binding", repository: context.Canceled, want: context.Canceled},
+		{name: "workspace deadline", workspace: spaces{err: context.DeadlineExceeded}, want: context.DeadlineExceeded},
+		{name: "unsafe carrier", carrier: session.ErrCarrierUnavailable, want: ErrAuthority},
+		{name: "carrier deadline", carrier: context.DeadlineExceeded, want: context.DeadlineExceeded},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			s, p, r := fixture()
+			p.add(Human, "retained original\r\n한글")
+			r.err, s.Workspaces, s.Carriers = test.repository, test.workspace, carriers{err: test.carrier}
+			if _, err := s.ListHistory(t.Context(), "owner", "session", "", 10); !errors.Is(err, test.want) {
+				t.Fatal("wrong failure classification", err)
+			}
+			if p.snapshotCalls != 0 || p.timelineCalls != 0 || len(s.slots) != 0 {
+				t.Fatal("failed authority dispatched provider reads or retained capacity")
+			}
+			r.err, s.Workspaces, s.Carriers = nil, spaces{}, carriers{}
+			history, err := s.ListHistory(t.Context(), "owner", "session", "", 10)
+			if err != nil || len(history.Items) != 1 || history.Items[0].Ordinal != 1 || p.snapshotCalls == 0 {
+				t.Fatal("restored source did not recover", history, err)
+			}
+		})
+	}
 }
 func TestHistoryFixedScopeIdentityEmptyPageAndOriginal(t *testing.T) {
 	s, p, _ := fixture()

@@ -16,6 +16,9 @@ const errorLabels: Partial<Record<ErrorCode, string>> = {
 };
 
 export function domainErrorMessage(code: ErrorCode, action?: ActionClass) {
+  if (code === ErrorCode.PROVIDER_BLOCKED && action === ActionClass.USE_SUPPORTED_PROFILE) {
+    return "Launch configuration is unsupported. Review the selected profile and launch options.";
+  }
   if (action !== undefined && !externalActions.has(action) && code !== ErrorCode.OUTCOME_UNKNOWN) {
     return "Current provider state is unavailable. Refresh the snapshot.";
   }

@@ -12,6 +12,7 @@ import pathlib
 import re
 import signal
 import ssl
+import sqlite3
 import struct
 import subprocess
 import sys
@@ -175,6 +176,40 @@ def main():
               await page.getByLabel(/^Execution lane/).selectOption({label:'Dedicated'});
               await page.getByLabel(/^Required assurance/).selectOption({label:'BEST_EFFORT_PERSONAL_ALPHA'});
               await page.getByLabel(/^Specialist Policy/).selectOption('carrier-test');
+            """)
+            refused = acceptance.browser_reply(run("""
+              // Keep protobuf framing and retry labels; change only the known effort field.
+              await page.route('**/gul.v1.DirectSessionService/CreateSession', async route => {
+                const body = route.request().postDataBuffer();
+                const effort = String.fromCharCode(0x1a, 6) + 'medium';
+                const offset = body.indexOf(effort);
+                if (offset < 0 || offset !== body.lastIndexOf(effort)) throw Error('Expected one selected effort field');
+                body.write('foobar', offset + 2, 'utf8');
+                await route.continue({postData: body});
+              }, {times: 1});
+              const reply = page.gulWaitForResponse(r => r.url().endsWith('.DirectSessionService/CreateSession'));
+              await page.getByRole('button', {name:'Create session', exact:true}).click();
+              const response = await reply;
+              const error = await response.json();
+              await page.getByText('Launch configuration is unsupported. Review the selected profile and launch options.', {exact:true}).waitFor();
+              await page.waitForFunction(() => {const b=[...document.querySelectorAll('button')].find(b=>b.textContent==='Create session');return b&&!b.disabled;});
+              if(await page.getByRole('button', {name:'Recover session creation', exact:true}).count()) throw Error('Known no-dispatch refusal retained recovery');
+              await page.unroute('**/gul.v1.DirectSessionService/CreateSession');
+              return {status: response.status(), error};
+            """))
+            details = [item for item in refused['error'].get('details', []) if item.get('type') == 'gul.v1.DomainError']
+            if refused['status'] != 400 or refused['error'].get('code') != 'failed_precondition' or len(details) != 1:
+                raise AssertionError('Launch refusal lacked its exact typed pre-dispatch proof: ' + str(refused))
+            detail = acceptance.decode_message(details[0]['value'], 'DomainError')
+            if 'ERROR_CODE_PROVIDER_BLOCKED' not in detail or 'ACTION_CLASS_USE_SUPPORTED_PROFILE' not in detail:
+                raise AssertionError('Launch refusal did not prove unsupported configuration')
+            with sqlite3.connect(f"file:{work / 'Gul/gul.sqlite'}?mode=ro", uri=True) as database:
+                for table in ('session_creations', 'controller_credential_metadata'):
+                    if database.execute(f'SELECT count(*) FROM {table}').fetchone()[0] != 0:
+                        raise AssertionError('Unsupported launch allocated persistent provider state')
+            if (work / 'native-inputs.jsonl').exists() and (work / 'native-inputs.jsonl').stat().st_size:
+                raise AssertionError('Unsupported launch dispatched native input')
+            run("""
               const reply = page.gulWaitForResponse(r => r.url().endsWith('.DirectSessionService/CreateSession'));
               await page.getByRole('button', {name:'Create session', exact:true}).click();
               const response = await reply;
@@ -340,41 +375,59 @@ def main():
             run("""
               await page.getByRole('button',{name:'Refresh current state',exact:true}).click();
               await page.getByLabel('Prompt',{exact:true}).fill('busy Primary draft stays local');
-              const interrupt=page.getByRole('button',{name:'Interrupt Primary turn',exact:true});
-              if(!await interrupt.isDisabled()) throw Error('Primary interruption admitted without consent');
+              if(!await page.getByRole('button',{name:'Interrupt Primary turn',exact:true}).isDisabled()) throw Error('Primary interruption admitted without consent');
               await page.getByLabel('I confirm interruption of active owned work.',{exact:true}).check();
-              let eligible=false;
-              for(let attempt=0;attempt<12;attempt++) {
-                await page.getByRole('button',{name:'Refresh current state',exact:true}).click();
-                try {await page.waitForFunction(()=>{const b=[...document.querySelectorAll('button')].find(b=>b.textContent==='Interrupt Primary turn');return b&&!b.disabled;},null,{timeout:10000});eligible=true;break;}
-                catch {await page.waitForTimeout(3000);}
-              }
-              if(!eligible) throw Error('fresh Primary interruption eligibility did not converge');
-              await page.route('**/gul.v1.DirectSessionService/GetExecutionState',route=>route.abort('failed'));
-              await page.route('**/gul.v1.WriterActionService/GetActionState',route=>route.abort('failed'));
-              await page.route('**/gul.v1.DirectSessionService/InterruptPrimary',async route=>{
-                try {const response=await route.fetch();if(response.status()!==200) throw Error('Primary interrupt failed');page.gulInterruptReceipt=(await response.body()).toString('base64');await route.abort('failed');}
-                catch(error) {page.gulInterruptError=String(error).split('Call log:')[0];await route.abort('failed');}
-              },{times:1});
-              await interrupt.click();
-              await page.getByText('Primary interruption outcome unresolved. Inspect provider state; do not repeat the request.',{exact:true}).waitFor();
-              if(page.gulInterruptError) throw Error(page.gulInterruptError);
-              if(!page.gulInterruptReceipt||!await interrupt.isDisabled()) throw Error('uncertain Primary interruption was repeatable');
-              if(await page.getByLabel('Prompt',{exact:true}).inputValue()!=='busy Primary draft stays local') throw Error('Primary interrupt lost the draft');
-              await page.waitForTimeout(6000);
-              if(page.gulSent.InterruptPrimary!==1) throw Error('Primary interruption was automatically retransmitted');
-              await page.unroute('**/gul.v1.DirectSessionService/GetExecutionState');
-              await page.unroute('**/gul.v1.WriterActionService/GetActionState');
             """)
-            interrupt_receipt=acceptance.decode_message(acceptance.browser_reply(run("return page.gulInterruptReceipt;")),"InterruptPrimaryResponse")
-            if "INTERRUPT_OUTCOME_ACCEPTED" not in interrupt_receipt:
-                raise AssertionError("published provider did not accept Primary interruption: "+interrupt_receipt)
+            for attempt in range(12):
+                captured=acceptance.browser_reply(run("""
+                  await page.getByRole('button',{name:'Refresh current state',exact:true}).click();
+                  await page.waitForFunction(()=>{const b=[...document.querySelectorAll('button')].find(b=>b.textContent==='Interrupt Primary turn');return b&&!b.disabled;},null,{timeout:10000});
+                  page.gulCapturedInterrupt=undefined;page.gulInterruptError=undefined;
+                  await page.route('**/gul.v1.DirectSessionService/InterruptPrimary',async route=>{
+                    try {
+                      const response=await route.fetch();
+                      page.gulHeldInterruptRoute=route;page.gulHeldInterruptResponse=response;
+                      page.gulCapturedInterrupt={status:response.status(),body:(await response.body()).toString('base64')};
+                    } catch(error) {page.gulInterruptError=String(error).split('Call log:')[0];await route.abort('failed');}
+                  },{times:1});
+                  await page.getByRole('button',{name:'Interrupt Primary turn',exact:true}).click();
+                  for(let tries=0;!page.gulCapturedInterrupt&&!page.gulInterruptError&&tries<80;tries++) await page.waitForTimeout(250);
+                  if(page.gulInterruptError) throw Error(page.gulInterruptError);
+                  if(!page.gulCapturedInterrupt) throw Error('Primary interrupt response was not captured');
+                  return page.gulCapturedInterrupt;
+                """))
+                interrupt_receipt=acceptance.decode_message(captured['body'],'InterruptPrimaryResponse') if captured['status']==200 else ''
+                if 'INTERRUPT_OUTCOME_ACCEPTED' in interrupt_receipt:
+                    run("""
+                      page.gulInterruptSent=page.gulSent.InterruptPrimary;
+                      await page.route('**/gul.v1.DirectSessionService/GetExecutionState',route=>route.abort('failed'));
+                      await page.route('**/gul.v1.WriterActionService/GetActionState',route=>route.abort('failed'));
+                      await page.gulHeldInterruptRoute.abort('failed');
+                      await page.unroute('**/gul.v1.DirectSessionService/InterruptPrimary');
+                      await page.getByText('Primary interruption outcome unresolved. Inspect provider state; do not repeat the request.',{exact:true}).waitFor();
+                      if(!await page.getByRole('button',{name:'Interrupt Primary turn',exact:true}).isDisabled()) throw Error('uncertain Primary interruption was repeatable');
+                      if(await page.getByLabel('Prompt',{exact:true}).inputValue()!=='busy Primary draft stays local') throw Error('Primary interrupt lost the draft');
+                      await page.waitForTimeout(6000);
+                      if(page.gulSent.InterruptPrimary!==page.gulInterruptSent) throw Error('Primary interruption was automatically retransmitted');
+                      await page.unroute('**/gul.v1.DirectSessionService/GetExecutionState');
+                      await page.unroute('**/gul.v1.WriterActionService/GetActionState');
+                    """)
+                    break
+                # Retry only the delivered, explicit no-dispatch freshness refusal.
+                run("await page.gulHeldInterruptRoute.fulfill({response:page.gulHeldInterruptResponse});await page.unroute('**/gul.v1.DirectSessionService/InterruptPrimary');")
+                if 'INTERRUPT_OUTCOME_REJECTED' in interrupt_receipt and 'ACTION_BLOCKER_FRESH_SNAPSHOT_REQUIRED' in interrupt_receipt:
+                    run("await page.getByText('Primary interruption was not admitted. Refresh current state.',{exact:true}).waitFor();")
+                    time.sleep(3)
+                    continue
+                raise AssertionError('published provider did not accept Primary interruption: '+interrupt_receipt)
+            else:
+                raise AssertionError('fresh Primary interruption acceptance did not converge')
             ready()
             # Reopening v0.1.3 can report UNVERIFIED background. Verify the
             # retained active session here; restart after confirmed Close below.
             run("""
               if(await page.getByText('Whole-session close confirmed by current provider projection.',{exact:true}).count()) throw Error('Primary interruption closed the whole session');
-              if(page.gulSent.InterruptPrimary!==1) throw Error('Gul restart retransmitted Primary interruption');
+              if(page.gulSent.InterruptPrimary!==page.gulInterruptSent) throw Error('Gul restart retransmitted Primary interruption');
               await page.getByLabel('I confirm interruption of active owned work.',{exact:true}).uncheck();
             """)
             busy_native=[json.loads(line) for line in (work/'native-inputs.jsonl').read_text().splitlines()]
@@ -511,7 +564,7 @@ def main():
             interrupt_count_before_restart=sum(json.loads(line).get('method')=='turn/interrupt' for line in (work/'native-protocol.jsonl').read_text().splitlines())
             acceptance.command(process,'restart')
             time.sleep(5)
-            if acceptance.browser_reply(run("return page.gulSent.InterruptPrimary;"))!=1:
+            if not acceptance.browser_reply(run("return page.gulSent.InterruptPrimary===page.gulInterruptSent;")):
                 raise AssertionError('Gul restart retransmitted Primary interruption')
             interrupt_count_after_restart=sum(json.loads(line).get('method')=='turn/interrupt' for line in (work/'native-protocol.jsonl').read_text().splitlines())
             if interrupt_count_after_restart!=interrupt_count_before_restart:

@@ -2440,6 +2440,14 @@ cleanup after authoritative settlement, including restart. Producer image
 ordinals are zero-based; malformed, duplicate or skipped image metadata remains
 rejected. Prompt History ordinals remain one-based.
 
+A typed unsupported-choice refusal returns the launch form to Create without
+allocating a Controller or StartRun attempt. Uncertain creation retains its
+retry label and recovery action. Workspace inspection or binding-persistence
+unavailability returns retry guidance for History; identity mismatches and
+unsafe carriers still deny reads. Assembled checks cover confirmed closure,
+host restart, a Workspace-only inspection outage and recovery of the same
+prompt identities, originals and Specialist result without mutation replay.
+
 A protected public-gRPC diagnostic confirmed that one root CloseRun with explicit
 interrupt consent settles a resident Specialist while Primary is IDLE and
 background execution is UNVERIFIED. The following public aggregate reported

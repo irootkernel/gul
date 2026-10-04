@@ -225,6 +225,60 @@ func TestAssembledAuthenticatedHistoryApprovalResultsCloseAndRestart(t *testing.
 	if e != nil || len(after.Msg.Items) != 3 {
 		t.Fatalf("post-close history: %v,%v", after, e)
 	}
+	submits, closes := len(f.Provider.SubmitCalls()), len(f.Provider.CloseCalls())
+	if e = f.Restart(t.Context()); e != nil {
+		t.Fatal("closed host restart", e)
+	}
+	c = login(t, f)
+	f.Provider.InspectionUnavailable.Store(true)
+	_, e = direct().ListPromptHistory(t.Context(), authorize(f, c, connect.NewRequest(&gulv1.ListPromptHistoryRequest{SessionId: f.Binding.ID, PageSize: 50})))
+	var unavailable *connect.Error
+	if !errors.As(e, &unavailable) || unavailable.Code() != connect.CodeUnavailable {
+		t.Fatal("workspace-only outage misclassified as authority loss", e)
+	}
+	if len(unavailable.Details()) != 1 {
+		t.Fatal("workspace outage has no typed recovery detail", e)
+	}
+	detail, e := unavailable.Details()[0].Value()
+	if e != nil {
+		t.Fatal(e)
+	}
+	domain, ok := detail.(*gulv1.DomainError)
+	if !ok || domain.Code != gulv1.ErrorCode_ERROR_CODE_SOURCE_UNAVAILABLE || domain.Action != gulv1.ActionClass_ACTION_CLASS_REFRESH_SNAPSHOT {
+		t.Fatal("workspace outage did not preserve retry guidance", detail)
+	}
+	f.Provider.InspectionUnavailable.Store(false)
+	synchronize(t, f)
+	retained, e := direct().ListPromptHistory(t.Context(), authorize(f, c, connect.NewRequest(&gulv1.ListPromptHistoryRequest{SessionId: f.Binding.ID, PageSize: 50})))
+	if e != nil || len(retained.Msg.Items) != len(after.Msg.Items) {
+		t.Fatal("closed history did not recover after host restart and workspace outage", retained, e)
+	}
+	for i, item := range retained.Msg.Items {
+		if item.PromptItemId != after.Msg.Items[i].PromptItemId || item.Ordinal != after.Msg.Items[i].Ordinal {
+			t.Fatal("closed history identity or ordinal changed", i)
+		}
+		original, e := direct().GetPromptHistoryItem(t.Context(), authorize(f, c, connect.NewRequest(&gulv1.GetPromptHistoryItemRequest{SessionId: f.Binding.ID, PromptItemId: item.PromptItemId})))
+		if e != nil {
+			t.Fatal(e)
+		}
+		body := original.Msg.Original.GetInlineUtf8()
+		if ref := original.Msg.Original.GetArtifactRef(); ref != "" {
+			body = artifact(t, f, c, ref)
+		}
+		if body != texts[i] {
+			t.Fatal("closed original changed after host restart", i)
+		}
+	}
+	retainedResults, e := direct().ListSpecialistResults(t.Context(), authorize(f, c, connect.NewRequest(&gulv1.ListSpecialistResultsRequest{SessionId: f.Binding.ID, PageSize: 2})))
+	if e != nil || len(retainedResults.Msg.Items) != 1 || retainedResults.Msg.Items[0].ResultId != results.Msg.Items[0].ResultId {
+		t.Fatal("closed results changed after host restart", retainedResults, e)
+	}
+	if body := artifact(t, f, c, retainedResults.Msg.Items[0].ArtifactRef); body != "Specialist original\r\n한글 <script>inert</script>" {
+		t.Fatal("closed result original changed")
+	}
+	if len(f.Provider.SubmitCalls()) != submits || len(f.Provider.CloseCalls()) != closes {
+		t.Fatal("closed host restart or read recovery replayed mutations")
+	}
 }
 func artifact(t *testing.T, f *Fixture, c credentials, ref string) string {
 	t.Helper()

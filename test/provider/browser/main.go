@@ -67,6 +67,9 @@ func main() {
 	register.Header().Set(api.CSRFHeader, logged.Msg.Session.CsrfToken)
 	register.Header().Set("Cookie", strings.Split(logged.Header().Get("Set-Cookie"), ";")[0])
 	_, err = gulv1connect.NewWorkspacePresentationServiceClient(client, h.Origin()).RegisterFromAllowlistPath(ctx, register)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "published host provider status: %+v\n", h.Core.ProviderStatus())
+	}
 	must(err)
 	out := json.NewEncoder(os.Stdout)
 	must(out.Encode(map[string]any{"ready": true, "origin": h.Origin()}))

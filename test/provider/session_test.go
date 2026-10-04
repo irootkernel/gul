@@ -560,6 +560,7 @@ func TestPublishedAuthenticatedSessionCreation(t *testing.T) {
 	if err = h.Start(ctx); err != nil {
 		t.Fatal(err)
 	}
+	closedHistoryStarted := time.Now()
 	for tries := 0; ; tries++ {
 		historyQ := connect.NewRequest(&gv.ListPromptHistoryRequest{SessionId: created.Msg.SessionId, PageSize: 20})
 		decorate(historyQ)
@@ -568,7 +569,14 @@ func TestPublishedAuthenticatedSessionCreation(t *testing.T) {
 			break
 		}
 		if tries >= 40 {
-			t.Fatal("closed history retention", history, readErr)
+			stateQ := connect.NewRequest(&gv.GetExecutionStateRequest{SessionId: created.Msg.SessionId})
+			decorate(stateQ)
+			state, stateErr := direct.GetExecutionState(ctx, stateQ)
+			var closeProgress gv.CloseProgress
+			if state != nil {
+				closeProgress = state.Msg.CloseProgress
+			}
+			t.Fatal("closed history retention", "elapsed", time.Since(closedHistoryStarted), "history error", readErr, "provider", h.Core.ProviderStatus(), "execution error", stateErr, "close progress", closeProgress)
 		}
 		time.Sleep(500 * time.Millisecond)
 	}

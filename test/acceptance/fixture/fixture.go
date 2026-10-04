@@ -34,10 +34,11 @@ const controllerID = "acceptance-controller"
 
 type Provider struct {
 	*scenario.Harness
-	Offline   atomic.Bool
-	mu        sync.Mutex
-	Closed    []string
-	Submitted []publicv1.WriteIntent
+	Offline               atomic.Bool
+	InspectionUnavailable atomic.Bool
+	mu                    sync.Mutex
+	Closed                []string
+	Submitted             []publicv1.WriteIntent
 }
 
 func (p *Provider) GetCapabilities(ctx context.Context, q *publicv1.GetCapabilitiesRequest) (*publicv1.GetCapabilitiesResponse, error) {
@@ -47,6 +48,9 @@ func (p *Provider) GetCapabilities(ctx context.Context, q *publicv1.GetCapabilit
 	return p.Harness.GetCapabilities(ctx, q)
 }
 func (p *Provider) InspectWorkspace(ctx context.Context, q *publicv1.InspectWorkspaceRequest) (*publicv1.InspectWorkspaceResponse, error) {
+	if p.InspectionUnavailable.Load() {
+		return nil, connect.NewError(connect.CodeUnavailable, errors.New("fixture workspace transport unavailable"))
+	}
 	if p.Offline.Load() {
 		return nil, errors.New("fixture provider unavailable")
 	}
