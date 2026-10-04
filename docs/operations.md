@@ -40,14 +40,18 @@ is blocked.
 `RenderLaunchdPlist` accepts the current user's verified home, an absolute Gul
 binary path, and the exact data directory
 `~/Library/Application Support/Gul`. It renders `gul serve --data-directory`
-with that path and any selected `--port` and `--tailnet-host`, using the `xyz.rootkernel.gul.serve` label. The agent starts at
+with that path and any selected `--port`, `--tailnet-host`,
+`--dolgorae-executable`, repeated `--workspace-root` and repeated `--policy`,
+using the `xyz.rootkernel.gul.serve` label. The agent starts at
 login, restarts after exit with a 30-second throttle, and uses a `077` umask.
 The shared host owns the singleton lock, reports port collisions, and drains on
 SIGINT/SIGTERM. After wake or reconnect, refresh the browser to read current
 authentication and navigation. Verify the replacement binary before loading the
-agent; live provider wake/recovery remains E2/E9-owned. Verify that the agent
-can resolve the qualified `tailscale` executable in its own environment; launchd
-does not inherit an interactive shell PATH.
+agent; live provider wake/recovery remains E9-owned. Verify that the agent
+can resolve the qualified `tailscale` executable in its own environment. Select
+the qualified Dolgorae executable with an absolute `--dolgorae-executable` path,
+or verify its lookup in the agent environment; launchd does not inherit an
+interactive shell PATH.
 
 Before rendering, create `~/Library/Logs/Gul` as the current user with mode
 `0700`. Create `stdout.log` and `stderr.log` inside it as regular, single-link,
@@ -64,7 +68,12 @@ down gracefully, replace and verify the binary, then load the agent again.
 needed or attaching to its verified headless owner. Host flags configure only a
 new owned core; attaching leaves the existing owner's port and tailnet
 configuration in effect. Initial HTTPS loading is
-bounded to 30 seconds; a failed load exits with an actionable error.
+bounded to 30 seconds; a failed load exits with an actionable error. Trusted
+`--dolgorae-executable <qualified absolute path>`, repeated
+`--workspace-root <approved absolute root>` and repeated `--policy <name>`
+select the released provider and its allowed launch inputs for a newly owned
+core. These flags also apply to `serve` and `launchd-plist`; they do not
+reconfigure an attached owner.
 
 `gul serve --data-directory <protected absolute directory> --port 17423` starts
 only the shared HTTPS host. With no `--tailnet-host`, remote origins are absent;
@@ -77,6 +86,17 @@ the local-only Host, even if their Host and Origin claim loopback. Those headers
 only restrict routing and never grant identity. A failed or unverified snapshot blocks remote access
 without stopping local HTTPS. Forwarded identity is never used for authorization.
 
+If the provider fails its initial start, Gul keeps local presentation and files
+available with runtime actions blocked and zero automatic restart attempts.
+Check the selected qualified executable, private runtime directories and approved
+Workspace roots. After repair, stop and restart the verified Gul host owner to
+retry; closing an attached desktop window does not stop a headless owner. An
+installed launchd agent must be unloaded before stopping its owner, then loaded
+again after repair. A provider that has already started uses the bounded crash
+restart policy; after its restart budget is exhausted, use the same owner restart
+procedure. Inspect a reported socket collision or unsafe cleanup separately;
+never delete another process's socket to force admission.
+
 `gul diagnose --data-directory <directory> --tailnet-host <node.ts.net:443>`
 verifies the private local owner with a fresh nonce and certificate pin, then
 refreshes node and Serve diagnostics. It mints no setup grant and makes no Serve
@@ -87,7 +107,7 @@ SIGINT or SIGTERM closes the desktop and drains a core owned by that process,
 or drains a headless host. A failed owned
 lifecycle stop retains its lock for retry. After wake or connection loss, browser refresh performs fresh
 session and navigation reads; production provider
-wake/recovery qualification remains E2/E9. An attached Gul.app window does not
+wake/recovery qualification remains E9-owned. An attached Gul.app window does not
 stop the headless owner when it closes.
 
 The [Tailscale 1.102.4 proxy source](https://github.com/tailscale/tailscale/blob/v1.102.4/ipn/ipnlocal/serve.go)
@@ -119,6 +139,9 @@ The E14 acceptance driver is a development fixture. Run the commands in
 [TESTING.md](../TESTING.md#assembled-application-acceptance) to exercise the real
 host and checked bundle with explicit stateful fakes. They allocate temporary
 Gul data, Workspace and client state and remove only their own fixture state.
-Production `gul` and `gul serve` keep runtime ports unavailable until the released
-provider integration is qualified. E14 does not install a provider, create a
-live Controller, load launchd, expose Tailscale or qualify a supported device.
+Production `gul` and `gul serve` assemble the configured released-provider
+gateway and protected Controller store. Runtime gates remain unavailable until
+the provider passes admission. E2 qualifies this assembly with the published
+Dolgorae release and permitted native fakes. E14 does not install a provider,
+create a live Controller, load launchd, expose Tailscale or qualify a supported
+device. Live, device, fault/security and deployment qualification remain E9-owned.

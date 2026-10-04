@@ -210,7 +210,8 @@ remain denied. Test principals and fake dependencies are explicit isolated test
 injections, never production bypasses. E13-T1 proves provider scenario behavior
 without requiring Gul feature implementations; E14-T1 proves those completed
 features together. This splits evidence ownership, not product safety or release
-scope. E2/E9 still own actual-provider proof.
+scope. E2 qualifies the released-provider integration with permitted native
+fakes; E9 retains live, device, fault/security and deployment proof.
 
 ### 5.1 Host, authentication, and network
 
@@ -416,7 +417,7 @@ scope. E2/E9 still own actual-provider proof.
 | ID | Requirement | Acceptance | Owner |
 |---|---|---|---|
 | REQ-API-001 | Application services MUST be declared in Protobuf and implemented with ConnectRPC. | Auth, Runtime, WorkspacePresentation, DirectSession, ArtifactPresentation, InteractionPresentation, WriterAction, File, ClientEvent, and Diagnostics clients are generated and versioned. E1-T3 proves the declarations and transport contracts; E14 verifies first-release service wiring across completed features with fake-provider diagnostics, while E9-T2 owns actual-provider diagnostic/security qualification. | E14-T1 |
-| REQ-API-002 | Retryable state-changing operations MUST use unary RPCs with typed provider-aware concurrency semantics. | Browser retry fault tests prove no duplicate provider effect using the E1-T3 contract and completed attempt/replay implementation; actual-provider proof remains E2/E9. | E5-T3 |
+| REQ-API-002 | Retryable state-changing operations MUST use unary RPCs with typed provider-aware concurrency semantics. | Browser retry fault tests prove no duplicate provider effect using the E1-T3 contract and completed attempt/replay implementation. E2 adds released-provider proof with permitted native fakes; E9 retains live and broader fault qualification. | E5-T3 |
 | REQ-API-003 | Client updates MUST use server-streaming RPCs with a Gul delivery sequence distinct from upstream cursors. | Replay and snapshot fallback converge in order. | E4-T1 |
 | REQ-API-004 | Unknown, expired, stale, unauthorized, conflict, unavailable, and recovery-required conditions MUST have stable Gul error codes. | Clients never parse human text or raw provider errors. | E1-T3 |
 | REQ-API-005 | Public APIs MUST NOT expose raw provider envelopes, capability material, unrestricted absolute paths, unvalidated or unauthorized artifact content, or arbitrary Git revisions. | Contract scans and negative serialization tests pass. | E1-T3 |
@@ -543,8 +544,9 @@ follows this opening summary and the roadmap. The E8-T3 host now mounts AuthServ
 and all eight completed feature handlers behind shared authentication, with
 runtime ports unavailable by default. E14-T1 adds Diagnostics as
 the ninth feature route, checked-port assembly, and authenticated core/browser/
-native acceptance with stateful fakes. Released-provider and live deployment
-qualification remain E2/E9-owned. Architecture Section 19 and
+native acceptance with stateful fakes. E2 completes released-provider integration
+with permitted native fakes; E9 retains live, device, fault/security and deployment
+qualification. Architecture Section 19 and
 `internal/host/composition.go` describe the current host composition.
 
 The injected provider remains a contract-derived stateful fake. Production

@@ -274,9 +274,9 @@ expectFailure('current state promotes a requirement before its owner completes',
   ));
 }, /Accepted Current State requirement REQ-HOST-001 has incomplete owner E14-T1/);
 
-expectFailure('architecture drops an E1-T1 delivery boundary', root => {
+expectFailure('architecture drops the current ConnectRPC delivery boundary', root => {
   write(root, 'docs/architecture.md', text => text.replace(
-    'ConnectRPC services are declared, generated and mounted behind the shared authentication boundary; live-provider assembly remains unqualified.',
+    'ConnectRPC services are declared, generated and mounted behind the shared authentication boundary; E2 accepts the configured released-provider assembly with permitted native fakes.',
     'ConnectRPC delivery state is unspecified.',
   ));
 }, /Architecture must distinguish isolated ConnectRPC route assembly from production host mounting/);
@@ -289,12 +289,19 @@ expectFailure('pre-E1-T3 state requires ConnectRPC absence', root => {
     .replace(/^\| Next \|[^\n]+$/m, '| Next | E1 continuing at E1-T3 |'));
 }, /pre-E1-T3 ConnectRPC absence boundary/);
 
-expectFailure('E1-T4 storage is not a production database lifecycle', root => {
+expectFailure('architecture drops the current production database lifecycle', root => {
   write(root, 'docs/architecture.md', text => text.replace(
-    'Gul-only SQLite repositories are opened by the shared authenticated host; live-provider acceptance remains disabled.',
+    'Gul-only SQLite repositories are opened by the shared authenticated host; E2 released-provider acceptance with permitted native fakes is complete.',
     'Gul database is ready.',
   ));
 }, /Architecture must distinguish isolated SQLite repositories from production database lifecycle/);
+
+expectFailure('architecture denies the accepted production provider assembly', root => {
+  write(root, 'docs/architecture.md', text => text.replace(
+    'Production commands assemble the released-provider gateway, Controller store, timeline and Artifact adapters when the configured provider passes admission.',
+    'No Runtime Provider adapter is wired into production commands.',
+  ));
+}, /Architecture must retain the current provider boundary: Production commands assemble/);
 
 expectFailure('runtime ports retain the unqualified provider boundary', root => {
   write(root, 'docs/architecture.md', text => text.replace(

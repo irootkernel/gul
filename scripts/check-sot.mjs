@@ -262,6 +262,7 @@ export function validateRepository(root, options = {}) {
   const e12State = epicSummaries.find(match => match[1] === 'E12')?.[2].trim();
   const e1State = epicSummaries.find(match => match[1] === 'E1')?.[2].trim();
   const currentSnapshot = section(architecture, '## 19. Current snapshot', '### 19.1 ', errors);
+  const releasedProviderAccepted = tasks.get('E2-T1')?.state === 'Completed';
   if (e12State === 'Completed' && !currentSnapshot.includes('E12 is `Completed`')) {
     errors.push('Architecture current snapshot must identify E12 as Completed');
   }
@@ -272,8 +273,14 @@ export function validateRepository(root, options = {}) {
     errors.push('Architecture current snapshot must identify E1-T1 as Completed');
   }
   if (tasks.get('E1-T1')?.state === 'Completed') {
+    const providerBoundary = releasedProviderAccepted
+      ? 'Production commands assemble the released-provider gateway, Controller store, timeline and Artifact adapters when the configured provider passes admission.'
+      : 'No Runtime Provider adapter';
+    const currentTopology = section(architecture, '### 19.4 ', '### 19.5 ', errors);
+    if (!(releasedProviderAccepted ? currentTopology : architecture).includes(providerBoundary)) {
+      errors.push(`Architecture must retain the current provider boundary: ${providerBoundary}`);
+    }
     for (const boundary of [
-      'No Runtime Provider adapter',
       tasks.get('E8-T3')?.state === 'Planned' ? 'Production authentication,' : 'Runtime ports are unavailable by default;',
     ]) {
       if (!architecture.includes(boundary)) errors.push(`Architecture must retain the E1-T1 boundary: ${boundary}`);
@@ -281,12 +288,20 @@ export function validateRepository(root, options = {}) {
   }
   if (tasks.get('E1-T4')?.state === 'Planned') {
     if (!architecture.includes('No Gul SQLite schema exists.')) errors.push('Architecture must retain the pre-E1-T4 SQLite absence boundary');
-  } else if (!architecture.includes(tasks.get('E8-T3')?.state === 'Planned' ? 'Gul-only SQLite schema and repositories exist in isolated tests; no production database lifecycle is enabled.' : 'Gul-only SQLite repositories are opened by the shared authenticated host; live-provider acceptance remains disabled.')) {
+  } else if (!architecture.includes(tasks.get('E8-T3')?.state === 'Planned'
+    ? 'Gul-only SQLite schema and repositories exist in isolated tests; no production database lifecycle is enabled.'
+    : releasedProviderAccepted
+      ? 'Gul-only SQLite repositories are opened by the shared authenticated host; E2 released-provider acceptance with permitted native fakes is complete.'
+      : 'Gul-only SQLite repositories are opened by the shared authenticated host; live-provider acceptance remains disabled.')) {
     errors.push('Architecture must distinguish isolated SQLite repositories from production database lifecycle');
   }
   if (tasks.get('E1-T3')?.state === 'Planned') {
     if (!architecture.includes('No ConnectRPC service exists.')) errors.push('Architecture must retain the pre-E1-T3 ConnectRPC absence boundary');
-  } else if (!architecture.includes(tasks.get('E8-T3')?.state === 'Planned' ? 'ConnectRPC services are declared and generated; isolated protected route assembly exists, but production host mounting is not enabled.' : 'ConnectRPC services are declared, generated and mounted behind the shared authentication boundary; live-provider assembly remains unqualified.')) {
+  } else if (!architecture.includes(tasks.get('E8-T3')?.state === 'Planned'
+    ? 'ConnectRPC services are declared and generated; isolated protected route assembly exists, but production host mounting is not enabled.'
+    : releasedProviderAccepted
+      ? 'ConnectRPC services are declared, generated and mounted behind the shared authentication boundary; E2 accepts the configured released-provider assembly with permitted native fakes.'
+      : 'ConnectRPC services are declared, generated and mounted behind the shared authentication boundary; live-provider assembly remains unqualified.')) {
     errors.push('Architecture must distinguish isolated ConnectRPC route assembly from production host mounting');
   }
   if (tasks.get('E1-T2')?.state === 'Completed') {

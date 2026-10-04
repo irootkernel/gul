@@ -1530,10 +1530,11 @@ and shared delivery adapter now accompany the five SOT documents, E0-T8
 toolchain authority, and E12-T1 TASK-053 contract artifacts. The serial Make
 facade validates both Go manifests, the root package pins, exact Go 1.27.1, and
 the Bun minimum before running frontend, core, contract, SOT and drift gates.
-Historical E0-T7 facts remain scoped to their original digests. The E8-T3
-candidate supplies authenticated attachment and mounted product routes against
-one SQLite lifecycle. E14-T1 accepts explicit checked-port application assembly
-against fakes; live-provider acceptance remains E2/E9-owned.
+Historical E0-T7 facts remain scoped to their original digests. E8-T3 supplies
+authenticated attachment and mounted product routes against one SQLite lifecycle.
+E14-T1 accepts explicit checked-port application assembly against fakes. E2
+accepts the configured released-provider assembly with permitted native fakes;
+E9 retains live, device, fault/security and deployment qualification.
 
 ### 19.4 Current topology and data
 
@@ -1541,18 +1542,20 @@ against fakes; live-provider acceptance remains E2/E9-owned.
 Shared Go core composition and lifecycle serve the authenticated host; E14-T1 accepts explicit checked-port application assembly against fakes.
 One checked React bundle and shared browser/shell asset delivery exist.
 The Wails shell uses the shared authenticated HTTPS host and verified attachment; live-provider qualification remains pending.
-ConnectRPC services are declared, generated and mounted behind the shared authentication boundary; live-provider assembly remains unqualified.
-Gul-only SQLite repositories are opened by the shared authenticated host; live-provider acceptance remains disabled.
-Explicit test injection assembles checked provider, timeline and Artifact adapters. No Runtime Provider adapter is wired into production commands, which keep runtime ports unavailable; released-provider supervision and Controller credential-store wiring remain E2-owned.
+ConnectRPC services are declared, generated and mounted behind the shared authentication boundary; E2 accepts the configured released-provider assembly with permitted native fakes.
+Gul-only SQLite repositories are opened by the shared authenticated host; E2 released-provider acceptance with permitted native fakes is complete.
+Production commands assemble the released-provider gateway, Controller store, timeline and Artifact adapters when the configured provider passes admission. Runtime gates remain unavailable without an admitted provider. E14 uses separate explicit test injection; E9 retains live, device, fault/security and deployment qualification.
 ```
 
 ### 19.5 Security posture
 
 E8-T1/T2 supply protected account setup and durable sessions. The E8-T3
 host mounts completed feature handlers behind the shared HTTPS boundary.
-Runtime ports are unavailable by default; E14-T1 accepts assembled fake-provider
-behavior, while live-provider qualification remains E2/E9-owned. No service is installed
-or exposed automatically by building the repository.
+Runtime ports are unavailable by default; a configured, admitted released
+provider supplies the E2-qualified production runtime. E14-T1 accepts assembled
+fake-provider behavior, and E2 accepts released-provider behavior with permitted
+native fakes. E9 retains live, device, fault/security and deployment qualification.
+No service is installed or exposed automatically by building the repository.
 
 ## 20. Promotion format
 
